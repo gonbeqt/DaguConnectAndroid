@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 fun LoginScreen(){
 
     val context = LocalContext.current
-
     val username by remember {
         mutableStateOf("") }
     val password by remember {

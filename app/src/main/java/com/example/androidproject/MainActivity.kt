@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.androidproject.ui.theme.AndroidProjectTheme
+import com.example.androidproject.ui.theme.views.LandingPageScreen
 import com.example.androidproject.ui.theme.views.LoginScreen
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidProjectTheme {
-                LoginScreen()
+                LandingPageScreen()
             }
         }
     }
