@@ -18,10 +18,9 @@ import com.example.androidproject.ui.theme.views.LoginScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             AndroidProjectTheme {
-                LandingPageScreen()
+                LoginScreen()
             }
         }
     }
