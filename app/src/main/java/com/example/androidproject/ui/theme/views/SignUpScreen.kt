@@ -42,11 +42,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.androidproject.R
 
-@Preview
+
 @Composable
-fun SignUpScreen(){
+fun SignUpScreen(navController: NavController){
 
     val context = LocalContext.current
     var firstName by remember {
@@ -235,7 +236,7 @@ fun SignUpScreen(){
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly)
                 {
-                    TextButton(onClick = {}) {
+                    TextButton(onClick = {navController.navigate("login")}) {
                         Row {
                             Text(
                                 text = "Already have an account? ",

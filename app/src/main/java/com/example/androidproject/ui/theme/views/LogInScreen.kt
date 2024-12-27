@@ -43,11 +43,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.androidproject.R
 
-@Preview
 @Composable
-fun LogInScreen(){
+fun LogInScreen(navController: NavController){
 
     val context = LocalContext.current
     var email by remember {
@@ -188,7 +188,7 @@ fun LogInScreen(){
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly)
                 {
-                    TextButton(onClick = {}) {
+                    TextButton(onClick = {navController.navigate("signup")}) {
                         Row {
                             Text(
                                 text = "Don't have an account? ",

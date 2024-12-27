@@ -3,6 +3,10 @@ package com.example.androidproject
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.ui.theme.AndroidProjectTheme
 import com.example.androidproject.ui.theme.views.LogInScreen
 import com.example.androidproject.ui.theme.views.SignUpScreen
@@ -12,8 +16,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AndroidProjectTheme {
-                SignUpScreen()
-                LogInScreen()
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("signup") {
+                        SignUpScreen(navController)
+                    }
+                    composable("login") {
+                        LogInScreen(navController)
+
+                    }
+                }
+
 
             }
         }
