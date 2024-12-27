@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,7 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -54,10 +55,18 @@ fun SignUpScreen(navController: NavController){
         mutableStateOf("") }
     var lastName by remember {
         mutableStateOf("") }
+    var age by remember {
+        mutableStateOf("") }
     var email by remember {
         mutableStateOf("") }
     var password by remember {
         mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    val icon = if (passwordVisible)
+        painterResource(id = R.drawable.visibility_on)
+    else
+        painterResource(id = R.drawable.visibility_off)
+
     Box(modifier = Modifier.fillMaxSize().background(Color.White),
         contentAlignment = Alignment.Center
     ){
@@ -74,7 +83,7 @@ fun SignUpScreen(navController: NavController){
         Card(
             modifier = Modifier
                 .padding(end = 50.dp) // Add padding to the right
-                .size(350.dp, 500.dp), // Adjust card size
+                .size(350.dp, 600.dp), // Adjust card size
 
             shape = RoundedCornerShape(
                 topStart = 0.dp,
@@ -108,6 +117,8 @@ fun SignUpScreen(navController: NavController){
                             contentDescription = "First Name Icon"
                         )
                     },
+                    singleLine = true,
+
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -138,6 +149,39 @@ fun SignUpScreen(navController: NavController){
                             contentDescription = "Last Name Icon"
                         )
                     },
+                    singleLine = true,
+
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f) // Adjust width as needed
+                        .heightIn(min = 56.dp), // Adjust height as needed
+                    shape = RoundedCornerShape(16.dp), // Set corner radius here
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Blue,
+                        unfocusedIndicatorColor = Color.Gray,
+                        focusedLabelColor = Color.Blue,
+                        unfocusedLabelColor = Color.Gray,
+                        cursorColor = Color.Black
+                    ),
+                    textStyle = TextStyle(
+                        fontSize = 16.sp, // Adjust text size for visibility
+                        color = Color.Black // Ensure text is visible
+                    )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = age,
+                    onValueChange = { age = it },
+                    label = { Text("Age") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Last Name Icon"
+                        )
+                    },
+                    singleLine = true,
+
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -167,6 +211,8 @@ fun SignUpScreen(navController: NavController){
                             contentDescription = "Email Icon"
                         )
                     },
+                    singleLine = true,
+
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -189,10 +235,22 @@ fun SignUpScreen(navController: NavController){
                 OutlinedTextField(value = password,
                     onValueChange = { password = it},
                     label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation(),
                     leadingIcon = {
                         Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
                     },
+
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            passwordVisible = !passwordVisible
+                        }) {
+                            Icon(
+                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(20.dp))
+
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed

@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -54,6 +54,13 @@ fun LogInScreen(navController: NavController){
         mutableStateOf("") }
     var password by remember {
         mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    val icon = if (passwordVisible)
+       painterResource(id = R.drawable.visibility_on)
+        else
+        painterResource(id = R.drawable.visibility_off)
+
+
     Box(modifier = Modifier.fillMaxSize().background(Color.White),
         contentAlignment = Alignment.Center
     ){
@@ -103,6 +110,7 @@ fun LogInScreen(navController: NavController){
                             contentDescription = "Email Icon"
                         )
                     },
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -125,10 +133,22 @@ fun LogInScreen(navController: NavController){
                 OutlinedTextField(value = password,
                     onValueChange = { password = it},
                     label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation(),
                     leadingIcon = {
                         Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
                     },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            passwordVisible = !passwordVisible
+                        }) {
+                            Icon(
+                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(20.dp))
+
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None
+                            else PasswordVisualTransformation(),
+
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
