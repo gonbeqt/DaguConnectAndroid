@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,7 +21,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
@@ -36,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -49,13 +47,9 @@ import com.example.androidproject.R
 
 @Preview
 @Composable
-fun LoginScreen(){
+fun LogInScreen(){
 
     val context = LocalContext.current
-    var firstName by remember {
-        mutableStateOf("") }
-    var lastName by remember {
-        mutableStateOf("") }
     var email by remember {
         mutableStateOf("") }
     var password by remember {
@@ -75,89 +69,29 @@ fun LoginScreen(){
 
         Card(
             modifier = Modifier
-                .padding(end = 50.dp) // Add padding to the right
-                .size(350.dp, 500.dp), // Adjust card size
+                .padding(start = 50.dp) // Add padding to the right
+                .size(350.dp, 400.dp), // Adjust card size
 
             shape = RoundedCornerShape(
-                topStart = 0.dp,
-                topEnd = 20.dp,  // No radius on the top-right corner
-                bottomStart = 0.dp,
-                bottomEnd = 20.dp // No radius on the bottom-right corner
+                topStart = 20.dp,
+                topEnd = 0.dp,  // No radius on the top-right corner
+                bottomStart = 20.dp,
+                bottomEnd = 0.dp // No radius on the bottom-right corner
             ),
             elevation = CardDefaults.cardElevation(8.dp)
-
-
         ){
             Column(modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
 
                 Text(
-                    text = "Create an Account",
+                    text = "Welcome Back",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Blue,
                     modifier = Modifier.padding(bottom = 16.dp, top = 16.dp) // Optional padding below the title
                 )
 
-                OutlinedTextField(
-                    value = firstName,
-                    onValueChange = { firstName = it }, // Updates the `firstName` state
-                    label = { Text("First Name")},
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "First Name Icon"
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f) // Adjust width as needed
-                        .heightIn(min = 56.dp), // Adjust height as needed
-                    shape = RoundedCornerShape(16.dp), // Set corner radius here
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Blue,
-                        unfocusedIndicatorColor = Color.Gray,
-                        focusedLabelColor = Color.Blue,
-                        unfocusedLabelColor = Color.Gray,
-                        cursorColor = Color.Black
-                    ),
-                    textStyle = TextStyle(
-                        fontSize = 16.sp, // Adjust text size for visibility
-                        color = Color.Black // Ensure text is visible
-                    )
-
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = lastName,
-                    onValueChange = { lastName = it },
-                    label = { Text("Last Name") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Last Name Icon"
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f) // Adjust width as needed
-                        .heightIn(min = 56.dp), // Adjust height as needed
-                    shape = RoundedCornerShape(16.dp), // Set corner radius here
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Blue,
-                        unfocusedIndicatorColor = Color.Gray,
-                        focusedLabelColor = Color.Blue,
-                        unfocusedLabelColor = Color.Gray,
-                        cursorColor = Color.Black
-                    ),
-                    textStyle = TextStyle(
-                        fontSize = 16.sp, // Adjust text size for visibility
-                        color = Color.Black // Ensure text is visible
-                    )
-                )
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     value = email,
@@ -213,14 +147,30 @@ fun LoginScreen(){
                         color = Color.Black // Ensure text is visible
                     )
                 )
-                Spacer(modifier = Modifier.height(30.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 36.dp, top = 5.dp, bottom = 5.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .clickable(onClick = {}) // clickable text
+                            .padding(0.dp),
+                        text = "Forgot Password?",
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(5.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(
                         onClick = {
-                            Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Log In Successful", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.8f) // 80% width
@@ -228,7 +178,7 @@ fun LoginScreen(){
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
                     )
                     {
-                        Text(text = "Sign Up", color = Color.White)
+                        Text(text = "Log In", color = Color.White)
                     }
                 }
 
@@ -241,12 +191,12 @@ fun LoginScreen(){
                     TextButton(onClick = {}) {
                         Row {
                             Text(
-                                text = "Already have an account? ",
+                                text = "Don't have an account? ",
                                 color = Color.Gray,
                                 fontSize = 12.sp
                             )
                             Text(
-                                text = "Log In",
+                                text = "Sign Up",
                                 color = Color.Black,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
