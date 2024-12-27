@@ -41,10 +41,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
+
+@Preview(showBackground = true)
+@Composable
+fun LogInScreenPreview() {
+    // Use a mock or placeholder NavController for preview purposes
+    LogInScreen(navController = rememberNavController())
+}
 
 @Composable
 fun LogInScreen(navController: NavController){
@@ -76,6 +85,7 @@ fun LogInScreen(navController: NavController){
 
         Card(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 50.dp) // Add padding to the right
                 .size(350.dp, 400.dp), // Adjust card size
 
@@ -141,7 +151,7 @@ fun LogInScreen(navController: NavController){
                             passwordVisible = !passwordVisible
                         }) {
                             Icon(
-                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(20.dp))
+                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(22.dp))
 
                         }
                     },
@@ -205,32 +215,30 @@ fun LogInScreen(navController: NavController){
 
 
                 Spacer(modifier = Modifier.height(5.dp))
-                Row(modifier = Modifier.fillMaxWidth(),
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly)
                 {
-                    TextButton(onClick = {navController.navigate("signup")}) {
-                        Row {
-                            Text(
-                                text = "Don't have an account? ",
-                                color = Color.Gray,
-                                fontSize = 12.sp
-                            )
-                            Text(
-                                text = "Sign Up",
-                                color = Color.Black,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    Row {
+                        Text(
+                            modifier = Modifier.clickable(onClick = {}),
+                            text = "Don't have an account? ",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            modifier = Modifier.clickable(onClick = {}),
+                            text = "Sign Up",
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
-
-
             }
 
+
         }
+
     }
-
-
-
 }
+

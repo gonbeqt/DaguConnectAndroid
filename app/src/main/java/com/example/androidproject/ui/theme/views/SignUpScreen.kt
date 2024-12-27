@@ -1,6 +1,9 @@
 package com.example.androidproject.ui.theme.views
 
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +24,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
@@ -41,11 +45,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
 
+@Preview(showBackground = true)
+@Composable
+fun SignUpScreenPreview() {
+    // Use a mock or placeholder NavController for preview purposes
+    SignUpScreen(navController = rememberNavController())
+}
 
 @Composable
 fun SignUpScreen(navController: NavController){
@@ -67,6 +79,17 @@ fun SignUpScreen(navController: NavController){
     else
         painterResource(id = R.drawable.visibility_off)
 
+    // Animatable for the card's X offset
+    val cardOffsetX = remember { Animatable(-1000f) } // Start off-screen to the left
+
+    // Launch animation when composable is composed
+    LaunchedEffect(Unit) {
+        cardOffsetX.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize().background(Color.White),
         contentAlignment = Alignment.Center
     ){
@@ -82,6 +105,7 @@ fun SignUpScreen(navController: NavController){
 
         Card(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(end = 50.dp) // Add padding to the right
                 .size(350.dp, 600.dp), // Adjust card size
 
@@ -244,7 +268,7 @@ fun SignUpScreen(navController: NavController){
                             passwordVisible = !passwordVisible
                         }) {
                             Icon(
-                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(20.dp))
+                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(22.dp))
 
                         }
                     },
@@ -288,26 +312,24 @@ fun SignUpScreen(navController: NavController){
                     }
                 }
 
-
-
                 Spacer(modifier = Modifier.height(5.dp))
-                Row(modifier = Modifier.fillMaxWidth(),
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly)
                 {
-                    TextButton(onClick = {navController.navigate("login")}) {
-                        Row {
-                            Text(
-                                text = "Already have an account? ",
-                                color = Color.Gray,
-                                fontSize = 12.sp
-                            )
-                            Text(
-                                text = "Log In",
-                                color = Color.Black,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    Row {
+                        Text(
+                            modifier = Modifier.clickable(onClick = {}),
+                            text = "Don't have an account? ",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            modifier = Modifier.clickable(onClick = {}),
+                            text = "Sign Up",
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -316,7 +338,5 @@ fun SignUpScreen(navController: NavController){
 
         }
     }
-
-
 
 }
