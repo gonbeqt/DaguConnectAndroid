@@ -68,6 +68,7 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int) {
         1 -> ScheduleScreen(modifier)
         2 -> BookmarkedScreen(modifier)
         3 -> MessageScreen(modifier)
+    }
 }
 
 
