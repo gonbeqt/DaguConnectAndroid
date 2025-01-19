@@ -36,8 +36,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
     var selectedItem by remember {
         mutableStateOf(0)
     }
-
-
+    
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -45,7 +44,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 navItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         selected = selectedItem == index,
-                        onClick = { },
+                        onClick = {
+                            selectedItem = index
+                        },
                         icon = {
                             Icon(imageVector = item.icon, contentDescription = "Icon")
                         },
