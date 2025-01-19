@@ -13,6 +13,14 @@
         android:theme="@style/Theme.AndroidProject"
         tools:targetApi="31">
         <activity
+            android:name=".ui.theme.views.BottomNavigationBar"
+            android:exported="false"
+            android:label="@string/title_activity_bottom_navigation_bar"
+            android:theme="@style/Theme.AndroidProject" />
+        <activity
+            android:name=".ui.theme.views.ui.theme.BottomNavigationBar"
+            android:exported="false" />
+        <activity
             android:name=".ui.theme.views.LogInScreen"
             android:exported="false"
             android:label="@string/title_activity_log_in_screen"

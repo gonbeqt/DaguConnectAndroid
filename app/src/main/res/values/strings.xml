@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">DaguConnect</string>
     <string name="title_activity_log_in_screen">LogInScreen</string>
+    <string name="title_activity_bottom_navigation_bar">BottomNavigationBar</string>
 </resources>
