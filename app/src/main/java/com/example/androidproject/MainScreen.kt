@@ -64,10 +64,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
 @Composable
 fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int) {
     when (selectedItem) {
-        0 -> HomeScreen(modifier)
-        1 -> ScheduleScreen(modifier)
-        2 -> BookmarkedScreen(modifier)
-        3 -> MessageScreen(modifier)
+        0 -> HomeScreen()
+        1 -> ScheduleScreen()
+        2 -> BookmarkedScreen()
+        3 -> MessageScreen()
     }
 }
 
