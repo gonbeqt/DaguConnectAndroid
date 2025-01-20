@@ -26,9 +26,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,11 +44,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,7 +116,7 @@ fun SignUpScreen(navController: NavController){
                 .offset(x = cardOffsetX.value.dp) // Apply animation offset
                 .fillMaxWidth()
                 .padding(end = 50.dp) // Add padding to the right
-                .size(350.dp, 600.dp), // Adjust card size
+                .size(350.dp, 700.dp), // Adjust card size
 
             shape = RoundedCornerShape(
                 topStart = 0.dp,
@@ -297,6 +302,76 @@ fun SignUpScreen(navController: NavController){
                         color = Color.Black // Ensure text is visible
                     )
                 )
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth().padding(start = 15.dp,end = 15.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // First Card
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(8.dp)
+                            .clickable {}, //Implementation here
+                        colors = CardDefaults.cardColors(Color.Blue)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Person Icon",
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Client",
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
+                        }
+                    }
+
+                    // Second Card
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(8.dp)
+                            .clickable { }, //Implementation here
+                         colors = CardDefaults.cardColors(Color.Blue)
+
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Work,
+                                contentDescription = "Person Icon",
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Client",
+                                fontSize = 16.sp,
+                                color = Color.White,
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(30.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -336,6 +411,7 @@ fun SignUpScreen(navController: NavController){
                         )
                     }
                 }
+
 
 
             }

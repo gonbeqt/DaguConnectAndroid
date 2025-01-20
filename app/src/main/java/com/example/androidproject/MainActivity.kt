@@ -30,8 +30,10 @@ class MainActivity : ComponentActivity() {
                         LogInScreen(navController)
 
                     }
+                    composable("main_screen"){
+                        MainScreen(navController)
+                    }
                 }
-                MainScreen()
             }
         }
     }

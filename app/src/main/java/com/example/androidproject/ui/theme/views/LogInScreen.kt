@@ -218,6 +218,7 @@ fun LogInScreen(navController: NavController){
                     Button(
                         onClick = {
                             Toast.makeText(context, "Log In Successful", Toast.LENGTH_SHORT).show()
+                            navController.navigate("main_screen")
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.8f) // 80% width

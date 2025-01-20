@@ -19,13 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavController
 import com.example.androidproject.pages.BookmarkedScreen
 import com.example.androidproject.pages.HomeScreen
 import com.example.androidproject.pages.MessageScreen
 import com.example.androidproject.pages.ScheduleScreen
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
