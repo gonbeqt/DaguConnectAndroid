@@ -13,6 +13,11 @@
         android:theme="@style/Theme.AndroidProject"
         tools:targetApi="31">
         <activity
+            android:name=".ui.theme.views.LogInScreen"
+            android:exported="false"
+            android:label="@string/title_activity_log_in_screen"
+            android:theme="@style/Theme.AndroidProject" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

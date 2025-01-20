@@ -1,6 +1,9 @@
 package com.example.androidproject.ui.theme.views
 
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,12 +24,14 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,30 +40,59 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun LoginScreen(){
+fun SignUpScreenPreview() {
+    // Use a mock or placeholder NavController for preview purposes
+    SignUpScreen(navController = rememberNavController())
+}
+
+@Composable
+fun SignUpScreen(navController: NavController){
 
     val context = LocalContext.current
     var firstName by remember {
         mutableStateOf("") }
     var lastName by remember {
         mutableStateOf("") }
+    var age by remember {
+        mutableStateOf("") }
     var email by remember {
         mutableStateOf("") }
     var password by remember {
         mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    val icon = if (passwordVisible)
+        painterResource(id = R.drawable.visibility_on)
+    else
+        painterResource(id = R.drawable.visibility_off)
+
+    // Animatable for the card's X offset
+    val cardOffsetX = remember { Animatable(-500f) } // Start off-screen to the left
+    val currentBackStackEntry = navController.currentBackStackEntryAsState()
+
+    // Launch animation when composable is composed
+    LaunchedEffect(currentBackStackEntry.value) {
+        cardOffsetX.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize().background(Color.White),
         contentAlignment = Alignment.Center
     ){
@@ -75,8 +108,10 @@ fun LoginScreen(){
 
         Card(
             modifier = Modifier
+                .offset(x = cardOffsetX.value.dp) // Apply animation offset
+                .fillMaxWidth()
                 .padding(end = 50.dp) // Add padding to the right
-                .size(350.dp, 500.dp), // Adjust card size
+                .size(350.dp, 600.dp), // Adjust card size
 
             shape = RoundedCornerShape(
                 topStart = 0.dp,
@@ -110,6 +145,8 @@ fun LoginScreen(){
                             contentDescription = "First Name Icon"
                         )
                     },
+                    singleLine = true,
+
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -140,6 +177,39 @@ fun LoginScreen(){
                             contentDescription = "Last Name Icon"
                         )
                     },
+                    singleLine = true,
+
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f) // Adjust width as needed
+                        .heightIn(min = 56.dp), // Adjust height as needed
+                    shape = RoundedCornerShape(16.dp), // Set corner radius here
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Blue,
+                        unfocusedIndicatorColor = Color.Gray,
+                        focusedLabelColor = Color.Blue,
+                        unfocusedLabelColor = Color.Gray,
+                        cursorColor = Color.Black
+                    ),
+                    textStyle = TextStyle(
+                        fontSize = 16.sp, // Adjust text size for visibility
+                        color = Color.Black // Ensure text is visible
+                    )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = age,
+                    onValueChange = { age = it },
+                    label = { Text("Age") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Last Name Icon"
+                        )
+                    },
+                    singleLine = true,
+
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -169,6 +239,8 @@ fun LoginScreen(){
                             contentDescription = "Email Icon"
                         )
                     },
+                    singleLine = true,
+
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -191,10 +263,22 @@ fun LoginScreen(){
                 OutlinedTextField(value = password,
                     onValueChange = { password = it},
                     label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation(),
                     leadingIcon = {
                         Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
                     },
+
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            passwordVisible = !passwordVisible
+                        }) {
+                            Icon(
+                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(22.dp))
+
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth(0.8f) // Adjust width as needed
                         .heightIn(min = 56.dp), // Adjust height as needed
@@ -232,26 +316,24 @@ fun LoginScreen(){
                     }
                 }
 
-
-
                 Spacer(modifier = Modifier.height(5.dp))
-                Row(modifier = Modifier.fillMaxWidth(),
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly)
                 {
-                    TextButton(onClick = {}) {
-                        Row {
-                            Text(
-                                text = "Already have an account? ",
-                                color = Color.Gray,
-                                fontSize = 12.sp
-                            )
-                            Text(
-                                text = "Log In",
-                                color = Color.Black,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    Row {
+                        Text(
+                            modifier = Modifier.clickable(onClick = {navController.navigate("login")}),
+                            text = "Don't have an account? ",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            modifier = Modifier.clickable(onClick = {navController.navigate("login")}),
+                            text = "Sign Up",
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -260,7 +342,5 @@ fun LoginScreen(){
 
         }
     }
-
-
 
 }

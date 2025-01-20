@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">AndroidProject</string>
+    <string name="app_name">DaguConnect</string>
+    <string name="title_activity_log_in_screen">LogInScreen</string>
 </resources>
