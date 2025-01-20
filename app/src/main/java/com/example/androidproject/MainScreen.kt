@@ -1,5 +1,6 @@
 package com.example.androidproject
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,12 +19,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.androidproject.pages.BookmarkedScreen
 import com.example.androidproject.pages.HomeScreen
 import com.example.androidproject.pages.MessageScreen
 import com.example.androidproject.pages.ScheduleScreen
+
 
 @Composable
 fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
@@ -41,7 +46,7 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar {
+            NavigationBar (containerColor = Color.White) {
                 navItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         selected = selectedItem == index,
