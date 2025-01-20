@@ -2,12 +2,23 @@ package com.example.androidproject.model
 
 import com.google.gson.annotations.SerializedName
 
-data class Login(
+data class LoginRequest(
     var email: String,
     var password: String
 )
 
-data class Register (
+data class LoginResponse(
+    val message: String,
+    val admin: List<AdminData>
+)
+
+data class AdminData (
+    val token: String,
+    val username: String,
+    val email: String
+)
+
+data class RegisterRequest (
     @SerializedName("first_name")
     var firstName: String,
     @SerializedName("last_name")
@@ -16,6 +27,10 @@ data class Register (
     var email: String,
     var age: Int,
     var password: String
+)
+
+data class RegisterResponse (
+    var message: String
 )
 
 
