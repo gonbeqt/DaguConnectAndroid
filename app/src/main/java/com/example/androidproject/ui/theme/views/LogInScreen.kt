@@ -231,6 +231,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                                 is LoginViewModel.LoginState.Success -> {
                                     Log.i("Login screen successful", "Login success")
                                     Toast.makeText(context, state.data?.message, Toast.LENGTH_SHORT).show()
+                                    navController.navigate("main_screen")
                                 }
                                 is LoginViewModel.LoginState.Error -> {
                                     Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
