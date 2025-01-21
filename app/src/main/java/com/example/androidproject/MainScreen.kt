@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -24,18 +25,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.androidproject.pages.BookingsScreen
 import com.example.androidproject.pages.BookmarkedScreen
 import com.example.androidproject.pages.HomeScreen
 import com.example.androidproject.pages.MessageScreen
 import com.example.androidproject.pages.ScheduleScreen
 
-
 @Composable
 fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
+        NavigationItem("Bookings", Icons.Default.ListAlt),
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
-        NavigationItem("Bookmark", Icons.Default.CollectionsBookmark),
+        NavigationItem("Bookmarks", Icons.Default.CollectionsBookmark),
         NavigationItem("Message", Icons.Default.Message)
 
     )
@@ -72,9 +74,10 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
 fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int) {
     when (selectedItem) {
         0 -> HomeScreen()
-        1 -> ScheduleScreen()
-        2 -> BookmarkedScreen()
-        3 -> MessageScreen()
+        1 -> BookingsScreen()
+        2 -> ScheduleScreen()
+        3 -> BookmarkedScreen()
+        4 -> MessageScreen()
     }
 }
 
