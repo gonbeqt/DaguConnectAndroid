@@ -9,13 +9,7 @@ data class LoginRequest(
 
 data class LoginResponse(
     val message: String,
-    val admin: List<AdminData>
-)
-
-data class AdminData (
-    val token: String,
-    val username: String,
-    val email: String
+    val token: String
 )
 
 data class RegisterRequest (
@@ -31,14 +25,4 @@ data class RegisterRequest (
 
 data class RegisterResponse (
     var message: String
-)
-
-
-//Forgot Password Data Classes
-data class ForgotPassword(
-    var email: String
-)
-
-data class VerifyOTP (
-    var otp: Int
 )

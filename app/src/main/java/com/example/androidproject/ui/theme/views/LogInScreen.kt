@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -48,35 +49,60 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
+import com.example.androidproject.api.ApiService
+import com.example.androidproject.api.RetrofitInstance
+import com.example.androidproject.viewmodels.LoginViewModel
+import com.example.androidproject.viewmodels.factories.LoginViewModelFactory
 
 @Preview(showBackground = true)
 @Composable
 fun LogInScreenPreview() {
-    // Use a mock or placeholder NavController for preview purposes
-    LogInScreen(navController = rememberNavController())
+    //LogInScreen(navController = rememberNavController(), loginViewModel)
 }
 
 @Composable
-fun LogInScreen(navController: NavController){
-
+fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
     val context = LocalContext.current
+
+    val loginState by viewModel.loginState.collectAsState()
+
     var email by remember {
-        mutableStateOf("") }
+        mutableStateOf("")
+    }
     var password by remember {
-        mutableStateOf("") }
+        mutableStateOf("")
+    }
     var passwordVisible by remember { mutableStateOf(false) }
     val icon = if (passwordVisible)
-       painterResource(id = R.drawable.visibility_on)
-        else
+        painterResource(id = R.drawable.visibility_on)
+    else
         painterResource(id = R.drawable.visibility_off)
 
     val cardOffsetX = remember { Animatable(500f) } // Start off-screen to the right
 
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
+
+    when (val state = loginState) {
+        is LoginViewModel.LoginState.Loading -> {
+            CircularProgressIndicator()
+        }
+        is LoginViewModel.LoginState.Success -> {
+            Toast.makeText(context, "Login successful: ${state.data?.message}", Toast.LENGTH_SHORT).show()
+            // Navigate to next screen
+        }
+        is LoginViewModel.LoginState.Error -> {
+            Text(text = "Error: ${state.message}", color = Color.Red, modifier = Modifier.padding(8.dp))
+        }
+        LoginViewModel.LoginState.Idle -> {
+            // Do nothing
+        }
+    }
 
     // Launch animation when composable is composed
     LaunchedEffect(currentBackStackEntry.value) {
@@ -86,9 +112,10 @@ fun LogInScreen(navController: NavController){
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White),
+    Box(
+        modifier = Modifier.fillMaxSize().background(Color.White),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         // Set an image as the background
         Image(
             painter = painterResource(id = R.drawable.background_image_auth), // Corrected name
@@ -96,8 +123,6 @@ fun LogInScreen(navController: NavController){
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-
-
 
         Card(
             modifier = Modifier
@@ -113,17 +138,22 @@ fun LogInScreen(navController: NavController){
                 bottomEnd = 0.dp // No radius on the bottom-right corner
             ),
             elevation = CardDefaults.cardElevation(8.dp)
-        ){
-            Column(modifier = Modifier.fillMaxSize(),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center) {
+                verticalArrangement = Arrangement.Center
+            ) {
 
                 Text(
                     text = "Welcome Back",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Blue,
-                    modifier = Modifier.padding(bottom = 16.dp, top = 16.dp) // Optional padding below the title
+                    modifier = Modifier.padding(
+                        bottom = 16.dp,
+                        top = 16.dp
+                    ) // Optional padding below the title
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -157,8 +187,9 @@ fun LogInScreen(navController: NavController){
                     )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(value = password,
-                    onValueChange = { password = it},
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
                     label = { Text("Password") },
                     leadingIcon = {
                         Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
@@ -168,12 +199,15 @@ fun LogInScreen(navController: NavController){
                             passwordVisible = !passwordVisible
                         }) {
                             Icon(
-                                painter = icon, contentDescription = "Visible", modifier = Modifier.size(22.dp))
+                                painter = icon,
+                                contentDescription = "Visible",
+                                modifier = Modifier.size(22.dp)
+                            )
 
                         }
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None
-                            else PasswordVisualTransformation(),
+                    else PasswordVisualTransformation(),
 
                     singleLine = true,
                     modifier = Modifier
@@ -217,7 +251,7 @@ fun LogInScreen(navController: NavController){
                 ) {
                     Button(
                         onClick = {
-                            Toast.makeText(context, "Log In Successful", Toast.LENGTH_SHORT).show()
+                            viewModel.login(email, password)
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.8f) // 80% width
@@ -228,34 +262,32 @@ fun LogInScreen(navController: NavController){
                         Text(text = "Log In", color = Color.White)
                     }
                 }
-
-
-
                 Spacer(modifier = Modifier.height(5.dp))
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                )
                 {
                     Row {
                         Text(
-                            modifier = Modifier.clickable(onClick = {navController.navigate("signup")}),
+                            modifier = Modifier.clickable(onClick = { navController.navigate("signup") }),
                             text = "Don't have an account? ",
                             color = Color.Gray,
                             fontSize = 12.sp
                         )
                         Text(
-                            modifier = Modifier.clickable(onClick = {navController.navigate("signup")}),
+                            modifier = Modifier.clickable(onClick = { navController.navigate("signup") }),
                             text = "Sign Up",
                             color = Color.Black,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
+
                 }
             }
-
-
         }
-
     }
 }
+
 
