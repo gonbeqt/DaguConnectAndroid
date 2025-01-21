@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.theme.views
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -29,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -52,16 +54,19 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
+import com.example.androidproject.viewmodels.LoginViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun LogInScreenPreview() {
     // Use a mock or placeholder NavController for preview purposes
-    LogInScreen(navController = rememberNavController())
+    //LogInScreen(navController = rememberNavController())
 }
 
 @Composable
-fun LogInScreen(navController: NavController){
+fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
+
+    val loginState by viewModel.loginState.collectAsState()
 
     val context = LocalContext.current
     var email by remember {
@@ -217,8 +222,24 @@ fun LogInScreen(navController: NavController){
                 ) {
                     Button(
                         onClick = {
-                            Toast.makeText(context, "Log In Successful", Toast.LENGTH_SHORT).show()
                             viewModel.login(email, password)
+                            // Show login state
+                            when (val state = loginState) {
+                                is LoginViewModel.LoginState.Loading -> {
+                                    // Do nothing
+                                }
+                                is LoginViewModel.LoginState.Success -> {
+                                    Log.i("Login screen successful", "Login success")
+                                    Toast.makeText(context, state.data?.message, Toast.LENGTH_SHORT).show()
+                                }
+                                is LoginViewModel.LoginState.Error -> {
+                                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                                    Log.i("Login screen error", "Login error $state.message")
+                                }
+                                LoginViewModel.LoginState.Idle -> {
+                                    // Do nothing
+                                }
+                            }
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.8f) // 80% width
@@ -228,9 +249,8 @@ fun LogInScreen(navController: NavController){
                     {
                         Text(text = "Log In", color = Color.White)
                     }
+
                 }
-
-
 
                 Spacer(modifier = Modifier.height(5.dp))
                 Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -253,10 +273,8 @@ fun LogInScreen(navController: NavController){
                     }
                 }
             }
-
-
         }
-
     }
 }
+
 

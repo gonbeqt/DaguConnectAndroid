@@ -21,8 +21,14 @@ class LoginViewModel(private val apiService: ApiService):ViewModel() {
                 val response = apiService.login(LoginRequest(email, password))
                 if (response.isSuccessful) {
                     _loginState.value = LoginState.Success(response.body())
+                    val loginResponse = response.body()
+                    if (loginResponse != null) {
+                        Log.d("LoginViewModel", "Token: ${loginResponse.token}")
+                        Log.d("LoginViewModel", "Token: ${_loginState.value}")
+                    }
                 } else {
-                    _loginState.value = LoginState.Error("Invalid credentials or server error")
+                    val errorMessage = response.errorBody()?.string() ?: "Unknown error occurred"
+                    _loginState.value = LoginState.Error(errorMessage)
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error(e.localizedMessage ?: "Unknown error")

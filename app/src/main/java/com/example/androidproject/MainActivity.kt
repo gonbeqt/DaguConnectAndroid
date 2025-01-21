@@ -21,7 +21,7 @@ import com.example.androidproject.viewmodels.factories.LoginViewModelFactory
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        TokenManager.init(applicationContext)
+        TokenManager.init(this)
         val apiService = RetrofitInstance.create(ApiService::class.java)
         val viewModelFactory = LoginViewModelFactory(apiService)
         val loginViewModel = ViewModelProvider(this, viewModelFactory)[LoginViewModel::class.java]
