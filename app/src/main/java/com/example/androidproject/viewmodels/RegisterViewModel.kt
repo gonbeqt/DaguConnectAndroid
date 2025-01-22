@@ -16,7 +16,7 @@ class RegisterViewModel(private val apiService: ApiService):ViewModel() {
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState.Idle)
     val registerState = _registerState.asStateFlow()
 
-    fun register(firstName:String, lastName: String, username: String, email:String, age: String, isClient: Boolean, password:String) {
+    fun register(firstName:String, lastName: String, username: String, email:String, age: Int, isClient: Boolean, password:String) {
         viewModelScope.launch { // Launch a coroutine to make the API call
             _registerState.value = RegisterState.Loading
             try {

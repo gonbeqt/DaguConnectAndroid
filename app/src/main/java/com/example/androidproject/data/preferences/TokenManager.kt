@@ -1,11 +1,11 @@
-package com.example.androidproject.api
+package com.example.androidproject.data.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 
 object TokenManager {
-    private const val PREFS_NAME = "user_prefs"
+    private const val PREFS_NAME = "user_token"
     private const val TOKEN_KEY = "token"
     private lateinit var preferences: SharedPreferences
 
@@ -32,6 +32,7 @@ object TokenManager {
         val token = getToken()
         return !token.isNullOrEmpty()  // Checks if a token exists
     }
+
     fun isTokenValid(): Boolean {
         val token = getToken()
         // You can add additional validation criteria here

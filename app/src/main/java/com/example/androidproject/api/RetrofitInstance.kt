@@ -1,5 +1,6 @@
 package com.example.androidproject.api
 
+import com.example.androidproject.data.preferences.TokenManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://192.168.1.142:8000/"
+    private const val BASE_URL = "http://192.168.1.144:8000/"
 
     // Add the logging interceptor
     private val logging = HttpLoggingInterceptor().apply {

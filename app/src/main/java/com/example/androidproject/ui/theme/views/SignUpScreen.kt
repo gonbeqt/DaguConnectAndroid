@@ -62,9 +62,9 @@ fun SignUpScreenPreview() {
 }
 
 @Composable
-fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel){
+fun SignUpScreen(navController: NavController){
 
-    val registerState by viewModel.registerState.collectAsState()
+    //val registerState by viewModel.registerState.collectAsState()
 
     val context = LocalContext.current
     var firstName by remember {
@@ -384,7 +384,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel){
                 ) {
                     Button(
                         onClick = {
-                            viewModel.register(firstName, lastName, username, email, age, isClient, password)
+                            //viewModel.register(firstName, lastName, username, email, age, isClient, password)
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.8f) // 80% width
