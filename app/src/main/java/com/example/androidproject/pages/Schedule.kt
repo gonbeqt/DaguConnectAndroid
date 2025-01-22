@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androidproject.R
+import com.example.androidproject.ui.theme.views.Tradesman
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -33,7 +34,11 @@ import java.util.Locale
 fun ScheduleScreen() {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
-
+    val tradesman = listOf(
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
+    )
     Column(modifier = Modifier.fillMaxSize()
         .background(Color.White)) {
         //calendar section showing the month, days, and selected date
@@ -43,7 +48,19 @@ fun ScheduleScreen() {
             onDateSelected = { selectedDate = it },
             onMonthChange = { currentMonth = it }
         )
-        PlumbingRepairCard(date = selectedDate)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxHeight()
+                .size(420.dp)
+            ,
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(tradesman.size) { index ->
+                val trade = tradesman[index]
+                PlumbingRepairCard(trade)
+            }
+        }
     }
 }
 
@@ -144,12 +161,13 @@ fun CalendarSection(
         )
     }
 }
+
 @Composable
-fun PlumbingRepairCard(date: LocalDate) {
+fun PlumbingRepairCard(trade: Tradesman) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(6.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
 
@@ -160,7 +178,7 @@ fun PlumbingRepairCard(date: LocalDate) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Image( painterResource(R.drawable.pfp),
+            Image( painterResource(trade.imageResId),
                 contentDescription = "Tradesman Image",
                 modifier = Modifier.size(120.dp,120.dp)
                     .padding(end = 10.dp))
@@ -170,11 +188,11 @@ fun PlumbingRepairCard(date: LocalDate) {
 
             ) {
                 Text(
-                    text = "Plumbing Repair",
+                    text = trade.category,
                 )
                 Text(
                     modifier = Modifier.padding( top = 5.dp),
-                    text = "Tradesman",
+                    text = trade.username,
                     color = Color.Gray
                 )
                 Row(
@@ -191,7 +209,7 @@ fun PlumbingRepairCard(date: LocalDate) {
                          {
                             Text(
                                 modifier = Modifier.padding(5.dp),
-                                text = "₱500/hr",
+                                text = trade.rate,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -213,7 +231,7 @@ fun PlumbingRepairCard(date: LocalDate) {
                                 tint = Color.Yellow
                             )
                             Text(
-                                text = "4.5",
+                                text = trade.reviews.toString(),
                                 fontWeight = FontWeight.Bold
                             )
                         }

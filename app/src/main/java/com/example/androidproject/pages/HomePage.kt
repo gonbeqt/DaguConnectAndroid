@@ -77,14 +77,14 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             Column(modifier=Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding( top = 40.dp, start =25.dp, end = 25.dp),
-                    horizontalArrangement = Arrangement.spacedBy(85.dp)
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween
                 ){
                     //Should be Logo
                     Image( painter = painterResource(id = R.drawable.visibility_on),
                         contentDescription = "LOGO",
                         contentScale = ContentScale.Crop
                     )
-                    Row (modifier=Modifier.fillMaxWidth()){
+                    Row (){
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Location Image",
@@ -183,7 +183,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier =Modifier.height(20.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(start = 25.dp,end = 25.dp),
-                    horizontalArrangement = Arrangement.spacedBy(180.dp)
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween
                 ) {
                     Text(text = "Categories",
                         fontSize = 18.sp,
@@ -211,7 +211,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier =Modifier.height(5.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(start = 25.dp,end = 25.dp),
-                    horizontalArrangement = Arrangement.spacedBy(190.dp)
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween
                 ) {
                     Text(text = "Top-Rated",
                         fontSize = 18.sp,
@@ -227,7 +227,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .size(411.dp)
+                        .size(411.dp).padding(start = 5.dp)
                     ,
 
                     contentPadding = PaddingValues(12.dp),
@@ -300,6 +300,7 @@ fun TradesmanItem(trade: Tradesman) {
             .size(390.dp, 120.dp)
             .clickable { }, //implementation here
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+
 
     ){
         Box(

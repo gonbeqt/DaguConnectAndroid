@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.pages.BookingsScreen
 import com.example.androidproject.pages.BookmarkedScreen
@@ -59,7 +60,7 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
                             Icon(imageVector = item.icon, contentDescription = "Icon")
                         },
                         label = {
-                            (Text(text = item.nav_label))
+                            (Text(text = item.nav_label, fontSize = 10.sp))
                         }
                     )
                 }

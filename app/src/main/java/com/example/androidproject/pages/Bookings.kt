@@ -56,7 +56,7 @@ fun BookingsScreen(modifier: Modifier = Modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 40.dp, start = 25.dp, end = 25.dp),
-                horizontalArrangement = Arrangement.spacedBy(85.dp)
+                horizontalArrangement = Arrangement.Absolute.SpaceBetween
             ) {
                 //Should be Logo
                 Image(
@@ -64,7 +64,7 @@ fun BookingsScreen(modifier: Modifier = Modifier) {
                     contentDescription = "LOGO",
                     contentScale = ContentScale.Crop
                 )
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row() {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = "Location Image",

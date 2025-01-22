@@ -74,6 +74,8 @@ fun SignUpScreen(navController: NavController){
         mutableStateOf("") }
     var lastName by remember {
         mutableStateOf("") }
+    var userName by remember {
+        mutableStateOf("") }
     var age by remember {
         mutableStateOf("") }
     var email by remember {
@@ -116,7 +118,7 @@ fun SignUpScreen(navController: NavController){
                 .offset(x = cardOffsetX.value.dp) // Apply animation offset
                 .fillMaxWidth()
                 .padding(end = 50.dp) // Add padding to the right
-                .size(350.dp, 700.dp), // Adjust card size
+                .size(350.dp, 750.dp), // Adjust card size
 
             shape = RoundedCornerShape(
                 topStart = 0.dp,
@@ -180,6 +182,37 @@ fun SignUpScreen(navController: NavController){
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Last Name Icon"
+                        )
+                    },
+                    singleLine = true,
+
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f) // Adjust width as needed
+                        .heightIn(min = 56.dp), // Adjust height as needed
+                    shape = RoundedCornerShape(16.dp), // Set corner radius here
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Blue,
+                        unfocusedIndicatorColor = Color.Gray,
+                        focusedLabelColor = Color.Blue,
+                        unfocusedLabelColor = Color.Gray,
+                        cursorColor = Color.Black
+                    ),
+                    textStyle = TextStyle(
+                        fontSize = 16.sp, // Adjust text size for visibility
+                        color = Color.Black // Ensure text is visible
+                    )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = userName,
+                    onValueChange = { userName = it },
+                    label = { Text("Username") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Username Icon"
                         )
                     },
                     singleLine = true,
@@ -311,7 +344,7 @@ fun SignUpScreen(navController: NavController){
                 ) {
                     // First Card
                     Card(
-                        modifier = Modifier
+                        modifier = Modifier.size(70.dp)
                             .weight(1f)
                             .padding(8.dp)
                             .clickable {}, //Implementation here
@@ -342,7 +375,7 @@ fun SignUpScreen(navController: NavController){
 
                     // Second Card
                     Card(
-                        modifier = Modifier
+                        modifier = Modifier.size(70.dp)
                             .weight(1f)
                             .padding(8.dp)
                             .clickable { }, //Implementation here
@@ -365,8 +398,8 @@ fun SignUpScreen(navController: NavController){
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Client",
-                                fontSize = 16.sp,
+                                text = "Tradesman",
+                                fontSize = 14.sp,
                                 color = Color.White,
                             )
                         }
@@ -382,7 +415,7 @@ fun SignUpScreen(navController: NavController){
                             Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier
-                            .fillMaxWidth(0.8f) // 80% width
+                            .fillMaxWidth(0.6f) // 80% width
                             .height(50.dp), // Set height
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
                     )
