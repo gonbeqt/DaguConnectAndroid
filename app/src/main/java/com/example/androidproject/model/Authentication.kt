@@ -20,6 +20,8 @@ data class RegisterRequest (
     var username: String,
     var email: String,
     var age: Int,
+    @SerializedName("is_client")
+    var isClient: Boolean,
     var password: String
 )
 

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
+import com.example.androidproject.api.JsonErrorParser
 import com.example.androidproject.model.LoginRequest
 import com.example.androidproject.model.LoginResponse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,8 @@ class LoginViewModel(private val apiService: ApiService):ViewModel() {
                         Log.d("LoginViewModel", "Login state:: ${_loginState.value}")
                     }
                 } else {
-                    val errorMessage = response.errorBody()?.string() ?: "Unknown error occurred"
+                    val errorJson = response.errorBody()?.string()
+                    val errorMessage = JsonErrorParser.extractField(errorJson, "message")
                     _loginState.value = LoginState.Error(errorMessage)
                 }
             } catch (e: Exception) {
@@ -43,4 +45,3 @@ class LoginViewModel(private val apiService: ApiService):ViewModel() {
         data class Error(val message: String) : LoginState()
     }
 }
-

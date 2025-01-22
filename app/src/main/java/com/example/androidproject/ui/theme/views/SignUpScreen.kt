@@ -1,6 +1,5 @@
 package com.example.androidproject.ui.theme.views
 
-import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -31,53 +30,55 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
+import com.example.androidproject.viewmodels.RegisterViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun SignUpScreenPreview() {
     // Use a mock or placeholder NavController for preview purposes
-    SignUpScreen(navController = rememberNavController())
+    //SignUpScreen(navController = rememberNavController())
 }
 
 @Composable
-fun SignUpScreen(navController: NavController){
+fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel){
+
+    val registerState by viewModel.registerState.collectAsState()
 
     val context = LocalContext.current
     var firstName by remember {
         mutableStateOf("") }
     var lastName by remember {
         mutableStateOf("") }
+    var username by remember {
+        mutableStateOf("") }
     var age by remember {
         mutableStateOf("") }
     var email by remember {
         mutableStateOf("") }
+    var isClient by remember {
+        mutableStateOf(false) }
     var password by remember {
         mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -205,7 +206,11 @@ fun SignUpScreen(navController: NavController){
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     value = age,
-                    onValueChange = { age = it },
+                    onValueChange = { newAge ->
+                        if (newAge.all { it.isDigit() }) {
+                            age = newAge
+                        }
+                    },
                     label = { Text("Age") },
                     leadingIcon = {
                         Icon(
@@ -379,7 +384,7 @@ fun SignUpScreen(navController: NavController){
                 ) {
                     Button(
                         onClick = {
-                            Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
+                            viewModel.register(firstName, lastName, username, email, age, isClient, password)
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.8f) // 80% width
