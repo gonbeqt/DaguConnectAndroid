@@ -1,34 +1,253 @@
 package com.example.androidproject.pages
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.background
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.androidproject.R
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
+
+@Preview
+@Composable
+fun ScheduleScreen() {
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var currentMonth by remember { mutableStateOf(YearMonth.now()) }
+
+    Column(modifier = Modifier.fillMaxSize()
+        .background(Color.White)) {
+        //calendar section showing the month, days, and selected date
+        CalendarSection(
+            currentMonth = currentMonth,
+            selectedDate = selectedDate,
+            onDateSelected = { selectedDate = it },
+            onMonthChange = { currentMonth = it }
+        )
+        PlumbingRepairCard(date = selectedDate)
+    }
+}
 
 
 
 @Composable
+fun CalendarSection(
+    currentMonth: YearMonth,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    onMonthChange: (YearMonth) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        //navigation for month (e.g jan to feb)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
+                Icon(Icons.Default.ArrowBackIos, contentDescription = "Previous Month")
+            }
+            Text(
+                text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
+                Icon(Icons.Default.ArrowForwardIos, contentDescription = "Next Month")
+            }
+        }
 
-fun ScheduleScreen(modifier: Modifier = Modifier) {
-    Column (
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Green),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
+        // days of the week header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN").forEach { day ->
+                Text(text = day, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        // display days of the current month
+        val daysInMonth = currentMonth.lengthOfMonth()
+        val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value % 7 // Adjust for Monday start
+
+        Column {
+            var day = 1 - firstDayOfWeek // Start rendering from the correct position
+            while (day <= daysInMonth) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    for (i in 0..6) {
+                        if (day in 1..daysInMonth) {
+                            val date = currentMonth.atDay(day)
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        if (date == selectedDate) Color.Green else Color.Transparent,
+                                        shape = MaterialTheme.shapes.small
+                                    )
+                                    .clickable { onDateSelected(date) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = day.toString(),
+                                    color = if (date == selectedDate) Color.White else Color.Black,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.size(40.dp)) // empty spaces for alignment
+                        }
+                        day++
+                    }
+                }
+            }
+        }
+
+        // Selected date display
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Schedule Screen",
-            fontSize = 30.sp,
-            color = Color.White
+            text = selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy")),
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp
+        )
+        Text(
+            text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            color = Color.Gray
         )
     }
-
 }
+@Composable
+fun PlumbingRepairCard(date: LocalDate) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Image( painterResource(R.drawable.pfp),
+                contentDescription = "Tradesman Image",
+                modifier = Modifier.size(120.dp,120.dp)
+                    .padding(end = 10.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+                    .padding(top = 7.dp)
+
+            ) {
+                Text(
+                    text = "Plumbing Repair",
+                )
+                Text(
+                    modifier = Modifier.padding( top = 5.dp),
+                    text = "Tradesman",
+                    color = Color.Gray
+                )
+                Row(
+                    modifier = Modifier.padding(top = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.padding(end = 5.dp)
+                        .background(
+                            color = Color(0xFFFFF2DD),
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                    ) {
+                        Row()
+                         {
+                            Text(
+                                modifier = Modifier.padding(5.dp),
+                                text = "₱500/hr",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Box(modifier = Modifier
+                        .background(
+                            color = Color(0xFFFFF2DD),
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(5.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Rating",
+                                tint = Color.Yellow
+                            )
+                            Text(
+                                text = "4.5",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.padding(top = 5.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+
+                ) {
+                    Column {
+                        Text(
+                            text = "Date",
+                        )
+                        Text(
+                            text = "31 January 2024"
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Time",
+                        )
+                        Text(
+                            text = "8:00 AM",
+                        )
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+
 
