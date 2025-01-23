@@ -1,4 +1,4 @@
-package com.example.androidproject.pages
+package com.example.androidproject.ui.theme.views.pages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -55,49 +55,8 @@ fun BookmarkedScreen(modifier: Modifier = Modifier) {
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 40.dp, start = 25.dp, end = 25.dp),
-                horizontalArrangement = Arrangement.Absolute.SpaceBetween
-            ) {
-                //Should be Logo
-                Image(
-                    painter = painterResource(id = R.drawable.visibility_on),
-                    contentDescription = "LOGO",
-                    contentScale = ContentScale.Crop
-                )
-                Row() {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Location Image",
-                        modifier = Modifier.size(32.dp),
-                        tint = (Color.Gray)
-                    )
+            BookmarkTopSection()
 
-                    Text(
-                        text = "Location",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(start = 5.dp, top = 2.dp)
-                    )
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications Image",
-                        modifier = Modifier.padding(start = 60.dp)
-                            .size(32.dp)
-                            .clickable { },//Implementation here
-                        tint = (Color.Gray)
-
-                    )
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Account Image",
-                        modifier = Modifier.padding(start = 15.dp)
-                            .size(32.dp)
-                            .clickable { },//Implementation here
-                        tint = (Color.Gray)
-                    )
-                }
-            }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -113,6 +72,52 @@ fun BookmarkedScreen(modifier: Modifier = Modifier) {
             }
         }
 
+    }
+}
+@Composable
+fun BookmarkTopSection(){
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 40.dp, start = 25.dp, end = 25.dp),
+        horizontalArrangement = Arrangement.Absolute.SpaceBetween
+    ) {
+        //Should be Logo
+        Image(
+            painter = painterResource(id = R.drawable.visibility_on),
+            contentDescription = "LOGO",
+            contentScale = ContentScale.Crop
+        )
+        Row() {
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = "Location Image",
+                modifier = Modifier.size(32.dp),
+                tint = (Color.Gray)
+            )
+
+            Text(
+                text = "Location",
+                color = Color.Black,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(start = 5.dp, top = 2.dp)
+            )
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Notifications Image",
+                modifier = Modifier.padding(start = 60.dp)
+                    .size(32.dp)
+                    .clickable { },//Implementation here
+                tint = (Color.Gray)
+
+            )
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = "Account Image",
+                modifier = Modifier.padding(start = 15.dp)
+                    .size(32.dp)
+                    .clickable { },//Implementation here
+                tint = (Color.Gray)
+            )
+        }
     }
 }
 

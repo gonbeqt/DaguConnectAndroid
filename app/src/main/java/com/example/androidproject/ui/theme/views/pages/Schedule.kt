@@ -1,4 +1,4 @@
-package com.example.androidproject.pages
+package com.example.androidproject.ui.theme.views.pages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

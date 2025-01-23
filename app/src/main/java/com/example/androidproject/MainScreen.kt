@@ -26,11 +26,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.androidproject.pages.BookingsScreen
-import com.example.androidproject.pages.BookmarkedScreen
-import com.example.androidproject.pages.HomeScreen
-import com.example.androidproject.pages.MessageScreen
-import com.example.androidproject.pages.ScheduleScreen
+import com.example.androidproject.ui.theme.views.pages.BookingsScreen
+import com.example.androidproject.ui.theme.views.pages.BookmarkedScreen
+import com.example.androidproject.ui.theme.views.pages.HomeScreen
+import com.example.androidproject.ui.theme.views.pages.MessageScreen
+import com.example.androidproject.ui.theme.views.pages.ScheduleScreen
 
 @Composable
 fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
