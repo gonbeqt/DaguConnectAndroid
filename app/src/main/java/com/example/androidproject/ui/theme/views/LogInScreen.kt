@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.theme.views
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -48,21 +49,32 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
+import com.example.androidproject.api.ApiService
+import com.example.androidproject.api.RetrofitInstance
+import com.example.androidproject.viewmodels.LoginViewModel
+import com.example.androidproject.viewmodels.factories.LoginViewModelFactory
 
 @Preview(showBackground = true)
 @Composable
 fun LogInScreenPreview() {
-    // Use a mock or placeholder NavController for preview purposes
-    LogInScreen(navController = rememberNavController())
+    //LogInScreen(navController = rememberNavController())
 }
 
 @Composable
-fun LogInScreen(navController: NavController){
+fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
 
+    val loginState by viewModel.loginState.collectAsState()
+
+    var email by remember {
+        mutableStateOf("") }
+
+    var password by remember {
+        mutableStateOf("") }
 
     val cardOffsetX = remember { Animatable(500f) } // Start off-screen to the right
 
@@ -113,12 +125,15 @@ fun LogInScreen(navController: NavController){
                     modifier = Modifier.padding(bottom = 16.dp, top = 16.dp) // Optional padding below the title
                 )
 
-                InputFieldForLogin()
+                InputFieldForLogin(email = email,
+                    onEmailChange = { email = it },
+                    password = password,
+                    onPasswordChange = { password = it })
 
                 ForgotPassword()
 
                 Spacer(modifier = Modifier.height(5.dp))
-                ButtonLogin(navController)
+                ButtonLogin(navController, viewModel, email, password)
 
                 Spacer(modifier = Modifier.height(5.dp))
                 SignUpButton(navController)
@@ -131,25 +146,29 @@ fun LogInScreen(navController: NavController){
     }
 }
 @Composable
-fun InputFieldForLogin(){
+fun InputFieldForLogin(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit
+    ){
 
 
     Spacer(modifier = Modifier.height(10.dp))
 
-    EmailField()
+    EmailField(email = email, onEmailChange = onEmailChange)
 
     Spacer(modifier = Modifier.height(10.dp))
 
-    PasswordField()
+    PasswordField(password = password, onPasswordChange = onPasswordChange)
 
 }
 @Composable
-fun EmailField(){
-    var email by remember {
-        mutableStateOf("") }
+fun EmailField(email: String, onEmailChange: (String) -> Unit){
+
     OutlinedTextField(
         value = email,
-        onValueChange = { email = it },
+        onValueChange = onEmailChange,
         label = { Text("Email") },
         leadingIcon = {
             Icon(
@@ -178,16 +197,15 @@ fun EmailField(){
     )
 }
 @Composable
-fun PasswordField(){
-    var password by remember {
-        mutableStateOf("") }
+fun PasswordField(password: String, onPasswordChange: (String) -> Unit){
+
     var passwordVisible by remember { mutableStateOf(false) }
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
     else
         painterResource(id = R.drawable.visibility_off)
     OutlinedTextField(value = password,
-        onValueChange = { password = it},
+        onValueChange =  onPasswordChange,
         label = { Text("Password") },
         leadingIcon = {
             Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
@@ -246,7 +264,7 @@ fun ForgotPassword(){
 }
 
 @Composable
-fun ButtonLogin(navController: NavController){
+fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: String, password: String ){
     val context = LocalContext.current
 
     Row(
@@ -255,8 +273,25 @@ fun ButtonLogin(navController: NavController){
     ) {
         Button(
             onClick = {
-                Toast.makeText(context, "Log In Successful", Toast.LENGTH_SHORT).show()
-                navController.navigate("main_screen")
+                viewModel.login(email, password)
+                when (val state = viewModel.loginState.value) {
+                    is LoginViewModel.LoginState.Loading -> {
+                        // Do nothing
+                    }
+                    is LoginViewModel.LoginState.Success -> {
+                        Log.i("Login screen successful", "Login success")
+                        Toast.makeText(context, state.data?.message, Toast.LENGTH_SHORT).show()
+                        navController.navigate("main_screen")
+                    }
+                    is LoginViewModel.LoginState.Error -> {
+                        Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                        Log.i("Login screen error", "Login error $state.message")
+                    }
+                    LoginViewModel.LoginState.Idle -> {
+                        // Do nothing
+                    }
+                }
+
             },
             modifier = Modifier
                 .fillMaxWidth(0.8f) // 80% width
