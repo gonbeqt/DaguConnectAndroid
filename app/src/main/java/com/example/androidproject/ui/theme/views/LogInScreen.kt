@@ -133,7 +133,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                 ForgotPassword()
 
                 Spacer(modifier = Modifier.height(5.dp))
-                ButtonLogin(navController, viewModel, email, password)
+                ButtonLogin(navController, viewModel, email, password, loginState)
 
                 Spacer(modifier = Modifier.height(5.dp))
                 SignUpButton(navController)
@@ -264,7 +264,7 @@ fun ForgotPassword(){
 }
 
 @Composable
-fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: String, password: String ){
+fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: String, password: String, loginState: LoginViewModel.LoginState ){
     val context = LocalContext.current
 
     Row(
@@ -274,18 +274,18 @@ fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: 
         Button(
             onClick = {
                 viewModel.login(email, password)
-                when (val state = viewModel.loginState.value) {
+                when (loginState) {
                     is LoginViewModel.LoginState.Loading -> {
                         // Do nothing
                     }
                     is LoginViewModel.LoginState.Success -> {
                         Log.i("Login screen successful", "Login success")
-                        Toast.makeText(context, state.data?.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, loginState.data?.message, Toast.LENGTH_SHORT).show()
                         navController.navigate("main_screen")
                     }
                     is LoginViewModel.LoginState.Error -> {
-                        Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-                        Log.i("Login screen error", "Login error $state.message")
+                        Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
+                        Log.i("Login screen error", "Login error $loginState.message")
                     }
                     LoginViewModel.LoginState.Idle -> {
                         // Do nothing
