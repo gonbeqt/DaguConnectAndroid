@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.theme.views
 
+import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -30,55 +31,55 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
-import com.example.androidproject.viewmodels.RegisterViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun SignUpScreenPreview() {
     // Use a mock or placeholder NavController for preview purposes
-    //SignUpScreen(navController = rememberNavController())
+    SignUpScreen(navController = rememberNavController())
 }
 
 @Composable
 fun SignUpScreen(navController: NavController){
-
-    //val registerState by viewModel.registerState.collectAsState()
 
     val context = LocalContext.current
     var firstName by remember {
         mutableStateOf("") }
     var lastName by remember {
         mutableStateOf("") }
-    var username by remember {
+    var userName by remember {
         mutableStateOf("") }
     var age by remember {
         mutableStateOf("") }
     var email by remember {
         mutableStateOf("") }
-    var isClient by remember {
-        mutableStateOf(false) }
     var password by remember {
         mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -117,7 +118,7 @@ fun SignUpScreen(navController: NavController){
                 .offset(x = cardOffsetX.value.dp) // Apply animation offset
                 .fillMaxWidth()
                 .padding(end = 50.dp) // Add padding to the right
-                .size(350.dp, 700.dp), // Adjust card size
+                .size(350.dp, 750.dp), // Adjust card size
 
             shape = RoundedCornerShape(
                 topStart = 0.dp,
@@ -205,12 +206,39 @@ fun SignUpScreen(navController: NavController){
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
-                    value = age,
-                    onValueChange = { newAge ->
-                        if (newAge.all { it.isDigit() }) {
-                            age = newAge
-                        }
+                    value = userName,
+                    onValueChange = { userName = it },
+                    label = { Text("Username") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Username Icon"
+                        )
                     },
+                    singleLine = true,
+
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f) // Adjust width as needed
+                        .heightIn(min = 56.dp), // Adjust height as needed
+                    shape = RoundedCornerShape(16.dp), // Set corner radius here
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Blue,
+                        unfocusedIndicatorColor = Color.Gray,
+                        focusedLabelColor = Color.Blue,
+                        unfocusedLabelColor = Color.Gray,
+                        cursorColor = Color.Black
+                    ),
+                    textStyle = TextStyle(
+                        fontSize = 16.sp, // Adjust text size for visibility
+                        color = Color.Black // Ensure text is visible
+                    )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = age,
+                    onValueChange = { age = it },
                     label = { Text("Age") },
                     leadingIcon = {
                         Icon(
@@ -316,7 +344,7 @@ fun SignUpScreen(navController: NavController){
                 ) {
                     // First Card
                     Card(
-                        modifier = Modifier
+                        modifier = Modifier.size(70.dp)
                             .weight(1f)
                             .padding(8.dp)
                             .clickable {}, //Implementation here
@@ -347,7 +375,7 @@ fun SignUpScreen(navController: NavController){
 
                     // Second Card
                     Card(
-                        modifier = Modifier
+                        modifier = Modifier.size(70.dp)
                             .weight(1f)
                             .padding(8.dp)
                             .clickable { }, //Implementation here
@@ -370,8 +398,8 @@ fun SignUpScreen(navController: NavController){
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Client",
-                                fontSize = 16.sp,
+                                text = "Tradesman",
+                                fontSize = 14.sp,
                                 color = Color.White,
                             )
                         }
@@ -384,10 +412,10 @@ fun SignUpScreen(navController: NavController){
                 ) {
                     Button(
                         onClick = {
-                            //viewModel.register(firstName, lastName, username, email, age, isClient, password)
+                            Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier
-                            .fillMaxWidth(0.8f) // 80% width
+                            .fillMaxWidth(0.6f) // 80% width
                             .height(50.dp), // Set height
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
                     )
