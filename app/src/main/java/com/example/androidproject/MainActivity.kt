@@ -3,8 +3,6 @@ package com.example.androidproject
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.Scaffold
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,7 +17,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "landing_page") {
+                NavHost(navController = navController, startDestination = "main_screen") {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -33,6 +31,7 @@ class MainActivity : ComponentActivity() {
                     composable("main_screen"){
                         MainScreen(navController)
                     }
+
                 }
             }
         }

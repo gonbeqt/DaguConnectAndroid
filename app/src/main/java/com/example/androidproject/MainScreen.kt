@@ -1,6 +1,5 @@
 package com.example.androidproject
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,8 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -74,11 +71,11 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
 @Composable
 fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int) {
     when (selectedItem) {
-        0 -> HomeScreen()
-        1 -> BookingsScreen()
+        0 -> HomeScreen(modifier.padding(bottom = 0.1.dp))
+        1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp))
         2 -> ScheduleScreen()
-        3 -> BookmarkedScreen()
-        4 -> MessageScreen()
+        3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp))
+        4 -> MessageScreen(modifier.padding(bottom = 0.1.dp))
     }
 }
 
