@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.example.androidproject.model.LoginResponse
+import com.example.androidproject.model.User
 import com.google.gson.Gson
 
 object AccountManager {
@@ -16,17 +17,17 @@ object AccountManager {
         preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
-    fun saveAccount(account: LoginResponse) {
+    fun saveAccount(account: User) {
         val accountJson = gson.toJson(account)
         Log.d("AccountManager", "Saving account: $accountJson")
         preferences.edit().putString(ACCOUNT_KEY, accountJson).apply()
     }
 
-    fun getAccount(): LoginResponse? {
+    fun getAccount(): User? {
         val accountJson = preferences.getString(ACCOUNT_KEY, null)
         return if (!accountJson.isNullOrEmpty()) {
             Log.d("AccountManager", "Retrieved account: $accountJson")
-            gson.fromJson(accountJson, LoginResponse::class.java)
+            gson.fromJson(accountJson, User::class.java)
         } else {
             null
         }
