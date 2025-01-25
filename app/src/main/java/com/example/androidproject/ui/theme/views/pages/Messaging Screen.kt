@@ -80,6 +80,7 @@ fun MessagingScreen(messages: List<String>) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomInputBar() {
     Row(
