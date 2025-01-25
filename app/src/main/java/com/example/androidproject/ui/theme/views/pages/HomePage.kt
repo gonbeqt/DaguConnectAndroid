@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,12 +37,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -434,6 +439,7 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TradesmanItem(trade: Tradesman) {
     val showDialogTradesman = remember { mutableStateOf(false) }
@@ -535,6 +541,7 @@ fun TradesmanItem(trade: Tradesman) {
     }
 
     if (showDialogTradesman.value) {
+        var taskDescription by remember { mutableStateOf("") }
         Dialog(
             onDismissRequest = { showDialogTradesman.value = false }
 
@@ -546,16 +553,16 @@ fun TradesmanItem(trade: Tradesman) {
             ) {
                 Card(
                     modifier = Modifier
-                        .size(400.dp)
-                        .align(Alignment.Center), // Center the card within the dialog
+                        .fillMaxSize(),
                     shape = RoundedCornerShape(20.dp),
                 ) {
                     Column(
                         modifier = Modifier
                             .background(Color.White)
                             .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                        horizontalAlignment = Alignment.CenterHorizontally,
+
+                        ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -572,7 +579,159 @@ fun TradesmanItem(trade: Tradesman) {
                             }
                         }
                     }
-                    Text(text="Contents here")
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            , // Adjust card padding for spacing
+                        shape = RoundedCornerShape(8.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFFD9D9D9)) // Background for the card
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Tradesman image
+                                Image(
+                                    painter = painterResource(trade.imageResId),
+                                    contentDescription = "Tradesman Image",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(start = 10.dp)
+                                )
+
+                                // Tradesman details
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 10.dp)
+                                ) {
+                                    Text(
+                                        text = trade.username,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight(500),
+                                        fontSize = 20.sp,
+                                        modifier = Modifier.padding(top = 10.dp)
+                                    )
+                                    Text(
+                                        text = trade.category,
+                                        color = Color.Black,
+                                        fontSize = 16.sp,
+                                    )
+                                    Row(
+                                        modifier = Modifier.padding(top = 10.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // Rate Box
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    color = Color(0xFFFFF2DD),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                )
+                                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = trade.rate,
+                                                fontSize = 14.sp,
+                                                modifier = Modifier.padding(horizontal = 4.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = Color(0xFFFFF2DD),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "Star Icon",
+                                            tint = Color(0xFFFFA500),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.size(4.dp))
+                                        Text(
+                                            text = trade.reviews.toString(),
+                                            fontSize = 14.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Column {
+                                Text(
+                                    text = "Task Description",
+                                    color = Color.Black,
+                                    fontSize = 18.sp,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color(0xFFF5F5F5)) // Background color
+                                ) {
+                                    TextField(
+                                        value = taskDescription,
+                                        onValueChange = { newValue ->
+                                            taskDescription = newValue
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        placeholder = { Text(text = "Enter task description") },
+                                        maxLines = 3,
+                                        colors = TextFieldDefaults.textFieldColors(
+                                            focusedIndicatorColor = Color.Transparent, // Remove focus indicator line
+                                            unfocusedIndicatorColor = Color.Transparent // Remove unfocused line
+                                        )
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState())
+                                        .padding(start = 5.dp, end = 5.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp) // Adds spacing between the boxes
+                                ) {
+                                    listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").forEach { day ->
+                                        Box(
+                                            modifier = Modifier
+                                                .size(80.dp, 30.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(Color(0xFFFFF2DD))
+                                                .clickable { },
+                                            contentAlignment = Alignment.Center // Centers the Text inside the Box
+                                        ) {
+                                            Text(
+                                                text = day,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.align(Alignment.Center),
+                                                fontSize = 14.sp// Ensures Text is centered
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

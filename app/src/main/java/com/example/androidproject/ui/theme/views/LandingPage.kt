@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.theme.views
 
+import android.content.Context
 import android.graphics.fonts.FontStyle
 import android.widget.Button
 import android.widget.Space
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -86,7 +88,12 @@ fun LandingPageScreen(navController: NavController){
         R.drawable.background_image_auth,
         R.drawable.landing1
     )
+    val context = LocalContext.current
 
+    LaunchedEffect(Unit) {
+        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putBoolean("isShown", true).apply()
+    }
     Box(modifier = Modifier.fillMaxSize().background(Color.White),
     ){
         Image(
