@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Categories
@@ -162,7 +164,7 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
 
 @Composable
 fun TradesmanColumn(tradesmen: List<Tradesman>) {
-    val showDialog = remember { mutableStateOf(false) }
+    val showDialogAllTradesman = remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -176,7 +178,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
             fontWeight = FontWeight(500),
             modifier = Modifier.padding(top = 10.dp)
         )
-        TextButton(onClick = { showDialog.value = true}) {
+        TextButton(onClick = { showDialogAllTradesman.value = true}) {
             Text(
                 text = "See All",
                 color = Color.Gray,
@@ -191,7 +193,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
             .fillMaxSize()
             .padding(16.dp)
             .background(Color.White), // Optional padding for the card
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(8.dp),
     ) {
         Column(
             modifier = Modifier
@@ -204,8 +206,8 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
             }
         }
     }
-    if (showDialog.value) {
-            Dialog(onDismissRequest = { showDialog.value = false }) {
+    if (showDialogAllTradesman.value) {
+            Dialog(onDismissRequest = { showDialogAllTradesman.value = false }) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -224,7 +226,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(16.dp)
                             )
-                            TextButton(onClick = { showDialog.value = false }) {
+                            TextButton(onClick = { showDialogAllTradesman.value = false }) {
                                 Text(text = "Close", fontSize = 16.sp, color = Color.Black, modifier = Modifier.padding(top = 7.dp))
                             }
                         }
@@ -250,6 +252,8 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
 
 
     }
+
+
 }
 
 
@@ -432,73 +436,86 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 
 @Composable
 fun TradesmanItem(trade: Tradesman) {
+    val showDialogTradesman = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .size(390.dp, 120.dp)
-            .clickable { }, //implementation here
+            .clickable { showDialogTradesman.value = true }, //implementation here
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
 
 
-    ){
+        ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFD9D9D9)),
             contentAlignment = Alignment.CenterStart
-        ){
-            Row (modifier = Modifier.fillMaxWidth()){
-                Image(painter = painterResource(trade.imageResId),
+        ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Image(
+                    painter = painterResource(trade.imageResId),
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(100.dp, 100.dp)
-                        .padding(start = 10.dp))
-                Column(modifier = Modifier
-                    .size(250.dp, 100.dp)
-                    .padding(start = 10.dp)
-                    )
+                        .padding(start = 10.dp)
+                )
+                Column(
+                    modifier = Modifier
+                        .size(250.dp, 100.dp)
+                        .padding(start = 10.dp)
+                )
                 {
-                   Text(text = trade.username,
-                       color = Color.Black,
-                       fontWeight = FontWeight(500),
-                       fontSize = 20.sp,
-                       modifier = Modifier.padding(top = 10.dp)
+                    Text(
+                        text = trade.username,
+                        color = Color.Black,
+                        fontWeight = FontWeight(500),
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(top = 10.dp)
 
-                   )
-                    Text(text = trade.category,
+                    )
+                    Text(
+                        text = trade.category,
                         color = Color.Black,
                         fontSize = 16.sp,
                     )
-                    Row (modifier = Modifier.size(185.dp,110.dp)){
-                        Box (modifier = Modifier
-                            .size(70.dp, 50.dp)
-                            .padding(top = 10.dp)
-                            .background(
-                                color = (Color(0xFFFFF2DD)),
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                            )
-                        ){
-                            Text(text = trade.rate,
+                    Row(modifier = Modifier.size(185.dp, 110.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp, 50.dp)
+                                .padding(top = 10.dp)
+                                .background(
+                                    color = (Color(0xFFFFF2DD)),
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                )
+                        ) {
+                            Text(
+                                text = trade.rate,
                                 fontSize = 14.sp,
-                                modifier = Modifier.padding(top = 5.dp, start = 8.dp))
+                                modifier = Modifier.padding(top = 5.dp, start = 8.dp)
+                            )
                         }
-                        Box (modifier = Modifier
-                            .size(70.dp, 50.dp)
-                            .padding(top = 10.dp, start = 10.dp)
-                            .background(
-                                color = (Color(0xFFFFF2DD)),
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                            )
-                        ){
-                            Icon(imageVector = Icons.Default.Star, contentDescription = "Start Icon",
-                                tint = Color(0xFFFFA500),modifier = Modifier
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp, 50.dp)
+                                .padding(top = 10.dp, start = 10.dp)
+                                .background(
+                                    color = (Color(0xFFFFF2DD)),
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Star, contentDescription = "Start Icon",
+                                tint = Color(0xFFFFA500), modifier = Modifier
                                     .size(25.dp)
-                                    .padding(top = 7.dp, start = 2.dp))
-                            Text(text = trade.reviews.toString(),
+                                    .padding(top = 7.dp, start = 2.dp)
+                            )
+                            Text(
+                                text = trade.reviews.toString(),
                                 fontSize = 14.sp,
-                                modifier = Modifier.padding(top = 5.dp, start = 28.dp))
+                                modifier = Modifier.padding(top = 5.dp, start = 28.dp)
+                            )
                         }
                     }
-
 
 
                 }
@@ -512,10 +529,52 @@ fun TradesmanItem(trade: Tradesman) {
             }
 
 
-
-
         }
 
 
+    }
+
+    if (showDialogTradesman.value) {
+        Dialog(
+            onDismissRequest = { showDialogTradesman.value = false }
+
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent) // Transparent background
+            ) {
+                Card(
+                    modifier = Modifier
+                        .size(400.dp)
+                        .align(Alignment.Center), // Center the card within the dialog
+                    shape = RoundedCornerShape(20.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .background(Color.White)
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Tradesman Details",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 10.dp)
+                            )
+
+                            Button(onClick = { showDialogTradesman.value = false }) {
+                                Text("Close", fontSize = 12.sp)
+                            }
+                        }
+                    }
+                    Text(text="Contents here")
+                }
+            }
+        }
     }
 }
