@@ -31,7 +31,7 @@ import java.util.Locale
 
 @Preview
 @Composable
-fun ScheduleScreen() {
+fun ScheduleScreen(modifier: Modifier = Modifier) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val tradesman = listOf(

@@ -73,7 +73,7 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int) {
     when (selectedItem) {
         0 -> HomeScreen(modifier.padding(bottom = 0.1.dp))
         1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp))
-        2 -> ScheduleScreen()
+        2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp))
         3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp))
         4 -> MessageScreen(modifier.padding(bottom = 0.1.dp))
     }
