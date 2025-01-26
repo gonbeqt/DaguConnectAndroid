@@ -29,11 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 
-@Preview
+
 @Composable
-fun MessageScreen(modifier: Modifier = Modifier) {
+fun MessageScreen(modifier: Modifier = Modifier,navController: NavController) {
     Column(
         modifier = Modifier
             .background(Color.White)

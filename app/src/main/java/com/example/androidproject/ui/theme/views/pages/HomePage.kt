@@ -21,22 +21,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -48,22 +45,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Categories
 import com.example.androidproject.ui.theme.views.Tradesman
 
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
 
     val selectedCategory = remember { mutableStateOf<String?>(null) }
 
@@ -74,43 +69,39 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         Categories(R.drawable.carpentry, "Carpentry")
     )
 
-    val tradesmans = listOf(
+    val tradesmen = listOf(
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
+    )
 
-
-
-        )
-
-    val tradesmen = if (selectedCategory.value != null) {
-        tradesmans.filter { it.category == selectedCategory.value }
+    val filteredTradesmen = if (selectedCategory.value != null) {
+        tradesmen.filter { it.category == selectedCategory.value }
     } else {
-        tradesmans
+        tradesmen
     }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color(0xFFECECEC))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeTopSection()
 
-            Spacer(modifier = Modifier.height(30.dp))
-            SearchField()
+            // Provide navController to the SearchField
+            SearchField(navController)
             Spacer(modifier = Modifier.height(5.dp))
 
             Column(modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),) {
+                .verticalScroll(rememberScrollState())) {
                 Spacer(modifier = Modifier.height(30.dp))
                 ExploreNow()
 
@@ -118,10 +109,89 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 CategoryRow(categories, selectedCategory)
 
                 Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(tradesmen)
+                TradesmanColumn(filteredTradesmen, selectedCategory,navController)
             }
+        }
+    }
+}
+@Composable
+fun SearchField(navController: NavController) {
+    var searchQuery by remember { mutableStateOf("") }
 
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(90.dp)
+            .background(Color.White)
+            .padding(horizontal = 25.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .width(280.dp)
+                .height(70.dp)
+                .padding(top = 20.dp)
+                .background(
+                    Color(0xFFFFFFFF),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .border(
+                    1.dp,
+                    Color(0xFF3CC0B0),
+                    shape = RoundedCornerShape(8.dp)
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(start = 10.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            BasicTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.weight(1f),
+                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, color = Color(0xFF3CC0B0)),
+                decorationBox = { innerTextField ->
+                    if (searchQuery.isEmpty()) {
+                        Text(
+                            text = "Search for services or tradespeople...",
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, color = Color.Gray)
+                        )
+                    }
+                    innerTextField()
+                }
+            )
+        }
 
+        // Notification and Message Icons outside the search field
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Notifications Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
+                    .size(32.dp)
+            )
+            Icon(
+                imageVector = Icons.Default.Message,
+                contentDescription = "Message Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        navController.navigate("message_screen")
+
+                    }
+            )
         }
     }
 }
@@ -132,7 +202,7 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 25.dp, end = 25.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+             horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = "Categories",
@@ -154,7 +224,7 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .background(Color.White),
+            .background(Color(0xFFECECEC)),
         contentPadding = PaddingValues(12.dp),
     ) {
         items(categories.size) { index ->
@@ -168,7 +238,7 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
 }
 
 @Composable
-fun TradesmanColumn(tradesmen: List<Tradesman>) {
+fun TradesmanColumn(tradesmen: List<Tradesman>,selectedCategory: MutableState<String?>,navController: NavController) {
     val showDialogAllTradesman = remember { mutableStateOf(false) }
 
     Row(
@@ -183,7 +253,8 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
             fontWeight = FontWeight(500),
             modifier = Modifier.padding(top = 10.dp)
         )
-        TextButton(onClick = { showDialogAllTradesman.value = true}) {
+        TextButton(onClick = { showDialogAllTradesman.value = true
+            selectedCategory.value = null}) {
             Text(
                 text = "See All",
                 color = Color.Gray,
@@ -203,11 +274,11 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .background(Color.White),
+                .background(Color(0xFFECECEC)),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             tradesmen.forEach { trade ->
-                TradesmanItem(trade)
+                TradesmanItem(trade,navController = navController)
             }
         }
     }
@@ -216,7 +287,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White)
+                        .background(Color(0xFFECECEC)),
                 ) {
                     Column {
                         Row(
@@ -241,11 +312,11 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .background(Color.White),
+                                    .background(Color(0xFFECECEC)),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 tradesmen.forEach { trade ->
-                                    TradesmanItem(trade)
+                                    TradesmanItem(trade,navController = navController)
                                 }
                             }
                         }
@@ -255,104 +326,14 @@ fun TradesmanColumn(tradesmen: List<Tradesman>) {
                 }
             }
 
-
     }
 
 
 }
 
 
-@Composable
-fun HomeTopSection(){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 40.dp, start = 25.dp, end = 25.dp),
-        horizontalArrangement = Arrangement.Absolute.SpaceBetween
-    ){
-        //Should be Logo
-        Image( painter = painterResource(id = R.drawable.visibility_on),
-            contentDescription = "LOGO",
-            contentScale = ContentScale.Crop
-        )
-        Row (){
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = "Location Image",
-                modifier = Modifier.size(32.dp),
-                tint = (Color.Gray)
-            )
 
-            Text(text = "Location",
-                color = Color.Black,fontSize = 16.sp, modifier = Modifier.padding(start = 5.dp, top = 2.dp))
-            Icon( imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications Image",
-                modifier = Modifier
-                    .padding(start = 60.dp)
-                    .size(32.dp)
-                    .clickable { },//Implementation here
-                tint = (Color.Gray)
 
-            )
-            Icon( imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Account Image",
-                modifier = Modifier
-                    .padding(start = 15.dp)
-                    .size(32.dp)
-                    .clickable { },//Implementation here
-                tint = (Color.Gray)
-            )
-        }
-
-    }
-}
-@Composable
-fun SearchField(){
-    var searchQuery by remember { mutableStateOf("") }
-
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .padding(start = 25.dp, end = 25.dp)
-        .size(50.dp,)
-        .background(
-            Color(0xFFFFFFFF),
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-        )
-        .border(
-            1.dp,
-            Color(0xFFBEBEBE),
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-        ),
-
-        verticalAlignment = Alignment.CenterVertically
-
-    ){
-        Icon(
-            imageVector = androidx.compose.material.icons.Icons.Default.Search,
-            contentDescription = "Search Icon",
-            tint = Color.Gray,
-            modifier = Modifier
-                .size(32.dp)
-                .padding(start = 10.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        BasicTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.weight(1f),
-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, color = Color.Black),
-            decorationBox = { innerTextField ->
-                if (searchQuery.isEmpty()) {
-                    Text(
-                        text = "Search for services or tradespeople...",
-                        style = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, color = Color.Gray)
-                    )
-                }
-                innerTextField()
-            }
-        )
-    }
-}
 @Composable
 fun ExploreNow(){
     Row(modifier = Modifier
@@ -399,13 +380,14 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .size(120.dp, 100.dp)
+
             .clickable { onClick() }, //implementation here
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White),
+                .background(Color(0xFFECECEC)),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -439,22 +421,20 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TradesmanItem(trade: Tradesman) {
-    val showDialogTradesman = remember { mutableStateOf(false) }
+fun TradesmanItem(trade: Tradesman,navController: NavController) {
     Card(
         modifier = Modifier
             .size(390.dp, 120.dp)
-            .clickable { showDialogTradesman.value = true }, //implementation here
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .clickable { navController.navigate("booknow")}, //implementation here
+        shape = RoundedCornerShape(8.dp),
 
 
         ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFD9D9D9)),
+                .background(Color.White),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -540,200 +520,6 @@ fun TradesmanItem(trade: Tradesman) {
 
     }
 
-    if (showDialogTradesman.value) {
-        var taskDescription by remember { mutableStateOf("") }
-        Dialog(
-            onDismissRequest = { showDialogTradesman.value = false }
 
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Transparent) // Transparent background
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    shape = RoundedCornerShape(20.dp),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .background(Color.White)
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
 
-                        ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Tradesman Details",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(top = 10.dp)
-                            )
-
-                            Button(onClick = { showDialogTradesman.value = false }) {
-                                Text("Close", fontSize = 12.sp)
-                            }
-                        }
-                    }
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            , // Adjust card padding for spacing
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color(0xFFD9D9D9)) // Background for the card
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Tradesman image
-                                Image(
-                                    painter = painterResource(trade.imageResId),
-                                    contentDescription = "Tradesman Image",
-                                    modifier = Modifier
-                                        .size(100.dp)
-                                        .padding(start = 10.dp)
-                                )
-
-                                // Tradesman details
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(start = 10.dp)
-                                ) {
-                                    Text(
-                                        text = trade.username,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight(500),
-                                        fontSize = 20.sp,
-                                        modifier = Modifier.padding(top = 10.dp)
-                                    )
-                                    Text(
-                                        text = trade.category,
-                                        color = Color.Black,
-                                        fontSize = 16.sp,
-                                    )
-                                    Row(
-                                        modifier = Modifier.padding(top = 10.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        // Rate Box
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    color = Color(0xFFFFF2DD),
-                                                    shape = RoundedCornerShape(12.dp)
-                                                )
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        ) {
-                                            Text(
-                                                text = trade.rate,
-                                                fontSize = 14.sp,
-                                                modifier = Modifier.padding(horizontal = 4.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = Color(0xFFFFF2DD),
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = "Star Icon",
-                                            tint = Color(0xFFFFA500),
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.size(4.dp))
-                                        Text(
-                                            text = trade.reviews.toString(),
-                                            fontSize = 14.sp
-                                        )
-                                    }
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Column {
-                                Text(
-                                    text = "Task Description",
-                                    color = Color.Black,
-                                    fontSize = 18.sp,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp)
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color(0xFFF5F5F5)) // Background color
-                                ) {
-                                    TextField(
-                                        value = taskDescription,
-                                        onValueChange = { newValue ->
-                                            taskDescription = newValue
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        placeholder = { Text(text = "Enter task description") },
-                                        maxLines = 3,
-                                        colors = TextFieldDefaults.textFieldColors(
-                                            focusedIndicatorColor = Color.Transparent, // Remove focus indicator line
-                                            unfocusedIndicatorColor = Color.Transparent // Remove unfocused line
-                                        )
-                                    )
-                                }
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .horizontalScroll(rememberScrollState())
-                                        .padding(start = 5.dp, end = 5.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp) // Adds spacing between the boxes
-                                ) {
-                                    listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").forEach { day ->
-                                        Box(
-                                            modifier = Modifier
-                                                .size(80.dp, 30.dp)
-                                                .clip(RoundedCornerShape(12.dp))
-                                                .background(Color(0xFFFFF2DD))
-                                                .clickable { },
-                                            contentAlignment = Alignment.Center // Centers the Text inside the Box
-                                        ) {
-                                            Text(
-                                                text = day,
-                                                textAlign = TextAlign.Center,
-                                                modifier = Modifier.align(Alignment.Center),
-                                                fontSize = 14.sp// Ensures Text is centered
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

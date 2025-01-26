@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -11,6 +12,10 @@ import com.example.androidproject.ui.theme.AndroidProjectTheme
 import com.example.androidproject.ui.theme.views.LandingPageScreen
 import com.example.androidproject.ui.theme.views.LogInScreen
 import com.example.androidproject.ui.theme.views.SignUpScreen
+import com.example.androidproject.ui.theme.views.Tradesman
+import com.example.androidproject.ui.theme.views.pages.BookNow
+import com.example.androidproject.ui.theme.views.pages.HomeScreen
+import com.example.androidproject.ui.theme.views.pages.MessageScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,6 +23,7 @@ class MainActivity : ComponentActivity() {
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val isShown = sharedPreferences.getBoolean("isShown", false)
         val startDestination = if (isShown) "login" else "landing_page"
+        val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
 
         setContent {
             AndroidProjectTheme {
@@ -35,6 +41,13 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("main_screen"){
                         MainScreen(navController)
+                    }
+                    composable("message_screen") {
+                        MessageScreen(modifier=Modifier,navController)
+                    }
+
+                    composable("booknow") {
+                        BookNow(trade, navController)
                     }
 
                 }
