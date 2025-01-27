@@ -15,8 +15,12 @@ import com.example.androidproject.ui.theme.views.LogInScreen
 import com.example.androidproject.ui.theme.views.SignUpScreen
 import com.example.androidproject.ui.theme.views.Tradesman
 import com.example.androidproject.ui.theme.views.pages.BookNow
+import com.example.androidproject.ui.theme.views.pages.BookingDetails
+import com.example.androidproject.ui.theme.views.pages.BookingsScreen
+import com.example.androidproject.ui.theme.views.pages.ConfirmBook
 import com.example.androidproject.ui.theme.views.pages.HomeScreen
 import com.example.androidproject.ui.theme.views.pages.MessageScreen
+import com.example.androidproject.ui.theme.views.pages.RateAndReviews
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +53,18 @@ class MainActivity : ComponentActivity() {
 
                     composable("booknow") {
                         BookNow(trade,feedback, navController)
+                    }
+                    composable("confirmbook") {
+                        ConfirmBook(trade,navController)
+                    }
+                    composable("bookingdetails") {
+                        BookingDetails(trade,navController)
+                    }
+                    composable("booking") {
+                        BookingsScreen(modifier = Modifier,navController)
+                    }
+                    composable("rateandreviews") {
+                        RateAndReviews(trade,navController)
                     }
 
                 }

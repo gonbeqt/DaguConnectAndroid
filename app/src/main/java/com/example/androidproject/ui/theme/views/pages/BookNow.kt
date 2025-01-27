@@ -59,9 +59,6 @@ import com.example.androidproject.ui.theme.views.Tradesman
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookNow(trade: Tradesman,feedback: Feedback, navController: NavController) {
-    var taskDescription by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
 
 
 
@@ -100,7 +97,7 @@ fun BookNow(trade: Tradesman,feedback: Feedback, navController: NavController) {
                         .background(Color(0xFF81D796))
                         .fillMaxWidth()
                         .size(100.dp)
-                        .padding(top = 30.dp)
+                        .padding(top = 20.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -305,7 +302,7 @@ fun BookNow(trade: Tradesman,feedback: Feedback, navController: NavController) {
         ) {
             Box(
                 modifier = Modifier
-                    .clickable { /* Chat Action */ }
+                    .clickable { navController.navigate("message_screen") }
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)
@@ -328,7 +325,7 @@ fun BookNow(trade: Tradesman,feedback: Feedback, navController: NavController) {
 
             Box(
                 modifier = Modifier
-                    .clickable {booknow = true }
+                    .clickable {navController.navigate("confirmbook") }
                     .background(
                         color = Color(0xFFECAB1E),
                         shape = RoundedCornerShape(12.dp)
@@ -357,305 +354,6 @@ fun BookNow(trade: Tradesman,feedback: Feedback, navController: NavController) {
             }
         }
     }
-
-    if (booknow) {
-        Dialog(onDismissRequest = { booknow = false }) {
-            Box(
-                modifier = Modifier
-                    .height(705.dp)
-                    .background(Color(0xFF81D796)) // Main background color
-            ) {
-                // Outer Column to hold the content
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 5.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBackIosNew,
-                            contentDescription = "Arrow Back",
-                            Modifier
-                                .clickable { booknow = false }
-                                .padding(16.dp),
-                            tint = Color.White
-                        )
-
-                        Text(
-                            text = "Booking",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .padding(top = 15.dp, end = 50.dp)
-                                .weight(1f)
-                        )
-                    }
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 60.dp)
-                        .background(Color(0xFF81D796)),
-                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFFF9F9F9))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Tradesman image
-                            Image(
-                                painter = painterResource(trade.imageResId),
-                                contentDescription = "Tradesman Image",
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .padding(start = 10.dp)
-                            )
-
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 10.dp)
-                            ) {
-                                Text(
-                                    text = trade.username,
-                                    color = Color.Black,
-                                    fontWeight = FontWeight(500),
-                                    fontSize = 20.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                                Text(
-                                    text = trade.category,
-                                    color = Color.Black,
-                                    fontSize = 16.sp,
-                                )
-                                Row(
-                                    modifier = Modifier.padding(top = 10.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Rate Box (Bookmark Option)
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable { }
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Bookmark,
-                                                contentDescription = "Star Icon",
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.size(4.dp))
-                                            Text(
-                                                text = "Add to bookmark",
-                                                fontSize = 12.sp
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Tradesman Reviews Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = Color(0xFFFFF2DD),
-                                        shape = RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Star Icon",
-                                        tint = Color(0xFFFFA500),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = trade.reviews.toString(),
-                                        fontSize = 14.sp
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        // Address Input
-                        Column(Modifier.padding(horizontal = 10.dp))
-                        {
-                            Text(
-                                text = "Address",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White)
-                            ) {
-
-                                TextField(
-                                    value = address,
-                                    onValueChange = { address = it },
-                                    modifier = Modifier.fillMaxWidth()
-                                        .background(Color.White),
-                                    placeholder = { Text(text = "Enter your Address") },
-                                    maxLines = 3,
-
-
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        focusedIndicatorColor = Color.White,
-                                        unfocusedIndicatorColor = Color.White,
-
-                                    )
-
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = "Mobile Number",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF5F5F5))
-                            ) {
-                                TextField(
-                                    value = phoneNumber,
-                                    onValueChange = { phoneNumber = it },
-                                    modifier = Modifier.fillMaxWidth()
-                                        .background(Color.White),
-
-                                    placeholder = { Text(text = " +63 | Enter Mobile Number") },
-                                    maxLines = 3,
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent
-                                    )
-                                )
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = "Week Availability",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-                            Spacer(Modifier.height(4.dp))
-
-
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState())
-                                    .padding(start = 5.dp, end = 5.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").forEach { day ->
-                                    Box(
-                                        modifier = Modifier
-                                            .size(100.dp, 30.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFFFF2DD))
-                                            .clickable { },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = day,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.align(Alignment.Center),
-                                            fontSize = 14.sp
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(Modifier.height(4.dp))
-
-                            Text(
-                                text = "Optional Details",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF5F5F5))
-                            ) {
-                                TextField(
-                                    value = taskDescription,
-                                    onValueChange = { taskDescription = it },
-                                    modifier = Modifier.fillMaxWidth()
-                                        .background(Color.White),
-
-                                    placeholder = { Text(text = " Add any special requests or details for the trades person...") },
-                                    maxLines = 3,
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent
-                                    )
-                                )
-                            }
-                                Row(Modifier.fillMaxWidth().background(Color.White).padding(vertical = 5.dp)) {
-                                    Button(onClick = {},
-                                        modifier = Modifier.fillMaxWidth(),
-                                        colors = ButtonColors(Color(0xFFECAB1E), Color.White,Color(0xFFECAB1E), Color.White)
-                                    ) {
-                                        Text(text = "Confirm")
-                                    }
-                                }
-                        }
-
-
-                    }
-                }
-            }
-        }
-    }
-
 
 }
 
