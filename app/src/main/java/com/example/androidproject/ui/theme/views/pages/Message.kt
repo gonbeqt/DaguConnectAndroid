@@ -79,7 +79,7 @@ fun MessageScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(10) { index -> // Replace 10 with your dynamic list size
+            items(10) { index -> // chat list size
                 ChatListItem(
                     title = "Lorem Ipsum",
                     subtitle = "Quick brown fox jumps...",
