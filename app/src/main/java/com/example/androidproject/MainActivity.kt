@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.ui.theme.AndroidProjectTheme
+import com.example.androidproject.ui.theme.views.Feedback
 import com.example.androidproject.ui.theme.views.LandingPageScreen
 import com.example.androidproject.ui.theme.views.LogInScreen
 import com.example.androidproject.ui.theme.views.SignUpScreen
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
         val isShown = sharedPreferences.getBoolean("isShown", false)
         val startDestination = if (isShown) "login" else "landing_page"
         val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
-
+        val feedback = Feedback(R.drawable.pfp, "Ezekiel", 4)
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -47,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("booknow") {
-                        BookNow(trade, navController)
+                        BookNow(trade,feedback, navController)
                     }
 
                 }

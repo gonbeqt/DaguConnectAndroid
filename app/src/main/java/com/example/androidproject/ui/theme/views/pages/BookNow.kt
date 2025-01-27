@@ -10,13 +10,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -24,7 +28,9 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -47,13 +53,18 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.ui.theme.views.Feedback
 import com.example.androidproject.ui.theme.views.Tradesman
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookNow(trade: Tradesman, navController: NavController) {
+fun BookNow(trade: Tradesman,feedback: Feedback, navController: NavController) {
     var taskDescription by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+
+
+
     var booknow by remember { mutableStateOf(false) }
 
     // Tradesmen list (you can optimize this if needed)
@@ -61,252 +72,297 @@ fun BookNow(trade: Tradesman, navController: NavController) {
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark)
     )
+    val feedbackList = listOf(
+        Feedback(R.drawable.pfp, "Ezekiel", 4),
+        Feedback(R.drawable.pfp, "Ezekiel", 4),
+    Feedback(R.drawable.pfp, "Ezekiel", 4),
+    Feedback(R.drawable.pfp, "Ezekiel", 4)
+    )
 
-    // Outer Card with rounded corners
-    Card(
+
+
+    Box(
         modifier = Modifier.fillMaxSize()
-            .background(Color(0xFF81D796)),
-        shape = RoundedCornerShape(20.dp)
-
     ) {
-        Column(
-            modifier = Modifier
-                .background(Color(0xFF81D796))
-                .fillMaxWidth()
-                .size(100.dp)
-                .padding(top = 30.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBackIosNew,
-                    contentDescription = "Arrow Back",
-                    Modifier.clickable { navController.navigate("main_screen") }
-                        .padding(16.dp)
-                    ,
-                    tint = Color.White
-                )
+        // Main Content Area (Scrollable)
 
-
-                Text(
-                    text = "Tradesman Details",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(top = 15.dp, end = 25.dp)
-                        .weight(1f) // Ensures the text takes available space and is centered
-                )
-            }
-
-        }
-        Card(
-            modifier = Modifier.fillMaxWidth()
-                .background(Color(0xFF81D796))
-            ,
-            shape = RoundedCornerShape(20.dp,20.dp, 0.dp, 0.dp), // Top corners rounded
-        ) {
-            Column(
+            // Header Card
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF9F9F9)) // Background for inner card
+                    .background(Color(0xFF81D796))
+                    .verticalScroll(rememberScrollState()),
+                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Tradesman image
-                    Image(
-                        painter = painterResource(trade.imageResId),
-                        contentDescription = "Tradesman Image",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(start = 10.dp)
-                    )
 
-                    // Tradesman details
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 15.dp)
+                Column(
+                    modifier = Modifier
+                        .background(Color(0xFF81D796))
+                        .fillMaxWidth()
+                        .size(100.dp)
+                        .padding(top = 30.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "Arrow Back",
+                            Modifier.clickable { navController.navigate("main_screen") }
+                                .padding(16.dp)
+                            ,
+                            tint = Color.White
+                        )
+
+
                         Text(
-                            text = trade.username,
-                            color = Color.Black,
-                            fontWeight = FontWeight(500),
+                            text = "Expert Details",
                             fontSize = 20.sp,
-                            modifier = Modifier.padding(top = 10.dp)
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(top = 15.dp, end = 50.dp)
+                                .weight(1f) // Ensures the text takes available space and is centered
                         )
-                        Text(
-                            text = trade.category,
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                        )
+                    }
+
+                }
+
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF81D796)),
+                        shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFFF9F9F9))
+                        ) {
+
                         Row(
-                            modifier = Modifier.padding(top = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Rate Box
+                            Image(
+                                painter = painterResource(trade.imageResId),
+                                contentDescription = "Tradesman Image",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .padding(start = 10.dp)
+                            )
+
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 15.dp)
+                            ) {
+                                Text(
+                                    text = trade.username,
+                                    color = Color.Black,
+                                    fontWeight = FontWeight(500),
+                                    fontSize = 20.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
+                                Text(
+                                    text = trade.category,
+                                    color = Color.Black,
+                                    fontSize = 16.sp
+                                )
+                                Row(
+                                    modifier = Modifier.padding(top = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            .clickable { /* Add to Bookmark Action */ }
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.Bookmark,
+                                                contentDescription = "Bookmark Icon",
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.size(4.dp))
+                                            Text(
+                                                text = "Add to bookmark",
+                                                fontSize = 14.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
                             Box(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .clickable { }
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0xFFFFF2DD),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Icons.Default.Bookmark,
-                                        contentDescription = "Bookmark Icon",
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "Add to bookmark",
+                                        text = trade.reviews.toString(),
                                         fontSize = 14.sp
                                     )
                                 }
                             }
                         }
-                    }
 
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = Color(0xFFFFF2DD),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Star Icon",
-                                tint = Color(0xFFFFA500),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.size(4.dp))
+                        // Additional Sections
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Column(Modifier.padding(horizontal = 10.dp)) {
                             Text(
-                                text = trade.reviews.toString(),
-                                fontSize = 14.sp
+                                text = "About Me",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(500),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
                             )
+                            Text(
+                                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                                        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                fontWeight = FontWeight(500)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Specialties",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(500),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            BoxRow() // Assuming this function exists
+
+                            Text(
+                                text = "Ratings And Testimonials",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(500),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
+
+                            Text(
+                                text = "Feedback from satisfied clients",
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .background(Color(0xFFF9F9F9)),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                feedbackList.forEach { feedback ->
+                                    FeedbackItem(feedback) // Assuming this function exists
+                                }
+                            }
                         }
                     }
+                    }
+                    // Tradesman Details Section
+
+
+        }
+
+        // Fixed Buttons at the Bottom
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .background(Color.Transparent)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Box(
+                modifier = Modifier
+                    .clickable { /* Chat Action */ }
+                    .background(
+                        color = Color.Transparent,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp) )
+                    .width(150.dp)
+                    .padding(8.dp),
+                    contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Message,
+                        contentDescription = "Message Icon"
+                    )
+                    Text(text = "Chat Me")
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Column(Modifier.padding(horizontal = 10.dp)) {
+            }
+
+            Box(
+                modifier = Modifier
+                    .clickable {booknow = true }
+                    .background(
+                        color = Color(0xFFECAB1E),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .width(150.dp)
+                    .padding(8.dp),contentAlignment = Alignment.Center
+
+
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+
+
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddShoppingCart,
+                        contentDescription = "Add to Cart Icon",
+                        tint = Color.White
+                    )
                     Text(
-                        text = "About Me",
-                        color = Color.Black,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight(500),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
+                        text = "Book Now",
+                        textAlign = TextAlign.Center,
+                        color = Color.White
                     )
-
-                    Text(text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
-                            "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.  "
-                            , modifier = Modifier.padding(horizontal = 8.dp),fontWeight = FontWeight(500),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Specialties",
-                        color = Color.Black,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight(500),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    BoxRow()
-
-                    Text(
-                        text = "Ratings And Testimonials",
-                        color = Color.Black,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight(500),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-                    )
-
-                    Text(
-                        text = "Feedback from satisfied clients",
-                        color = Color.Black,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        // First Box: with border and transparent background
-                        Box(
-                            modifier = Modifier
-                                .clickable {  }
-                                .background(
-                                    color = Color.Transparent,
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .border(1.dp, Color(0xFFECAB1E))
-                                .padding(8.dp)
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.background(Color.Transparent)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Message,
-                                    contentDescription = "Message Icon"
-                                )
-                                Text(text = "Chat Me")
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clickable { booknow = true}
-                                .padding(8.dp)
-                                .background(
-                                    color = Color(0xFFECAB1E),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                        ){
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.background(Color(0xFFECAB1E)) // Background color for content
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AddShoppingCart,
-                                    contentDescription = "Add to Cart Icon",
-                                    tint = Color.White
-                                )
-                                Text(text = "Book Now",textAlign = TextAlign.Center, color = Color.White)
-                            }
-                        }
-                        }
-
-                    }
-
                 }
             }
         }
+    }
+
     if (booknow) {
         Dialog(onDismissRequest = { booknow = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .height(705.dp)
                     .background(Color(0xFF81D796)) // Main background color
             ) {
                 // Outer Column to hold the content
@@ -329,13 +385,13 @@ fun BookNow(trade: Tradesman, navController: NavController) {
                         )
 
                         Text(
-                            text = "Tradesman Details",
+                            text = "Booking",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .padding(top = 15.dp, end = 25.dp)
+                                .padding(top = 15.dp, end = 50.dp)
                                 .weight(1f)
                         )
                     }
@@ -369,7 +425,6 @@ fun BookNow(trade: Tradesman, navController: NavController) {
                                     .padding(start = 10.dp)
                             )
 
-                            // Tradesman details (name, category, rating)
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
@@ -395,7 +450,6 @@ fun BookNow(trade: Tradesman, navController: NavController) {
                                     // Rate Box (Bookmark Option)
                                     Box(
                                         modifier = Modifier
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
                                             .clickable { }
                                     ) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -442,7 +496,8 @@ fun BookNow(trade: Tradesman, navController: NavController) {
                         Spacer(modifier = Modifier.height(4.dp))
 
                         // Address Input
-                        Column(Modifier.padding(horizontal = 10.dp)) {
+                        Column(Modifier.padding(horizontal = 10.dp))
+                        {
                             Text(
                                 text = "Address",
                                 color = Color.Black,
@@ -458,18 +513,24 @@ fun BookNow(trade: Tradesman, navController: NavController) {
                                     .fillMaxWidth()
                                     .padding(8.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF5F5F5))
+                                    .background(Color.White)
                             ) {
+
                                 TextField(
-                                    value = taskDescription,
-                                    onValueChange = { taskDescription = it },
-                                    modifier = Modifier.fillMaxWidth(),
+                                    value = address,
+                                    onValueChange = { address = it },
+                                    modifier = Modifier.fillMaxWidth()
+                                        .background(Color.White),
                                     placeholder = { Text(text = "Enter your Address") },
                                     maxLines = 3,
+
+
                                     colors = TextFieldDefaults.textFieldColors(
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent
+                                        focusedIndicatorColor = Color.White,
+                                        unfocusedIndicatorColor = Color.White,
+
                                     )
+
                                 )
                             }
 
@@ -495,7 +556,9 @@ fun BookNow(trade: Tradesman, navController: NavController) {
                                 TextField(
                                     value = phoneNumber,
                                     onValueChange = { phoneNumber = it },
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .background(Color.White),
+
                                     placeholder = { Text(text = " +63 | Enter Mobile Number") },
                                     maxLines = 3,
                                     colors = TextFieldDefaults.textFieldColors(
@@ -504,34 +567,89 @@ fun BookNow(trade: Tradesman, navController: NavController) {
                                     )
                                 )
                             }
-                        }
-                        Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Week Availability",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(500),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
+                            Spacer(Modifier.height(4.dp))
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                                .padding(start = 5.dp, end = 5.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").forEach { day ->
-                                Box(
-                                    modifier = Modifier
-                                        .size(80.dp, 30.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color(0xFFFFF2DD))
-                                        .clickable { },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = day,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.align(Alignment.Center),
-                                        fontSize = 14.sp
-                                    )
+
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState())
+                                    .padding(start = 5.dp, end = 5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").forEach { day ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(100.dp, 30.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color(0xFFFFF2DD))
+                                            .clickable { },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = day,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.align(Alignment.Center),
+                                            fontSize = 14.sp
+                                        )
+                                    }
                                 }
                             }
+                            Spacer(Modifier.height(4.dp))
+
+                            Text(
+                                text = "Optional Details",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(500),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color(0xFFF5F5F5))
+                            ) {
+                                TextField(
+                                    value = taskDescription,
+                                    onValueChange = { taskDescription = it },
+                                    modifier = Modifier.fillMaxWidth()
+                                        .background(Color.White),
+
+                                    placeholder = { Text(text = " Add any special requests or details for the trades person...") },
+                                    maxLines = 3,
+                                    colors = TextFieldDefaults.textFieldColors(
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent
+                                    )
+                                )
+                            }
+                                Row(Modifier.fillMaxWidth().background(Color.White).padding(vertical = 5.dp)) {
+                                    Button(onClick = {},
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonColors(Color(0xFFECAB1E), Color.White,Color(0xFFECAB1E), Color.White)
+                                    ) {
+                                        Text(text = "Confirm")
+                                    }
+                                }
                         }
+
+
                     }
                 }
             }
@@ -555,7 +673,7 @@ fun BoxRow() {
         items.forEach { item ->
             Box(
                 modifier = Modifier
-                    .size(110.dp,50.dp)
+                    .size(120.dp,50.dp)
                     .background(Color(0xFFF1F1F1))
                     .padding(4.dp)
                     .clip(RoundedCornerShape(12.dp))
@@ -565,11 +683,55 @@ fun BoxRow() {
                 Text(
                     text = item,
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color.Black
+                    color = Color.Black,
                 )
             }
         }
     }
 }
 
+@Composable
+fun FeedbackItem(feedback: Feedback) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .padding(8.dp)
+            ,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White // Set the background color of the card
+        ),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Profile Picture
+            Image(
+                painter = painterResource(feedback.ImageRes),
+                contentDescription = "Profile Picture",
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(CircleShape)
+                    .border(2.dp, Color.Gray, CircleShape)
+            )
+
+             Text(
+                    text = feedback.username,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                 fontSize = 16.sp
+                )
+                Text(
+                    text = "${feedback.ratingstarsInt} stars",
+                    color = Color.Gray
+                )
+
+        }
+    }
+}
 
