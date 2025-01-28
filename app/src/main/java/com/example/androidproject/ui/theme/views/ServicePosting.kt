@@ -5,6 +5,6 @@ data class ServicePosting(
     val postedDate: String,
     val isActive: Boolean = true,
     val description: String = "Description of the service",
-    val rate: String = "P200/hr",
+    val rate: String = "Estimated Budget",
     val applicantsCount: Int = 0
 )
