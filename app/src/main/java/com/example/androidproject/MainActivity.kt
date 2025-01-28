@@ -17,6 +17,7 @@ import com.example.androidproject.ui.theme.views.Tradesman
 import com.example.androidproject.ui.theme.views.pages.BookNow
 import com.example.androidproject.ui.theme.views.pages.BookingDetails
 import com.example.androidproject.ui.theme.views.pages.BookingsScreen
+import com.example.androidproject.ui.theme.views.pages.CancellationDetails
 import com.example.androidproject.ui.theme.views.pages.ConfirmBook
 import com.example.androidproject.ui.theme.views.pages.HomeScreen
 import com.example.androidproject.ui.theme.views.pages.MessageScreen
@@ -65,6 +66,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("rateandreviews") {
                         RateAndReviews(trade,navController)
+                    }
+                    composable("cancellationdetails") {
+                        CancellationDetails(trade,navController)
                     }
 
                 }

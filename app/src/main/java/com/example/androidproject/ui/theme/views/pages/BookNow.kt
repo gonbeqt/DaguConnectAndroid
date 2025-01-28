@@ -115,7 +115,7 @@ fun BookNow(trade: Tradesman,feedback: Feedback, navController: NavController) {
 
                         Text(
                             text = "Expert Details",
-                            fontSize = 20.sp,
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             textAlign = TextAlign.Center,

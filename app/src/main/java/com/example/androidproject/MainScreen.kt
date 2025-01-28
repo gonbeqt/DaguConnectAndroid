@@ -1,5 +1,6 @@
 package com.example.androidproject
 
+import android.provider.ContactsContract
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -30,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.ui.theme.views.pages.BookingsScreen
 import com.example.androidproject.ui.theme.views.pages.BookmarkedScreen
 import com.example.androidproject.ui.theme.views.pages.HomeScreen
+import com.example.androidproject.ui.theme.views.pages.ProfileScreen
 import com.example.androidproject.ui.theme.views.pages.ScheduleScreen
 
 @Composable
@@ -39,6 +41,7 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
         NavigationItem("Bookings", Icons.Default.ListAlt),
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
         NavigationItem("Bookmarks", Icons.Default.CollectionsBookmark),
+        NavigationItem("Profile", Icons.Default.Person)
 
     )
     var selectedItem by remember {
@@ -80,7 +83,8 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int,navController
         0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController)
         1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController)
         2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp))
-        3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp))
+        3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp),navController)
+        4 -> ProfileScreen(modifier.padding(bottom = 0.1.dp))
     }
 }
 

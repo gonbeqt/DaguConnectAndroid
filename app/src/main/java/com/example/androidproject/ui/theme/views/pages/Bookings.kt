@@ -95,8 +95,8 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
                         0 -> AllBookingsContent()
                         1 -> PendingBookingsContent(navController)
                         2 -> ActiveBookingsContent()
-                        3 -> CompletedBookingsContent()
-                        4 -> CancelledBookingsContent()
+                        3 -> CompletedBookingsContent(navController)
+                        4 -> CancelledBookingsContent(navController)
                     }
                 }
             }
@@ -248,7 +248,7 @@ fun ActiveBookingsContent() {
 }
 
 @Composable
-fun CompletedBookingsContent() {
+fun CompletedBookingsContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -272,12 +272,12 @@ fun CompletedBookingsContent() {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllItem(trade)
+            CompletedItem(trade, navController )
         }
     }
 }
 @Composable
-fun CancelledBookingsContent() {
+fun CancelledBookingsContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -300,7 +300,7 @@ fun CancelledBookingsContent() {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllItem(trade)
+            CancelledItem(trade, navController )
         }
     }
 }
@@ -586,6 +586,330 @@ fun PendingItem(trade: Tradesman,navController:NavController) {
 
                             Text(text = "Booking Details", color = Color(0xFFECAB1E), fontSize = 14.sp)
                         }
+                }
+            }
+        }
+    }
+}
+@Composable
+fun CompletedItem(trade: Tradesman,navController:NavController) {
+    Card(
+        modifier = Modifier
+            .size(390.dp, 250.dp)
+        , // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = trade.category,
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = trade.rate,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = trade.reviews.toString(),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                        Text(
+                            text = "Weekdays Selected",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Text(
+                            text = "Monday",
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                        )
+                    }
+                    Text(
+                        text = "All",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 50.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("booknow")}
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Book Again", fontSize = 14.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("rateandreviews") }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = 14.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CancelledItem(trade: Tradesman,navController:NavController) {
+    Card(
+        modifier = Modifier
+            .size(390.dp, 250.dp)
+        , // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = trade.category,
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = trade.rate,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = trade.reviews.toString(),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                        Text(
+                            text = "Weekdays Selected",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Text(
+                            text = "Monday",
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                        )
+                    }
+                    Text(
+                        text = "All",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 50.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("cancellationdetails")}
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Cancellation  Details", fontSize = 14.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("booknow") }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Book Again", color = Color(0xFFECAB1E), fontSize = 14.sp)
+                    }
                 }
             }
         }

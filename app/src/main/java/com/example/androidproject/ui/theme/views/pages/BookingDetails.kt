@@ -105,7 +105,7 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
 
                     Text(
                         text = "Bookings Details",
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
                         modifier = Modifier
@@ -485,8 +485,6 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
                                 }
                             }
                         }
-
-
 
 
 

@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -32,12 +34,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Tradesman
 
 @Composable
 
-fun BookmarkedScreen(modifier: Modifier = Modifier) {
+fun BookmarkedScreen(modifier: Modifier = Modifier,navController:NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -55,7 +58,7 @@ fun BookmarkedScreen(modifier: Modifier = Modifier) {
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            BookmarkTopSection()
+            BookmarkTopSection(navController)
 
             LazyColumn(
                 modifier = Modifier
@@ -75,49 +78,50 @@ fun BookmarkedScreen(modifier: Modifier = Modifier) {
     }
 }
 @Composable
-fun BookmarkTopSection(){
+fun BookmarkTopSection(navController:NavController){
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 40.dp, start = 25.dp, end = 25.dp),
-        horizontalArrangement = Arrangement.Absolute.SpaceBetween
-    ) {
-        //Should be Logo
-        Image(
-            painter = painterResource(id = R.drawable.visibility_on),
-            contentDescription = "LOGO",
-            contentScale = ContentScale.Crop
-        )
-        Row() {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = "Location Image",
-                modifier = Modifier.size(32.dp),
-                tint = (Color.Gray)
-            )
+        modifier = Modifier
+            .padding(top = 10.dp)
+            .fillMaxWidth()
+            .height(70.dp)
 
-            Text(
-                text = "Location",
-                color = Color.Black,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(start = 5.dp, top = 2.dp)
+        ,
+        horizontalArrangement = Arrangement.spacedBy(140.dp),
+    ) {
+        Text(text="Bookmarks ",
+            fontSize = 24.sp,
+            fontWeight =
+            FontWeight(500),
+            modifier = Modifier.padding(16.dp),
+
+
+
             )
+        Row (modifier = Modifier.fillMaxWidth()
+            .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)){
             Icon(
                 imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications Image",
-                modifier = Modifier.padding(start = 60.dp)
+                contentDescription = "Notifications Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
                     .size(32.dp)
-                    .clickable { },//Implementation here
-                tint = (Color.Gray)
 
             )
             Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Account Image",
-                modifier = Modifier.padding(start = 15.dp)
+                imageVector = Icons.Default.Message,
+                contentDescription = "Message Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
                     .size(32.dp)
-                    .clickable { },//Implementation here
-                tint = (Color.Gray)
+
+                    .clickable {
+                        navController.navigate("message_screen")
+
+                    }
             )
         }
+
     }
 }
 
