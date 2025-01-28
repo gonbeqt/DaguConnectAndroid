@@ -54,7 +54,6 @@ import com.example.androidproject.ui.theme.views.rememberWindowSizeClass
 
 
 @Composable
-
 fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
