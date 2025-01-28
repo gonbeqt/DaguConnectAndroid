@@ -67,8 +67,8 @@ fun SignUpScreenPreview() {
 }
 
 @Composable
-fun SignUpScreen(navController: NavController){
-
+fun SignUpScreen(navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
 
     // Animatable for the card's X offset
     val cardOffsetX = remember { Animatable(-500f) } // Start off-screen to the left
@@ -82,41 +82,48 @@ fun SignUpScreen(navController: NavController){
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White),
-        contentAlignment = Alignment.Center
-    ){
+    // Determine card size and padding based on screen width
+    val cardWidth = when (windowSize.width) {
+        WindowType.SMALL -> 0.9f
+        WindowType.MEDIUM -> 0.7f
+        WindowType.LARGE -> 0.5f
+    }
+    val cardHeight = when (windowSize.height) {
+        WindowType.SMALL -> 620.dp
+        WindowType.MEDIUM -> 750.dp
+        WindowType.LARGE -> 800.dp
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.CenterStart
+    ) {
         // Set an image as the background
         Image(
-            painter = painterResource(id = R.drawable.background_image_auth), // Corrected name
+            painter = painterResource(id = R.drawable.background_image_auth),
             contentDescription = "Background Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
 
-
-
         Card(
             modifier = Modifier
                 .offset(x = cardOffsetX.value.dp) // Apply animation offset
-                .fillMaxWidth()
-                .padding(end = 50.dp) // Add padding to the right
-                .size(350.dp, 750.dp), // Adjust card size
-
+                .fillMaxWidth(cardWidth)
+                .height(cardHeight),
             shape = RoundedCornerShape(
-                topStart = 0.dp,
-                topEnd = 20.dp,  // No radius on the top-right corner
-                bottomStart = 0.dp,
-                bottomEnd = 20.dp // No radius on the bottom-right corner
+                topEnd = 20.dp,
+                bottomEnd = 20.dp
             ),
             elevation = CardDefaults.cardElevation(8.dp)
-
-
-        ){
+        ) {
             Column(modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
 
-                InputFieldForSignUp()
+                InputFieldForSignUp(windowSize)
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Roles()
@@ -135,7 +142,12 @@ fun SignUpScreen(navController: NavController){
 
 }
 @Composable
-fun InputFieldForSignUp(){
+fun InputFieldForSignUp(windowSize: WindowSize){
+    val fieldWidth = when (windowSize.width) {
+        WindowType.SMALL -> 0.9f
+        WindowType.MEDIUM -> 0.8f
+        WindowType.LARGE -> 0.7f
+    }
     var firstName by remember {
         mutableStateOf("") }
     var lastName by remember {
@@ -156,7 +168,11 @@ fun InputFieldForSignUp(){
 
     Text(
         text = "Create an Account",
-        fontSize = 24.sp,
+        fontSize = when (windowSize.width) {
+            WindowType.SMALL -> 20.sp
+            WindowType.MEDIUM -> 24.sp
+            else -> 28.sp
+        },
         fontWeight = FontWeight.Bold,
         color = Color.Blue,
         modifier = Modifier.padding(bottom = 16.dp, top = 16.dp) // Optional padding below the title
@@ -175,7 +191,7 @@ fun InputFieldForSignUp(){
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
+            .fillMaxWidth(fieldWidth) // Adjust width as needed
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -207,7 +223,7 @@ fun InputFieldForSignUp(){
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
+            .fillMaxWidth(fieldWidth) // Adjust width as needed
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -238,7 +254,7 @@ fun InputFieldForSignUp(){
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
+            .fillMaxWidth(fieldWidth) // Adjust width as needed
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -269,7 +285,7 @@ fun InputFieldForSignUp(){
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
+            .fillMaxWidth(fieldWidth) // Adjust width as needed
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -300,7 +316,7 @@ fun InputFieldForSignUp(){
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
+            .fillMaxWidth(fieldWidth) // Adjust width as needed
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -338,7 +354,7 @@ fun InputFieldForSignUp(){
         else PasswordVisualTransformation(),
         singleLine = true,
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
+            .fillMaxWidth(fieldWidth) // Adjust width as needed
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
