@@ -48,6 +48,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -55,10 +57,14 @@ import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Categories
 import com.example.androidproject.ui.theme.views.Tradesman
+import com.example.androidproject.ui.theme.views.WindowSize
+import com.example.androidproject.ui.theme.views.WindowType
+import com.example.androidproject.ui.theme.views.rememberWindowSizeClass
 
 
 @Composable
 fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
 
     val selectedCategory = remember { mutableStateOf<String?>(null) }
 
@@ -96,14 +102,14 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Provide navController to the SearchField
-            SearchField(navController)
+            SearchField(navController,windowSize )
             Spacer(modifier = Modifier.height(5.dp))
 
             Column(modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())) {
                 Spacer(modifier = Modifier.height(30.dp))
-                ExploreNow()
+                ExploreNow(windowSize)
 
                 Spacer(modifier = Modifier.height(20.dp))
                 CategoryRow(categories, selectedCategory)
@@ -115,9 +121,19 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
     }
 }
 @Composable
-fun SearchField(navController: NavController) {
+fun SearchField(navController: NavController,windowSize: WindowSize) {
     var searchQuery by remember { mutableStateOf("") }
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 24.dp
+        WindowType.MEDIUM -> 28.dp
+        WindowType.LARGE -> 32.dp
+    }
 
+    val textSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -146,7 +162,7 @@ fun SearchField(navController: NavController) {
                 contentDescription = "Search Icon",
                 tint = Color(0xFF3CC0B0),
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(iconSize)
                     .padding(start = 10.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -159,7 +175,7 @@ fun SearchField(navController: NavController) {
                     if (searchQuery.isEmpty()) {
                         Text(
                             text = "Search for services or tradespeople...",
-                            style = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, color = Color.Gray)
+                            style = androidx.compose.ui.text.TextStyle(fontSize = textSize, color = Color.Gray)
                         )
                     }
                     innerTextField()
@@ -179,14 +195,14 @@ fun SearchField(navController: NavController) {
                 contentDescription = "Notifications Icon",
                 tint = Color(0xFF3CC0B0),
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(iconSize)
             )
             Icon(
                 imageVector = Icons.Default.Message,
                 contentDescription = "Message Icon",
                 tint = Color(0xFF3CC0B0),
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(iconSize)
                     .clickable {
                         navController.navigate("message_screen")
 
@@ -198,6 +214,18 @@ fun SearchField(navController: NavController) {
 
 @Composable
 fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<String?>) {
+    val windowSize = rememberWindowSizeClass()
+    val cardSize = when (windowSize.width) {
+        WindowType.SMALL -> 100.dp to 80.dp
+        WindowType.MEDIUM -> 120.dp to 100.dp
+        WindowType.LARGE -> 140.dp to 120.dp
+    }
+
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 20.dp
+        WindowType.MEDIUM -> 30.dp
+        WindowType.LARGE -> 40.dp
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -206,7 +234,11 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
     ) {
         Text(
             text = "Categories",
-            fontSize = 18.sp,
+            fontSize = when (windowSize.width) {
+                WindowType.SMALL -> 16.sp
+                WindowType.MEDIUM -> 18.sp
+                WindowType.LARGE -> 20.sp
+            },
             fontWeight = FontWeight(500),
             modifier = Modifier.padding(top = 10.dp)
         )
@@ -223,9 +255,8 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(cardSize.second)
             .background(Color(0xFFECECEC)),
-        contentPadding = PaddingValues(12.dp),
     ) {
         items(categories.size) { index ->
             val category = categories[index]
@@ -240,7 +271,18 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
 @Composable
 fun TradesmanColumn(tradesmen: List<Tradesman>,selectedCategory: MutableState<String?>,navController: NavController) {
     val showDialogAllTradesman = remember { mutableStateOf(false) }
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 120.dp
+        WindowType.MEDIUM -> 140.dp
+        WindowType.LARGE -> 160.dp
+    }
 
+    val textSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -268,7 +310,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,selectedCategory: MutableState<St
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .background(Color.White), // Optional padding for the card
+            .background(Color.White),
         shape = RoundedCornerShape(8.dp),
     ) {
         Column(
@@ -278,7 +320,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,selectedCategory: MutableState<St
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             tradesmen.forEach { trade ->
-                TradesmanItem(trade,navController = navController)
+                TradesmanItem(trade,navController = navController, cardHeight, textSize)
             }
         }
     }
@@ -316,7 +358,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,selectedCategory: MutableState<St
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 tradesmen.forEach { trade ->
-                                    TradesmanItem(trade,navController = navController)
+                                    TradesmanItem(trade,navController = navController, cardHeight, textSize)
                                 }
                             }
                         }
@@ -335,7 +377,18 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,selectedCategory: MutableState<St
 
 
 @Composable
-fun ExploreNow(){
+fun ExploreNow(windowSize: WindowSize){
+    val textSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+
+    val imageSize = when (windowSize.width) {
+        WindowType.SMALL -> 250.dp to 250.dp
+        WindowType.MEDIUM -> 300.dp to 300.dp
+        WindowType.LARGE -> 350.dp to 350.dp
+    }
     Row(modifier = Modifier
         .fillMaxWidth()
         .size(180.dp)
@@ -353,7 +406,7 @@ fun ExploreNow(){
             .size(150.dp)){
             Text(text ="What service do you need today?",
                 color = Color.White,
-                fontSize = 20.sp,
+                fontSize = textSize,
                 fontWeight = FontWeight(500),
                 modifier = Modifier.padding(start = 20.dp, top = 20.dp)
             )
@@ -368,7 +421,7 @@ fun ExploreNow(){
         Image(painter = painterResource(R.drawable.workers),
             contentDescription = "Workers Images",
             modifier= Modifier
-                .size(250.dp, 250.dp)
+                .size(imageSize.first, imageSize.second)
                 .padding(top = 20.dp)
         )
 
@@ -382,7 +435,7 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
             .size(120.dp, 100.dp)
 
             .clickable { onClick() }, //implementation here
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp)
     ) {
         Box(
             modifier = Modifier
@@ -422,10 +475,17 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(trade: Tradesman,navController: NavController) {
+fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp, textSize: TextUnit) {
+    val windowSize = rememberWindowSizeClass()
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 30.dp
+        WindowType.MEDIUM -> 40.dp
+        WindowType.LARGE -> 50.dp
+    }
     Card(
         modifier = Modifier
-            .size(390.dp, 120.dp)
+            .fillMaxWidth()
+            .height(cardHeight)
             .clickable { navController.navigate("booknow")}, //implementation here
         shape = RoundedCornerShape(8.dp),
 
@@ -442,7 +502,7 @@ fun TradesmanItem(trade: Tradesman,navController: NavController) {
                     painter = painterResource(trade.imageResId),
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
-                        .size(100.dp, 100.dp)
+                        .size(cardHeight - 20.dp)
                         .padding(start = 10.dp)
                 )
                 Column(
@@ -455,15 +515,15 @@ fun TradesmanItem(trade: Tradesman,navController: NavController) {
                         text = trade.username,
                         color = Color.Black,
                         fontWeight = FontWeight(500),
-                        fontSize = 20.sp,
+                        fontSize = textSize,
                         modifier = Modifier.padding(top = 10.dp)
 
                     )
                     Text(
                         text = trade.category,
                         color = Color.Black,
-                        fontSize = 16.sp,
-                    )
+                        fontSize = textSize,
+                        )
                     Row(modifier = Modifier.size(185.dp, 110.dp)) {
                         Box(
                             modifier = Modifier
@@ -471,12 +531,12 @@ fun TradesmanItem(trade: Tradesman,navController: NavController) {
                                 .padding(top = 10.dp)
                                 .background(
                                     color = (Color(0xFFFFF2DD)),
-                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    shape =RoundedCornerShape(12.dp)
                                 )
                         ) {
                             Text(
                                 text = trade.rate,
-                                fontSize = 14.sp,
+                                fontSize = textSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )
                         }
@@ -486,7 +546,7 @@ fun TradesmanItem(trade: Tradesman,navController: NavController) {
                                 .padding(top = 10.dp, start = 10.dp)
                                 .background(
                                     color = (Color(0xFFFFF2DD)),
-                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
                             Icon(
@@ -508,7 +568,7 @@ fun TradesmanItem(trade: Tradesman,navController: NavController) {
                 Image(painter = painterResource(trade.bookmark),
                     contentDescription = "Bookmark Image",
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(iconSize)
                         .padding(end = 5.dp)
                         .clickable { }
                 )

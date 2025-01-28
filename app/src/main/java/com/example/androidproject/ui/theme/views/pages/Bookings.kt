@@ -48,11 +48,20 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Tradesman
+import com.example.androidproject.ui.theme.views.WindowSize
+import com.example.androidproject.ui.theme.views.WindowType
+import com.example.androidproject.ui.theme.views.rememberWindowSizeClass
 
 
 @Composable
 
 fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val textSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     // Tab titles
@@ -64,7 +73,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            BookingsTopSection(navController)
+            BookingsTopSection(navController,windowSize)
             Column(modifier = Modifier.fillMaxSize()) {
                 // Tabs (Fixed Choices)
                 ScrollableTabRow(
@@ -77,7 +86,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { Text(title, fontSize = 14.sp)},
+                            text = { Text(title, fontSize = textSize)},
                             modifier = Modifier.background(Color.White)
                         )
                     }
@@ -106,11 +115,26 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
 
 }
 @Composable
-fun BookingsTopSection(navController: NavController) {
+fun BookingsTopSection(navController: NavController,windowSize:WindowSize) {
+    val fontSize = when (windowSize.width) {
+        WindowType.SMALL -> 24.sp
+        WindowType.MEDIUM -> 28.sp
+        WindowType.LARGE -> 32.sp
+    }
 
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 32.dp
+        WindowType.MEDIUM -> 34.dp
+        WindowType.LARGE -> 36.dp
+    }
 
+    val horizontalSpacing = when (windowSize.width) {
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 20.dp
+        WindowType.LARGE -> 24.dp
+    }
 
-        Row(
+    Row(
             modifier = Modifier
                 .padding(top = 10.dp)
                 .fillMaxWidth()
@@ -120,7 +144,7 @@ fun BookingsTopSection(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(140.dp),
         ) {
             Text(text="My Bookings ",
-                fontSize = 24.sp,
+                fontSize = fontSize,
                 fontWeight =
                 FontWeight(500),
                 modifier = Modifier.padding(16.dp),
@@ -130,7 +154,7 @@ fun BookingsTopSection(navController: NavController) {
             )
             Row (modifier = Modifier.fillMaxWidth()
                 .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)){
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications Icon",
@@ -144,7 +168,7 @@ fun BookingsTopSection(navController: NavController) {
                     contentDescription = "Message Icon",
                     tint = Color(0xFF3CC0B0),
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(iconSize)
 
                         .clickable {
                             navController.navigate("message_screen")
@@ -310,9 +334,15 @@ fun CancelledBookingsContent(navController: NavController) {
 //Design For Items
 @Composable
 fun AllItem(trade: Tradesman) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 170.dp
+        WindowType.MEDIUM -> 400.dp to 180.dp
+        WindowType.LARGE -> 410.dp to 190.dp
+    }
     Card(
         modifier = Modifier
-            .size(390.dp, 170.dp)
+            .size(cardHeight.first,cardHeight.second)
             .clickable { }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
@@ -432,9 +462,15 @@ fun AllItem(trade: Tradesman) {
 
 @Composable
 fun PendingItem(trade: Tradesman,navController:NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
+    }
     Card(
         modifier = Modifier
-            .size(390.dp, 250.dp)
+            .size(cardHeight.first,cardHeight.second)
             , // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
@@ -593,9 +629,15 @@ fun PendingItem(trade: Tradesman,navController:NavController) {
 }
 @Composable
 fun CompletedItem(trade: Tradesman,navController:NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
+    }
     Card(
         modifier = Modifier
-            .size(390.dp, 250.dp)
+            .size(cardHeight.first, cardHeight.second)
         , // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
@@ -756,9 +798,15 @@ fun CompletedItem(trade: Tradesman,navController:NavController) {
 
 @Composable
 fun CancelledItem(trade: Tradesman,navController:NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
+    }
     Card(
         modifier = Modifier
-            .size(390.dp, 250.dp)
+            .size(cardHeight.first, cardHeight.second)
         , // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {

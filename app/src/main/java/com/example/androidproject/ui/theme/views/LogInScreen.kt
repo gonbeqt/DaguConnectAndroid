@@ -53,18 +53,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
 
-@Preview(showBackground = true)
 @Composable
-fun LogInScreenPreview() {
-    // Use a mock or placeholder NavController for preview purposes
-    LogInScreen(navController = rememberNavController())
-}
+fun LogInScreen(navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
 
-@Composable
-fun LogInScreen(navController: NavController){
-
-
-    val cardOffsetX = remember { Animatable(500f) } // Start off-screen to the right
+    val cardOffsetX = remember { Animatable(500f) }
 
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
@@ -76,77 +69,81 @@ fun LogInScreen(navController: NavController){
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White),
-        contentAlignment = Alignment.Center
-    ){
-        // Set an image as the background
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        // Background Image
         Image(
-            painter = painterResource(id = R.drawable.background_image_auth), // Corrected name
+            painter = painterResource(id = R.drawable.background_image_auth),
             contentDescription = "Background Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
 
+        // Card with adaptive size and padding
         Card(
             modifier = Modifier
-                .offset(x = cardOffsetX.value.dp) // Apply animation offset
-                .fillMaxWidth()
-                .padding(start = 50.dp) // Add padding to the right
-                .size(350.dp, 400.dp), // Adjust card size
-
-            shape = RoundedCornerShape(
-                topStart = 20.dp,
-                topEnd = 0.dp,  // No radius on the top-right corner
-                bottomStart = 20.dp,
-                bottomEnd = 0.dp // No radius on the bottom-right corner
-            ),
+                .offset(x = cardOffsetX.value.dp)
+                .size(
+                    width = when (windowSize.width) {
+                        WindowType.SMALL -> 300.dp
+                        WindowType.MEDIUM -> 350.dp
+                        else -> 400.dp
+                    },
+                    height = when (windowSize.height) {
+                        WindowType.SMALL -> 360.dp
+                        WindowType.MEDIUM -> 400.dp
+                        else -> 450.dp
+                    }
+                ),
+            shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(8.dp)
-        ){
-            Column(modifier = Modifier.fillMaxSize(),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center) {
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
                     text = "Welcome Back",
-                    fontSize = 24.sp,
+                    fontSize = when (windowSize.width) {
+                        WindowType.SMALL -> 20.sp
+                        WindowType.MEDIUM -> 24.sp
+                        else -> 28.sp
+                    },
                     fontWeight = FontWeight.Bold,
                     color = Color.Blue,
-                    modifier = Modifier.padding(bottom = 16.dp, top = 16.dp) // Optional padding below the title
+                    modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)
                 )
 
-                InputFieldForLogin()
+                InputFieldForLogin(windowSize)
 
-                ForgotPassword()
+                ForgotPassword(windowSize)
 
-                Spacer(modifier = Modifier.height(5.dp))
-                ButtonLogin(navController)
+                Spacer(modifier = Modifier.height(10.dp))
+                ButtonLogin(navController, windowSize)
 
-                Spacer(modifier = Modifier.height(5.dp))
-                SignUpButton(navController)
-
+                Spacer(modifier = Modifier.height(10.dp))
+                SignUpButton(navController, windowSize)
             }
-
-
         }
-
     }
 }
+
 @Composable
-fun InputFieldForLogin(){
-
-
+fun InputFieldForLogin(windowSize: WindowSize) {
     Spacer(modifier = Modifier.height(10.dp))
-
-    EmailField()
-
+    EmailField(windowSize)
     Spacer(modifier = Modifier.height(10.dp))
-
-    PasswordField()
-
+    PasswordField(windowSize)
 }
+
 @Composable
-fun EmailField(){
-    var email by remember {
-        mutableStateOf("") }
+fun EmailField(windowSize: WindowSize) {
+    var email by remember { mutableStateOf("") }
     OutlinedTextField(
         value = email,
         onValueChange = { email = it },
@@ -159,9 +156,14 @@ fun EmailField(){
         },
         singleLine = true,
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
-            .heightIn(min = 56.dp), // Adjust height as needed
-        shape = RoundedCornerShape(16.dp), // Set corner radius here
+            .fillMaxWidth(
+                when (windowSize.width) {
+                    WindowType.SMALL -> 0.9f
+                    else -> 0.8f
+                }
+            )
+            .heightIn(min = 56.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
@@ -171,44 +173,45 @@ fun EmailField(){
             unfocusedLabelColor = Color.Gray,
             cursorColor = Color.Black
         ),
-        textStyle = TextStyle(
-            fontSize = 16.sp, // Adjust text size for visibility
-            color = Color.Black // Ensure text is visible
-        )
+        textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
 }
+
 @Composable
-fun PasswordField(){
-    var password by remember {
-        mutableStateOf("") }
+fun PasswordField(windowSize: WindowSize) {
+    var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
+
     else
         painterResource(id = R.drawable.visibility_off)
-    OutlinedTextField(value = password,
-        onValueChange = { password = it},
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 20.dp // Smaller screen
+        WindowType.MEDIUM -> 24.dp // Medium screen
+        WindowType.LARGE -> 30.dp // Larger screen
+    }
+    OutlinedTextField(
+        value = password,
+        onValueChange = { password = it },
         label = { Text("Password") },
-        leadingIcon = {
-            Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
-        },
+        leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") },
         trailingIcon = {
-            IconButton(onClick = {
-                passwordVisible = !passwordVisible
-            }) {
-                Icon(
-                    painter = icon, contentDescription = "Visible", modifier = Modifier.size(22.dp))
-
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(painter = icon, contentDescription = "Toggle Password Visibility", modifier = Modifier.size(iconSize))
             }
         },
-        visualTransformation = if (passwordVisible) VisualTransformation.None
-        else PasswordVisualTransformation(),
-
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         singleLine = true,
         modifier = Modifier
-            .fillMaxWidth(0.8f) // Adjust width as needed
-            .heightIn(min = 56.dp), // Adjust height as needed
-        shape = RoundedCornerShape(16.dp), // Set corner radius here
+            .fillMaxWidth(
+                when (windowSize.width) {
+                    WindowType.SMALL -> 0.9f
+                    else -> 0.8f
+                }
+            )
+            .heightIn(min = 56.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
@@ -218,76 +221,79 @@ fun PasswordField(){
             unfocusedLabelColor = Color.Gray,
             cursorColor = Color.Black
         ),
-        textStyle = TextStyle(
-            fontSize = 16.sp, // Adjust text size for visibility
-            color = Color.Black // Ensure text is visible
-        )
+        textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
-
 }
 
 @Composable
-fun ForgotPassword(){
+fun ForgotPassword(windowSize: WindowSize) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 36.dp, top = 5.dp, bottom = 5.dp),
+            .padding(
+                end = when (windowSize.width) {
+                    WindowType.SMALL -> 16.dp
+                    else -> 36.dp
+                }
+            ),
         horizontalArrangement = Arrangement.End
     ) {
         Text(
-            modifier = Modifier
-                .clickable(onClick = {}) // clickable text
-                .padding(0.dp),
             text = "Forgot Password?",
             color = Color.Gray,
-            fontSize = 12.sp
+            fontSize = when (windowSize.width) {
+                WindowType.SMALL -> 12.sp
+                else -> 14.sp
+            }
         )
     }
 }
 
 @Composable
-fun ButtonLogin(navController: NavController){
+fun ButtonLogin(navController: NavController, windowSize: WindowSize) {
     val context = LocalContext.current
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+    Button(
+        onClick = {
+            Toast.makeText(context, "Log In Successful", Toast.LENGTH_SHORT).show()
+            navController.navigate("main_screen")
+        },
+        modifier = Modifier
+            .fillMaxWidth(
+                when (windowSize.width) {
+                    WindowType.SMALL -> 0.9f
+                    else -> 0.8f
+                }
+            )
+            .height(50.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
     ) {
-        Button(
-            onClick = {
-                Toast.makeText(context, "Log In Successful", Toast.LENGTH_SHORT).show()
-                navController.navigate("main_screen")
-            },
-            modifier = Modifier
-                .fillMaxWidth(0.8f) // 80% width
-                .height(50.dp), // Set height
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-        )
-        {
-            Text(text = "Log In", color = Color.White)
-        }
+        Text(text = "Log In", color = Color.White)
     }
 }
 
 @Composable
-fun SignUpButton(navController: NavController){
-    Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly)
-    {
-        Row {
-            Text(
-                modifier = Modifier.clickable(onClick = {navController.navigate("signup")}),
-                text = "Don't have an account? ",
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
-            Text(
-                modifier = Modifier.clickable(onClick = {navController.navigate("signup")}),
-                text = "Sign Up",
-                color = Color.Black,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+fun SignUpButton(navController: NavController, windowSize: WindowSize) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Don't have an account? ",
+            color = Color.Gray,
+            fontSize = when (windowSize.width) {
+                WindowType.SMALL -> 12.sp
+                else -> 14.sp
+            }
+        )
+        Text(
+            text = "Sign Up",
+            color = Color.Black,
+            fontWeight = FontWeight.Bold,
+            fontSize = when (windowSize.width) {
+                WindowType.SMALL -> 12.sp
+                else -> 14.sp
+            },
+            modifier = Modifier.clickable { navController.navigate("signup") }
+        )
     }
 }
