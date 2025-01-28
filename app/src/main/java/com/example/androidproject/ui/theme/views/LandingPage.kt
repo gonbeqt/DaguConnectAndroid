@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.theme.views
 
+import android.content.Context
 import android.graphics.fonts.FontStyle
 import android.widget.Button
 import android.widget.Space
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +62,7 @@ fun LandingPageScreenPreview() {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LandingPageScreen(navController: NavController){
+    val windowSize = rememberWindowSizeClass()
 
     var mainText by remember { mutableStateOf("Find & Offer Local Services with Ease") }
     var messageText by remember { mutableStateOf("Connect with local residents in Dagupan City, to find or offer services, showcase your skills transact easily,and enjoy a secure platform"
@@ -86,7 +89,12 @@ fun LandingPageScreen(navController: NavController){
         R.drawable.background_image_auth,
         R.drawable.landing1
     )
+    val context = LocalContext.current
 
+    LaunchedEffect(Unit) {
+        val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putBoolean("isShown", true).apply()
+    }
     Box(modifier = Modifier.fillMaxSize().background(Color.White),
     ){
         Image(
@@ -123,12 +131,18 @@ fun LandingPageScreen(navController: NavController){
                 transitionSpec = {
                     slideInHorizontally(initialOffsetX = { -it }) with slideOutHorizontally(targetOffsetX = { it })
                 }
-            ) { targetImage ->
-                Card(modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp).size(350.dp, 350.dp)) {
+            ) {targetImage ->
+                val imageSize = when (windowSize.width) {
+                    WindowType.SMALL -> 250.dp
+                    WindowType.MEDIUM -> 350.dp
+                    WindowType.LARGE -> 400.dp
+                }
+
+                Card(modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp).size(imageSize)) {
                     Image(
                         painter = painterResource(id = targetImage),
                         contentDescription = "LandingPage",
-                        modifier = Modifier.fillMaxSize().size(350.dp, 350.dp)
+                        modifier = Modifier.fillMaxSize().size(imageSize)
                     )
                 }
             }
@@ -142,14 +156,21 @@ fun LandingPageScreen(navController: NavController){
                     slideInHorizontally(initialOffsetX = { -it }) with slideOutHorizontally(targetOffsetX = { it })
                 }
             ) { targetText ->
+                val fontSize = when (windowSize.width) {
+                    WindowType.SMALL -> 20.sp
+                    WindowType.MEDIUM -> 24.sp
+                    WindowType.LARGE -> 28.sp
+                }
+
                 Text(
                     text = targetText,
                     fontWeight = FontWeight(700),
                     color = Color.Black,
-                    fontSize = 24.sp,
+                    fontSize = fontSize,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 10.dp, start = 15.dp, end = 15.dp)
                 )
+
             }
 
             AnimatedContent(
@@ -158,10 +179,16 @@ fun LandingPageScreen(navController: NavController){
                     slideInHorizontally(initialOffsetX = { -it }) with slideOutHorizontally(targetOffsetX = { it })
                 }
             ) { targetMessage ->
+                val fontSize = when (windowSize.width) {
+                    WindowType.SMALL -> 16.sp
+                    WindowType.MEDIUM -> 20.sp
+                    WindowType.LARGE -> 22.sp
+                }
+
                 Text(
                     text = targetMessage,
                     color = Color.Gray,
-                    fontSize = 20.sp,
+                    fontSize = fontSize,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 30.dp, start = 15.dp, end = 15.dp)
                 )

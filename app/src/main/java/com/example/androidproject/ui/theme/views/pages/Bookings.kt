@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,13 +16,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -35,15 +42,26 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Tradesman
+import com.example.androidproject.ui.theme.views.WindowSize
+import com.example.androidproject.ui.theme.views.WindowType
+import com.example.androidproject.ui.theme.views.rememberWindowSizeClass
 
 
 @Composable
 
-fun BookingsScreen(modifier: Modifier = Modifier) {
+fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val textSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     // Tab titles
@@ -55,8 +73,7 @@ fun BookingsScreen(modifier: Modifier = Modifier) {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            BookingsTopSection()
-
+            BookingsTopSection(navController,windowSize)
             Column(modifier = Modifier.fillMaxSize()) {
                 // Tabs (Fixed Choices)
                 ScrollableTabRow(
@@ -69,7 +86,7 @@ fun BookingsScreen(modifier: Modifier = Modifier) {
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { Text(title, fontSize = 14.sp)},
+                            text = { Text(title, fontSize = textSize)},
                             modifier = Modifier.background(Color.White)
                         )
                     }
@@ -79,14 +96,16 @@ fun BookingsScreen(modifier: Modifier = Modifier) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color(0xFFD9D9D9))
+
                         .padding(16.dp)
                 ) {
                     when (selectedTabIndex) {
                         0 -> AllBookingsContent()
-                        1 -> PendingBookingsContent()
+                        1 -> PendingBookingsContent(navController)
                         2 -> ActiveBookingsContent()
-                        3 -> CompletedBookingsContent()
-                        4 -> CancelledBookingsContent()
+                        3 -> CompletedBookingsContent(navController)
+                        4 -> CancelledBookingsContent(navController)
                     }
                 }
             }
@@ -96,51 +115,71 @@ fun BookingsScreen(modifier: Modifier = Modifier) {
 
 }
 @Composable
-fun BookingsTopSection(){
+fun BookingsTopSection(navController: NavController,windowSize:WindowSize) {
+    val fontSize = when (windowSize.width) {
+        WindowType.SMALL -> 24.sp
+        WindowType.MEDIUM -> 28.sp
+        WindowType.LARGE -> 32.sp
+    }
+
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 32.dp
+        WindowType.MEDIUM -> 34.dp
+        WindowType.LARGE -> 36.dp
+    }
+
+    val horizontalSpacing = when (windowSize.width) {
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 20.dp
+        WindowType.LARGE -> 24.dp
+    }
+
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 40.dp, start = 25.dp, end = 25.dp),
-        horizontalArrangement = Arrangement.Absolute.SpaceBetween
-    ) {
-        //Should be Logo
-        Image(
-            painter = painterResource(id = R.drawable.visibility_on),
-            contentDescription = "LOGO",
-            contentScale = ContentScale.Crop
-        )
-        Row() {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = "Location Image",
-                modifier = Modifier.size(32.dp),
-                tint = (Color.Gray)
-            )
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .fillMaxWidth()
+                .height(70.dp)
 
-            Text(
-                text = "Location",
-                color = Color.Black,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(start = 5.dp, top = 2.dp)
-            )
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications Image",
-                modifier = Modifier.padding(start = 60.dp)
-                    .size(32.dp)
-                    .clickable { },//Implementation here
-                tint = (Color.Gray)
+            ,
+            horizontalArrangement = Arrangement.spacedBy(140.dp),
+        ) {
+            Text(text="My Bookings ",
+                fontSize = fontSize,
+                fontWeight =
+                FontWeight(500),
+                modifier = Modifier.padding(16.dp),
+
+
 
             )
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Account Image",
-                modifier = Modifier.padding(start = 15.dp)
-                    .size(32.dp)
-                    .clickable { },//Implementation here
-                tint = (Color.Gray)
-            )
+            Row (modifier = Modifier.fillMaxWidth()
+                .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)){
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier
+                        .size(32.dp)
+
+                )
+                Icon(
+                    imageVector = Icons.Default.Message,
+                    contentDescription = "Message Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier
+                        .size(iconSize)
+
+                        .clickable {
+                            navController.navigate("message_screen")
+
+                        }
+                )
+            }
+
         }
     }
-}
+
 @Composable
 fun AllBookingsContent() {
     val tradesman = listOf(
@@ -158,6 +197,8 @@ fun AllBookingsContent() {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+
         ,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -171,7 +212,7 @@ fun AllBookingsContent() {
 
 
 @Composable
-fun PendingBookingsContent() {
+fun PendingBookingsContent(navController:NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -187,13 +228,15 @@ fun PendingBookingsContent() {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+
         ,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllItem(trade)
+            PendingItem(trade,navController)
         }
     }
 }
@@ -215,6 +258,8 @@ fun ActiveBookingsContent() {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+
         ,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -227,7 +272,7 @@ fun ActiveBookingsContent() {
 }
 
 @Composable
-fun CompletedBookingsContent() {
+fun CompletedBookingsContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -243,18 +288,20 @@ fun CompletedBookingsContent() {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+
         ,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllItem(trade)
+            CompletedItem(trade, navController )
         }
     }
 }
 @Composable
-fun CancelledBookingsContent() {
+fun CancelledBookingsContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -270,13 +317,14 @@ fun CancelledBookingsContent() {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .background(Color(0xFFD9D9D9))
         ,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllItem(trade)
+            CancelledItem(trade, navController )
         }
     }
 }
@@ -286,16 +334,22 @@ fun CancelledBookingsContent() {
 //Design For Items
 @Composable
 fun AllItem(trade: Tradesman) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 170.dp
+        WindowType.MEDIUM -> 400.dp to 180.dp
+        WindowType.LARGE -> 410.dp to 190.dp
+    }
     Card(
         modifier = Modifier
-            .size(390.dp, 120.dp)
+            .size(cardHeight.first,cardHeight.second)
             .clickable { }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFD9D9D9)),
+                .background(Color.White),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
@@ -377,23 +431,533 @@ fun AllItem(trade: Tradesman) {
                             }
                         }
                     }
+                    Text(
+                        text = "Weekdays Selected",
+                        color = Color.Black,
+                        fontSize = 16.sp,
+
+                        )
+                    Text(
+                        text = "Monday",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+
+                        )
                 }
 
-                // Pending box
-                Box(
-                    modifier = Modifier.padding(bottom = 50.dp)
-                        .background(
-                            color = (Color(0xFFFFF2DD)),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
                     Text(
                         text = "All",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Gray
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 50.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
                     )
+
+            }
+        }
+    }
+}
+
+
+@Composable
+fun PendingItem(trade: Tradesman,navController:NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first,cardHeight.second)
+            , // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = trade.category,
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = trade.rate,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = trade.reviews.toString(),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                        Text(
+                            text = "Weekdays Selected",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Text(
+                            text = "Monday",
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                        )
+                    }
+                    Text(
+                        text = "All",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 50.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { /* Chat Action */ }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                            Text(text = "Cancel Appointment", fontSize = 14.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("bookingdetails") }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                            Text(text = "Booking Details", color = Color(0xFFECAB1E), fontSize = 14.sp)
+                        }
+                }
+            }
+        }
+    }
+}
+@Composable
+fun CompletedItem(trade: Tradesman,navController:NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second)
+        , // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = trade.category,
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = trade.rate,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = trade.reviews.toString(),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                        Text(
+                            text = "Weekdays Selected",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Text(
+                            text = "Monday",
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                        )
+                    }
+                    Text(
+                        text = "All",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 50.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("booknow")}
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Book Again", fontSize = 14.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("rateandreviews") }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = 14.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CancelledItem(trade: Tradesman,navController:NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second)
+        , // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = trade.category,
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = trade.rate,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = trade.reviews.toString(),
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                        Text(
+                            text = "Weekdays Selected",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Text(
+                            text = "Monday",
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                        )
+                    }
+                    Text(
+                        text = "All",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 50.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("cancellationdetails")}
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Cancellation  Details", fontSize = 14.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("booknow") }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Book Again", color = Color(0xFFECAB1E), fontSize = 14.sp)
+                    }
                 }
             }
         }
