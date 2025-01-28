@@ -33,15 +33,17 @@ data class User(
 
 data class RegisterRequest (
     @SerializedName("first_name")
-    var firstName: String,
+    val firstName: String,
     @SerializedName("last_name")
-    var lastName: String,
-    var username: String,
-    var email: String,
-    var age: Int,
+    val lastName: String,
+    val username: String,
+    val email: String,
+    val age: Int,
     @SerializedName("is_client")
-    var isClient: Boolean,
-    var password: String
+    val isClient: Boolean,
+    val password: String,
+    @SerializedName("confirm_password")
+    val confirmPassword: String
 )
 
 data class RegisterResponse (

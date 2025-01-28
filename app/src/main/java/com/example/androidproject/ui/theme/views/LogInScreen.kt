@@ -148,7 +148,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                 ForgotPassword(windowSize)
 
                 Spacer(modifier = Modifier.height(10.dp))
-                ButtonLogin(navController, windowSize)
+                ButtonLogin(navController, viewModel, email, password, loginState,  windowSize)
 
                 Spacer(modifier = Modifier.height(10.dp))
                 SignUpButton(navController, windowSize)
@@ -222,8 +222,6 @@ fun PasswordField(password: String, onPasswordChange: (String) -> Unit, windowSi
         painterResource(id = R.drawable.visibility_on)
     else
         painterResource(id = R.drawable.visibility_off)
-    OutlinedTextField(value = password,
-        onValueChange =  onPasswordChange,
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 20.dp // Smaller screen
         WindowType.MEDIUM -> 24.dp // Medium screen

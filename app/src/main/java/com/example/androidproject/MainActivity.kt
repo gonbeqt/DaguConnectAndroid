@@ -27,7 +27,9 @@ import com.example.androidproject.ui.theme.views.pages.HomeScreen
 import com.example.androidproject.ui.theme.views.pages.MessageScreen
 import com.example.androidproject.ui.theme.views.pages.RateAndReviews
 import com.example.androidproject.viewmodels.LoginViewModel
+import com.example.androidproject.viewmodels.RegisterViewModel
 import com.example.androidproject.viewmodels.factories.LoginViewModelFactory
+import com.example.androidproject.viewmodels.factories.RegisterViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,18 +40,26 @@ class MainActivity : ComponentActivity() {
         val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
         val feedback = Feedback(R.drawable.pfp, "Ezekiel", 4)
         TokenManager.init(this)
+
         val apiService = RetrofitInstance.create(ApiService::class.java)
-        val viewModelFactory = LoginViewModelFactory(apiService)
+
+        val registerVMFactory = RegisterViewModelFactory(apiService)
+        val registerViewModel = ViewModelProvider(this, registerVMFactory)[RegisterViewModel::class.java]
+
+        val viewModelFactory = LoginViewModelFactory(apiService, this)
         val loginViewModel = ViewModelProvider(this, viewModelFactory)[LoginViewModel::class.java]
+
+
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "main_screen") {
+                NavHost(navController = navController, startDestination = startDestination) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
                     composable("signup") {
-                        SignUpScreen(navController)
+                        SignUpScreen(navController, registerViewModel)
                     }
                     composable("login") {
                         LogInScreen(navController, loginViewModel)

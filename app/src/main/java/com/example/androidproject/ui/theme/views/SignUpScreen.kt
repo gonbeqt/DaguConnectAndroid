@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.theme.views
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -58,17 +59,42 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
+import com.example.androidproject.viewmodels.RegisterViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun SignUpScreenPreview() {
     // Use a mock or placeholder NavController for preview purposes
-    SignUpScreen(navController = rememberNavController())
+    //SignUpScreen(navController = rememberNavController())
 }
 
 @Composable
-fun SignUpScreen(navController: NavController) {
+fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
     val windowSize = rememberWindowSizeClass()
+    val registerState by viewModel.registerState.collectAsState()
+
+    var firstName by remember {
+        mutableStateOf("")
+    }
+    var lastName by remember {
+        mutableStateOf("")
+    }
+    var userName by remember {
+        mutableStateOf("")
+    }
+    var age by remember {
+        mutableStateOf(0)
+    }
+    var email by remember {
+        mutableStateOf("")
+    }
+    var password by remember {
+        mutableStateOf("")
+    }
+    var confirmPassword = password
+    var isClient by remember {
+        mutableStateOf(false)
+    }
 
     // Animatable for the card's X offset
     val cardOffsetX = remember { Animatable(-500f) } // Start off-screen to the left
@@ -123,13 +149,26 @@ fun SignUpScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
 
-                InputFieldForSignUp(windowSize)
+                InputFieldForSignUp(
+                    firstName = firstName,
+                    onFirstNameChange = { firstName = it },
+                    lastName = lastName,
+                    onLastNameChange = { lastName = it },
+                    userName = userName,
+                    onUserNameChange = { userName = it },
+                    age = age,
+                    onAgeChange = { age = it },
+                    email = email,
+                    onEmailChange = { email = it },
+                    password = password,
+                    onPasswordChange = { password = it },
+                    windowSize)
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Roles()
+                Roles(isClient = isClient, onIsClientChange = {isClient = it})
 
                 Spacer(modifier = Modifier.height(30.dp))
-                RegistrationButton()
+                RegistrationButton(navController, viewModel, firstName, lastName, userName, email, age.toInt(), isClient, password, confirmPassword, registerState, windowSize)
 
                 Spacer(modifier = Modifier.height(5.dp))
                 RegistrationLoginButton(navController)
@@ -142,24 +181,26 @@ fun SignUpScreen(navController: NavController) {
 
 }
 @Composable
-fun InputFieldForSignUp(windowSize: WindowSize){
+fun InputFieldForSignUp(
+    firstName: String,
+    onFirstNameChange: (String) -> Unit,
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
+    userName: String,
+    onUserNameChange: (String) -> Unit,
+    age: Int,
+    onAgeChange: (Int) -> Unit,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    windowSize: WindowSize
+    ){
     val fieldWidth = when (windowSize.width) {
         WindowType.SMALL -> 0.9f
         WindowType.MEDIUM -> 0.8f
         WindowType.LARGE -> 0.7f
     }
-    var firstName by remember {
-        mutableStateOf("") }
-    var lastName by remember {
-        mutableStateOf("") }
-    var userName by remember {
-        mutableStateOf("") }
-    var age by remember {
-        mutableStateOf("") }
-    var email by remember {
-        mutableStateOf("") }
-    var password by remember {
-        mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
@@ -180,7 +221,7 @@ fun InputFieldForSignUp(windowSize: WindowSize){
 
     OutlinedTextField(
         value = firstName,
-        onValueChange = { firstName = it }, // Updates the `firstName` state
+        onValueChange = onFirstNameChange, // Updates the `firstName` state
         label = { Text("First Name")},
         leadingIcon = {
             Icon(
@@ -212,7 +253,7 @@ fun InputFieldForSignUp(windowSize: WindowSize){
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(
         value = lastName,
-        onValueChange = { lastName = it },
+        onValueChange = onLastNameChange,
         label = { Text("Last Name") },
         leadingIcon = {
             Icon(
@@ -243,7 +284,7 @@ fun InputFieldForSignUp(windowSize: WindowSize){
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(
         value = userName,
-        onValueChange = { userName = it },
+        onValueChange = onUserNameChange,
         label = { Text("Username") },
         leadingIcon = {
             Icon(
@@ -273,8 +314,12 @@ fun InputFieldForSignUp(windowSize: WindowSize){
     )
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(
-        value = age,
-        onValueChange = { age = it },
+        value = age.toString(),
+        onValueChange = {
+            newValue -> // Convert String back to Int safely
+            val intValue = newValue.toIntOrNull() ?: 0
+            onAgeChange(intValue)
+        },
         label = { Text("Age") },
         leadingIcon = {
             Icon(
@@ -305,7 +350,7 @@ fun InputFieldForSignUp(windowSize: WindowSize){
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(
         value = email,
-        onValueChange = { email = it },
+        onValueChange = onEmailChange,
         label = { Text("Email") },
         leadingIcon = {
             Icon(
@@ -335,7 +380,7 @@ fun InputFieldForSignUp(windowSize: WindowSize){
     )
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(value = password,
-        onValueChange = { password = it},
+        onValueChange = onPasswordChange,
         label = { Text("Password") },
         leadingIcon = {
             Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
@@ -373,7 +418,7 @@ fun InputFieldForSignUp(windowSize: WindowSize){
     )
 }
 @Composable
-fun Roles(){
+fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
     Row(
         modifier = Modifier
             .fillMaxWidth().padding(start = 15.dp,end = 15.dp),
@@ -385,7 +430,7 @@ fun Roles(){
             modifier = Modifier.size(70.dp)
                 .weight(1f)
                 .padding(8.dp)
-                .clickable {}, //Implementation here
+                .clickable {onIsClientChange (true)}, //Implementation here
             colors = CardDefaults.cardColors(Color.Blue)
         ) {
             Row(
@@ -416,7 +461,7 @@ fun Roles(){
             modifier = Modifier.size(70.dp)
                 .weight(1f)
                 .padding(8.dp)
-                .clickable { }, //Implementation here
+                .clickable { onIsClientChange(false) }, //Implementation here
             colors = CardDefaults.cardColors(Color.Blue)
 
         ) {
@@ -445,7 +490,7 @@ fun Roles(){
     }
 }
 @Composable
-fun RegistrationButton(){
+fun RegistrationButton(navController: NavController, viewModel: RegisterViewModel, firstName: String, lastName: String, userName: String, email: String, age: Int, isClient: Boolean, password: String, confirmPassword: String, registerState: RegisterViewModel.RegisterState, windowSize: WindowSize){
     val context = LocalContext.current
 
     Row(
@@ -454,7 +499,24 @@ fun RegistrationButton(){
     ) {
         Button(
             onClick = {
-                Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
+                viewModel.register(firstName, lastName, userName, email, age, isClient, password, confirmPassword)
+                when (registerState) {
+                    is RegisterViewModel.RegisterState.Loading -> {
+                        // Do nothing
+                    }
+                    is RegisterViewModel.RegisterState.Success -> {
+                        Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
+                        navController.navigate("login")
+                    }
+                    is RegisterViewModel.RegisterState.Error -> {
+                        Toast.makeText(context, registerState.message, Toast.LENGTH_SHORT).show()
+                        Log.i("Register screen error", "Register error $registerState.message")
+                    }
+                    RegisterViewModel.RegisterState.Idle -> {
+                        // Do nothing
+                    }
+                }
+
             },
             modifier = Modifier
                 .fillMaxWidth(0.6f) // 80% width
