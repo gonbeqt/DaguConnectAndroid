@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
@@ -24,6 +26,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,11 +56,11 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
 
     val servicePostings = listOf(
         ServicePosting("Plumbing Repair", "January 25, 2025", applicantsCount = 5),
-        ServicePosting(
-            "Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3
-        )
+        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
+        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
+        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
+        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3)
     )
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -169,7 +172,7 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 2.dp) // Add separation from the white background
+                .padding(top = 2.dp) //separation from the white background
         ) {
             when (selectedTabIndex) {
                 0 -> MyPostsTab(servicePostings)
@@ -179,19 +182,18 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
     }
 }
 
-
 @Composable
 fun MyPostsTab(servicePostings: List<ServicePosting>) {
     var postsList by remember { mutableStateOf(servicePostings) }
 
-    Column(
+    LazyColumn( //make it scrollable
         verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxSize()
     ) {
-        servicePostings.forEach { posting ->
+        items(postsList) { posting ->
             PostsCard(
                 servicePosting = posting,
                 onEditClick = { title, description, rate ->
-                    // update the deets in posting card
                     postsList = postsList.map {
                         if (it.title == posting.title) {
                             it.copy(title = title, description = description, rate = rate)
@@ -205,7 +207,7 @@ fun MyPostsTab(servicePostings: List<ServicePosting>) {
         }
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PostsCard(
     servicePosting: ServicePosting,
@@ -216,7 +218,7 @@ fun PostsCard(
     var editableTitle by remember { mutableStateOf(servicePosting.title) }
     var editableDescription by remember { mutableStateOf(servicePosting.description) }
     var editableRate by remember { mutableStateOf(servicePosting.rate) }
-
+    var selectedCategories = remember { mutableStateListOf<String>() }
 
     Card(
         modifier = Modifier
@@ -256,11 +258,11 @@ fun PostsCard(
                                 "Edit Post",
                                 color = Color.Black,
                                 fontSize = 14.sp,
-                                modifier = Modifier.padding(start = 8.dp),
+                                modifier = Modifier.padding(start = 8.dp, end = 2.dp),
                                 textAlign = TextAlign.Start
                             )
                             Icon(
-                                imageVector = Icons.Default.ArrowForwardIos,
+                                imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit Icon",
                                 tint = Color.Black,
                                 modifier = Modifier.padding(end = 8.dp).size(15.dp)
@@ -276,9 +278,17 @@ fun PostsCard(
                     fontWeight = FontWeight.Normal
                 )
                 Text(
-                    text = "Rate: ${editableRate}",
+                    text = "Est. Budget: ${editableRate}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal
+                )
+                Text(
+                    text = "Category: ${
+                        if (selectedCategories.isEmpty()) "Uncategorized"
+                        else selectedCategories.joinToString(", ")
+                    }",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
                 )
                 Text(
                     text = "${servicePosting.applicantsCount} Applicants",
@@ -287,6 +297,7 @@ fun PostsCard(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onApplicantsClick() }
                 )
+
                 // Other card content
                 Text(
                     text = "Posted on ${servicePosting.postedDate} - ${if (servicePosting.isActive) "Active" else "Inactive"}",
@@ -297,7 +308,7 @@ fun PostsCard(
         }
     }
 
-    // Dialog for editing posting
+    // pop up dialog for editing posting
     if (isDialogVisible) {
         Dialog(onDismissRequest = { isDialogVisible = false }) {
             Card(
@@ -377,13 +388,56 @@ fun PostsCard(
                         TextField(
                             value = editableRate,
                             onValueChange = { editableRate = it },
-                            label = { Text("Rate") },
+                            label = { Text("Estimated Budget") },
                             modifier = Modifier.fillMaxWidth(),
+                            maxLines = 1,
                             colors = TextFieldDefaults.textFieldColors(
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                             )
                         )
+                    }
+                    Column(
+                        modifier = Modifier.padding(5.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
+
+                    ) {
+                        Text(
+                            text = "Select Service Category",
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+
+                        ) {
+                            val categories = listOf(
+                                "Plumbing", "Carpentry", "Electrical",
+                                "Home Cleaning", "Painter and Decorator", "Fence Installer"
+                            )
+
+                            categories.forEach { category ->
+                                val isSelected = selectedCategories.contains(category)
+                                Box(
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (isSelected) selectedCategories.remove(category)
+                                            else selectedCategories.add(category)
+                                        }
+                                        .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
+                                        .clip(RoundedCornerShape(30.dp))
+                                        .background(if (isSelected) Color.Gray else Color.White)
+                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = category,
+                                        color = if (isSelected) Color.White else Color.Black
+                                    )
+                                }
+                            }
+                        }
                     }
 
 
