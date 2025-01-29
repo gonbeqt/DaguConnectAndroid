@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Tradesman
 import java.time.LocalDate
@@ -29,9 +32,9 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-@Preview
+
 @Composable
-fun ScheduleScreen(modifier: Modifier = Modifier) {
+fun ScheduleScreen(modifier: Modifier = Modifier,navController: NavController) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val tradesman = listOf(
@@ -42,6 +45,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier) {
     Column(modifier = Modifier.fillMaxSize()
         .background(Color.White)) {
         //calendar section showing the month, days, and selected date
+        ScheduleTopSection(navController )
         CalendarSection(
             currentMonth = currentMonth,
             selectedDate = selectedDate,
@@ -52,6 +56,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxHeight()
                 .size(420.dp)
+                .background(Color(0xFFD9D9D9))
             ,
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -66,6 +71,53 @@ fun ScheduleScreen(modifier: Modifier = Modifier) {
 
 
 
+@Composable
+fun ScheduleTopSection(navController: NavController){
+    Row(
+        modifier = Modifier
+            .padding(top = 10.dp)
+            .fillMaxWidth()
+            .height(70.dp)
+
+        ,
+        horizontalArrangement = Arrangement.spacedBy(140.dp),
+    ) {
+        Text(text="Schedule",
+            fontSize = 24.sp,
+            fontWeight =
+            FontWeight(500),
+            modifier = Modifier.padding(16.dp),
+
+
+
+            )
+        Row (modifier = Modifier.fillMaxWidth()
+            .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)){
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Notifications Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
+                    .size(32.dp)
+
+            )
+            Icon(
+                imageVector = Icons.Default.Message,
+                contentDescription = "Message Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
+                    .size(32.dp)
+
+                    .clickable {
+                        navController.navigate("message_screen")
+
+                    }
+            )
+        }
+
+    }
+}
 @Composable
 fun CalendarSection(
     currentMonth: YearMonth,
@@ -168,7 +220,8 @@ fun PlumbingRepairCard(trade: Tradesman) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(6.dp),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(Color.White)
     ) {
 
         Row(

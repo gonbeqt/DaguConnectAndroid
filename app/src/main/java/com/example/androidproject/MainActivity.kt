@@ -23,7 +23,9 @@ import com.example.androidproject.ui.theme.views.pages.HomeScreen
 import com.example.androidproject.ui.theme.views.pages.MessageScreen
 import com.example.androidproject.ui.theme.views.pages.RateAndReviews
 import com.example.androidproject.ui.theme.views.pages2.BookingsTradesman
+import com.example.androidproject.ui.theme.views.pages2.BookmarkedTradesman
 import com.example.androidproject.ui.theme.views.pages2.HomeTradesman
+import com.example.androidproject.ui.theme.views.pages2.ScheduleTradesman
 import com.example.androidproject.ui.theme.views.pages2.TradesmanApply
 
 class MainActivity : ComponentActivity() {
@@ -40,24 +42,6 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = startDestination) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        
                     }
                     composable("signup") {
                         SignUpScreen(navController)
@@ -102,6 +86,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController)
+                    }
+                    composable("bookmarkedtradesman") {
+                        BookmarkedTradesman(modifier = Modifier,navController)
+                    }
+                    composable("scheduletradesman") {
+                        ScheduleTradesman(modifier = Modifier,navController)
                     }
 
                 }
