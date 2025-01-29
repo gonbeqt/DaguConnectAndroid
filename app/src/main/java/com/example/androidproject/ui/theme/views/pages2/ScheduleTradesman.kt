@@ -1,4 +1,5 @@
-package com.example.androidproject.ui.theme.views.pages
+package com.example.androidproject.ui.theme.views.pages2
+
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -6,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.Tradesman
+import com.example.androidproject.ui.theme.views.WindowType
+import com.example.androidproject.ui.theme.views.rememberWindowSizeClass
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -34,7 +39,7 @@ import java.util.Locale
 
 
 @Composable
-fun ScheduleScreen(modifier: Modifier = Modifier,navController: NavController) {
+fun ScheduleTradesman(modifier: Modifier = Modifier,navController: NavController) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val tradesman = listOf(
@@ -45,8 +50,8 @@ fun ScheduleScreen(modifier: Modifier = Modifier,navController: NavController) {
     Column(modifier = Modifier.fillMaxSize()
         .background(Color.White)) {
         //calendar section showing the month, days, and selected date
-        ScheduleTopSection(navController )
-        CalendarSection(
+        ScheduleTradesmanTopSection(navController)
+        CalendarSectionTradesman(
             currentMonth = currentMonth,
             selectedDate = selectedDate,
             onDateSelected = { selectedDate = it },
@@ -63,16 +68,15 @@ fun ScheduleScreen(modifier: Modifier = Modifier,navController: NavController) {
         ) {
             items(tradesman.size) { index ->
                 val trade = tradesman[index]
-                PlumbingRepairCard(trade)
+                PlumbingRepairCardTradesman(trade)
             }
         }
     }
 }
 
 
-
 @Composable
-fun ScheduleTopSection(navController: NavController){
+fun ScheduleTradesmanTopSection(navController: NavController){
     Row(
         modifier = Modifier
             .padding(top = 10.dp)
@@ -119,7 +123,7 @@ fun ScheduleTopSection(navController: NavController){
     }
 }
 @Composable
-fun CalendarSection(
+fun CalendarSectionTradesman(
     currentMonth: YearMonth,
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
@@ -215,107 +219,98 @@ fun CalendarSection(
 }
 
 @Composable
-fun PlumbingRepairCard(trade: Tradesman) {
+fun PlumbingRepairCardTradesman(trade: Tradesman) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 190.dp
+        WindowType.MEDIUM -> 400.dp to 200.dp
+        WindowType.LARGE -> 410.dp to 210.dp
+    }
+
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp),
+            .size(cardHeight.first, cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(Color.White)
+
     ) {
-
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .background(Color.White)
         ) {
-
-            Image( painterResource(trade.imageResId),
-                contentDescription = "Tradesman Image",
-                modifier = Modifier.size(120.dp,120.dp)
-                    .padding(end = 10.dp))
-            Column(
-                modifier = Modifier.weight(1f)
-                    .padding(top = 7.dp)
-
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Text(
-                    text = trade.category,
+                // Tradesman image
+                Image(
+                    painter = painterResource(trade.imageResId),
+                    contentDescription = "Tradesman Image",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
                 )
-                Text(
-                    modifier = Modifier.padding( top = 5.dp),
-                    text = trade.username,
-                    color = Color.Gray
-                )
-                Row(
-                    modifier = Modifier.padding(top = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier.padding(end = 5.dp)
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                    ) {
-                        Row()
-                         {
-                            Text(
-                                modifier = Modifier.padding(5.dp),
-                                text = trade.rate,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
 
-                    Box(modifier = Modifier
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(5.dp)
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(16.dp),
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Rating",
-                                tint = Color.Yellow
-                            )
-                            Text(
-                                text = trade.reviews.toString(),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
+                // Tradesman details
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 12.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = trade.username,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Service: Plumbing Repair",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Date: Jan 15, 2025",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Time: 10:00 AM",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Location: 123 Elm Street",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Payment: Pending",
+                        color = Color.Red,
+                        fontSize = 14.sp
+                    )
                 }
 
-                Row(
-                    modifier = Modifier.padding(top = 5.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-
-                ) {
-                    Column {
-                        Text(
-                            text = "Date",
-                        )
-                        Text(
-                            text = "31 January 2024"
-                        )
-                    }
-                    Column {
-                        Text(
-                            text = "Time",
-                        )
-                        Text(
-                            text = "8:00 AM",
-                        )
-                    }
-                }
+                // Status or additional label
+                Text(
+                    text = "All",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 12.dp)
+                )
             }
-
         }
     }
 }

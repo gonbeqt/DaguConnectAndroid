@@ -30,6 +30,11 @@ import com.example.androidproject.viewmodels.LoginViewModel
 import com.example.androidproject.viewmodels.RegisterViewModel
 import com.example.androidproject.viewmodels.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodels.factories.RegisterViewModelFactory
+import com.example.androidproject.ui.theme.views.pages2.BookingsTradesman
+import com.example.androidproject.ui.theme.views.pages2.BookmarkedTradesman
+import com.example.androidproject.ui.theme.views.pages2.HomeTradesman
+import com.example.androidproject.ui.theme.views.pages2.ScheduleTradesman
+import com.example.androidproject.ui.theme.views.pages2.TradesmanApply
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +93,24 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("cancellationdetails") {
                         CancellationDetails(trade,navController)
+                    }
+
+
+                    //Tradesman Routes
+                    composable("hometradesman") {
+                        HomeTradesman(trade,modifier = Modifier,navController)
+                    }
+                    composable("tradesmanapply") {
+                        TradesmanApply(trade,navController)
+                    }
+                    composable("bookingstradesman") {
+                        BookingsTradesman(modifier = Modifier,navController)
+                    }
+                    composable("bookmarkedtradesman") {
+                        BookmarkedTradesman(modifier = Modifier,navController)
+                    }
+                    composable("scheduletradesman") {
+                        ScheduleTradesman(modifier = Modifier,navController)
                     }
 
                 }

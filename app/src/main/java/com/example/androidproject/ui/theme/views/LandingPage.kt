@@ -1,5 +1,6 @@
 package com.example.androidproject.ui.theme.views
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.fonts.FontStyle
 import android.widget.Button
@@ -81,15 +82,16 @@ fun LandingPageScreen(navController: NavController){
 
     val message = listOf(
         "Connect with local residents in Dagupan City, to find or offer services, showcase your skills transact easily,and enjoy a secure platform",
-        "chuchuchcuchuchcucc",
-        "ASHDAHDAHWDWDWDASDAS"
+        "Work with trusted professionals in Dagupan City to fulfill your needs while maintaining trust and quality.",
+        "Effortlessly manage all your transactions and services through a user-friendly and reliable platform."
     )
     val images = listOf(
         R.drawable.landing1,
-        R.drawable.background_image_auth,
-        R.drawable.landing1
+        R.drawable.landing2,
+        R.drawable.landing3
     )
     val context = LocalContext.current
+    val activity = (LocalContext.current as? Activity)
 
     LaunchedEffect(Unit) {
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
@@ -108,14 +110,14 @@ fun LandingPageScreen(navController: NavController){
                 modifier = Modifier.fillMaxWidth().padding( top = 25.dp),
                 horizontalArrangement = Arrangement.spacedBy(290.dp)
             ) {
-                IconButton(onClick = {} ){
+                IconButton(onClick = {activity?.finish()} ){
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
                         modifier = Modifier.size(24.dp)
                     )
                 }
-                TextButton(onClick = {navController.navigate("signup")}) {
+                TextButton(onClick = {navController.navigate("login")}) {
                     Text(text = "Skip", color = Color.Gray)
                 }
 
@@ -142,7 +144,8 @@ fun LandingPageScreen(navController: NavController){
                     Image(
                         painter = painterResource(id = targetImage),
                         contentDescription = "LandingPage",
-                        modifier = Modifier.fillMaxSize().size(imageSize)
+                        modifier = Modifier.fillMaxSize().size(imageSize),
+                        contentScale = ContentScale.FillBounds
                     )
                 }
             }

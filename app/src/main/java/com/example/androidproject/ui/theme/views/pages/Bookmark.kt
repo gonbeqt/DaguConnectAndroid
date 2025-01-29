@@ -88,7 +88,7 @@ fun BookmarkTopSection(navController:NavController){
         ,
         horizontalArrangement = Arrangement.spacedBy(140.dp),
     ) {
-        Text(text="Bookmarks ",
+        Text(text="Bookmarks",
             fontSize = 24.sp,
             fontWeight =
             FontWeight(500),
