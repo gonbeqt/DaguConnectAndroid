@@ -13,11 +13,15 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -36,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.androidproject.R
 import com.example.androidproject.ui.theme.views.ServicePosting
 
@@ -144,7 +150,7 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
                 }
             }
 
-            // Tabs Row
+            // tab selection
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier.fillMaxWidth(),
@@ -176,100 +182,232 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
 
 @Composable
 fun MyPostsTab(servicePostings: List<ServicePosting>) {
+    var postsList by remember { mutableStateOf(servicePostings) }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         servicePostings.forEach { posting ->
             PostsCard(
                 servicePosting = posting,
-                onEditClick = { /* Handle edit click */ },
+                onEditClick = { title, description, rate ->
+                    // update the deets in posting card
+                    postsList = postsList.map {
+                        if (it.title == posting.title) {
+                            it.copy(title = title, description = description, rate = rate)
+                        } else {
+                            it
+                        }
+                    }
+                },
                 onApplicantsClick = { /* Handle applicants click */ }
             )
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostsCard(
     servicePosting: ServicePosting,
-    onEditClick: () -> Unit,
+    onEditClick: (String, String, String) -> Unit,
     onApplicantsClick: () -> Unit
 ) {
+    var isDialogVisible by remember { mutableStateOf(false) }
+    var editableTitle by remember { mutableStateOf(servicePosting.title) }
+    var editableDescription by remember { mutableStateOf(servicePosting.description) }
+    var editableRate by remember { mutableStateOf(servicePosting.rate) }
+
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .background(shape = RoundedCornerShape(1.dp), color = Color.White)
+            .background(color = Color.White)
+            .clip(RoundedCornerShape(8.dp))
+
     ) {
         Box(modifier = Modifier.background(color = Color.White)) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = servicePosting.title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Button(
-                    onClick = onEditClick,
-                    colors = ButtonDefaults.buttonColors(Color.White),
-                    modifier = Modifier
-                        .border(1.dp, Color.Black, shape = RoundedCornerShape(8.dp))
-                        .height(40.dp)
-                        .width(160.dp)
-
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+
+                    Text(
+                        text = editableTitle,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TextButton(
+                        onClick = { isDialogVisible = true }, // Show dialog when clicked
+                        colors = ButtonDefaults.buttonColors(Color.White),
+                        modifier = Modifier
+                            .border(1.dp, Color.Black, shape = RoundedCornerShape(8.dp))
+                            .height(40.dp)
+                            .width(130.dp)
                     ) {
-                        Text(
-                            "Edit Posting",
-                            color = Color.Black,
-                            modifier = Modifier.padding(start = 8.dp),
-                            textAlign = TextAlign.Start
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ArrowForwardIos,
-                            contentDescription = "Edit Icon",
-                            tint = Color.Black,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Edit Post",
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(start = 8.dp),
+                                textAlign = TextAlign.Start
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowForwardIos,
+                                contentDescription = "Edit Icon",
+                                tint = Color.Black,
+                                modifier = Modifier.padding(end = 8.dp).size(15.dp)
+                            )
+                        }
                     }
                 }
 
+
+                Text(
+                    text = editableDescription,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal
+                )
+                Text(
+                    text = "Rate: ${editableRate}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal
+                )
+                Text(
+                    text = "${servicePosting.applicantsCount} Applicants",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { onApplicantsClick() }
+                )
+                // Other card content
+                Text(
+                    text = "Posted on ${servicePosting.postedDate} - ${if (servicePosting.isActive) "Active" else "Inactive"}",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
             }
-            Text(
-                text = "Posted on ${servicePosting.postedDate} - ${if (servicePosting.isActive) "Active" else "Inactive"}",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-            Text(
-                text = servicePosting.description,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal
-            )
-            Text(
-                text = "Rate: ${servicePosting.rate}",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = "${servicePosting.applicantsCount} Applicants",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onApplicantsClick() }
-            )
+        }
+    }
+
+    // Dialog for editing posting
+    if (isDialogVisible) {
+        Dialog(onDismissRequest = { isDialogVisible = false }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(
+                        text = "Edit Post",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = "Update the details of your service need",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                    // Title TextField with Border
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ) {
+                        TextField(
+                            value = editableTitle,
+                            onValueChange = { editableTitle = it },
+                            label = { Text("Title") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            )
+                        )
+                    }
+
+                    // Description TextField with Border
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ) {
+                        TextField(
+                            value = editableDescription,
+                            onValueChange = { editableDescription = it },
+                            label = { Text("Description") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            )
+                        )
+                    }
+
+                    // Rate TextField with Border
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ) {
+                        TextField(
+                            value = editableRate,
+                            onValueChange = { editableRate = it },
+                            label = { Text("Rate") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            )
+                        )
+                    }
+
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(onClick = { isDialogVisible = false }) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            isDialogVisible = false
+                            onEditClick(editableTitle, editableDescription, editableRate)
+                        }) {
+                            Text("Save")
+                        }
+                    }
+                }
+            }
         }
     }
 }
-}
+
 
 @Composable
 fun GeneralSettings(
@@ -280,24 +418,41 @@ fun GeneralSettings(
 ) {
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .background(Color.LightGray)
+            .padding(8.dp)
             .clickable { onClick() }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = null)
-            Text(
-                text = title,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-        }
-        if (description.isNotEmpty()) { // Only show description if it's not empty
-            Text(
-                text = description,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White,
+                shape = RoundedCornerShape(8.dp))) {
+
+            Column(modifier = Modifier.padding(10.dp)) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                    Text(
+                        text = title,
+                        modifier = Modifier.padding(start = 14.dp)
+                    )
+                }
+                Text(
+                    text = description,
+                    modifier = Modifier.padding(top = 5.dp, start = 10.dp)
+                )
+            }
+
         }
     }
+
 }
+
 
 @Composable
 fun SettingsScreen() {
