@@ -6,8 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Chat
@@ -16,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -166,6 +169,7 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
                     )
                 }
             }
+
         }
 
 // Cards Section (Placed Outside the White Background)
@@ -178,9 +182,23 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
                 0 -> MyPostsTab(servicePostings)
                 1 -> SettingsScreen()
             }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.BottomEnd // Ensures FAB stays at bottom-end
+            ) {
+                FabPosting(servicePosting =ServicePosting("Plumbing Repair", "January 25, 2025", applicantsCount = 5),
+                     onEditClick = { _, _, _ -> }, onApplicantsClick = {})
+            }
         }
+
     }
+
 }
+
+
+
 
 @Composable
 fun MyPostsTab(servicePostings: List<ServicePosting>) {
@@ -206,6 +224,7 @@ fun MyPostsTab(servicePostings: List<ServicePosting>) {
             )
         }
     }
+
 }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -543,3 +562,174 @@ fun SettingsScreen() {
         )
     }
 }
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun FabPosting(servicePosting: ServicePosting,
+               onEditClick: (String, String, String) -> Unit,
+               onApplicantsClick: () -> Unit){
+    var isDialogVisible by remember { mutableStateOf(false) }
+    var editableTitle by remember { mutableStateOf(servicePosting.title) }
+    var editableDescription by remember { mutableStateOf(servicePosting.description) }
+    var editableRate by remember { mutableStateOf(servicePosting.rate) }
+    var selectedCategories = remember { mutableStateListOf<String>() }
+    FloatingActionButton(onClick = { isDialogVisible = true },
+        containerColor = Color.Gray,
+        contentColor = Color.White,
+        shape = CircleShape) {
+        Icon(imageVector = Icons.Default.Add,
+            contentDescription = "Add Icon")
+    }
+
+    if (isDialogVisible) {
+        Dialog(onDismissRequest = { isDialogVisible = false }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(
+                        text = "Edit Post",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = "Update the details of your service need",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                    // Title TextField with Border
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ) {
+                        TextField(
+                            value = editableTitle,
+                            onValueChange = { editableTitle = it },
+                            label = { Text("Title") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            )
+                        )
+                    }
+
+                    // Description TextField with Border
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ) {
+                        TextField(
+                            value = editableDescription,
+                            onValueChange = { editableDescription = it },
+                            label = { Text("Description") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            )
+                        )
+                    }
+
+                    // Rate TextField with Border
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ) {
+                        TextField(
+                            value = editableRate,
+                            onValueChange = { editableRate = it },
+                            label = { Text("Estimated Budget") },
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 1,
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            )
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.padding(5.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
+
+                    ) {
+                        Text(
+                            text = "Select Service Category",
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+
+                        ) {
+                            val categories = listOf(
+                                "Plumbing", "Carpentry", "Electrical",
+                                "Home Cleaning", "Painter and Decorator", "Fence Installer"
+                            )
+
+                            categories.forEach { category ->
+                                val isSelected = selectedCategories.contains(category)
+                                Box(
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (isSelected) selectedCategories.remove(category)
+                                            else selectedCategories.add(category)
+                                        }
+                                        .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
+                                        .clip(RoundedCornerShape(30.dp))
+                                        .background(if (isSelected) Color.Gray else Color.White)
+                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = category,
+                                        color = if (isSelected) Color.White else Color.Black
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(onClick = { isDialogVisible = false }) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            isDialogVisible = false
+                            onEditClick(editableTitle, editableDescription, editableRate)
+                        }) {
+                            Text("Save")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
