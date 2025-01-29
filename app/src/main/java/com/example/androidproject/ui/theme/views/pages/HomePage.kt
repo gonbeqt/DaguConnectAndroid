@@ -124,9 +124,9 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
 fun SearchField(navController: NavController,windowSize: WindowSize) {
     var searchQuery by remember { mutableStateOf("") }
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 24.dp
-        WindowType.MEDIUM -> 28.dp
-        WindowType.LARGE -> 32.dp
+        WindowType.SMALL -> 32.dp
+        WindowType.MEDIUM -> 34.dp
+        WindowType.LARGE -> 36.dp
     }
 
     val textSize = when (windowSize.width) {

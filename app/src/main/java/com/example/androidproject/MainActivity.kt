@@ -22,6 +22,9 @@ import com.example.androidproject.ui.theme.views.pages.ConfirmBook
 import com.example.androidproject.ui.theme.views.pages.HomeScreen
 import com.example.androidproject.ui.theme.views.pages.MessageScreen
 import com.example.androidproject.ui.theme.views.pages.RateAndReviews
+import com.example.androidproject.ui.theme.views.pages2.BookingsTradesman
+import com.example.androidproject.ui.theme.views.pages2.HomeTradesman
+import com.example.androidproject.ui.theme.views.pages2.TradesmanApply
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,6 +90,18 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("cancellationdetails") {
                         CancellationDetails(trade,navController)
+                    }
+
+
+                    //Tradesman Routes
+                    composable("hometradesman") {
+                        HomeTradesman(trade,modifier = Modifier,navController)
+                    }
+                    composable("tradesmanapply") {
+                        TradesmanApply(trade,navController)
+                    }
+                    composable("bookingstradesman") {
+                        BookingsTradesman(modifier = Modifier,navController)
                     }
 
                 }
