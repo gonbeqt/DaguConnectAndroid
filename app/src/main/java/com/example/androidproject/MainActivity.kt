@@ -40,24 +40,6 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = startDestination) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        
                     }
                     composable("signup") {
                         SignUpScreen(navController)
