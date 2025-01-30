@@ -14,13 +14,18 @@ import com.example.androidproject.ui.theme.views.LandingPageScreen
 import com.example.androidproject.ui.theme.views.LogInScreen
 import com.example.androidproject.ui.theme.views.SignUpScreen
 import com.example.androidproject.ui.theme.views.Tradesman
+import com.example.androidproject.ui.theme.views.pages.ACRepair
 import com.example.androidproject.ui.theme.views.pages.BookNow
 import com.example.androidproject.ui.theme.views.pages.BookingDetails
 import com.example.androidproject.ui.theme.views.pages.BookingsScreen
 import com.example.androidproject.ui.theme.views.pages.CancellationDetails
+import com.example.androidproject.ui.theme.views.pages.Carpentry
+import com.example.androidproject.ui.theme.views.pages.Cleaning
 import com.example.androidproject.ui.theme.views.pages.ConfirmBook
+import com.example.androidproject.ui.theme.views.pages.Electrician
 import com.example.androidproject.ui.theme.views.pages.HomeScreen
 import com.example.androidproject.ui.theme.views.pages.MessageScreen
+import com.example.androidproject.ui.theme.views.pages.Plumbing
 import com.example.androidproject.ui.theme.views.pages.RateAndReviews
 import com.example.androidproject.ui.theme.views.pages2.BookingsTradesman
 import com.example.androidproject.ui.theme.views.pages2.BookmarkedTradesman
@@ -74,6 +79,21 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("cancellationdetails") {
                         CancellationDetails(trade,navController)
+                    }
+                    composable("acrepair"){
+                        ACRepair(navController)
+                    }
+                    composable("plumbing") {
+                        Plumbing(navController)
+                    }
+                    composable("carpentry") {
+                        Carpentry(navController)
+                    }
+                    composable("electrician") {
+                        Electrician(navController)
+                    }
+                    composable("cleaning") {
+                        Cleaning(navController)
                     }
 
 
