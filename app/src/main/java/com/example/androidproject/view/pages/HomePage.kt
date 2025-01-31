@@ -1,4 +1,4 @@
-package com.example.androidproject.view.pages
+package com.example.androidproject.ui.theme.views.pages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -62,10 +64,17 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
     val selectedCategory = remember { mutableStateOf<String?>(null) }
 
     val categories = listOf(
-        Categories(R.drawable.plumbing, "Plumber"),
-        Categories(R.drawable.electrical, "Electrical"),
-        Categories(R.drawable.cleaning, "Cleaning"),
-        Categories(R.drawable.carpentry, "Carpentry")
+        Categories(R.drawable.carpentry, "Carpentry"),
+        Categories(R.drawable.painting, "Painting"),
+        Categories(R.drawable.welding, "Welding"),
+        Categories(R.drawable.electrician, "Electrician"),
+        Categories(R.drawable.plumbing, "Plumbing"),
+        Categories(R.drawable.masonry, "Masonry"),
+        Categories(R.drawable.roofing, "Roofing"),
+        Categories(R.drawable.airconrepair, "AC Repair"),
+        Categories(R.drawable.mechanics, "Mechanics"),
+        Categories(R.drawable.cleaning, "Cleaning")
+
     )
 
     val tradesmen = listOf(
@@ -81,11 +90,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
     )
 
-    val filteredTradesmen = if (selectedCategory.value != null) {
-        tradesmen.filter { it.category == selectedCategory.value }
-    } else {
-        tradesmen
-    }
+
 
     Box(
         modifier = modifier
@@ -105,10 +110,10 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
                 ExploreNow(windowSize)
 
                 Spacer(modifier = Modifier.height(20.dp))
-                CategoryRow(categories, selectedCategory)
+                CategoryRow(categories,navController)
 
                 Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(filteredTradesmen, selectedCategory,navController)
+                TradesmanColumn(tradesmen,navController)
             }
         }
     }
@@ -206,43 +211,29 @@ fun SearchField(navController: NavController,windowSize: WindowSize) {
 }
 
 @Composable
-fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<String?>) {
+fun CategoryRow(categories: List<Categories>, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardSize = when (windowSize.width) {
         WindowType.SMALL -> 100.dp to 80.dp
         WindowType.MEDIUM -> 120.dp to 100.dp
         WindowType.LARGE -> 140.dp to 120.dp
     }
-
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 20.dp
-        WindowType.MEDIUM -> 30.dp
-        WindowType.LARGE -> 40.dp
-    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, end = 25.dp),
-             horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 25.dp, vertical = 25.dp ),
+             horizontalArrangement = Arrangement.Start
     ) {
         Text(
             text = "Categories",
             fontSize = when (windowSize.width) {
-                WindowType.SMALL -> 16.sp
-                WindowType.MEDIUM -> 18.sp
-                WindowType.LARGE -> 20.sp
+                WindowType.SMALL -> 18.sp
+                WindowType.MEDIUM -> 20.sp
+                WindowType.LARGE -> 22.sp
             },
             fontWeight = FontWeight(500),
-            modifier = Modifier.padding(top = 10.dp)
         )
-        TextButton(onClick = {}) {
-            Text(
-                text = "View All",
-                color = Color.Gray,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 10.dp)
-            )
-        }
+
     }
 
     LazyRow(
@@ -254,15 +245,22 @@ fun CategoryRow(categories: List<Categories>, selectedCategory: MutableState<Str
         items(categories.size) { index ->
             val category = categories[index]
             CategoryItem(category) {
-                // Set the clicked category
-                selectedCategory.value = category.name
+
+                when (category.name) {
+                    "Plumbing" -> navController.navigate("plumbing")
+                    "Cleaning" -> navController.navigate("cleaning")
+                    "Carpentry" -> navController.navigate("carpentry")
+                    "Electrician" -> navController.navigate("electrician")
+
+
+                }
             }
         }
     }
 }
 
 @Composable
-fun TradesmanColumn(tradesmen: List<Tradesman>, selectedCategory: MutableState<String?>, navController: NavController) {
+fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
     val showDialogAllTradesman = remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -289,7 +287,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>, selectedCategory: MutableState<S
             modifier = Modifier.padding(top = 10.dp)
         )
         TextButton(onClick = { showDialogAllTradesman.value = true
-            selectedCategory.value = null}) {
+            }) {
             Text(
                 text = "See All",
                 color = Color.Gray,
@@ -360,9 +358,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>, selectedCategory: MutableState<S
                     }
                 }
             }
-
     }
-
 
 }
 
@@ -422,7 +418,7 @@ fun ExploreNow(windowSize: WindowSize){
     }
 }
 @Composable
-fun CategoryItem(category: Categories, onClick: () -> Unit) {
+fun CategoryItem(category: Categories,onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .size(120.dp, 100.dp)
@@ -566,13 +562,6 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
                         .clickable { }
                 )
             }
-
-
         }
-
-
     }
-
-
-
 }
