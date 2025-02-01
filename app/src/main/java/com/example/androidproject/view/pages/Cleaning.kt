@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
-import com.example.androidproject.ui.theme.views.Tradesman
+import com.example.androidproject.view.Tradesman
 
 @Composable
 fun Cleaning(navController: NavController) {

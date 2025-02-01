@@ -17,14 +17,18 @@ data class RequestJobs(
     val deadline: String,
 )
 
-data class JobResponse(
+data class PostJobResponse(
+    val message: String
+)
+
+data class GetJobs(
     val id: Int,
     @SerializedName("user_id")
     val userId: Int,
     @SerializedName("client_fullname")
     val clientFullname: String,
     @SerializedName("client_profile")
-    val clientProfile: String,
+    val clientProfile: String?,
     val salary: Double,
     @SerializedName("job_type")
     val jobType: String,

@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,7 @@ import com.example.androidproject.view.rememberWindowSizeClass
 
 @Composable
 fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
+    Log.i("Screen" , "BookingsScreen")
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp

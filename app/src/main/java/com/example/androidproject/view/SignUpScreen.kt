@@ -494,13 +494,13 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
     ) {
         Button(
             onClick = {
-                viewModel.register(firstName, lastName, userName, email, age, isClient, password, confirmPassword)
+                viewModel.register(firstName, lastName, userName, age, email,  isClient, password, confirmPassword)
                 when (registerState) {
                     is RegisterViewModel.RegisterState.Loading -> {
                         // Do nothing
                     }
                     is RegisterViewModel.RegisterState.Success -> {
-                        Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, registerState.data?.message, Toast.LENGTH_SHORT).show()
                         navController.navigate("login")
                     }
                     is RegisterViewModel.RegisterState.Error -> {

@@ -79,8 +79,6 @@ fun TradesmanApply(trade: Tradesman, navController: NavController) {
                             .padding(16.dp),
                         tint = Color(0xFF81D796)
                     )
-
-
                     Text(
                         text = "Bookings Details",
                         fontSize = 24.sp,
@@ -120,7 +118,6 @@ fun TradesmanApply(trade: Tradesman, navController: NavController) {
                             .size(100.dp)
                             .padding(start = 10.dp)
                     )
-
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -138,7 +135,6 @@ fun TradesmanApply(trade: Tradesman, navController: NavController) {
                             color = Color.Black,
                             fontSize = 16.sp
                         )
-
                         Box(
                             modifier = Modifier
                                 .padding(vertical = 4.dp)
@@ -176,7 +172,6 @@ fun TradesmanApply(trade: Tradesman, navController: NavController) {
                             }
                         }
                     }
-
                 }
                 Spacer(Modifier.height(8.dp))
                 Row (modifier = Modifier.fillMaxWidth().padding(horizontal =25.dp), horizontalArrangement = Arrangement.SpaceBetween){
@@ -250,7 +245,6 @@ fun TradesmanApply(trade: Tradesman, navController: NavController) {
                                 .fillMaxWidth()
                                 .padding(10.dp)
                         )
-
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -265,7 +259,6 @@ fun TradesmanApply(trade: Tradesman, navController: NavController) {
                                         .background(Color(0xFFF1F1F1))
                                         .padding(4.dp)
                                         .clip(RoundedCornerShape(12.dp)),
-
                                 ) {
                                     // Content for each Box
                                     Text(
@@ -280,7 +273,6 @@ fun TradesmanApply(trade: Tradesman, navController: NavController) {
                 }
                 Row (Modifier.fillMaxWidth().height(150.dp),horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
                     Text(text = "Other services needed by this client (0)", fontSize = 20.sp, fontWeight = FontWeight(500))
-
                 }
                 Box(
                     modifier = Modifier

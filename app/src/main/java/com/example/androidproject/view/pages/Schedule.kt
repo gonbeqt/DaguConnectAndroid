@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +34,7 @@ import java.util.Locale
 
 @Composable
 fun ScheduleScreen(modifier: Modifier = Modifier,navController: NavController) {
+    Log.i("Screen" , "ScheduleScreen")
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val tradesman = listOf(

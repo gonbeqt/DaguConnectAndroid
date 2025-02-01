@@ -9,25 +9,36 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.androidproject.ui.theme.AndroidProjectTheme
-import com.example.androidproject.ui.theme.views.Feedback
-import com.example.androidproject.ui.theme.views.LandingPageScreen
-import com.example.androidproject.ui.theme.views.LogInScreen
-import com.example.androidproject.ui.theme.views.SignUpScreen
-import com.example.androidproject.ui.theme.views.Tradesman
-import com.example.androidproject.ui.theme.views.pages.BookNow
-import com.example.androidproject.ui.theme.views.pages.BookingDetails
-import com.example.androidproject.ui.theme.views.pages.BookingsScreen
-import com.example.androidproject.ui.theme.views.pages.CancellationDetails
-import com.example.androidproject.ui.theme.views.pages.ConfirmBook
-import com.example.androidproject.ui.theme.views.pages.HomeScreen
-import com.example.androidproject.ui.theme.views.pages.MessageScreen
-import com.example.androidproject.ui.theme.views.pages.RateAndReviews
-import com.example.androidproject.ui.theme.views.pages2.BookingsTradesman
-import com.example.androidproject.ui.theme.views.pages2.BookmarkedTradesman
-import com.example.androidproject.ui.theme.views.pages2.HomeTradesman
-import com.example.androidproject.ui.theme.views.pages2.ScheduleTradesman
-import com.example.androidproject.ui.theme.views.pages2.TradesmanApply
+import com.example.androidproject.api.ApiService
+import com.example.androidproject.api.RetrofitInstance
+import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.ui.theme.views.pages.ACRepair
+import com.example.androidproject.ui.theme.views.pages.Carpentry
+import com.example.androidproject.ui.theme.views.pages.Cleaning
+import com.example.androidproject.ui.theme.views.pages.Electrician
+import com.example.androidproject.ui.theme.views.pages.Plumbing
+import com.example.androidproject.view.Feedback
+import com.example.androidproject.view.LandingPageScreen
+import com.example.androidproject.view.LogInScreen
+import com.example.androidproject.view.SignUpScreen
+import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.pages.BookNow
+import com.example.androidproject.view.pages.BookingDetails
+import com.example.androidproject.view.pages.BookingsScreen
+import com.example.androidproject.view.pages.CancellationDetails
+import com.example.androidproject.view.pages.ConfirmBook
+import com.example.androidproject.view.pages.MessageScreen
+import com.example.androidproject.view.pages.RateAndReviews
+import com.example.androidproject.view.pages2.BookingsTradesman
+import com.example.androidproject.view.pages2.BookmarkedTradesman
+import com.example.androidproject.view.pages2.HomeTradesman
+import com.example.androidproject.view.pages2.ScheduleTradesman
+import com.example.androidproject.view.pages2.TradesmanApply
+import com.example.androidproject.view.theme.AndroidProjectTheme
+import com.example.androidproject.viewmodel.LoginViewModel
+import com.example.androidproject.viewmodel.RegisterViewModel
+import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
+import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +57,6 @@ class MainActivity : ComponentActivity() {
 
         val viewModelFactory = LoginViewModelFactory(apiService, this)
         val loginViewModel = ViewModelProvider(this, viewModelFactory)[LoginViewModel::class.java]
-
-
 
         setContent {
             AndroidProjectTheme {
@@ -106,7 +115,7 @@ class MainActivity : ComponentActivity() {
 
                     //Tradesman Routes
                     composable("hometradesman") {
-                        HomeTradesman(trade,modifier = Modifier,navController)
+                        HomeTradesman(modifier = Modifier,navController)
                     }
                     composable("tradesmanapply") {
                         TradesmanApply(trade,navController)

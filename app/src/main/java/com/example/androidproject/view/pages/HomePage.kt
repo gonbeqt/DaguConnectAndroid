@@ -1,5 +1,6 @@
-package com.example.androidproject.ui.theme.views.pages
+package com.example.androidproject.view.pages
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -59,6 +58,7 @@ import com.example.androidproject.view.rememberWindowSizeClass
 
 @Composable
 fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
+    Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
 
     val selectedCategory = remember { mutableStateOf<String?>(null) }

@@ -23,11 +23,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.view.pages.HomeScreen
 import com.example.androidproject.view.pages.BookingsScreen
 import com.example.androidproject.view.pages.BookmarkedScreen
-import com.example.androidproject.view.pages.HomeScreen
 import com.example.androidproject.view.pages.ProfileScreen
 import com.example.androidproject.view.pages.ScheduleScreen
+import com.example.androidproject.view.pages2.BookingsTradesman
+import com.example.androidproject.view.pages2.BookmarkedTradesman
+import com.example.androidproject.view.pages2.HomeTradesman
+import com.example.androidproject.view.pages2.ProfileTradesman
+import com.example.androidproject.view.pages2.ScheduleTradesman
 
 @Composable
 fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
@@ -60,9 +66,6 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
                             (Text(text = item.nav_label, fontSize = 10.sp))
                         }
                     )
-
-
-
                 }
             }
         }
@@ -72,14 +75,24 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
 }
 
 @Composable
-
 fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int,navController: NavController) {
-    when (selectedItem) {
-        0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController)
-        1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController)
-        2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
-        3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp),navController)
-        4 -> ProfileScreen(modifier.padding(bottom = 0.1.dp))
+    val role = AccountManager.getAccount()?.isClient
+    if (role == true) {
+        when (selectedItem) {
+            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController)
+            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController)
+            2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
+            3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp),navController)
+            4 -> ProfileScreen(modifier.padding(bottom = 0.1.dp))
+        }
+    } else {
+        when (selectedItem) {
+            0 -> HomeTradesman(modifier = Modifier, navController)
+            1 -> BookingsTradesman(modifier.padding(bottom = 0.1.dp),navController)
+            2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp),navController)
+            3 -> BookmarkedTradesman(modifier.padding(bottom = 0.1.dp),navController)
+            4 -> ProfileTradesman()
+        }
     }
 }
 

@@ -54,7 +54,7 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 
 @Composable
-fun HomeTradesman(trade: Tradesman, modifier: Modifier, navController: NavController){
+fun HomeTradesman( modifier: Modifier, navController: NavController){
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -397,10 +397,7 @@ fun RecentJobsItem(trade: Tradesman, navController: NavController){
 
 
                 }
-
             }
-
-
         }
     }
 }

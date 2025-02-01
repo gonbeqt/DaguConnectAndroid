@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import com.example.androidproject.view.Tradesman
 @Composable
 
 fun BookmarkedScreen(modifier: Modifier = Modifier,navController:NavController) {
+    Log.i("Screen" , "BookmarkedScreen")
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,

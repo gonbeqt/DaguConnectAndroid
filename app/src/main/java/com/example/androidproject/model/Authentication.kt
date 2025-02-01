@@ -37,8 +37,8 @@ data class RegisterRequest (
     @SerializedName("last_name")
     val lastName: String,
     val username: String,
-    val email: String,
     val age: Int,
+    val email: String,
     @SerializedName("is_client")
     val isClient: Boolean,
     val password: String,
