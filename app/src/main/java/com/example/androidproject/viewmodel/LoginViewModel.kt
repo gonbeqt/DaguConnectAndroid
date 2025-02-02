@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.JsonErrorParser
 import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.LoginRequest
 import com.example.androidproject.model.LoginResponse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,7 @@ class LoginViewModel(private val apiService: ApiService, private val context: Co
                     if (loginResponse != null) {
                         val user = loginResponse.user
                         AccountManager.saveAccount(user)
+                        loginResponse.token?.let { TokenManager.saveToken(it) }
                         Log.d("LoginViewModel", "Token: ${loginResponse.token}")
                         Log.d("LoginViewModel", "Login state:: ${_loginState.value}")
                     }

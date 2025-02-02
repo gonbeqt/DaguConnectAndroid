@@ -1,5 +1,6 @@
 package com.example.androidproject
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.pages.HomeScreen
@@ -34,7 +36,9 @@ import com.example.androidproject.view.pages2.BookmarkedTradesman
 import com.example.androidproject.view.pages2.HomeTradesman
 import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
-
+import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
+import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
+import androidx.compose.ui.platform.LocalContext
 @Composable
 fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
     val navItems = listOf(
@@ -48,6 +52,8 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
     var selectedItem by remember {
         mutableStateOf(0)
     }
+    val activity = LocalContext.current as ComponentActivity
+    val getJobsViewModel = remember { ViewModelSetups.setupGetJobsViewModel(activity) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -70,12 +76,21 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
             }
         }
     ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding),selectedItem,navController)
+        ContentScreen(
+            modifier = Modifier.padding(innerPadding),
+            selectedItem,
+            navController,
+            getJobsViewModel)
     }
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int,navController: NavController) {
+fun ContentScreen(
+    modifier: Modifier = Modifier,
+    selectedItem: Int,
+    navController: NavController,
+    getJobsViewModel: GetJobsViewModel) {
+
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
@@ -87,7 +102,7 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedItem: Int,navController
         }
     } else {
         when (selectedItem) {
-            0 -> HomeTradesman(modifier = Modifier, navController)
+            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel)
             1 -> BookingsTradesman(modifier.padding(bottom = 0.1.dp),navController)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp),navController)
             3 -> BookmarkedTradesman(modifier.padding(bottom = 0.1.dp),navController)

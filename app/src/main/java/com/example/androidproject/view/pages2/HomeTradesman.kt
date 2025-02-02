@@ -26,12 +26,15 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,13 +51,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.GetJobs
+import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 
 @Composable
-fun HomeTradesman( modifier: Modifier, navController: NavController){
+fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel){
+
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -114,18 +122,16 @@ fun HomeTradesman( modifier: Modifier, navController: NavController){
 
                         ) {
                             when (selectedTabIndex) {
-                                0 -> TopMatches(navController)
+                                0 -> TopMatches(navController, getJobsViewModel)
                                 1 -> RecentJobs(navController)
 
                             }
                         }
                     }
                 }
-
             }
         }
     }
-
 }
 @Composable
 fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize) {
@@ -181,7 +187,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
                 decorationBox = { innerTextField ->
                     if (searchQuery.isEmpty()) {
                         Text(
-                            text = "Search for services or tradespeople...",
+                            text = "Search for jobs or services...",
                             style = androidx.compose.ui.text.TextStyle(fontSize = textSize, color = Color.Gray)
                         )
                     }
@@ -212,48 +218,58 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
                     .size(iconSize)
                     .clickable {
                         navController.navigate("message_screen")
-
                     }
             )
         }
     }
 }
 @Composable
-fun TopMatches(navController: NavController){
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFD9D9D9))
-            .padding(top = 5.dp)
-        ,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            TopMatchesItem(trade,navController)
+fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel){
+    val jobState by getJobsViewModel.jobsState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        getJobsViewModel.getJobs()
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
+        when (jobState) {
+            is GetJobsViewModel.JobsState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+            is GetJobsViewModel.JobsState.Success -> {
+                val jobs = (jobState as GetJobsViewModel.JobsState.Success).data
+                LazyColumn(
+                    modifier = Modifier.padding(top = 5.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    items(jobs.size) { index ->
+                        val job = jobs[index]
+                        TopMatchesItem(job, navController)
+                    }
+                }
+            }
+            is GetJobsViewModel.JobsState.Error -> {
+                val errorMessage = (jobState as GetJobsViewModel.JobsState.Error).message
+                Text(
+                    text = "Error: $errorMessage",
+                    color = Color.Red,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            else -> Unit
         }
     }
 }
 
 
 @Composable
-fun TopMatchesItem(trade: Tradesman, navController: NavController){
+fun TopMatchesItem(getJobs: GetJobs, navController: NavController){
+    val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-            navController.navigate("tradesmanapply")
+            navController.navigate("tradesmanapply/${getJobs.id}")
             },
         colors = CardDefaults.cardColors(Color.White)
     ) {
@@ -268,7 +284,7 @@ fun TopMatchesItem(trade: Tradesman, navController: NavController){
                         .size(40.dp)
                         .clip(CircleShape)
                 )
-                Text(text = trade.username,
+                Text(text = getJobs.clientFullname,
                     fontSize = 16.sp,
                     color = Color.Black,
                     fontWeight = FontWeight(500),
@@ -277,9 +293,8 @@ fun TopMatchesItem(trade: Tradesman, navController: NavController){
             Spacer(modifier = Modifier.height(16.dp))
             Row {
                 Column {
-                    Text(text = trade.category, fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
-                    Text(text = "Posted on 1 min ago - Active ")
-
+                    Text(text = "Looking for ${getJobs.jobType}", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
+                    Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Image(painter = painterResource(R.drawable.bookmark),
@@ -294,22 +309,17 @@ fun TopMatchesItem(trade: Tradesman, navController: NavController){
                 colors = CardDefaults.cardColors(Color.White)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Description of the Plumbing Repair service", fontSize = 12.sp)
-                    Text(text = "Est. Budget: P200/hr", fontSize = 12.sp)
-                    Text(text = "Location: Lingayen, Pangasinan", fontSize = 12.sp)
+                    Text(text = getJobs.jobDescription, fontSize = 12.sp)
+                    Text(text = "Est. Budget: ${getJobs.salary} pesos", fontSize = 12.sp)
+                    Text(text = "Location: ${getJobs.location}", fontSize = 12.sp)
                     TextButton(onClick = {
-
                     }) {
                         Text(text = "5 Applicant",fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight(500),
                             style = TextStyle(textDecoration = TextDecoration.Underline),
                             modifier = Modifier.padding(8.dp))
                     }
-
                 }
-
             }
-
-
         }
     }
 }

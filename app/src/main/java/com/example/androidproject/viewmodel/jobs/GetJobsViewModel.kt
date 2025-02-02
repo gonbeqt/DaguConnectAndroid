@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.GetJobs
+import com.example.androidproject.model.JobsResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -18,8 +19,11 @@ class GetJobsViewModel (private val apiService: ApiService, private val context:
             _jobsState.value = JobsState.Loading
             try {
                 val response = apiService.getJobs()
+                val body = response.body()
                 if (response.isSuccessful) {
-                    _jobsState.value = JobsState.Success(response.body())
+                    if (body != null) {
+                        _jobsState.value = JobsState.Success(body.jobs)
+                    }
                 } else {
                     _jobsState.value = JobsState.Error(response.message())
                 }
@@ -31,7 +35,7 @@ class GetJobsViewModel (private val apiService: ApiService, private val context:
     sealed class JobsState {
         object Idle : JobsState()
         object Loading : JobsState()
-        data class Success(val data: List<GetJobs>?) : JobsState()
+        data class Success(val data: List<GetJobs>) : JobsState()
         data class Error(val message: String) : JobsState()
     }
 }

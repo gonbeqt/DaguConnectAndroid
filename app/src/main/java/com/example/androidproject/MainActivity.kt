@@ -2,6 +2,7 @@ package com.example.androidproject
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
@@ -39,6 +40,10 @@ import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
+import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
+import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +63,11 @@ class MainActivity : ComponentActivity() {
         val viewModelFactory = LoginViewModelFactory(apiService, this)
         val loginViewModel = ViewModelProvider(this, viewModelFactory)[LoginViewModel::class.java]
 
+        val getJobsViewModelFactory = GetJobsViewModelFactory(apiService, this)
+        val getJobsViewModel = ViewModelProvider(this, getJobsViewModelFactory)[GetJobsViewModel::class.java]
+
+        val viewJobViewModelFactory = ViewJobViewModelFactory(apiService, this)
+        val viewJobViewModel = ViewModelProvider(this, viewJobViewModelFactory)[ViewJobViewModel::class.java]
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -115,10 +125,12 @@ class MainActivity : ComponentActivity() {
 
                     //Tradesman Routes
                     composable("hometradesman") {
-                        HomeTradesman(modifier = Modifier,navController)
+                        HomeTradesman(modifier = Modifier,navController, getJobsViewModel)
                     }
-                    composable("tradesmanapply") {
-                        TradesmanApply(trade,navController)
+                    composable("tradesmanapply/{jobId}") { backStackEntry ->
+                        val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                        Log.e("Job ID" , jobId)
+                        TradesmanApply(jobId, navController, viewJobViewModel)
                     }
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController)
