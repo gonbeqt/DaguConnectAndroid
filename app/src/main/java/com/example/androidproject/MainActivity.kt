@@ -28,9 +28,11 @@ import com.example.androidproject.ui.theme.views.pages.HomeScreen
 import com.example.androidproject.ui.theme.views.pages.MessageScreen
 import com.example.androidproject.ui.theme.views.pages.Plumbing
 import com.example.androidproject.ui.theme.views.pages.RateAndReviews
+import com.example.androidproject.ui.theme.views.pages2.AvailabilityStatusScreen
 import com.example.androidproject.ui.theme.views.pages2.BookingsTradesman
 import com.example.androidproject.ui.theme.views.pages2.BookmarkedTradesman
 import com.example.androidproject.ui.theme.views.pages2.HomeTradesman
+import com.example.androidproject.ui.theme.views.pages2.ProfileTradesman
 import com.example.androidproject.ui.theme.views.pages2.ScheduleTradesman
 import com.example.androidproject.ui.theme.views.pages2.TradesmanApply
 
@@ -45,7 +47,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination) {
+                NavHost(navController = navController, startDestination = "profiletradesman") {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -117,6 +119,10 @@ class MainActivity : ComponentActivity() {
                     composable("scheduletradesman") {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
+                    composable("profiletradesman") {
+                        ProfileTradesman(modifier = Modifier,navController)
+                    }
+
 
                 }
             }
