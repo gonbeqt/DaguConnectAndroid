@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -37,10 +38,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -84,8 +87,6 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
 
             // Provide navController to the SearchField
             TopSectionHomeTradesman(navController,windowSize )
-
-
             Box (
                 modifier = modifier
                     .fillMaxSize()
@@ -225,22 +226,45 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
         }
     }
 }
+
 @Composable
-fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel){
+fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
     val jobState by getJobsViewModel.jobsState.collectAsState()
     val listState = rememberLazyListState()
 
+    // Only trigger getJobs when jobState is Idle (first load)
     LaunchedEffect(jobState) {
-        getJobsViewModel.getJobs()
+        if (jobState is GetJobsViewModel.JobsState.Idle) {
+            getJobsViewModel.getJobs()
+        }
+    }
+
+    val jobs = when (val state = jobState) {
+        is GetJobsViewModel.JobsState.Success -> state.data
+        else -> emptyList<GetJobs>()
+    }
+
+    // Check if we need to load more data when nearing the end of the list
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            lastVisibleItemIndex >= jobs.size - 5 // Load next page when 5 items are left
+        }
+    }
+
+    // Load more jobs when needed
+    LaunchedEffect(shouldLoadMore.value) {
+        if (shouldLoadMore.value && jobState !is GetJobsViewModel.JobsState.Loading) {
+            getJobsViewModel.getJobs()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
         when (jobState) {
             is GetJobsViewModel.JobsState.Loading -> {
-                //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                // Optionally show a spinner here when the jobState is Loading
             }
             is GetJobsViewModel.JobsState.Success -> {
-                val jobs = (jobState as GetJobsViewModel.JobsState.Success).data
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.padding(top = 5.dp),
@@ -248,15 +272,21 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
                 ) {
                     itemsIndexed(jobs) { index, job ->
                         TopMatchesItem(job, navController)
-
-                        if (index == jobs.lastIndex) {
-                            LaunchedEffect(index == jobs.lastIndex) {
-                                getJobsViewModel.getJobs()
-                            }
+                    }
+                    item {
+                        // Show a loading spinner at the bottom if jobs are loading
+                        if (jobState is GetJobsViewModel.JobsState.Loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
+                            )
                         }
                     }
                 }
             }
+
             is GetJobsViewModel.JobsState.Error -> {
                 val errorMessage = (jobState as GetJobsViewModel.JobsState.Error).message
                 Text(
