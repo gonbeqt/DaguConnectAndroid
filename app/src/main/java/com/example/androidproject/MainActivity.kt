@@ -15,6 +15,7 @@ import com.example.androidproject.ui.theme.views.LogInScreen
 import com.example.androidproject.ui.theme.views.SignUpScreen
 import com.example.androidproject.ui.theme.views.Tradesman
 import com.example.androidproject.ui.theme.views.pages.ACRepair
+import com.example.androidproject.ui.theme.views.pages.AllTradesman
 import com.example.androidproject.ui.theme.views.pages.BookNow
 import com.example.androidproject.ui.theme.views.pages.BookingDetails
 import com.example.androidproject.ui.theme.views.pages.BookingsScreen
@@ -95,11 +96,14 @@ class MainActivity : ComponentActivity() {
                     composable("cleaning") {
                         Cleaning(navController)
                     }
+                    composable("alltradesman"){
+                        AllTradesman(navController)
+                    }
 
 
                     //Tradesman Routes
                     composable("hometradesman") {
-                        HomeTradesman(trade,modifier = Modifier,navController)
+                        HomeTradesman(modifier = Modifier,navController)
                     }
                     composable("tradesmanapply") {
                         TradesmanApply(trade,navController)

@@ -62,7 +62,7 @@ fun Cleaning(navController: NavController) {
 
         )
 
-    // Filter only Plumbers
+    // Filter only Cleaning
     val cleanings = tradesmen.filter { it.category == "Cleaning" }
 
     Box(

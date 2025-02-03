@@ -150,7 +150,7 @@ fun TradesmanApply(trade: Tradesman,navController: NavController) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.LocationOn,
-                                        contentDescription = "Bookmark Icon",
+                                        contentDescription = "Location Icon",
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
@@ -159,22 +159,7 @@ fun TradesmanApply(trade: Tradesman,navController: NavController) {
                                         fontSize = 12.sp
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(16.dp)) // Spacing between the two sections
 
-                                // Second section
-                                Row(modifier = Modifier.clickable { /* Add to Bookmark Action */ }
-                                    ,verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Bookmark,
-                                        contentDescription = "Bookmark Icon",
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = "Add to bookmark",
-                                        fontSize = 12.sp
-                                    )
-                                }
                             }
                         }
                     }
@@ -187,7 +172,7 @@ fun TradesmanApply(trade: Tradesman,navController: NavController) {
                 }
                 Text(text = "Posted on January 5, 2025 - Active",Modifier.padding(horizontal = 25.dp))
 
-                Card(modifier = Modifier.fillMaxWidth().height(150.dp),
+                Card(modifier = Modifier.fillMaxWidth().height(100.dp),
                     border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
                     colors = CardDefaults.cardColors(Color.White),
                     shape = RectangleShape
@@ -236,7 +221,7 @@ fun TradesmanApply(trade: Tradesman,navController: NavController) {
                         }
                     }
                 }
-                Card(modifier = Modifier.fillMaxWidth().height(150.dp),
+                Card(modifier = Modifier.fillMaxWidth(),
                     border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
                     colors = CardDefaults.cardColors(Color.White),
                     shape = RectangleShape
@@ -263,7 +248,7 @@ fun TradesmanApply(trade: Tradesman,navController: NavController) {
                             items.forEach { item ->
                                 Box(
                                     modifier = Modifier
-                                        .size(120.dp,50.dp)
+                                        .size(110.dp,50.dp)
                                         .background(Color(0xFFF1F1F1))
                                         .padding(4.dp)
                                         .clip(RoundedCornerShape(12.dp)),
@@ -280,10 +265,13 @@ fun TradesmanApply(trade: Tradesman,navController: NavController) {
                         }
                     }
                 }
-                Row (Modifier.fillMaxWidth().height(150.dp),horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
-                    Text(text = "Other services needed by this client (0)", fontSize = 20.sp, fontWeight = FontWeight(500))
+                Spacer(Modifier.height(20.dp))
+                Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
+                    Text(text = "Other services needed by this client (0)", fontSize = 18.sp, fontWeight = FontWeight(500))
 
                 }
+                Spacer(Modifier.height(40.dp))
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(),

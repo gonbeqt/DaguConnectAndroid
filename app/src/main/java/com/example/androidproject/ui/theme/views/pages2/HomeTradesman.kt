@@ -72,7 +72,7 @@ import com.example.androidproject.ui.theme.views.pages.TradesmanColumn
 import com.example.androidproject.ui.theme.views.rememberWindowSizeClass
 
 @Composable
-fun HomeTradesman(trade:Tradesman,modifier: Modifier,navController: NavController){
+fun HomeTradesman(modifier: Modifier,navController: NavController){
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -253,7 +253,7 @@ fun TopMatches(navController: NavController){
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFD9D9D9))
-            .padding(top = 5.dp)
+            .padding(bottom = 100.dp)
         ,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -299,12 +299,7 @@ fun TopMatchesItem(trade: Tradesman,navController: NavController){
                     Text(text = "Posted on 1 min ago - Active ")
 
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                Image(painter = painterResource(R.drawable.bookmark),
-                    contentDescription = "Bookmark",
-                    Modifier.size(32.dp)
-                        .clickable {  }
-                )
+
             }
             Spacer(modifier = Modifier.height(16.dp))
             Card(modifier = Modifier.fillMaxWidth(),
@@ -349,7 +344,7 @@ fun RecentJobs(navController: NavController){
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFD9D9D9))
-            .padding(top = 5.dp)
+            .padding(bottom = 100.dp)
 
         ,
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -396,12 +391,7 @@ fun RecentJobsItem(trade: Tradesman,navController: NavController){
                     Text(text = "Posted on 1 min ago - Active ")
 
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                Image(painter = painterResource(R.drawable.bookmark),
-                    contentDescription = "Bookmark",
-                    Modifier.size(32.dp)
-                        .clickable {  }
-                )
+
             }
             Spacer(modifier = Modifier.height(16.dp))
             Card(modifier = Modifier.fillMaxWidth(),
