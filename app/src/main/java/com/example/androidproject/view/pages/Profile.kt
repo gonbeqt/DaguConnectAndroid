@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import LogoutViewModel
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,6 +29,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,11 +50,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ServicePosting
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
+fun ProfileScreen(modifier: Modifier = Modifier, navController: NavController,
+                  logoutViewModel: LogoutViewModel) {
     Log.i("Screen", "ProfileScreen")
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
@@ -179,7 +186,7 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
         ) {
             when (selectedTabIndex) {
                 0 -> MyPostsTab(servicePostings)
-                1 -> SettingsScreen()
+                1 -> SettingsScreen(navController,logoutViewModel)
             }
             Box(
                 modifier = Modifier
@@ -527,7 +534,19 @@ fun GeneralSettings(
 
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewModel) {
+    val logoutResult by logoutViewModel.logoutResult.collectAsState()
+    LaunchedEffect(logoutResult) {
+        logoutResult?.let {
+            // Clear tokens and navigate regardless of result
+            TokenManager.clearToken()
+            AccountManager.clearAccountData()
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }
+            logoutViewModel.resetLogoutResult()
+        }
+    }
     Column {
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_notification),
@@ -557,7 +576,19 @@ fun SettingsScreen() {
             icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
             title = "Log Out",
             description = "",
-            onClick = { /* Handle Log Out click */ }
+            onClick = {
+                val token = TokenManager.getToken()
+                if (token != null) {
+                    logoutViewModel.logout("Bearer $token")
+                } else {
+                    // Handle case where token is null
+                    TokenManager.clearToken()
+                    AccountManager.clearAccountData()
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                }
+            }
         )
     }
 }

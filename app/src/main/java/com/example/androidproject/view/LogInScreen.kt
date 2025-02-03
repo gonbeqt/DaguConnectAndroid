@@ -63,6 +63,26 @@ fun LogInScreenPreview() {
 fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
     val windowSize = rememberWindowSizeClass()
     val loginState by viewModel.loginState.collectAsState()
+    val context = LocalContext.current
+
+    // Observe login state changes
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is LoginViewModel.LoginState.Success -> {
+                Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                navController.navigate("main_screen") {
+                    popUpTo("login") { inclusive = true }
+                }
+                viewModel.resetState()
+            }
+            is LoginViewModel.LoginState.Error -> {
+                Toast.makeText(context, (loginState as LoginViewModel.LoginState.Error).message, Toast.LENGTH_SHORT).show()
+                viewModel.resetState()
+            }
+            else -> {}
+        }
+    }
+
 
     var email by remember {
         mutableStateOf("") }
@@ -142,7 +162,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                 ForgotPassword(windowSize)
 
                 Spacer(modifier = Modifier.height(10.dp))
-                ButtonLogin(navController, viewModel, email, password, loginState,  windowSize)
+                ButtonLogin(navController, viewModel, email, password,  windowSize)
 
                 Spacer(modifier = Modifier.height(10.dp))
                 SignUpButton(navController, windowSize)
@@ -281,29 +301,11 @@ fun ForgotPassword(windowSize: WindowSize) {
 }
 
 @Composable
-fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: String, password: String, loginState: LoginViewModel.LoginState, windowSize: WindowSize){
-    val context = LocalContext.current
+fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize){
+
     Button(
         onClick = {
             viewModel.login(email, password)
-            when (loginState) {
-                is LoginViewModel.LoginState.Loading -> {
-                    // Do nothing
-                }
-                is LoginViewModel.LoginState.Success -> {
-                    Log.i("Login screen successful", "Login success")
-                    Toast.makeText(context, loginState.data?.message, Toast.LENGTH_SHORT).show()
-                    navController.navigate("main_screen")
-                }
-                is LoginViewModel.LoginState.Error -> {
-                    Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
-                    Log.i("Login screen error", "Login error $loginState.message")
-                }
-                LoginViewModel.LoginState.Idle -> {
-                    // Do nothing
-                }
-            }
-
         },
         modifier = Modifier
             .fillMaxWidth(

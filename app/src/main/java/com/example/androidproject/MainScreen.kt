@@ -1,5 +1,6 @@
 package com.example.androidproject
 
+import LogoutViewModel
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.pages.HomeScreen
@@ -36,11 +36,10 @@ import com.example.androidproject.view.pages2.BookmarkedTradesman
 import com.example.androidproject.view.pages2.HomeTradesman
 import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
-import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import androidx.compose.ui.platform.LocalContext
 @Composable
-fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
+fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel,modifier: Modifier = Modifier,) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
@@ -80,7 +79,8 @@ fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {
             modifier = Modifier.padding(innerPadding),
             selectedItem,
             navController,
-            getJobsViewModel)
+            getJobsViewModel,
+            logoutViewModel)
     }
 }
 
@@ -89,7 +89,9 @@ fun ContentScreen(
     modifier: Modifier = Modifier,
     selectedItem: Int,
     navController: NavController,
-    getJobsViewModel: GetJobsViewModel) {
+    getJobsViewModel: GetJobsViewModel,
+    logoutViewModel: LogoutViewModel
+) {
 
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -98,7 +100,11 @@ fun ContentScreen(
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
             3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp),navController)
-            4 -> ProfileScreen(modifier.padding(bottom = 0.1.dp))
+            4 -> ProfileScreen(
+                modifier = modifier.padding(bottom = 0.1.dp),
+                navController = navController,
+                logoutViewModel = logoutViewModel
+            )
         }
     } else {
         when (selectedItem) {

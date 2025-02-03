@@ -48,11 +48,16 @@ class LoginViewModel(private val apiService: ApiService, private val context: Co
                 Log.e("Error Login View Model", "Unknown error: $e")
             }
         }
+
+
     }
     sealed class LoginState {
         object Idle : LoginState()
         object Loading : LoginState()
         data class Success(val data: LoginResponse?) : LoginState()
         data class Error(val message: String) : LoginState()
+    }
+    fun resetState() {
+        _loginState.value = LoginState.Idle
     }
 }

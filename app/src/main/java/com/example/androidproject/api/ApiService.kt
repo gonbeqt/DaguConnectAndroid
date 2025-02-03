@@ -11,7 +11,9 @@ import com.example.androidproject.model.ViewJob
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Response
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Path
 
 interface ApiService {
@@ -27,4 +29,7 @@ interface ApiService {
 
     @GET("/user/job/view/{id}")
     suspend fun getJobById(@Path("id") id: Int): Response<Job>
+
+    @DELETE("/user/logout")
+    suspend fun logout(@Header("Authorization") token: String): Response<Unit>
 }
