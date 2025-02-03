@@ -13,6 +13,7 @@ import retrofit2.http.POST
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -23,7 +24,7 @@ interface ApiService {
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
     @GET("/user/jobs")
-    suspend fun getJobs(): Response<JobsResponse>
+    suspend fun getJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 5): Response<JobsResponse>
 
     @GET("/user/job/view/{id}")
     suspend fun getJobById(@Path("id") id: Int): Response<Job>

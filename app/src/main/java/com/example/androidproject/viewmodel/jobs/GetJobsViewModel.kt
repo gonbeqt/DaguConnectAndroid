@@ -13,24 +13,36 @@ import kotlinx.coroutines.launch
 class GetJobsViewModel (private val apiService: ApiService, private val context: Context): ViewModel(){
     private val _jobsState = MutableStateFlow<JobsState>(JobsState.Idle)
     val jobsState = _jobsState.asStateFlow() // Exposing the state as StateFlow
-
+    private var isFetching = false
+    private var currentPage = 1
+    private val jobsList = mutableListOf<GetJobs>()
+    private var isLastPage = false
     fun getJobs(){
+        if (isFetching || isLastPage) return // Prevent multiple calls at once
+
         viewModelScope.launch {
+            isFetching = true // Set fetching flag
             _jobsState.value = JobsState.Loading
             try {
-                val response = apiService.getJobs()
+                val response = apiService.getJobs(page = currentPage)
                 val body = response.body()
-                if (response.isSuccessful) {
-                    if (body != null) {
-                        _jobsState.value = JobsState.Success(body.jobs)
+                if (response.isSuccessful && body != null) {
+                    if (body.jobs.isEmpty()){
+                        isLastPage = true
+                    } else {
+                        jobsList.addAll(body.jobs) // Append new jobs to the list
+                        _jobsState.value = JobsState.Success(jobsList.toList())
+                        currentPage++ // Move to the next page
                     }
                 } else {
                     _jobsState.value = JobsState.Error(response.message())
                 }
             } catch (e: Exception) {
                 _jobsState.value = JobsState.Error(e.localizedMessage ?: "Unknown error")
-                }
+                isFetching = false
             }
+            isFetching = false // Reset flag after request completes
+        }
         }
     sealed class JobsState {
         object Idle : JobsState()

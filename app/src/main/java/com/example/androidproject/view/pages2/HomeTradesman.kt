@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -226,25 +228,32 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
 @Composable
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel){
     val jobState by getJobsViewModel.jobsState.collectAsState()
+    val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(jobState) {
         getJobsViewModel.getJobs()
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
         when (jobState) {
             is GetJobsViewModel.JobsState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             is GetJobsViewModel.JobsState.Success -> {
                 val jobs = (jobState as GetJobsViewModel.JobsState.Success).data
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.padding(top = 5.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    items(jobs.size) { index ->
-                        val job = jobs[index]
+                    itemsIndexed(jobs) { index, job ->
                         TopMatchesItem(job, navController)
+
+                        if (index == jobs.lastIndex) {
+                            LaunchedEffect(index == jobs.lastIndex) {
+                                getJobsViewModel.getJobs()
+                            }
+                        }
                     }
                 }
             }
