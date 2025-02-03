@@ -1,5 +1,6 @@
 package com.example.androidproject
 
+import LogoutViewModel
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -39,6 +40,7 @@ import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
+import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
@@ -56,6 +58,10 @@ class MainActivity : ComponentActivity() {
         TokenManager.init(this)
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
+
+
+        val logoutVMFactory = LogoutViewModelFactory(apiService)
+        val logoutViewModel = ViewModelProvider(this, logoutVMFactory)[LogoutViewModel::class.java]
 
         val registerVMFactory = RegisterViewModelFactory(apiService)
         val registerViewModel = ViewModelProvider(this, registerVMFactory)[RegisterViewModel::class.java]
@@ -82,7 +88,7 @@ class MainActivity : ComponentActivity() {
                         LogInScreen(navController, loginViewModel)
                     }
                     composable("main_screen"){
-                        MainScreen(navController)
+                        MainScreen(navController,logoutViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier,navController)

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://192.168.1.142:8000/"
+    private const val BASE_URL = "http://192.168.1.217:8000/"
 
     // Add the logging interceptor
     private val logging = HttpLoggingInterceptor().apply {
@@ -23,9 +23,12 @@ object RetrofitInstance {
         .writeTimeout(100,TimeUnit.SECONDS)
         .addInterceptor(logging)
         .addInterceptor { chain ->
+            val originalRequest = chain.request()
             val requestBuilder = chain.request().newBuilder()
-            TokenManager.getToken()?.let { token -> // Add authorization header if token is available
-                requestBuilder.addHeader("Authorization", "Bearer $token")
+            if (originalRequest.header("Authorization") == null) {
+                TokenManager.getToken()?.let { token ->
+                    requestBuilder.addHeader("Authorization", "Bearer $token")
+                }
             }
             chain.proceed(requestBuilder.build())
         }.build()
