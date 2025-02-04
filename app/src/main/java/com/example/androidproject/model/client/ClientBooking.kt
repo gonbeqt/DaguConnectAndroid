@@ -15,6 +15,12 @@ data class GetClientsBooking(
     val id: Int,
     @SerializedName("phone_number")
     val phonenumber: String,
+    @SerializedName("tradesman_fullname")
+    val tradesmanfullname : String,
+    @SerializedName("work_fee")
+    val workfee: Int,
+    @SerializedName("client_fullname")
+    val client_fullname: String,
     @SerializedName("resume_id")
     val resumeid: Int,
     @SerializedName("task_description")
