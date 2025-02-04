@@ -1,6 +1,5 @@
 package com.example.androidproject
 
-import android.provider.ContactsContract
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -8,7 +7,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ListAlt
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -25,14 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.androidproject.ui.theme.views.pages.BookingsScreen
-import com.example.androidproject.ui.theme.views.pages.BookmarkedScreen
-import com.example.androidproject.ui.theme.views.pages.HomeScreen
-import com.example.androidproject.ui.theme.views.pages.ProfileScreen
-import com.example.androidproject.ui.theme.views.pages.ScheduleScreen
+import com.example.androidproject.ui.theme.views.ClientPov.Navigation.BookingsScreen
+import com.example.androidproject.ui.theme.views.ClientPov.Navigation.BookmarkedScreen
+import com.example.androidproject.ui.theme.views.ClientPov.Navigation.HomeScreen
+import com.example.androidproject.ui.theme.views.ClientPov.Navigation.ProfileScreen
+import com.example.androidproject.ui.theme.views.ClientPov.Navigation.ScheduleScreen
 
 @Composable
 fun MainScreen(navController: NavController,modifier: Modifier = Modifier,) {

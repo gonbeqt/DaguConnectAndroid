@@ -9,32 +9,39 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.ui.theme.AndroidProjectTheme
+import com.example.androidproject.ui.theme.views.ClientPov.AboutUs
 import com.example.androidproject.ui.theme.views.Feedback
 import com.example.androidproject.ui.theme.views.LandingPageScreen
 import com.example.androidproject.ui.theme.views.LogInScreen
 import com.example.androidproject.ui.theme.views.SignUpScreen
 import com.example.androidproject.ui.theme.views.Tradesman
-import com.example.androidproject.ui.theme.views.pages.ACRepair
-import com.example.androidproject.ui.theme.views.pages.AllTradesman
-import com.example.androidproject.ui.theme.views.pages.BookNow
-import com.example.androidproject.ui.theme.views.pages.BookingDetails
-import com.example.androidproject.ui.theme.views.pages.BookingsScreen
-import com.example.androidproject.ui.theme.views.pages.CancellationDetails
-import com.example.androidproject.ui.theme.views.pages.Carpentry
-import com.example.androidproject.ui.theme.views.pages.Cleaning
-import com.example.androidproject.ui.theme.views.pages.ConfirmBook
-import com.example.androidproject.ui.theme.views.pages.Electrician
-import com.example.androidproject.ui.theme.views.pages.HomeScreen
-import com.example.androidproject.ui.theme.views.pages.MessageScreen
-import com.example.androidproject.ui.theme.views.pages.Plumbing
-import com.example.androidproject.ui.theme.views.pages.RateAndReviews
-import com.example.androidproject.ui.theme.views.pages2.AvailabilityStatusScreen
-import com.example.androidproject.ui.theme.views.pages2.BookingsTradesman
-import com.example.androidproject.ui.theme.views.pages2.BookmarkedTradesman
-import com.example.androidproject.ui.theme.views.pages2.HomeTradesman
-import com.example.androidproject.ui.theme.views.pages2.ProfileTradesman
-import com.example.androidproject.ui.theme.views.pages2.ScheduleTradesman
-import com.example.androidproject.ui.theme.views.pages2.TradesmanApply
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.ACRepair
+import com.example.androidproject.ui.theme.views.ClientPov.AllTradesman
+import com.example.androidproject.ui.theme.views.ClientPov.BookNow
+import com.example.androidproject.ui.theme.views.ClientPov.BookingDetails
+import com.example.androidproject.ui.theme.views.ClientPov.Navigation.BookingsScreen
+import com.example.androidproject.ui.theme.views.ClientPov.CancellationDetails
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Carpentry
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Cleaning
+import com.example.androidproject.ui.theme.views.ClientPov.ConfirmBook
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Electrician
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Masonry
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Mechanics
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Painting
+import com.example.androidproject.ui.theme.views.ClientPov.Navigation.MessageScreen
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Plumbing
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Roofing
+import com.example.androidproject.ui.theme.views.ClientPov.Categories.Welding
+import com.example.androidproject.ui.theme.views.ClientPov.ChangePassword
+import com.example.androidproject.ui.theme.views.ClientPov.EmailVerification
+import com.example.androidproject.ui.theme.views.ClientPov.ReportProblem
+import com.example.androidproject.ui.theme.views.ClientPov.RateAndReviews
+import com.example.androidproject.ui.theme.views.TradesmanPov.BookingsTradesman
+import com.example.androidproject.ui.theme.views.TradesmanPov.BookmarkedTradesman
+import com.example.androidproject.ui.theme.views.TradesmanPov.HomeTradesman
+import com.example.androidproject.ui.theme.views.TradesmanPov.ProfileTradesman
+import com.example.androidproject.ui.theme.views.TradesmanPov.ScheduleTradesman
+import com.example.androidproject.ui.theme.views.TradesmanPov.TradesmanApply
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +54,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "profiletradesman") {
+                NavHost(navController = navController, startDestination = "main_screen") {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -95,12 +102,40 @@ class MainActivity : ComponentActivity() {
                     composable("electrician") {
                         Electrician(navController)
                     }
+                    composable("masonry"){
+                        Masonry(navController)
+                    }
                     composable("cleaning") {
                         Cleaning(navController)
+                    }
+                    composable("mechanics"){
+                        Mechanics(navController)
+                    }
+                    composable("painting"){
+                        Painting(navController)
+                    }
+                    composable("roofing"){
+                        Roofing(navController)
+                    }
+                    composable("welding"){
+                        Welding(navController)
                     }
                     composable("alltradesman"){
                         AllTradesman(navController)
                     }
+                    composable("emailverification"){
+                        EmailVerification(navController)
+                    }
+                    composable("changepassword"){
+                        ChangePassword(navController)
+                    }
+                    composable("aboutus"){
+                        AboutUs(navController)
+                    }
+                    composable("reportproblem"){
+                        ReportProblem(navController)
+                    }
+
 
 
                     //Tradesman Routes
