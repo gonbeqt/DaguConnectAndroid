@@ -1,13 +1,11 @@
-package com.example.androidproject.ui.theme.views.pages
+package com.example.androidproject.view.ClientPov.Categories
 
-import android.graphics.BlurMaskFilter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
@@ -19,9 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
@@ -32,11 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RenderEffect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +40,7 @@ import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
 
 @Composable
-fun Carpentry(navController: NavController) {
+fun Masonry(navController: NavController){
     val tradesmen = listOf(
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
@@ -59,11 +51,13 @@ fun Carpentry(navController: NavController) {
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "AC Repair", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Masonry", "P500/hr", 4.5, R.drawable.bookmark)
 
-        )
+    )
 
     // Filter only Plumbers
-    val carpentrys = tradesmen.filter { it.category == "Carpentry" }
+    val masonrys = tradesmen.filter { it.category == "Masonry" }
 
     Box(
         modifier = Modifier
@@ -85,8 +79,8 @@ fun Carpentry(navController: NavController) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Background Image
                     Image(
-                        painter = painterResource(R.drawable.carpentrybg),
-                        contentDescription = "Carpentry Background",
+                        painter = painterResource(R.drawable.masonrybg),
+                        contentDescription = "Masonry Background",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.matchParentSize()
                     )
@@ -111,7 +105,7 @@ fun Carpentry(navController: NavController) {
                     }
 
                     Text(
-                        text = "Carpentry Works",
+                        text = "Masonry Work",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -170,9 +164,9 @@ fun Carpentry(navController: NavController) {
                                 .background(Color(0xFFF9F9F9)),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            items(carpentrys.size) { index ->
-                                val trade = carpentrys[index]
-                                CarpentryItem(trade, navController)
+                            items(masonrys.size) { index ->
+                                val trade = masonrys[index]
+                                MasonryItem(trade, navController)
                             }
                         }
                     }
@@ -183,7 +177,7 @@ fun Carpentry(navController: NavController) {
 }
 
 @Composable
-fun CarpentryItem(trade: Tradesman, navController: NavController) {
+fun MasonryItem(trade: Tradesman, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

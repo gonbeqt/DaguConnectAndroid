@@ -1,13 +1,11 @@
-package com.example.androidproject.ui.theme.views.pages
+package com.example.androidproject.view.ClientPov.Categories
 
-import android.graphics.BlurMaskFilter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
@@ -19,9 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
@@ -32,11 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RenderEffect
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +40,9 @@ import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
 
 @Composable
-fun Plumbing(navController: NavController) {
+fun Roofing(navController: NavController){
+
+
     val tradesmen = listOf(
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
@@ -56,14 +50,16 @@ fun Plumbing(navController: NavController) {
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-                Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "AC Repair", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Roofing", "P500/hr", 4.5, R.drawable.bookmark)
 
     )
 
     // Filter only Plumbers
-    val plumbers = tradesmen.filter { it.category == "Plumber" }
+    val roofings = tradesmen.filter { it.category == "Roofing" }
 
     Box(
         modifier = Modifier
@@ -73,7 +69,9 @@ fun Plumbing(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+
         ) {
+            // First Card (Header)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -83,17 +81,18 @@ fun Plumbing(navController: NavController) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Background Image
                     Image(
-                        painter = painterResource(R.drawable.plumbingbg),
-                        contentDescription = "Plumbing Background",
+                        painter = painterResource(R.drawable.roofingbg),
+                        contentDescription = "Roofing Background",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.matchParentSize()
                     )
 
+                    // Icon & Title
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .align(Alignment.TopStart),
+                            .align(Alignment.TopStart), // Align to the top for the icon
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Icon(
@@ -108,7 +107,7 @@ fun Plumbing(navController: NavController) {
                     }
 
                     Text(
-                        text = "Plumbing Service",
+                        text = "Roofing Work",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -146,7 +145,7 @@ fun Plumbing(navController: NavController) {
                         )
 
                         Text(
-                            text = "Access reliable plumbing services for repairs, installations, and emergencies. Connect with trusted experts for seamless solutions on one convenient platform.",
+                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start
@@ -167,9 +166,9 @@ fun Plumbing(navController: NavController) {
                                 .background(Color(0xFFF9F9F9)),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            items(plumbers.size) { index ->
-                                val trade = plumbers[index]
-                                PlumbingItem(trade, navController)
+                            items(roofings.size) { index ->
+                                val trade = roofings[index]
+                                RoofingItem(trade, navController)
                             }
                         }
                     }
@@ -180,7 +179,7 @@ fun Plumbing(navController: NavController) {
 }
 
 @Composable
-fun PlumbingItem(trade: Tradesman, navController: NavController) {
+fun RoofingItem(trade: Tradesman, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

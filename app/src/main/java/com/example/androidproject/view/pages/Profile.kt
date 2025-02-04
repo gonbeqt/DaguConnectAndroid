@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -57,13 +58,12 @@ import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ServicePosting
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier, navController: NavController,
-                  logoutViewModel: LogoutViewModel) {
-    Log.i("Screen", "ProfileScreen")
+fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logoutViewModel:LogoutViewModel) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
+    var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
 
-    val servicePostings = listOf(
+    var servicePostings = listOf(
         ServicePosting("Plumbing Repair", "January 25, 2025", applicantsCount = 5),
         ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
         ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
@@ -73,34 +73,52 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavController,
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.LightGray)
+            .background(Color.White)
     ) {
         // top bar
         Row(
             modifier = Modifier
+                .padding(top = 10.dp)
                 .fillMaxWidth()
-                .shadow(elevation = 8.dp)
-                .background(Color.White)
-                .padding(horizontal = 8.dp, vertical = 16.dp),
+                .height(70.dp)
+
+            ,
+            horizontalArrangement = Arrangement.spacedBy(140.dp),
         ) {
-            Text(
-                text = "Profile",
-                fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
-            )
+            Text(text="My Profile",
+                fontSize = 24.sp,
+                fontWeight =
+                FontWeight(500),
+                modifier = Modifier.padding(16.dp),
 
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications",
-                tint = Color.Cyan,
-                modifier = Modifier.padding(end = 16.dp)
-            )
 
-            Icon(
-                imageVector = Icons.Default.Chat,
-                contentDescription = "Chat",
-                tint = Color.Cyan
-            )
+
+                )
+            Row (modifier = Modifier.fillMaxWidth()
+                .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier
+                        .size(32.dp)
+
+                )
+                Icon(
+                    imageVector = Icons.Default.Message,
+                    contentDescription = "Message Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier
+                        .size(32.dp)
+
+                        .clickable {
+                            navController.navigate("message_screen")
+
+                        }
+                )
+            }
+
         }
 
         // for profile info
@@ -182,22 +200,26 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavController,
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 2.dp) //separation from the white background
+                .padding(top = 2.dp) // Separation from the white background
         ) {
             when (selectedTabIndex) {
-                0 -> MyPostsTab(servicePostings)
-                1 -> SettingsScreen(navController,logoutViewModel)
+                0 -> MyPostsTab(servicePostings = postsList) // Pass postsList
+                1 -> SettingsScreen(navController, logoutViewModel)
             }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 contentAlignment = Alignment.BottomEnd // Ensures FAB stays at bottom-end
             ) {
-                FabPosting(servicePosting =ServicePosting("Plumbing Repair", "January 25, 2025", applicantsCount = 5),
-                     onEditClick = { _, _, _ -> }, onApplicantsClick = {})
+                // Pass the callback function to update the postsList
+                FabPosting(onPostNewService = { newPost ->
+                    postsList = postsList + newPost // Add the new post to the list
+                })
             }
         }
+
 
     }
 
@@ -208,30 +230,22 @@ fun ProfileScreen(modifier: Modifier = Modifier, navController: NavController,
 
 @Composable
 fun MyPostsTab(servicePostings: List<ServicePosting>) {
-    var postsList by remember { mutableStateOf(servicePostings) }
-
-    LazyColumn( //make it scrollable
+    LazyColumn( // Make it scrollable
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(postsList) { posting ->
+        items(servicePostings) { posting ->
             PostsCard(
                 servicePosting = posting,
                 onEditClick = { title, description, rate ->
-                    postsList = postsList.map {
-                        if (it.title == posting.title) {
-                            it.copy(title = title, description = description, rate = rate)
-                        } else {
-                            it
-                        }
-                    }
+                    // Handle edit functionality here if needed
                 },
                 onApplicantsClick = { /* Handle applicants click */ }
             )
         }
     }
-
 }
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PostsCard(
@@ -243,6 +257,9 @@ fun PostsCard(
     var editableTitle by remember { mutableStateOf(servicePosting.title) }
     var editableDescription by remember { mutableStateOf(servicePosting.description) }
     var editableRate by remember { mutableStateOf(servicePosting.rate) }
+    val originalTitle = remember { servicePosting.title }
+    val originalDescription = remember { servicePosting.description }
+    val originalRate = remember { servicePosting.rate }
     var selectedCategories = remember { mutableStateListOf<String>() }
 
     Card(
@@ -470,11 +487,18 @@ fun PostsCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        Button(onClick = { isDialogVisible = false }) {
+                        Button(onClick = {
+                            // Restore the original values if cancel is clicked
+                            editableTitle = originalTitle
+                            editableDescription = originalDescription
+                            editableRate = originalRate
+                            isDialogVisible = false
+                        }) {
                             Text("Cancel")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(onClick = {
+                            // Save the new values
                             isDialogVisible = false
                             onEditClick(editableTitle, editableDescription, editableRate)
                         }) {
@@ -482,6 +506,7 @@ fun PostsCard(
                         }
                     }
                 }
+
             }
         }
     }
@@ -497,13 +522,13 @@ fun GeneralSettings(
 ) {
     Column(
         modifier = Modifier
-            .background(Color.LightGray)
+            .background(Color.White)
             .padding(8.dp)
             .clickable { onClick() }
     ) {
         Box(modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White,
+            .background(Color(0xFFF9F9F9),
                 shape = RoundedCornerShape(8.dp))) {
 
             Column(modifier = Modifier.padding(10.dp)) {
@@ -520,11 +545,13 @@ fun GeneralSettings(
                         text = title,
                         modifier = Modifier.padding(start = 14.dp)
                     )
+
                 }
                 Text(
                     text = description,
                     modifier = Modifier.padding(top = 5.dp, start = 10.dp)
                 )
+
             }
 
         }
@@ -548,6 +575,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
         }
     }
     Column {
+
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_notification),
             title = "Notification",
@@ -558,19 +586,27 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
             title = "Privacy",
             description = "Change your password.",
-            onClick = { /* Handle Privacy click */ }
+            onClick = { navController.navigate("emailverification") }
+        )
+        Text(
+            text = "Help and Support", fontWeight = FontWeight(500),
+            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
         )
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_about),
             title = "About Us",
             description = "Know more about our team.",
-            onClick = { /* Handle About Us click */ }
+            onClick = { navController.navigate("aboutus") }
         )
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_report),
             title = "Report a Problem",
             description = "Report a problem.",
             onClick = { /* Handle Report a Problem click */ }
+        )
+        Text(
+            text = "Log Out", fontWeight = FontWeight(500),
+            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
         )
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
@@ -594,20 +630,22 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun FabPosting(servicePosting: ServicePosting,
-               onEditClick: (String, String, String) -> Unit,
-               onApplicantsClick: () -> Unit){
+fun FabPosting(
+    onPostNewService: (ServicePosting) -> Unit // Pass a function to handle new post submission
+) {
     var isDialogVisible by remember { mutableStateOf(false) }
-    var editableTitle by remember { mutableStateOf(servicePosting.title) }
-    var editableDescription by remember { mutableStateOf(servicePosting.description) }
-    var editableRate by remember { mutableStateOf(servicePosting.rate) }
+    var title by remember { mutableStateOf("") } // Use simple variables for input
+    var description by remember { mutableStateOf("") }
+    var rate by remember { mutableStateOf("") }
     var selectedCategories = remember { mutableStateListOf<String>() }
-    FloatingActionButton(onClick = { isDialogVisible = true },
+
+    FloatingActionButton(
+        onClick = { isDialogVisible = true },
         containerColor = Color.Gray,
         contentColor = Color.White,
-        shape = CircleShape) {
-        Icon(imageVector = Icons.Default.Add,
-            contentDescription = "Add Icon")
+        shape = CircleShape
+    ) {
+        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Icon")
     }
 
     if (isDialogVisible) {
@@ -625,94 +663,64 @@ fun FabPosting(servicePosting: ServicePosting,
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Text(
-                        text = "Edit Post",
+                        text = "Create New Post",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                     Text(
-                        text = "Update the details of your service need",
+                        text = "Provide details of your new service",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
-                    // Title TextField with Border
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ) {
-                        TextField(
-                            value = editableTitle,
-                            onValueChange = { editableTitle = it },
-                            label = { Text("Title") },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = TextFieldDefaults.textFieldColors(
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                            )
-                        )
-                    }
 
-                    // Description TextField with Border
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ) {
-                        TextField(
-                            value = editableDescription,
-                            onValueChange = { editableDescription = it },
-                            label = { Text("Description") },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = TextFieldDefaults.textFieldColors(
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                            )
+                    // Title TextField
+                    TextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text("Title") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.textFieldColors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                         )
-                    }
+                    )
 
-                    // Rate TextField with Border
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ) {
-                        TextField(
-                            value = editableRate,
-                            onValueChange = { editableRate = it },
-                            label = { Text("Estimated Budget") },
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines = 1,
-                            colors = TextFieldDefaults.textFieldColors(
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                            )
+                    // Description TextField
+                    TextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Description") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.textFieldColors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                         )
-                    }
+                    )
+
+                    // Rate TextField
+                    TextField(
+                        value = rate,
+                        onValueChange = { rate = it },
+                        label = { Text("Estimated Budget") },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 1,
+                        colors = TextFieldDefaults.textFieldColors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                        )
+                    )
+
                     Column(
                         modifier = Modifier.padding(5.dp),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
-
                     ) {
-                        Text(
-                            text = "Select Service Category",
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "Select Service Category", fontWeight = FontWeight.Bold)
 
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
-
                         ) {
                             val categories = listOf(
                                 "Plumbing", "Carpentry", "Electrical",
@@ -741,7 +749,6 @@ fun FabPosting(servicePosting: ServicePosting,
                         }
                     }
 
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
@@ -751,10 +758,19 @@ fun FabPosting(servicePosting: ServicePosting,
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(onClick = {
+                            val newPost = ServicePosting(
+                                title = title,
+                                description = description,
+                                rate = rate.toString(),
+                                postedDate = System.currentTimeMillis().toString(), // Current timestamp
+                                isActive = true, // Default to active
+                                category = selectedCategories.joinToString(", "), // Join selected categories
+                                applicantsCount = 0 // Initial count of applicants
+                            )
                             isDialogVisible = false
-                            onEditClick(editableTitle, editableDescription, editableRate)
+                            onPostNewService(newPost) // Send the new post to the parent Composable
                         }) {
-                            Text("Save")
+                            Text("Post")
                         }
                     }
                 }
@@ -762,4 +778,3 @@ fun FabPosting(servicePosting: ServicePosting,
         }
     }
 }
-

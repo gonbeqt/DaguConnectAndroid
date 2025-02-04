@@ -14,11 +14,21 @@ import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.TokenManager
-import com.example.androidproject.ui.theme.views.pages.ACRepair
-import com.example.androidproject.ui.theme.views.pages.Carpentry
-import com.example.androidproject.ui.theme.views.pages.Cleaning
-import com.example.androidproject.ui.theme.views.pages.Electrician
-import com.example.androidproject.ui.theme.views.pages.Plumbing
+import com.example.androidproject.view.ClientPov.AboutUs
+import com.example.androidproject.view.ClientPov.AllTradesman
+import com.example.androidproject.view.ClientPov.Categories.ACRepair
+import com.example.androidproject.view.ClientPov.Categories.Carpentry
+import com.example.androidproject.view.ClientPov.Categories.Cleaning
+import com.example.androidproject.view.ClientPov.Categories.Electrician
+import com.example.androidproject.view.ClientPov.Categories.Masonry
+import com.example.androidproject.view.ClientPov.Categories.Mechanics
+import com.example.androidproject.view.ClientPov.Categories.Painting
+import com.example.androidproject.view.ClientPov.Categories.Plumbing
+import com.example.androidproject.view.ClientPov.Categories.Roofing
+import com.example.androidproject.view.ClientPov.Categories.Welding
+import com.example.androidproject.view.ClientPov.ChangePassword
+import com.example.androidproject.view.ClientPov.EmailVerification
+import com.example.androidproject.view.ClientPov.ReportProblem
 import com.example.androidproject.view.Feedback
 import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
@@ -82,10 +92,11 @@ class MainActivity : ComponentActivity() {
                         LandingPageScreen(navController)
                     }
                     composable("signup") {
-                        SignUpScreen(navController, registerViewModel)
+                        SignUpScreen(navController,registerViewModel)
                     }
                     composable("login") {
-                        LogInScreen(navController, loginViewModel)
+                        LogInScreen(navController,loginViewModel)
+
                     }
                     composable("main_screen"){
                         MainScreen(navController,logoutViewModel)
@@ -124,8 +135,38 @@ class MainActivity : ComponentActivity() {
                     composable("electrician") {
                         Electrician(navController)
                     }
+                    composable("masonry"){
+                        Masonry(navController)
+                    }
                     composable("cleaning") {
                         Cleaning(navController)
+                    }
+                    composable("mechanics"){
+                        Mechanics(navController)
+                    }
+                    composable("painting"){
+                        Painting(navController)
+                    }
+                    composable("roofing"){
+                        Roofing(navController)
+                    }
+                    composable("welding"){
+                        Welding(navController)
+                    }
+                    composable("alltradesman"){
+                        AllTradesman(navController)
+                    }
+                    composable("emailverification"){
+                        EmailVerification(navController)
+                    }
+                    composable("changepassword"){
+                        ChangePassword(navController)
+                    }
+                    composable("aboutus"){
+                        AboutUs(navController)
+                    }
+                    composable("reportproblem"){
+                        ReportProblem(navController)
                     }
 
 

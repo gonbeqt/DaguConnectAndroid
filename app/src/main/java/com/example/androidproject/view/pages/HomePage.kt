@@ -251,6 +251,12 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
                     "Cleaning" -> navController.navigate("cleaning")
                     "Carpentry" -> navController.navigate("carpentry")
                     "Electrician" -> navController.navigate("electrician")
+                    "AC Repair" -> navController.navigate("acrepair")
+                    "Masonry" -> navController.navigate("masonry")
+                    "Mechanics" -> navController.navigate("mechanics")
+                    "Painting" -> navController.navigate("painting")
+                    "Roofing" -> navController.navigate("roofing")
+                    "Welding" -> navController.navigate("welding")
 
 
                 }
@@ -261,7 +267,6 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 
 @Composable
 fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
-    val showDialogAllTradesman = remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 120.dp
@@ -286,7 +291,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
             fontWeight = FontWeight(500),
             modifier = Modifier.padding(top = 10.dp)
         )
-        TextButton(onClick = { showDialogAllTradesman.value = true
+        TextButton(onClick = { navController.navigate("alltradesman")
             }) {
             Text(
                 text = "See All",
@@ -315,50 +320,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
             }
         }
     }
-    if (showDialogAllTradesman.value) {
-            Dialog(onDismissRequest = { showDialogAllTradesman.value = false }) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFFECECEC)),
-                ) {
-                    Column {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "All Tradesmen",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                            TextButton(onClick = { showDialogAllTradesman.value = false }) {
-                                Text(text = "Close", fontSize = 16.sp, color = Color.Black, modifier = Modifier.padding(top = 7.dp))
-                            }
-                        }
-                        Box(Modifier.verticalScroll(rememberScrollState())
-                        )
-                        {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .background(Color(0xFFECECEC)),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                tradesmen.forEach { trade ->
-                                    TradesmanItem(trade,navController = navController, cardHeight, textSize)
-                                }
-                            }
-                        }
 
-
-                    }
-                }
-            }
-    }
 
 }
 

@@ -112,7 +112,7 @@ fun ContentScreen(
             1 -> BookingsTradesman(modifier.padding(bottom = 0.1.dp),navController)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp),navController)
             3 -> BookmarkedTradesman(modifier.padding(bottom = 0.1.dp),navController)
-            4 -> ProfileTradesman()
+            4 -> ProfileTradesman(modifier = Modifier, navController)
         }
     }
 }

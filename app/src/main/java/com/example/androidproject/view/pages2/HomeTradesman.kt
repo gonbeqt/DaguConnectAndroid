@@ -267,7 +267,8 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
             is GetJobsViewModel.JobsState.Success -> {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.padding(top = 5.dp),
+                    modifier = Modifier.padding(bottom = 100.dp)
+                    ,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(jobs) { index, job ->
@@ -336,11 +337,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController){
                     Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Image(painter = painterResource(R.drawable.bookmark),
-                    contentDescription = "Bookmark",
-                    Modifier.size(32.dp)
-                        .clickable {  }
-                )
+
             }
             Spacer(modifier = Modifier.height(16.dp))
             Card(modifier = Modifier.fillMaxWidth(),
@@ -380,7 +377,8 @@ fun RecentJobs(navController: NavController){
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFD9D9D9))
-            .padding(top = 5.dp)
+             .padding(bottom = 100.dp)
+
 
         ,
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -428,11 +426,7 @@ fun RecentJobsItem(trade: Tradesman, navController: NavController){
 
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Image(painter = painterResource(R.drawable.bookmark),
-                    contentDescription = "Bookmark",
-                    Modifier.size(32.dp)
-                        .clickable {  }
-                )
+
             }
             Spacer(modifier = Modifier.height(16.dp))
             Card(modifier = Modifier.fillMaxWidth(),
