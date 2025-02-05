@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.data.preferences.TokenManager
-import com.example.androidproject.model.resumesItem
+import com.example.androidproject.model.client.resumesItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ class GetResumesViewModel(private val apiService: ApiService, private val contex
                 val body = response.body()
                 if (response.isSuccessful) {
                     if (body != null) {
-                        _resumeState.value = ResumeState.Success(body.resumes)
+                        _resumeState.value = ResumeState.Success(body)
                     } else {
                         _resumeState.value = ResumeState.Error("No resumes found.")
                     }
@@ -41,7 +41,7 @@ class GetResumesViewModel(private val apiService: ApiService, private val contex
     sealed class ResumeState(){
         object Idle : ResumeState()
         object Loading : ResumeState()
-        data class Success(val data: ArrayList<resumesItem>) : ResumeState()
+        data class Success(val data: List<resumesItem>) : ResumeState()
         data class Error(val message: String) : ResumeState()
 
     }
