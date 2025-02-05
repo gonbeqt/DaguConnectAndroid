@@ -39,14 +39,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 
 
 @Composable
-fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
+fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,getClientsBooking: GetClientBookingViewModel) {
+
+
+
     Log.i("Screen" , "BookingsScreen")
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
@@ -93,11 +99,11 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
                         .padding(16.dp)
                 ) {
                     when (selectedTabIndex) {
-                        0 -> AllBookingsContent()
-                        1 -> PendingBookingsContent(navController)
-                        2 -> ActiveBookingsContent()
-                        3 -> CompletedBookingsContent(navController)
-                        4 -> CancelledBookingsContent(navController)
+                        0 -> AllBookingsContent(getClientsBooking,navController)
+                        1 -> PendingBookingsContent(getClientsBooking,navController)
+                        2 -> ActiveBookingsContent(getClientsBooking)
+                        3 -> CompletedBookingsContent(getClientsBooking,navController)
+                        4 -> CancelledBookingsContent(getClientsBooking,navController)
                     }
                 }
             }
@@ -173,159 +179,203 @@ fun BookingsTopSection(navController: NavController,windowSize: WindowSize) {
     }
 
 @Composable
-fun AllBookingsContent() {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight()
-            .size(420.dp)
-            .background(Color(0xFFD9D9D9))
+fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navController: NavController) {
+    val clientbookingState by getClientsBooking.clientbookingState.collectAsState()
 
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            AllItem(trade)
+    LaunchedEffect(Unit) {
+        getClientsBooking.getClientBookings()
+    }
+    when(clientbookingState){
+        is GetClientBookingViewModel.GetClientBookings.Loading ->{
+            //do nothing
         }
+        is GetClientBookingViewModel.GetClientBookings.Success ->{
+        val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(booking.size) { index ->
+                    val bookings = booking[index]
+                    AllItem(bookings,navController)
+                }
+            }
+        }
+        is GetClientBookingViewModel.GetClientBookings.Error -> {
+            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
+            Text(text = "Error: $errorMessage")
+            Log.d("bookerror", errorMessage)
+        }
+        else ->  Unit
+
     }
 }
 
 
 @Composable
-fun PendingBookingsContent(navController:NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight()
-            .size(420.dp)
-            .background(Color(0xFFD9D9D9))
+fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController) {
+    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
 
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            PendingItem(trade,navController)
-        }
+    LaunchedEffect(Unit) {
+        getClientBooking.getClientBookings()
     }
+    when(clientbookingState){
+        is GetClientBookingViewModel.GetClientBookings.Loading ->{
+            //do nothing
+        }
+        is GetClientBookingViewModel.GetClientBookings.Success ->{
+            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
+            val pendingBookings = booking.filter { it.bookingstatus == "Pending" }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(pendingBookings.size) { index ->
+                    val bookings = pendingBookings[index]
+                    PendingItem(bookings,navController)
+                }
+            }
+
+        }
+        is GetClientBookingViewModel.GetClientBookings.Error -> {
+            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
+            Text(text = "Error: $errorMessage")
+            Log.d("bookerror", errorMessage)
+        }
+        else ->  Unit
+
+    }
+
 }
 
 @Composable
-fun ActiveBookingsContent() {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight()
-            .size(420.dp)
-            .background(Color(0xFFD9D9D9))
+fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel) {
+    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
 
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            AllItem(trade)
+    when(clientbookingState){
+        is GetClientBookingViewModel.GetClientBookings.Loading ->{
+            //do nothing
         }
+        is GetClientBookingViewModel.GetClientBookings.Success ->{
+            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
+
+            val ActiveBookings = booking.filter { it.workstatus == "Active" }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(ActiveBookings.size) { index ->
+                    val booking = ActiveBookings[index]
+                    ActiveItems(booking)
+                }
+            }
+
+        }
+        is GetClientBookingViewModel.GetClientBookings.Error -> {
+            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
+            Text(text = "Error: $errorMessage")
+            Log.d("bookerror", errorMessage)
+        }
+        else ->  Unit
     }
+
 }
 
 @Composable
-fun CompletedBookingsContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight()
-            .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            CompletedItem(trade, navController )
+fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
+    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+    when(clientbookingState){
+        is GetClientBookingViewModel.GetClientBookings.Loading ->{
+            //do nothing
         }
+        is GetClientBookingViewModel.GetClientBookings.Success ->{
+            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
+            val completedBookings = booking.filter { it.workstatus == "Finished" }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(completedBookings.size) { index ->
+                    val booking = completedBookings[index]
+                    CompletedItem(booking, navController )
+                }
+            }
+        }
+        is GetClientBookingViewModel.GetClientBookings.Error -> {
+            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
+            Text(text = "Error: $errorMessage")
+            Log.d("bookerror", errorMessage)
+        }
+        else ->  Unit
     }
+
 }
 @Composable
-fun CancelledBookingsContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight()
-            .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            CancelledItem(trade, navController )
+fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
+    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+
+    when(clientbookingState){
+        is GetClientBookingViewModel.GetClientBookings.Loading ->{
+            //do nothing
         }
+        is GetClientBookingViewModel.GetClientBookings.Success ->{
+            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
+            val cancelledBookings = booking.filter { it.workstatus == "Failed" }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(cancelledBookings.size) { index ->
+                    val booking = cancelledBookings[index]
+                    CancelledItem(booking, navController )
+                }
+            }
+        }
+        is GetClientBookingViewModel.GetClientBookings.Error -> {
+            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
+            Text(text = "Error: $errorMessage")
+            Log.d("bookerror", errorMessage)
+        }
+        else ->  Unit
     }
+
 }
 
 
 
 //Design For Items
 @Composable
-fun AllItem(trade: Tradesman) {
+fun AllItem(Booking : GetClientsBooking,navController: NavController) {
+    val getbookdate = ViewModelSetups.formatDateTime(Booking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 170.dp
@@ -353,7 +403,7 @@ fun AllItem(trade: Tradesman) {
             ) {
                 // Tradesman image
                 Image(
-                    painter = painterResource(trade.imageResId),
+                    painter = painterResource(id = R.drawable.pfp),
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(100.dp)
@@ -367,14 +417,14 @@ fun AllItem(trade: Tradesman) {
                         .padding(start = 10.dp)
                 ) {
                     Text(
-                        text = trade.username,
+                        text = Booking.tradesmanfullname,
                         color = Color.Black,
                         fontWeight = FontWeight(500),
                         fontSize = 20.sp,
                         modifier = Modifier.padding(top = 10.dp)
                     )
                     Text(
-                        text = trade.category,
+                        text = Booking.tasktype,
                         color = Color.Black,
                         fontSize = 16.sp,
                     )
@@ -393,7 +443,7 @@ fun AllItem(trade: Tradesman) {
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = trade.rate,
+                                text = "P ${Booking.workfee}/hr",
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             )
@@ -417,7 +467,7 @@ fun AllItem(trade: Tradesman) {
                                 )
                                 Spacer(modifier = Modifier.size(4.dp))
                                 Text(
-                                    text = trade.reviews.toString(),
+                                    text = "4.5",
                                     fontSize = 14.sp
                                 )
                             }
@@ -430,7 +480,7 @@ fun AllItem(trade: Tradesman) {
 
                         )
                     Text(
-                        text = "Monday",
+                        text = getbookdate,
                         color = Color.Gray,
                         fontSize = 14.sp,
 
@@ -452,8 +502,139 @@ fun AllItem(trade: Tradesman) {
 }
 
 
+//Design for activeItems
 @Composable
-fun PendingItem(trade: Tradesman, navController:NavController) {
+fun ActiveItems(booking: GetClientsBooking) {
+    val getbookdate = ViewModelSetups.formatDateTime(booking.bookingdate)
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 170.dp
+        WindowType.MEDIUM -> 400.dp to 180.dp
+        WindowType.LARGE -> 410.dp to 190.dp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first,cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Tradesman image
+                Image(
+                    painter = painterResource(id = R.drawable.pfp),
+                    contentDescription = "Tradesman Image",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(start = 10.dp)
+                )
+
+                // Tradesman details
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 10.dp)
+                ) {
+                    Text(
+                        text = booking.tradesmanfullname,
+                        color = Color.Black,
+                        fontWeight = FontWeight(500),
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                    Text(
+                        text = booking.tasktype,
+                        color = Color.Black,
+                        fontSize = 16.sp,
+                    )
+                    Row(
+                        modifier = Modifier.padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Rate Box
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = (Color(0xFFFFF2DD)),
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "P${booking.workfee}/hr",
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            )
+                        }
+
+                        // Reviews Box
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = (Color(0xFFFFF2DD)),
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Star Icon",
+                                    tint = Color(0xFFFFA500),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.size(4.dp))
+                                Text(
+                                    text = "4",
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        text = "Weekdays Selected",
+                        color = Color.Black,
+                        fontSize = 16.sp,
+
+                        )
+                    Text(
+                        text = getbookdate,
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+
+                        )
+                }
+
+                Text(
+                    text = "All",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 50.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+
+            }
+        }
+    }
+}
+
+
+@Composable
+fun PendingItem(booking : GetClientsBooking, navController:NavController) {
+    val getbookdate = ViewModelSetups.formatDateTime(booking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -484,7 +665,7 @@ fun PendingItem(trade: Tradesman, navController:NavController) {
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(id = R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -498,14 +679,14 @@ fun PendingItem(trade: Tradesman, navController:NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = trade.username,
+                            text = booking.tradesmanfullname,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = 20.sp,
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = trade.category,
+                            text = booking.tasktype,
                             color = Color.Black,
                             fontSize = 16.sp,
                         )
@@ -524,7 +705,7 @@ fun PendingItem(trade: Tradesman, navController:NavController) {
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = trade.rate,
+                                    text = "P${booking.workfee}/hr",
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(horizontal = 4.dp)
                                 )
@@ -548,7 +729,7 @@ fun PendingItem(trade: Tradesman, navController:NavController) {
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = trade.reviews.toString(),
+                                        text = "4",
                                         fontSize = 14.sp
                                     )
                                 }
@@ -560,7 +741,7 @@ fun PendingItem(trade: Tradesman, navController:NavController) {
                             fontSize = 16.sp,
                         )
                         Text(
-                            text = "Monday",
+                            text = getbookdate,
                             color = Color.Gray,
                             fontSize = 14.sp,
                         )
@@ -620,7 +801,8 @@ fun PendingItem(trade: Tradesman, navController:NavController) {
     }
 }
 @Composable
-fun CompletedItem(trade: Tradesman, navController:NavController) {
+fun CompletedItem(booking: GetClientsBooking, navController:NavController) {
+    val getbookdate = ViewModelSetups.formatDateTime(booking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -651,7 +833,7 @@ fun CompletedItem(trade: Tradesman, navController:NavController) {
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(id = R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -665,14 +847,14 @@ fun CompletedItem(trade: Tradesman, navController:NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = trade.username,
+                            text = booking.tradesmanfullname,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = 20.sp,
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = trade.category,
+                            text = booking.tasktype,
                             color = Color.Black,
                             fontSize = 16.sp,
                         )
@@ -691,7 +873,7 @@ fun CompletedItem(trade: Tradesman, navController:NavController) {
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = trade.rate,
+                                    text = "P${booking.workfee}",
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(horizontal = 4.dp)
                                 )
@@ -715,7 +897,7 @@ fun CompletedItem(trade: Tradesman, navController:NavController) {
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = trade.reviews.toString(),
+                                        text = "4",
                                         fontSize = 14.sp
                                     )
                                 }
@@ -727,7 +909,7 @@ fun CompletedItem(trade: Tradesman, navController:NavController) {
                             fontSize = 16.sp,
                         )
                         Text(
-                            text = "Monday",
+                            text = getbookdate,
                             color = Color.Gray,
                             fontSize = 14.sp,
                         )
@@ -789,7 +971,7 @@ fun CompletedItem(trade: Tradesman, navController:NavController) {
 
 
 @Composable
-fun CancelledItem(trade: Tradesman, navController:NavController) {
+fun CancelledItem(booking: GetClientsBooking, navController:NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -820,7 +1002,7 @@ fun CancelledItem(trade: Tradesman, navController:NavController) {
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(id = R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -834,14 +1016,14 @@ fun CancelledItem(trade: Tradesman, navController:NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = trade.username,
+                            text = booking.tradesmanfullname,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = 20.sp,
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = trade.category,
+                            text = booking.tasktype,
                             color = Color.Black,
                             fontSize = 16.sp,
                         )
@@ -860,7 +1042,7 @@ fun CancelledItem(trade: Tradesman, navController:NavController) {
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = trade.rate,
+                                    text = "P${booking.workfee}/hr",
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(horizontal = 4.dp)
                                 )
@@ -884,7 +1066,7 @@ fun CancelledItem(trade: Tradesman, navController:NavController) {
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = trade.reviews.toString(),
+                                        text = "4",
                                         fontSize = 14.sp
                                     )
                                 }

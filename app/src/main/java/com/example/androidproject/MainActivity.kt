@@ -49,11 +49,15 @@ import com.example.androidproject.view.pages2.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
+import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
+import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 
@@ -68,6 +72,14 @@ class MainActivity : ComponentActivity() {
         TokenManager.init(this)
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
+
+
+        val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService,this)
+        val getClientBookingViewModel = ViewModelProvider(this,getClientsBookingVMFactory)[GetClientBookingViewModel::class.java]
+
+
+        val getResumesVMFactory = GetResumesViewModelFactory(apiService,this)
+        val getResumesViewModel = ViewModelProvider(this, getResumesVMFactory)[GetResumesViewModel::class.java]
 
 
         val logoutVMFactory = LogoutViewModelFactory(apiService)
@@ -99,7 +111,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier,navController)
@@ -115,7 +127,7 @@ class MainActivity : ComponentActivity() {
                         BookingDetails(trade,navController)
                     }
                     composable("booking") {
-                        BookingsScreen(modifier = Modifier,navController)
+                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel)
                     }
                     composable("rateandreviews") {
                         RateAndReviews(trade,navController)
