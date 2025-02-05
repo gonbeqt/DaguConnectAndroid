@@ -39,14 +39,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 
 
 @Composable
-fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
+fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,getClientsBooking: GetClientBookingViewModel) {
     Log.i("Screen" , "BookingsScreen")
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
@@ -93,7 +96,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController) {
                         .padding(16.dp)
                 ) {
                     when (selectedTabIndex) {
-                        0 -> AllBookingsContent()
+                        0 -> AllBookingsContent(getClientsBooking)
                         1 -> PendingBookingsContent(navController)
                         2 -> ActiveBookingsContent()
                         3 -> CompletedBookingsContent(navController)
@@ -173,7 +176,12 @@ fun BookingsTopSection(navController: NavController,windowSize: WindowSize) {
     }
 
 @Composable
-fun AllBookingsContent() {
+fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel) {
+    val clientbookingState by getClientsBooking.clientbookingState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        getClientsBooking.getClientBookings()
+    }
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -185,20 +193,35 @@ fun AllBookingsContent() {
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
     )
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight()
-            .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            AllItem(trade)
+    when(clientbookingState){
+        is GetClientBookingViewModel.GetClientBookings.Loading ->{
+            //do nothing
         }
+        is GetClientBookingViewModel.GetClientBookings.Success ->{
+        val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(booking.size) { index ->
+                    val bookings = booking[index]
+                    AllItem(bookings)
+                }
+            }
+        }
+        is GetClientBookingViewModel.GetClientBookings.Error -> {
+            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
+            Text(text = "Error: $errorMessage")
+            Log.d("bookerror", errorMessage)
+        }
+        else ->  Unit
+
     }
 }
 
@@ -258,7 +281,7 @@ fun ActiveBookingsContent() {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllItem(trade)
+            ActiveItems(trade)
         }
     }
 }
@@ -325,7 +348,137 @@ fun CancelledBookingsContent(navController: NavController) {
 
 //Design For Items
 @Composable
-fun AllItem(trade: Tradesman) {
+fun AllItem(getClientBooking : GetClientsBooking) {
+    val getbookdate = ViewModelSetups.formatDateTime(getClientBooking.bookingdate)
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 170.dp
+        WindowType.MEDIUM -> 400.dp to 180.dp
+        WindowType.LARGE -> 410.dp to 190.dp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first,cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Tradesman image
+                Image(
+                    painter = painterResource(id = R.drawable.pfp),
+                    contentDescription = "Tradesman Image",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(start = 10.dp)
+                )
+
+                // Tradesman details
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 10.dp)
+                ) {
+                    Text(
+                        text = "tester",
+                        color = Color.Black,
+                        fontWeight = FontWeight(500),
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                    Text(
+                        text = getClientBooking.tasktype,
+                        color = Color.Black,
+                        fontSize = 16.sp,
+                    )
+                    Row(
+                        modifier = Modifier.padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Rate Box
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = (Color(0xFFFFF2DD)),
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "500",
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            )
+                        }
+
+                        // Reviews Box
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = (Color(0xFFFFF2DD)),
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Star Icon",
+                                    tint = Color(0xFFFFA500),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.size(4.dp))
+                                Text(
+                                    text = "4.5",
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        text = "Weekdays Selected",
+                        color = Color.Black,
+                        fontSize = 16.sp,
+
+                        )
+                    Text(
+                        text = getbookdate,
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+
+                        )
+                }
+
+                    Text(
+                        text = "All",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 50.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+
+            }
+        }
+    }
+}
+
+
+//Design for activeItems
+@Composable
+fun ActiveItems(trade: Tradesman) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 170.dp
@@ -437,14 +590,14 @@ fun AllItem(trade: Tradesman) {
                         )
                 }
 
-                    Text(
-                        text = "All",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 50.dp)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
+                Text(
+                    text = "All",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 50.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                )
 
             }
         }

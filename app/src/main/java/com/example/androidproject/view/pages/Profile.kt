@@ -2,6 +2,7 @@ package com.example.androidproject.view.pages
 
 import LogoutViewModel
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -563,11 +565,13 @@ fun GeneralSettings(
 @Composable
 fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewModel) {
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
+    val context = LocalContext.current
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
             // Clear tokens and navigate regardless of result
             TokenManager.clearToken()
             AccountManager.clearAccountData()
+            Toast.makeText(context, "logout successful", Toast.LENGTH_SHORT).show()
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }

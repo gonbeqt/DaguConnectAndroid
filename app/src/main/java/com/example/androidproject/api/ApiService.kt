@@ -7,7 +7,10 @@ import com.example.androidproject.model.LoginRequest
 import com.example.androidproject.model.LoginResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
-import com.example.androidproject.model.ViewJob
+import com.example.androidproject.model.ResumeResponse
+import com.example.androidproject.model.client.GetClientsBooking
+
+
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Response
@@ -33,4 +36,11 @@ interface ApiService {
 
     @DELETE("/user/logout")
     suspend fun logout(@Header("Authorization") token: String): Response<Unit>
+
+    @GET("/user/getresumes")
+    suspend fun getResumes(@Header("Authorization") token: String): Response<ResumeResponse>
+
+    @GET("/user/client/getbooking")
+    suspend fun getClientBooking(@Header("Authorization") token: String): Response<List<GetClientsBooking>>
+
 }
