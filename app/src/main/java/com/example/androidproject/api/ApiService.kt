@@ -1,5 +1,6 @@
 package com.example.androidproject.api
 
+import com.example.androidproject.model.GetChats
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobsResponse
@@ -43,4 +44,6 @@ interface ApiService {
     @GET("/user/client/getbooking")
     suspend fun getClientBooking(@Header("Authorization") token: String): Response<List<GetClientsBooking>>
 
+    @GET("/user/chat/get")
+    suspend fun getChat(): Response <GetChats>
 }

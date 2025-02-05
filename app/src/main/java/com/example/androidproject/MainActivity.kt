@@ -51,10 +51,12 @@ import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
+import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
@@ -96,6 +98,10 @@ class MainActivity : ComponentActivity() {
 
         val viewJobViewModelFactory = ViewJobViewModelFactory(apiService, this)
         val viewJobViewModel = ViewModelProvider(this, viewJobViewModelFactory)[ViewJobViewModel::class.java]
+
+        val getChatsViewModelFactory = GetChatViewModelFactory(apiService, this)
+        val getChatsViewModel = ViewModelProvider(this, getChatsViewModelFactory)[GetChatViewModel::class.java]
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -114,7 +120,7 @@ class MainActivity : ComponentActivity() {
                         MainScreen(navController,logoutViewModel,getClientBookingViewModel)
                     }
                     composable("message_screen") {
-                        MessageScreen(modifier=Modifier,navController)
+                        MessageScreen(modifier=Modifier, navController, getChatsViewModel)
                     }
 
                     composable("booknow") {

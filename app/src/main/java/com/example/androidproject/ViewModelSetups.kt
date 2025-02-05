@@ -16,9 +16,6 @@ class ViewModelSetups {
             val apiService = RetrofitInstance.create(ApiService::class.java)
             val viewModelFactory = GetJobsViewModelFactory(apiService, owner as Context)
             return ViewModelProvider(owner, viewModelFactory)[GetJobsViewModel::class.java]
-
-
-
         }
 
         fun formatDateTime(dateTime: String?): String {
