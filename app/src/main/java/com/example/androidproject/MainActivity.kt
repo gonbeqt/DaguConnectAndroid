@@ -50,6 +50,7 @@ import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
@@ -60,6 +61,7 @@ import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFact
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
+import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 
@@ -83,6 +85,8 @@ class MainActivity : ComponentActivity() {
         val getResumesVMFactory = GetResumesViewModelFactory(apiService,this)
         val getResumesViewModel = ViewModelProvider(this, getResumesVMFactory)[GetResumesViewModel::class.java]
 
+        val viewResumesVMFactory = ViewResumeViewModelFactory(apiService,this)
+        val viewResumeViewModel = ViewModelProvider(this, viewResumesVMFactory)[ViewResumeViewModel::class.java]
 
         val logoutVMFactory = LogoutViewModelFactory(apiService)
         val logoutViewModel = ViewModelProvider(this, logoutVMFactory)[LogoutViewModel::class.java]
@@ -123,8 +127,9 @@ class MainActivity : ComponentActivity() {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
                     }
 
-                    composable("booknow") {
-                        BookNow(trade,feedback, navController)
+                    composable("booknow/{resumeId}") { backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        BookNow(viewResumeViewModel, navController,resumeId)
                     }
                     composable("confirmbook") {
                         ConfirmBook(trade,navController)
@@ -172,7 +177,7 @@ class MainActivity : ComponentActivity() {
                         Welding(navController)
                     }
                     composable("alltradesman"){
-                        AllTradesman(navController)
+                        AllTradesman(navController,getResumesViewModel)
                     }
                     composable("emailverification"){
                         EmailVerification(navController)
