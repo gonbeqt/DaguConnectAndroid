@@ -136,7 +136,7 @@ fun BookingsTopSection(navController: NavController,windowSize: WindowSize) {
                 .height(70.dp)
 
             ,
-            horizontalArrangement = Arrangement.spacedBy(140.dp),
+            horizontalArrangement = Arrangement.spacedBy(100.dp),
         ) {
             Text(text="My Bookings ",
                 fontSize = fontSize,

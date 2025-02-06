@@ -353,19 +353,19 @@ fun BookNow(trade: Tradesman, feedback: Feedback, navController: NavController) 
 
 @Composable
 fun BoxRow() {
-    val items = listOf("Skill 1", "Skill 2", "Skill 3") // Your list of items
+    val items = listOf("Skill 1", "Skill 2", "Skill 3")
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
 
-        horizontalArrangement = Arrangement.Absolute.SpaceAround // Distributes the boxes evenly
+        horizontalArrangement = Arrangement.Absolute.SpaceAround
     ) {
         items.forEach { item ->
             Box(
                 modifier = Modifier
-                    .size(120.dp,50.dp)
+                    .size(100.dp,50.dp)
                     .background(Color(0xFFF1F1F1))
                     .padding(4.dp)
                     .clip(RoundedCornerShape(12.dp))
