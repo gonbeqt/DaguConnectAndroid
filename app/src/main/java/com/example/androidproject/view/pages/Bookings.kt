@@ -271,7 +271,7 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel) {
         is GetClientBookingViewModel.GetClientBookings.Success ->{
             val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
 
-            val ActiveBookings = booking.filter { it.workstatus == "Active" }
+            val ActiveBookings = booking.filter { it.bookingstatus == "Active" }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -308,7 +308,7 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
         }
         is GetClientBookingViewModel.GetClientBookings.Success ->{
             val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-            val completedBookings = booking.filter { it.workstatus == "Finished" }
+            val completedBookings = booking.filter { it.bookingstatus == "Completed" }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -344,7 +344,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
         }
         is GetClientBookingViewModel.GetClientBookings.Success ->{
             val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-            val cancelledBookings = booking.filter { it.workstatus == "Failed" }
+            val cancelledBookings = booking.filter { it.bookingstatus == "Failed" }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -488,7 +488,7 @@ fun AllItem(Booking : GetClientsBooking,navController: NavController) {
                 }
 
                     Text(
-                        text = "All",
+                        text = Booking.bookingstatus,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray,

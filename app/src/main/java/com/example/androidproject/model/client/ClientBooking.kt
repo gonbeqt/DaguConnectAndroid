@@ -31,6 +31,4 @@ data class GetClientsBooking(
     val tradesman_id: Int,
     @SerializedName("user_id")
     val userid: Int,
-    @SerializedName("work_status")
-    val workstatus: Any
 )

@@ -4,8 +4,6 @@ import com.google.gson.annotations.SerializedName
 
 
 data class resumesItem(
-    @SerializedName("academic_background")
-    val academicbackground: AcademicBackground,
     @SerializedName("created_at")
     val createdat: String,
     val email: String,
@@ -28,12 +26,8 @@ data class resumesItem(
 )
 
 
-data class AcademicBackground(
-    val Decription: String,
-    @SerializedName("Field_of_study")
-    val Fieldofstudy: String,
-    val School: String
-)
+
+
 
 
 
