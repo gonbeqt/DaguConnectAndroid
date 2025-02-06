@@ -8,14 +8,17 @@ data class GetChats(
 
 data class Chats(
     val id: Int,
-    @SerializedName("user_id")
-    val userId: Int,
-    @SerializedName("receiver_id")
-    val receiverId: Int,
-    @SerializedName("receiver_name")
-    val receiverName: String,
+    @SerializedName("user_id1")
+    val userId1: Int,
+    @SerializedName("user_id2")
+    val userId2: Int,
+    @SerializedName("full_name")
+    val fullName: String,
     @SerializedName("latest_message")
     val latestMessage: String,
     @SerializedName("created_at")
-    val createdAt: String
+    val createdAt: String,
+    @SerializedName("updated_at")
+    val updatedAt: String
+
 )

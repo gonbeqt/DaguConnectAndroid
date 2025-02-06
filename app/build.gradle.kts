@@ -62,7 +62,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.0.0")
     //livedata
     implementation("androidx.compose.runtime:runtime-livedata:1.5.3")
-
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
 
 
     implementation(libs.androidx.core.ktx)
