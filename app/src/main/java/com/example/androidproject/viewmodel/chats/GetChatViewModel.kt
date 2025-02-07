@@ -1,5 +1,6 @@
 package com.example.androidproject.viewmodel.chats
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
@@ -25,9 +26,11 @@ class GetChatViewModel(private val apiService: ApiService) : ViewModel() {
                     }
                 } else {
                     _chatState.value = ChatState.Error(response.message())
+                    Log.e("GetChatViewModel", "Error: ${response.message()}")
                 }
             } catch (e: Exception) {
                 _chatState.value = ChatState.Error(e.localizedMessage ?: "Unknown error")
+                Log.e("GetChatViewModel", "Error: ${e.localizedMessage}")
             }
         }
     }
