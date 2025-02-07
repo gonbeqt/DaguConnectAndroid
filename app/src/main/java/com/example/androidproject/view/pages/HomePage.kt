@@ -82,10 +82,10 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.4, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.2, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.9, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
     )
@@ -268,6 +268,8 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 @Composable
 fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
     val windowSize = rememberWindowSizeClass()
+    val topTradesmen = tradesmen.sortedByDescending { it.reviews }.take(5)
+
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 120.dp
         WindowType.MEDIUM -> 140.dp
@@ -315,7 +317,7 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
                 .background(Color(0xFFECECEC)),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            tradesmen.forEach { trade ->
+            topTradesmen.forEach { trade ->
                 TradesmanItem(trade,navController = navController, cardHeight, textSize)
             }
         }
