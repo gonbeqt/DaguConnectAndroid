@@ -48,12 +48,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
+import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.RegisterViewModel
 
 @Preview(showBackground = true)
@@ -91,13 +93,13 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         mutableStateOf(false)
     }
 
-    // Animatable for the card's X offset
-    val cardOffsetX = remember { Animatable(-500f) } // Start off-screen to the left
+    // Animatable for the card's Y offset
+    val cardOffsetY = remember { Animatable(500f) } // Start off-screen to the bottom
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
     // Launch animation when composable is composed
     LaunchedEffect(currentBackStackEntry.value) {
-        cardOffsetX.animateTo(
+        cardOffsetY.animateTo(
             targetValue = 0f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
         )
@@ -105,39 +107,41 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
 
     // Determine card size and padding based on screen width
     val cardWidth = when (windowSize.width) {
-        WindowType.SMALL -> 0.9f
-        WindowType.MEDIUM -> 0.7f
-        WindowType.LARGE -> 0.5f
+        WindowType.SMALL -> 1f
+        WindowType.MEDIUM -> 0.75f
+        WindowType.LARGE -> 0.55f
     }
     val cardHeight = when (windowSize.height) {
         WindowType.SMALL -> 620.dp
-        WindowType.MEDIUM -> 750.dp
+        WindowType.MEDIUM -> 720.dp
         WindowType.LARGE -> 800.dp
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.CenterStart
+            .background(myGradient),
+        contentAlignment = Alignment.Center
     ) {
         // Set an image as the background
         Image(
-            painter = painterResource(id = R.drawable.background_image_auth),
+            painter = painterResource(id = R.drawable.authbg),
             contentDescription = "Background Image",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize()
+                .offset(y = (-150).dp)
         )
 
         Card(
             modifier = Modifier
-                .offset(x = cardOffsetX.value.dp) // Apply animation offset
+                .offset(y = cardOffsetY.value.dp) // Apply animation offset
                 .fillMaxWidth(cardWidth)
-                .height(cardHeight),
+                .height(cardHeight)
+                .align(Alignment.BottomCenter),
             shape = RoundedCornerShape(
                 topEnd = 20.dp,
-                bottomEnd = 20.dp
+                topStart = 20.dp
             ),
+            colors = CardDefaults.cardColors(Color.White),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize(),
@@ -191,11 +195,7 @@ fun InputFieldForSignUp(
     onPasswordChange: (String) -> Unit,
     windowSize: WindowSize
     ){
-    val fieldWidth = when (windowSize.width) {
-        WindowType.SMALL -> 0.9f
-        WindowType.MEDIUM -> 0.8f
-        WindowType.LARGE -> 0.7f
-    }
+
     var passwordVisible by remember { mutableStateOf(false) }
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
@@ -209,73 +209,78 @@ fun InputFieldForSignUp(
             WindowType.MEDIUM -> 24.sp
             else -> 28.sp
         },
+        textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
-        color = Color.Blue,
-        modifier = Modifier.padding(bottom = 16.dp, top = 16.dp) // Optional padding below the title
+        color = Color.Black,
+        modifier = Modifier.offset(y = (-25).dp)
     )
+    Row(Modifier.fillMaxWidth()
+        .padding(horizontal = 25.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly) {
+        OutlinedTextField(
+            value = firstName,
+            onValueChange = onFirstNameChange, // Updates the `firstName` state
+            label = { Text("First Name")},
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "First Name Icon"
+                )
+            },
+            singleLine = true,
 
-    OutlinedTextField(
-        value = firstName,
-        onValueChange = onFirstNameChange, // Updates the `firstName` state
-        label = { Text("First Name")},
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "First Name Icon"
+            modifier = Modifier
+                .width(170.dp)
+                .heightIn(min = 56.dp), // Adjust height as needed
+            shape = RoundedCornerShape(16.dp), // Set corner radius here
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Blue,
+                unfocusedIndicatorColor = Color.Gray,
+                focusedLabelColor = Color.Blue,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Black
+            ),
+            textStyle = TextStyle(
+                fontSize = 16.sp, // Adjust text size for visibility
+                color = Color.Black // Ensure text is visible
             )
-        },
-        singleLine = true,
 
-        modifier = Modifier
-            .fillMaxWidth(fieldWidth) // Adjust width as needed
-            .heightIn(min = 56.dp), // Adjust height as needed
-        shape = RoundedCornerShape(16.dp), // Set corner radius here
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Blue,
-            unfocusedIndicatorColor = Color.Gray,
-            focusedLabelColor = Color.Blue,
-            unfocusedLabelColor = Color.Gray,
-            cursorColor = Color.Black
-        ),
-        textStyle = TextStyle(
-            fontSize = 16.sp, // Adjust text size for visibility
-            color = Color.Black // Ensure text is visible
         )
+        Spacer(modifier = Modifier.width(10.dp))
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = onLastNameChange,
+            label = { Text("Last Name") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Last Name Icon"
+                )
+            },
+            singleLine = true,
 
-    )
-    Spacer(modifier = Modifier.height(10.dp))
-    OutlinedTextField(
-        value = lastName,
-        onValueChange = onLastNameChange,
-        label = { Text("Last Name") },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Last Name Icon"
+            modifier = Modifier
+                .width(170.dp)
+                .heightIn(min = 56.dp), // Adjust height as needed
+            shape = RoundedCornerShape(16.dp), // Set corner radius here
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Blue,
+                unfocusedIndicatorColor = Color.Gray,
+                focusedLabelColor = Color.Blue,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Black
+            ),
+            textStyle = TextStyle(
+                fontSize = 16.sp, // Adjust text size for visibility
+                color = Color.Black // Ensure text is visible
             )
-        },
-        singleLine = true,
-
-        modifier = Modifier
-            .fillMaxWidth(fieldWidth) // Adjust width as needed
-            .heightIn(min = 56.dp), // Adjust height as needed
-        shape = RoundedCornerShape(16.dp), // Set corner radius here
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Blue,
-            unfocusedIndicatorColor = Color.Gray,
-            focusedLabelColor = Color.Blue,
-            unfocusedLabelColor = Color.Gray,
-            cursorColor = Color.Black
-        ),
-        textStyle = TextStyle(
-            fontSize = 16.sp, // Adjust text size for visibility
-            color = Color.Black // Ensure text is visible
         )
-    )
+    }
+
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(
         value = userName,
@@ -290,7 +295,7 @@ fun InputFieldForSignUp(
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(fieldWidth) // Adjust width as needed
+            .width(360.dp)
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -325,7 +330,7 @@ fun InputFieldForSignUp(
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(fieldWidth) // Adjust width as needed
+            .width(360.dp)
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -356,7 +361,7 @@ fun InputFieldForSignUp(
         singleLine = true,
 
         modifier = Modifier
-            .fillMaxWidth(fieldWidth) // Adjust width as needed
+            .width(360.dp)
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -394,7 +399,7 @@ fun InputFieldForSignUp(
         else PasswordVisualTransformation(),
         singleLine = true,
         modifier = Modifier
-            .fillMaxWidth(fieldWidth) // Adjust width as needed
+            .width(360.dp)
             .heightIn(min = 56.dp), // Adjust height as needed
         shape = RoundedCornerShape(16.dp), // Set corner radius here
         colors = TextFieldDefaults.colors(
@@ -414,6 +419,8 @@ fun InputFieldForSignUp(
 }
 @Composable
 fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
+    val selectedCard = remember { mutableStateOf<Boolean?>(null) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth().padding(start = 15.dp,end = 15.dp),
@@ -425,8 +432,19 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
             modifier = Modifier.size(70.dp)
                 .weight(1f)
                 .padding(8.dp)
-                .clickable {onIsClientChange (true)}, //Implementation here
-            colors = CardDefaults.cardColors(Color.Blue)
+                .clickable {
+                    if (selectedCard.value != true) {
+                        selectedCard.value = true
+                        onIsClientChange(true)
+                    } else {
+                        selectedCard.value = null
+                        onIsClientChange(false)
+                    }
+                },
+            colors = CardDefaults.cardColors(
+                if (selectedCard.value == true) Color(0xFF122826) else Color.White
+            ),
+            elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -440,13 +458,13 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
                     imageVector = Icons.Default.Person,
                     contentDescription = "Person Icon",
                     modifier = Modifier.size(24.dp),
-                    tint = Color.White
+                    tint = if (selectedCard.value == true) Color.White else Color.Black // Change icon tint on selection
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Client",
                     fontSize = 12.sp,
-                    color = Color.White
+                    color = if (selectedCard.value == true) Color.White else Color.Black
                 )
             }
         }
@@ -456,8 +474,19 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
             modifier = Modifier.size(70.dp)
                 .weight(1f)
                 .padding(8.dp)
-                .clickable { onIsClientChange(false) }, //Implementation here
-            colors = CardDefaults.cardColors(Color.Blue)
+                .clickable {
+                    if (selectedCard.value != false) {
+                        selectedCard.value = false
+                        onIsClientChange(false)  // Your implementation for second card
+                    } else {
+                        selectedCard.value = null
+                        onIsClientChange(false)  // Deselecting (not selecting any card)
+                    }
+                },
+            colors = CardDefaults.cardColors(
+                if (selectedCard.value == false) Color(0xFF122826) else Color.White
+            ),
+            elevation = CardDefaults.cardElevation(8.dp)
 
         ) {
             Row(
@@ -472,13 +501,13 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
                     imageVector = Icons.Default.Work,
                     contentDescription = "Person Icon",
                     modifier = Modifier.size(24.dp),
-                    tint = Color.White
+                    tint = if (selectedCard.value == false) Color.White else Color.Black // Change icon tint on selection
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Tradesman",
                     fontSize = 12.sp,
-                    color = Color.White,
+                    color =  if (selectedCard.value == false) Color.White else Color.Black
                 )
             }
         }
@@ -516,7 +545,7 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
             modifier = Modifier
                 .fillMaxWidth(0.6f) // 80% width
                 .height(50.dp), // Set height
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826)),
         )
         {
             Text(text = "Sign Up", color = Color.White)

@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
+import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.LoginViewModel
 
 @Preview(showBackground = true)
@@ -90,13 +91,12 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
     var password by remember {
         mutableStateOf("") }
 
-    val cardOffsetX = remember { Animatable(500f) } // Start off-screen to the right
-
+    val cardOffsetY = remember { Animatable(500f) } // Start off-screen to the bottom
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
     // Launch animation when composable is composed
     LaunchedEffect(currentBackStackEntry.value) {
-        cardOffsetX.animateTo(
+        cardOffsetY.animateTo(
             targetValue = 0f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
         )
@@ -105,36 +105,44 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.CenterEnd
+            .background(myGradient),
+        contentAlignment = Alignment.Center
     ) {
-        // Background Image
+        // Set an image as the background
         Image(
-            painter = painterResource(id = R.drawable.background_image_auth),
+            painter = painterResource(id = R.drawable.authbg),
             contentDescription = "Background Image",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize()
+                .offset(y = (-150).dp)
         )
+
 
         // Card with adaptive size and padding
         Card(
             modifier = Modifier
-                .offset(x = cardOffsetX.value.dp)
-                .size(
+                .offset(y = cardOffsetY.value.dp)
+                .align(Alignment.BottomCenter)
+            .size(
                     width = when (windowSize.width) {
-                        WindowType.SMALL -> 300.dp
+                        WindowType.SMALL -> 500.dp
                         WindowType.MEDIUM -> 350.dp
                         else -> 400.dp
                     },
                     height = when (windowSize.height) {
-                        WindowType.SMALL -> 360.dp
-                        WindowType.MEDIUM -> 400.dp
+                        WindowType.SMALL -> 400.dp
+                        WindowType.MEDIUM -> 450.dp
                         else -> 450.dp
                     }
+
                 ),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp)
-        ) {
+            shape = RoundedCornerShape(
+                topEnd = 20.dp,
+                topStart = 20.dp
+            ),
+            elevation = CardDefaults.cardElevation(8.dp),
+            colors = CardDefaults.cardColors(Color.White)
+
+            ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -148,7 +156,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                         else -> 28.sp
                     },
                     fontWeight = FontWeight.Bold,
-                    color = Color.Blue,
+                    color = Color.Black,
                     modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)
                 )
 
@@ -281,12 +289,9 @@ fun ForgotPassword(windowSize: WindowSize) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                end = when (windowSize.width) {
-                    WindowType.SMALL -> 16.dp
-                    else -> 36.dp
-                }
-            ),
+            .padding(16.dp)
+
+            ,
         horizontalArrangement = Arrangement.End
     ) {
         Text(
@@ -315,7 +320,7 @@ fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: 
                 }
             )
             .height(50.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
     ) {
         Text(text = "Log In", color = Color.White)
     }

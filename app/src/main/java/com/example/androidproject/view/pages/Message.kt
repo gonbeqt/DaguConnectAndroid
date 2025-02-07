@@ -135,12 +135,12 @@ fun ChatListItem(chats: Chats) {
 
         // Text Section
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = chats.receiverName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
+//            Text(
+//                text = chats.receiverName,
+//                style = MaterialTheme.typography.bodyLarge,
+//                fontWeight = FontWeight.Bold,
+//                color = Color.Black
+//            )
             Text(
                 text = chats.latestMessage,
                 style = MaterialTheme.typography.bodyMedium,
