@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier,navController)
@@ -144,7 +144,7 @@ class MainActivity : ComponentActivity() {
                         ACRepair(navController)
                     }
                     composable("plumbing") {
-                        Plumbing(navController)
+                        Plumbing(navController,getResumesViewModel)
                     }
                     composable("carpentry") {
                         Carpentry(navController)

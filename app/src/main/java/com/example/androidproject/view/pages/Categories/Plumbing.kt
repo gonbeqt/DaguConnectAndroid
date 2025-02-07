@@ -26,6 +26,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,10 +40,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 @Composable
-fun Plumbing(navController: NavController) {
+fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewModel) {
+    val resumeState by getResumesViewModel.resumeState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        getResumesViewModel.getResumes()
+    }
     val tradesmen = listOf(
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
@@ -52,11 +62,7 @@ fun Plumbing(navController: NavController) {
     Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
     Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
 
-    )
-
-    // Filter only Plumbers
-    val plumbers = tradesmen.filter { it.category == "Plumber" }
-
+    );
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -150,29 +156,65 @@ fun Plumbing(navController: NavController) {
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-
-                        // LazyColumn with CompletedItem layout
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .size(500.dp)
-                                .background(Color(0xFFF9F9F9)),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(plumbers.size) { index ->
-                                val trade = plumbers[index]
-                                PlumbingItem(trade, navController)
+                        when (resumeState){
+                            is GetResumesViewModel.ResumeState.Loading -> {
+                                // Show a loading indicator if needed
+                                Text(
+                                    text = "Loading...",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
                             }
+                            is GetResumesViewModel.ResumeState.Success -> {
+                                val resume = (resumeState as GetResumesViewModel.ResumeState.Success).data
+                                val plumbers = resume.filter { it.specialties.contains("Plumber") }
+
+                                if (plumbers.isNotEmpty()) {
+                                    // LazyColumn with CompletedItem layout
+                                    LazyColumn(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .size(500.dp)
+                                            .background(Color(0xFFF9F9F9)),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        items(plumbers.size) { index ->
+                                            val Plumbers = plumbers[index]
+                                            PlumbingItem(Plumbers, navController)
+                                        }
+                                    }
+
+                                } else {
+                                    Text("No plumbers found.")
+                                }
+
+                            }
+                            is GetResumesViewModel.ResumeState.Error -> {
+                                val errorMessage = (resumeState as GetResumesViewModel.ResumeState.Error).message
+                                Text(text = "Error: $errorMessage")
+                            }
+                            else -> Unit
+
                         }
+
                     }
                 }
+
+
             }
         }
     }
+
+
+
+
+
+
+
 }
 
 @Composable
-fun PlumbingItem(trade: Tradesman, navController: NavController) {
+fun PlumbingItem(plumbers: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -190,8 +232,8 @@ fun PlumbingItem(trade: Tradesman, navController: NavController) {
         ) {
             // Profile Picture
             Image(
-                painter = painterResource(trade.imageResId),
-                contentDescription = trade.username,
+                painter = painterResource(id = R.drawable.pfp),
+                contentDescription = plumbers.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
                     .background(Color.Gray, RoundedCornerShape(25.dp))
@@ -203,7 +245,7 @@ fun PlumbingItem(trade: Tradesman, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = trade.username,
+                    text = plumbers.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -219,7 +261,7 @@ fun PlumbingItem(trade: Tradesman, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = trade.rate,
+                            text = "P${plumbers.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -240,7 +282,7 @@ fun PlumbingItem(trade: Tradesman, navController: NavController) {
                                 .padding(top = 7.dp, start = 2.dp)
                         )
                         Text(
-                            text = trade.reviews.toString(),
+                            text = "4.2",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                         )

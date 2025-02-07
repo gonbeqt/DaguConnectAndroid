@@ -40,7 +40,7 @@ interface ApiService {
 
 
     @GET("/user/getresumes")
-    suspend fun getResumes(@Header("Authorization") token: String): Response<List<resumesItem>>
+    suspend fun getResumes(@Header("Authorization",) token: String,@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<List<resumesItem>>
 
     @GET("/user/getresume/{resumeId}")
     suspend fun getResumeById(@Header("Authorization") token: String, @Path("resumeId") resumeId: Int): Response<viewResume>

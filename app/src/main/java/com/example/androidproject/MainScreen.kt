@@ -38,11 +38,12 @@ import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import androidx.compose.ui.platform.LocalContext
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,modifier: Modifier = Modifier) {
+fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
@@ -84,7 +85,8 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
             navController,
             getJobsViewModel,
             logoutViewModel,
-            getClientsBooking)
+            getClientsBooking,
+            getResumesViewModel)
     }
 }
 
@@ -95,13 +97,14 @@ fun ContentScreen(
     navController: NavController,
     getJobsViewModel: GetJobsViewModel,
     logoutViewModel: LogoutViewModel,
-    getClientsBooking: GetClientBookingViewModel
+    getClientsBooking: GetClientBookingViewModel,
+    getResumesViewModel: GetResumesViewModel
 ) {
 
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
-            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController)
+            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel)
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
             3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp),navController)
