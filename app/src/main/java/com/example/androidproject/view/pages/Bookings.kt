@@ -139,7 +139,7 @@ fun BookingsTopSection(navController: NavController,windowSize: WindowSize) {
                 .height(70.dp)
 
             ,
-            horizontalArrangement = Arrangement.spacedBy(140.dp),
+            horizontalArrangement = Arrangement.spacedBy(100.dp),
         ) {
             Text(text="My Bookings ",
                 fontSize = fontSize,
@@ -208,9 +208,18 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
             }
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
 
@@ -250,9 +259,18 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
 
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
 
@@ -290,9 +308,18 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel) {
 
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
     }
@@ -326,9 +353,18 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
             }
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
     }
@@ -361,9 +397,18 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
             }
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
     }

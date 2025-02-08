@@ -46,6 +46,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,21 +58,16 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark)
-    )
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Main Content Area (Scrollable)
 
-        // Header Card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF81D796))
-                .verticalScroll(rememberScrollState()),
+                ,
             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
         ) {
 
@@ -110,7 +109,8 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 100.dp)
-                        .background(Color(0xFF81D796)),
+                        .background(Color(0xFF81D796))
+                        .verticalScroll(rememberScrollState()),
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
                 ) {
                     Column(
@@ -276,9 +276,10 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                     )
                                 )
                             }
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
+
                             Text(
-                                text = "Week Availability",
+                                text = "Specialties",
                                 color = Color.Black,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight(500),
@@ -286,43 +287,44 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                     .fillMaxWidth()
                                     .padding(10.dp)
                             )
-                            Spacer(Modifier.height(4.dp))
+                            Spacer(Modifier.height(8.dp))
 
-
+                            val items = listOf("Electrician", "Plumbing", "Cleaning")
 
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState())
-                                    .padding(start = 5.dp, end = 5.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    .padding(16.dp),
+
+                                horizontalArrangement = Arrangement.Absolute.SpaceAround
                             ) {
-                                listOf(
-                                    "Monday",
-                                    "Tuesday",
-                                    "Wednesday",
-                                    "Thursday",
-                                    "Friday",
-                                    "Saturday",
-                                    "Sunday"
-                                ).forEach { day ->
+                                items.forEach { item ->
                                     Box(
                                         modifier = Modifier
-                                            .size(100.dp, 30.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFFFF2DD))
-                                            .clickable { },
-                                        contentAlignment = Alignment.Center
-                                    ) {
+                                            .size(100.dp, 50.dp)
+                                            .clip(RoundedCornerShape(12.dp)) // Apply rounded corners first
+                                            .background(Color(0xFFF1F1F1))  // Then apply background
+                                            .padding(4.dp)
+                                            .clickable { }
+                                    )
+                                    {
+                                        // Content for each Box
                                         Text(
-                                            text = day,
-                                            textAlign = TextAlign.Center,
+                                            text = item,
                                             modifier = Modifier.align(Alignment.Center),
+                                            color = Color.Black,
                                             fontSize = 14.sp
                                         )
                                     }
                                 }
                             }
+                            Spacer(Modifier.height(8.dp))
+
+
+
+
+                            WeekRow()
+
                             Spacer(Modifier.height(4.dp))
 
                             Text(
@@ -380,3 +382,69 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
 
      }
 }
+@Composable
+fun WeekRow() {
+    val currentDate = LocalDate.now()
+    val startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) // Start of week (Monday)
+    val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")) // Format as "February 6, 2025"
+
+    val weekDays = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween // Ensures spacing
+    ) {
+        Text(
+            text = "Week Availability",
+            color = Color.Black,
+            fontSize = 18.sp,
+            fontWeight = FontWeight(500)
+        )
+        Text(
+            text = formattedDate,  // Displays the actual date
+            color = Color.Black,
+            fontSize = 18.sp,
+            fontWeight = FontWeight(500)
+        )
+    }
+
+    Spacer(Modifier.height(4.dp))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(start = 5.dp, end = 5.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        weekDays.forEachIndexed { index, day ->
+            val date = startOfWeek.plusDays(index.toLong()).dayOfMonth  // Get the corresponding date
+
+            Box(
+                modifier = Modifier
+                    .size(70.dp, 70.dp) // Adjusted size for better spacing
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFFFF2DD))
+                    .clickable {  },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = day,
+                        textAlign = TextAlign.Center,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = date.toString(),
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+    }
+}
+

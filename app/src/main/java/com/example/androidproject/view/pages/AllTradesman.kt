@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -25,7 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,19 +40,48 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 
 @Composable
 fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) {
     val resumeState by getResumes.resumeState.collectAsState()
+    val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
-        getResumes.getResumes()
+    LaunchedEffect(resumeState) {
+      if (resumeState is GetResumesViewModel.ResumeState.Idle){
+          getResumes.getResumes()
+      }
     }
+
+        val resume = when (val state = resumeState) {
+            is GetResumesViewModel.ResumeState.Success -> state.data
+            else -> emptyList<resumesItem>()
+        }
+
+
+        // Check if we need to load more data when nearing the end of the list
+        val shouldLoadMore = remember {
+            derivedStateOf {
+                val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                lastVisibleItemIndex >= resume.size - 5 // Load next page when 5 items are left
+            }
+        }
+
+        // Load more jobs when needed
+        LaunchedEffect(shouldLoadMore.value) {
+            if (shouldLoadMore.value && resumeState !is GetResumesViewModel.ResumeState.Loading) {
+                getResumes.getResumes()
+            }
+        }
+
+
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -115,14 +147,16 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) 
                     Text(text = "Loading...")
                 }
                 is GetResumesViewModel.ResumeState.Success -> {
-                    val resume = (resumeState as GetResumesViewModel.ResumeState.Success).data
+                    val activeresume = resume.filter { it.is_active  == 1}
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier
                             .fillMaxSize() // Ensure LazyColumn takes up the remaining space
                             .background(Color(0xFFECECEC)),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        itemsIndexed(resume) { index, resumes ->
+                        items(activeresume.size) { index ->
+                            val resumes = activeresume[index]
                             AllTradesmanItem(resumes, navController, cardHeight, textSize)
                         }
                     }
@@ -164,8 +198,8 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
             contentAlignment = Alignment.CenterStart
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = R.drawable.pfp),
+                AsyncImage(
+                    model = resumes.profilepic,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(cardHeight - 20.dp)

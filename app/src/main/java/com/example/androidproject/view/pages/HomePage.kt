@@ -46,18 +46,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Categories
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 
 @Composable
-fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
+fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
 
@@ -82,10 +84,10 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.4, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.2, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.9, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
     )
@@ -113,7 +115,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController) {
                 CategoryRow(categories,navController)
 
                 Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(tradesmen,navController)
+                TradesmanColumn(getResumesViewModel,navController)
             }
         }
     }
@@ -266,8 +268,16 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 }
 
 @Composable
-fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavController) {
     val windowSize = rememberWindowSizeClass()
+    val resumeState by getResumesViewModel.resumeState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        getResumesViewModel.getResumes()
+    }
+
+
+
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 120.dp
         WindowType.MEDIUM -> 140.dp
@@ -309,16 +319,40 @@ fun TradesmanColumn(tradesmen: List<Tradesman>,navController: NavController) {
             .background(Color.White),
         shape = RoundedCornerShape(8.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(Color(0xFFECECEC)),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            tradesmen.forEach { trade ->
-                TradesmanItem(trade,navController = navController, cardHeight, textSize)
+        when (resumeState){
+            is GetResumesViewModel.ResumeState.Loading ->{
+                // Show a loading indicator if needed
+                Text(
+                    text = "Loading...",
+                    fontSize = textSize,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
             }
+            is GetResumesViewModel.ResumeState.Success ->{
+                val resumes = (resumeState as GetResumesViewModel.ResumeState.Success).data
+                // Sort resumes by ID and take the top 5
+                val topResumes = resumes.sortedBy { it.id }.take(5)
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(Color(0xFFECECEC)),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    topResumes.forEach { resumes ->
+                        TradesmanItem(resumes, navController = navController, cardHeight, textSize)
+                    }
+                }
+            }
+            is GetResumesViewModel.ResumeState.Error ->{
+                Text(
+                    text = "Error fetching data",
+                    fontSize = textSize,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
+            else -> Unit
         }
+
     }
 
 
@@ -426,7 +460,7 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp, textSize: TextUnit) {
+fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit) {
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 30.dp
@@ -437,7 +471,7 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
         modifier = Modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .clickable { navController.navigate("booknow")}, //implementation here
+            .clickable { navController.navigate("booknow/${resumes.id}")}, //implementation here
         shape = RoundedCornerShape(8.dp),
 
 
@@ -449,8 +483,8 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
             contentAlignment = Alignment.CenterStart
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(trade.imageResId),
+                AsyncImage(
+                    model = resumes.profilepic,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(cardHeight - 20.dp)
@@ -463,7 +497,7 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
                 )
                 {
                     Text(
-                        text = trade.username,
+                        text = resumes.tradesmanfullname,
                         color = Color.Black,
                         fontWeight = FontWeight(500),
                         fontSize = textSize,
@@ -471,7 +505,9 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
 
                     )
                     Text(
-                        text = trade.category,
+                        text = "${resumes.specialties}"
+                            .replace("[", "")  // Remove opening bracket
+                            .replace("]", ""),  // Remove closing bracket ,
                         color = Color.Black,
                         fontSize = textSize,
                         )
@@ -486,7 +522,7 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
                                 )
                         ) {
                             Text(
-                                text = trade.rate,
+                                text = "P${resumes.workfee}/hr",
                                 fontSize = textSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )
@@ -507,7 +543,7 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
                                     .padding(top = 7.dp, start = 2.dp)
                             )
                             Text(
-                                text = trade.reviews.toString(),
+                                text = "4",
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                             )
@@ -516,7 +552,7 @@ fun TradesmanItem(trade: Tradesman, navController: NavController, cardHeight: Dp
 
 
                 }
-                Image(painter = painterResource(trade.bookmark),
+                Image(painter = painterResource(id = R.drawable.bookmark),
                     contentDescription = "Bookmark Image",
                     modifier = Modifier
                         .size(iconSize)
