@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Tradesman
@@ -51,18 +52,8 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
     LaunchedEffect(Unit) {
         getResumesViewModel.getResumes()
     }
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-                Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
 
-    );
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -190,8 +181,12 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
 
                             }
                             is GetResumesViewModel.ResumeState.Error -> {
-                                val errorMessage = (resumeState as GetResumesViewModel.ResumeState.Error).message
-                                Text(text = "Error: $errorMessage")
+                                // Show an error message if needed
+                                Text(
+                                    text = "Error loading resumes. Please try again later.",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
                             }
                             else -> Unit
 
@@ -214,7 +209,7 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun PlumbingItem(plumbers: resumesItem, navController: NavController) {
+fun PlumbingItem(resume: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -231,9 +226,9 @@ fun PlumbingItem(plumbers: resumesItem, navController: NavController) {
             horizontalArrangement = Arrangement.Start
         ) {
             // Profile Picture
-            Image(
-                painter = painterResource(id = R.drawable.pfp),
-                contentDescription = plumbers.tradesmanfullname,
+            AsyncImage(
+                model = resume.profilepic,
+                contentDescription = resume.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
                     .background(Color.Gray, RoundedCornerShape(25.dp))
@@ -245,7 +240,7 @@ fun PlumbingItem(plumbers: resumesItem, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = plumbers.tradesmanfullname,
+                    text = resume.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -261,7 +256,7 @@ fun PlumbingItem(plumbers: resumesItem, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = "P${plumbers.workfee}/hr",
+                            text = "P${resume.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )

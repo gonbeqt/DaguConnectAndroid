@@ -141,34 +141,34 @@ class MainActivity : ComponentActivity() {
                         CancellationDetails(trade,navController)
                     }
                     composable("acrepair"){
-                        ACRepair(navController)
+                        ACRepair(navController,getResumesViewModel)
                     }
                     composable("plumbing") {
                         Plumbing(navController,getResumesViewModel)
                     }
                     composable("carpentry") {
-                        Carpentry(navController)
+                        Carpentry(navController,getResumesViewModel)
                     }
                     composable("electrician") {
-                        Electrician(navController)
+                        Electrician(navController,getResumesViewModel)
                     }
                     composable("masonry"){
-                        Masonry(navController)
+                        Masonry(navController,getResumesViewModel)
                     }
                     composable("cleaning") {
-                        Cleaning(navController)
+                        Cleaning(navController,getResumesViewModel)
                     }
                     composable("mechanics"){
-                        Mechanics(navController)
+                        Mechanics(navController,getResumesViewModel)
                     }
                     composable("painting"){
-                        Painting(navController)
+                        Painting(navController,getResumesViewModel)
                     }
                     composable("roofing"){
-                        Roofing(navController)
+                        Roofing(navController,getResumesViewModel)
                     }
                     composable("welding"){
-                        Welding(navController)
+                        Welding(navController,getResumesViewModel)
                     }
                     composable("alltradesman"){
                         AllTradesman(navController,getResumesViewModel)

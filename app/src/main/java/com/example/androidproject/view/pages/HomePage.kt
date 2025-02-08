@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Categories
@@ -482,8 +483,8 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             contentAlignment = Alignment.CenterStart
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = R.drawable.pfp),
+                AsyncImage(
+                    model = resumes.profilepic,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(cardHeight - 20.dp)
