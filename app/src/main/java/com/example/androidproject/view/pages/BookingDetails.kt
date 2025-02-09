@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.theme.myGradient3
 
 @Composable
 fun BookingDetails(trade: Tradesman, navController: NavController) {
@@ -119,20 +120,19 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth(),
-                colors =  CardDefaults.cardColors( Color(0xFF81D796)),
-
                 shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp) // Keep card shape
             ) {
-                Column(
+                Box(
                     modifier = Modifier
-                        .padding(16.dp)
                         .fillMaxWidth()
-                        .background(Color(0xFF81D796)) // Set background color here
+                        .background(brush = myGradient3) // Apply gradient background here
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center // Ensure padding is inside the gradient box
                 ) {
                     Text(
                         text = "Your appointment is Pending Approval",
-                        fontSize = 18.sp,
-                        color = Color.Black,
+                        fontSize = 20.sp,
+                        color = Color.White,
                     )
                 }
             }

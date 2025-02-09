@@ -2,6 +2,7 @@ package com.example.androidproject.view.pages2
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,21 +43,41 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Top Bar
         Row(
             modifier = Modifier
+                .padding(top = 10.dp, start = 25.dp, end = 25.dp)
                 .fillMaxWidth()
-                .shadow(elevation = 8.dp)
-                .background(Color.White)
-                .padding(horizontal = 8.dp, vertical = 16.dp),
+                .height(70.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Left-aligned text
             Text(
                 text = "Profile",
-                fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Medium
             )
-            Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifications", tint = Color.Cyan, modifier = Modifier.padding(end = 16.dp))
-            Icon(imageVector = Icons.Default.Chat, contentDescription = "Chat", tint = Color.Cyan)
+
+            // Right-aligned icons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier.size(32.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.Message,
+                    contentDescription = "Message Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { navController.navigate("message_screen") }
+                )
+            }
         }
 
         // Profile Info

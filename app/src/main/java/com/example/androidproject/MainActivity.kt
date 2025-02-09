@@ -30,6 +30,7 @@ import com.example.androidproject.view.ClientPov.ChangePassword
 import com.example.androidproject.view.ClientPov.EmailVerification
 import com.example.androidproject.view.ClientPov.ReportProblem
 import com.example.androidproject.view.Feedback
+import com.example.androidproject.view.LandingPage2
 import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.SignUpScreen
@@ -112,6 +113,9 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = startDestination) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
+                    }
+                    composable("landingpage2") {
+                        LandingPage2(navController)
                     }
                     composable("signup") {
                         SignUpScreen(navController,registerViewModel)

@@ -56,7 +56,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     // Tab titles
-    val tabTitles = listOf("All", "Pending", "Active", "Completed", "Cancelled")
+    val tabTitles = listOf("All", "Pending","Declined", "Active", "Completed", "Cancelled")
     Box (
         modifier = modifier
             .fillMaxSize()
@@ -64,7 +64,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            BookingsTradesmanTopSection(navController,windowSize)
+            BookingsTradesmanTopSection(navController)
             Column(modifier = Modifier.fillMaxSize()) {
                 // Tabs (Fixed Choices)
                 ScrollableTabRow(
@@ -94,9 +94,10 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     when (selectedTabIndex) {
                         0 -> AllBookingsTradesmanContent()
                         1 -> PendingBookingsTradesmanContent(navController)
-                        2 -> ActiveBookingsTradesmanContent()
-                        3 -> CompletedBookingsTradesmanContent(navController)
-                        4 -> CancelledBookingsTradesmanContent(navController)
+                        2-> DeclinedBookingsTradesmanContent(navController)
+                        3 -> ActiveBookingsTradesmanContent()
+                        4 -> CompletedBookingsTradesmanContent(navController)
+                        5 -> CancelledBookingsTradesmanContent(navController)
                     }
                 }
             }
@@ -106,68 +107,42 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
 }
 @Composable
-fun BookingsTradesmanTopSection(navController: NavController, windowSize: WindowSize) {
-    val fontSize = when (windowSize.width) {
-        WindowType.SMALL -> 24.sp
-        WindowType.MEDIUM -> 28.sp
-        WindowType.LARGE -> 32.sp
-    }
-
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 32.dp
-        WindowType.MEDIUM -> 34.dp
-        WindowType.LARGE -> 36.dp
-    }
-
-    val horizontalSpacing = when (windowSize.width) {
-        WindowType.SMALL -> 16.dp
-        WindowType.MEDIUM -> 20.dp
-        WindowType.LARGE -> 24.dp
-    }
-
+fun BookingsTradesmanTopSection(navController: NavController) {
     Row(
         modifier = Modifier
-            .padding(top = 10.dp)
+            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
             .fillMaxWidth()
-            .height(70.dp)
-
-        ,
-        horizontalArrangement = Arrangement.spacedBy(100.dp),
+            .height(70.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text="My Bookings ",
-            fontSize = fontSize,
-            fontWeight =
-            FontWeight(500),
-            modifier = Modifier.padding(16.dp),
+        // Left-aligned text
+        Text(
+            text = "Job Application",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Medium
+        )
 
-
-
-            )
-        Row (modifier = Modifier.fillMaxWidth()
-            .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)){
+        // Right-aligned icons
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(32.dp)
-
+                modifier = Modifier.size(32.dp)
             )
             Icon(
                 imageVector = Icons.Default.Message,
                 contentDescription = "Message Icon",
                 tint = Color(0xFF3CC0B0),
                 modifier = Modifier
-                    .size(iconSize)
-
-                    .clickable {
-                        navController.navigate("message_screen")
-
-                    }
+                    .size(32.dp)
+                    .clickable { navController.navigate("message_screen") }
             )
         }
-
     }
 }
 
@@ -228,6 +203,35 @@ fun PendingBookingsTradesmanContent(navController: NavController) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
             PendingTradesmanItem(trade,navController)
+        }
+    }
+}
+@Composable
+fun DeclinedBookingsTradesmanContent(navController: NavController) {
+    val tradesman = listOf(
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+    )
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+
+        ,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(tradesman.size) { index ->
+            val trade = tradesman[index]
+            DeclinedTradesmanItem(trade,navController)
         }
     }
 }
@@ -395,24 +399,7 @@ fun AllTradesmanItem(trade: Tradesman) {
                         color = Color.Gray,
                         fontSize = 14.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Payment: Pending",
-                        color = Color.Red,
-                        fontSize = 14.sp
-                    )
                 }
-
-                // Status or additional label
-                Text(
-                    text = "All",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 12.dp)
-                )
             }
         }
     }
@@ -491,24 +478,88 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                         color = Color.Gray,
                         fontSize = 14.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Payment: Pending",
-                        color = Color.Red,
-                        fontSize = 14.sp
-                    )
+
                 }
 
-                // Status or additional label
-                Text(
-                    text = "Pending",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
+            }
+        }
+    }
+}
+@Composable
+fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 190.dp
+        WindowType.MEDIUM -> 400.dp to 200.dp
+        WindowType.LARGE -> 410.dp to 210.dp
+    }
+
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                // Tradesman image
+                Image(
+                    painter = painterResource(trade.imageResId),
+                    contentDescription = "Tradesman Image",
                     modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 12.dp)
+                        .size(60.dp)
+                        .clip(CircleShape)
                 )
+
+                // Tradesman details
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 12.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = trade.username,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Service: Plumbing Repair",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Date: Jan 15, 2025",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Time: 10:00 AM",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Location: 123 Elm Street",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+
+                }
+
             }
         }
     }
@@ -585,24 +636,10 @@ fun CompletedItem(trade: Tradesman, navController: NavController) {
                         color = Color.Gray,
                         fontSize = 14.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Payment: Paid",
-                        color = Color.Blue,
-                        fontSize = 14.sp
-                    )
+
                 }
 
-                // Status or additional label
-                Text(
-                    text = "Completed",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 12.dp)
-                )
+
             }
         }
     }
@@ -681,19 +718,7 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
                         color = Color.Gray,
                         fontSize = 14.sp
                     )
-
                 }
-
-                // Status or additional label
-                Text(
-                    text = "Cancelled",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 12.dp)
-                )
             }
         }
     }

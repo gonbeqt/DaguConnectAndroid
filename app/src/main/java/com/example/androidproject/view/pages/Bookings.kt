@@ -63,7 +63,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     // Tab titles
-    val tabTitles = listOf("All", "Pending", "Active", "Completed", "Cancelled")
+    val tabTitles = listOf("All", "Pending","Declined" ,"Active", "Completed", "Cancelled")
     Box (
         modifier = modifier
             .fillMaxSize()
@@ -71,7 +71,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            BookingsTopSection(navController,windowSize)
+            BookingsTopSection(navController)
             Column(modifier = Modifier.fillMaxSize()) {
                 // Tabs (Fixed Choices)
                 ScrollableTabRow(
@@ -101,9 +101,11 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
                     when (selectedTabIndex) {
                         0 -> AllBookingsContent(getClientsBooking,navController)
                         1 -> PendingBookingsContent(getClientsBooking,navController)
-                        2 -> ActiveBookingsContent(getClientsBooking)
-                        3 -> CompletedBookingsContent(getClientsBooking,navController)
-                        4 -> CancelledBookingsContent(getClientsBooking,navController)
+                        2->  DeclinedBookingsContent(getClientsBooking,navController)
+                        3 -> ActiveBookingsContent(getClientsBooking)
+                        4 -> CompletedBookingsContent(getClientsBooking,navController)
+                        5 -> CancelledBookingsContent(getClientsBooking,navController)
+
                     }
                 }
             }
@@ -113,70 +115,45 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
 
 }
 @Composable
-fun BookingsTopSection(navController: NavController,windowSize: WindowSize) {
-    val fontSize = when (windowSize.width) {
-        WindowType.SMALL -> 24.sp
-        WindowType.MEDIUM -> 28.sp
-        WindowType.LARGE -> 32.sp
-    }
-
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 32.dp
-        WindowType.MEDIUM -> 34.dp
-        WindowType.LARGE -> 36.dp
-    }
-
-    val horizontalSpacing = when (windowSize.width) {
-        WindowType.SMALL -> 16.dp
-        WindowType.MEDIUM -> 20.dp
-        WindowType.LARGE -> 24.dp
-    }
+fun BookingsTopSection(navController: NavController) {
 
     Row(
-            modifier = Modifier
-                .padding(top = 10.dp)
-                .fillMaxWidth()
-                .height(70.dp)
+        modifier = Modifier
+            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+            .fillMaxWidth()
+            .height(70.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Left-aligned text
+        Text(
+            text = "My Bookings",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Medium
+        )
 
-            ,
-            horizontalArrangement = Arrangement.spacedBy(140.dp),
+        // Right-aligned icons
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text="My Bookings ",
-                fontSize = fontSize,
-                fontWeight =
-                FontWeight(500),
-                modifier = Modifier.padding(16.dp),
-
-
-
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Notifications Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier.size(32.dp)
             )
-            Row (modifier = Modifier.fillMaxWidth()
-                .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)){
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier
-                        .size(32.dp)
-
-                )
-                Icon(
-                    imageVector = Icons.Default.Message,
-                    contentDescription = "Message Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier
-                        .size(iconSize)
-
-                        .clickable {
-                            navController.navigate("message_screen")
-
-                        }
-                )
-            }
-
+            Icon(
+                imageVector = Icons.Default.Message,
+                contentDescription = "Message Icon",
+                tint = Color(0xFF3CC0B0),
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable { navController.navigate("message_screen") }
+            )
         }
     }
+}
 
 @Composable
 fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navController: NavController) {
@@ -370,6 +347,42 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
 
 }
 
+@Composable
+fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
+    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+
+    when(clientbookingState){
+        is GetClientBookingViewModel.GetClientBookings.Loading ->{
+            //do nothing
+        }
+        is GetClientBookingViewModel.GetClientBookings.Success ->{
+            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
+            val cancelledBookings = booking.filter { it.bookingstatus == "Failed" }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(cancelledBookings.size) { index ->
+                    val booking = cancelledBookings[index]
+                    DeclinedItem(booking, navController )
+                }
+            }
+        }
+        is GetClientBookingViewModel.GetClientBookings.Error -> {
+            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
+            Text(text = "Error: $errorMessage")
+            Log.d("bookerror", errorMessage)
+        }
+        else ->  Unit
+    }
+
+}
+
 
 
 //Design For Items
@@ -502,6 +515,7 @@ fun AllItem(Booking : GetClientsBooking,navController: NavController) {
 }
 
 
+
 //Design for activeItems
 @Composable
 fun ActiveItems(booking: GetClientsBooking) {
@@ -617,14 +631,7 @@ fun ActiveItems(booking: GetClientsBooking) {
                         )
                 }
 
-                Text(
-                    text = "All",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 50.dp)
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                )
+
 
             }
         }
@@ -746,13 +753,7 @@ fun PendingItem(booking : GetClientsBooking, navController:NavController) {
                             fontSize = 14.sp,
                         )
                     }
-                    Text(
-                        text = "All",
-                        fontSize = 16.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 50.dp)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
+
                 }
 
                 // Spacer between text and buttons
@@ -914,13 +915,7 @@ fun CompletedItem(booking: GetClientsBooking, navController:NavController) {
                             fontSize = 14.sp,
                         )
                     }
-                    Text(
-                        text = "All",
-                        fontSize = 16.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 50.dp)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
+
                 }
 
                 // Spacer between text and buttons
@@ -1083,13 +1078,7 @@ fun CancelledItem(booking: GetClientsBooking, navController:NavController) {
                             fontSize = 14.sp,
                         )
                     }
-                    Text(
-                        text = "All",
-                        fontSize = 16.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 50.dp)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
+
                 }
 
                 // Spacer between text and buttons
@@ -1102,6 +1091,170 @@ fun CancelledItem(booking: GetClientsBooking, navController:NavController) {
                     Box(
                         modifier = Modifier
                             .clickable { navController.navigate("cancellationdetails")}
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Cancellation  Details", fontSize = 14.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("booknow") }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Book Again", color = Color(0xFFECAB1E), fontSize = 14.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+@Composable
+fun DeclinedItem(booking: GetClientsBooking, navController:NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second), // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(id = R.drawable.pfp),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = booking.tradesmanfullname,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = booking.tasktype,
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "P${booking.workfee}/hr",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = "4",
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                        Text(
+                            text = "Weekdays Selected",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                        )
+                        Text(
+                            text = "Monday",
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                        )
+                    }
+
+                }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("cancellationdetails") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)

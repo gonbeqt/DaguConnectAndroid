@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.theme.myGradient3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,14 +68,14 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF81D796))
+                .background(myGradient3)
                 .verticalScroll(rememberScrollState()),
             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
         ) {
 
             Column(
                 modifier = Modifier
-                    .background(Color(0xFF81D796))
+                    .background(myGradient3)
                     .fillMaxWidth()
                     .size(100.dp)
                     .padding(top = 20.dp)

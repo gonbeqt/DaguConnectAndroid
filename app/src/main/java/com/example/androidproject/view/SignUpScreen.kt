@@ -112,9 +112,9 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         WindowType.LARGE -> 0.55f
     }
     val cardHeight = when (windowSize.height) {
-        WindowType.SMALL -> 620.dp
-        WindowType.MEDIUM -> 720.dp
-        WindowType.LARGE -> 800.dp
+        WindowType.SMALL -> 650.dp
+        WindowType.MEDIUM -> 750.dp
+        WindowType.LARGE -> 850.dp
     }
 
     Box(
@@ -197,6 +197,8 @@ fun InputFieldForSignUp(
     ){
 
     var passwordVisible by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
+
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
     else
@@ -205,14 +207,13 @@ fun InputFieldForSignUp(
     Text(
         text = "Create an Account",
         fontSize = when (windowSize.width) {
-            WindowType.SMALL -> 20.sp
-            WindowType.MEDIUM -> 24.sp
-            else -> 28.sp
+            WindowType.SMALL -> 24.sp
+            WindowType.MEDIUM -> 28.sp
+            else -> 32.sp
         },
-        textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         color = Color.Black,
-        modifier = Modifier.offset(y = (-25).dp)
+        modifier = Modifier.offset(x = (-90).dp).padding(8.dp)
     )
     Row(Modifier.fillMaxWidth()
         .padding(horizontal = 25.dp),
@@ -380,7 +381,10 @@ fun InputFieldForSignUp(
     )
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(value = password,
-        onValueChange = onPasswordChange,
+        onValueChange = {
+            onPasswordChange(it)
+            passwordError = it.isNotEmpty() && it.length < 8
+                        },
         label = { Text("Password") },
         leadingIcon = {
             Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
@@ -398,6 +402,7 @@ fun InputFieldForSignUp(
         visualTransformation = if (passwordVisible) VisualTransformation.None
         else PasswordVisualTransformation(),
         singleLine = true,
+        isError = passwordError, // Show error state
         modifier = Modifier
             .width(360.dp)
             .heightIn(min = 56.dp), // Adjust height as needed
@@ -415,15 +420,38 @@ fun InputFieldForSignUp(
             fontSize = 16.sp, // Adjust text size for visibility
             color = Color.Black // Ensure text is visible
         )
+
     )
+    if (passwordError) {
+        Text(
+            text = "● At least 8 characters required.",
+            color = Color.Red,
+            fontSize = 14.sp,
+            modifier = Modifier.offset(x = 70.dp)
+                .padding(top = 10.dp)
+        )
+    }
 }
 @Composable
 fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
     val selectedCard = remember { mutableStateOf<Boolean?>(null) }
 
-    Row(
+    Column(
         modifier = Modifier
-            .fillMaxWidth().padding(start = 15.dp,end = 15.dp),
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "Select your role",
+            fontSize = 20.sp,
+            color = Color.Gray,
+            fontWeight = FontWeight.Bold
+        )
+    }
+        Row(
+        modifier = Modifier
+            .fillMaxWidth().padding(horizontal = 25.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -463,7 +491,7 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Client",
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     color = if (selectedCard.value == true) Color.White else Color.Black
                 )
             }
@@ -506,7 +534,7 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Tradesman",
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     color =  if (selectedCard.value == false) Color.White else Color.Black
                 )
             }
@@ -548,7 +576,7 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826)),
         )
         {
-            Text(text = "Sign Up", color = Color.White)
+            Text(text = "Sign Up", color = Color.White, fontSize = 16.sp)
         }
     }
 }

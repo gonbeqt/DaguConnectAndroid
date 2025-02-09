@@ -58,6 +58,9 @@ import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ServicePosting
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logoutViewModel:LogoutViewModel) {
@@ -65,47 +68,37 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
     val tabNames = listOf("My Posts", "General")
     var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
 
-    var servicePostings = listOf(
-        ServicePosting("Plumbing Repair", "January 25, 2025", applicantsCount = 5),
-        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
-        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
-        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3),
-        ServicePosting("Electrical Repair", "January 20, 2025", isActive = false, applicantsCount = 3)
-    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // top bar
         Row(
             modifier = Modifier
-                .padding(top = 10.dp)
+                .padding(top = 10.dp, start = 25.dp, end = 25.dp)
                 .fillMaxWidth()
-                .height(70.dp)
-
-            ,
-            horizontalArrangement = Arrangement.spacedBy(140.dp),
+                .height(70.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text="My Profile",
-                fontSize = 24.sp,
-                fontWeight =
-                FontWeight(500),
-                modifier = Modifier.padding(16.dp),
+            // Left-aligned text
+            Text(
+                text = "My Profile",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Medium
+            )
 
-
-
-                )
-            Row (modifier = Modifier.fillMaxWidth()
-                .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)){
+            // Right-aligned icons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color(0xFF3CC0B0),
-                    modifier = Modifier
-                        .size(32.dp)
-
+                    modifier = Modifier.size(32.dp)
                 )
                 Icon(
                     imageVector = Icons.Default.Message,
@@ -113,15 +106,12 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
                     tint = Color(0xFF3CC0B0),
                     modifier = Modifier
                         .size(32.dp)
-
-                        .clickable {
-                            navController.navigate("message_screen")
-
-                        }
+                        .clickable { navController.navigate("message_screen") }
                 )
             }
-
         }
+
+
 
         // for profile info
         Column(
@@ -258,12 +248,15 @@ fun PostsCard(
     var isDialogVisible by remember { mutableStateOf(false) }
     var editableTitle by remember { mutableStateOf(servicePosting.title) }
     var editableDescription by remember { mutableStateOf(servicePosting.description) }
+    var editableLocation by remember { mutableStateOf(servicePosting.location) }
+
     var editableRate by remember { mutableStateOf(servicePosting.rate) }
     val originalTitle = remember { servicePosting.title }
     val originalDescription = remember { servicePosting.description }
     val originalRate = remember { servicePosting.rate }
-    var selectedCategories = remember { mutableStateListOf<String>() }
-
+    val selectedCategories = remember { mutableStateListOf<String>().apply {
+        addAll(servicePosting.category.split(", ").filter { it.isNotBlank() })
+    } }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -321,6 +314,8 @@ fun PostsCard(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal
                 )
+                Text(text = "Location: $editableLocation", fontSize = 16.sp)
+
                 Text(
                     text = "Est. Budget: ${editableRate}",
                     fontSize = 16.sp,
@@ -328,8 +323,7 @@ fun PostsCard(
                 )
                 Text(
                     text = "Category: ${
-                        if (selectedCategories.isEmpty()) "Uncategorized"
-                        else selectedCategories.joinToString(", ")
+                        if (servicePosting.category.isNotEmpty()) servicePosting.category else "Uncategorized"
                     }",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
@@ -391,10 +385,15 @@ fun PostsCard(
                             value = editableTitle,
                             onValueChange = { editableTitle = it },
                             label = { Text("Title") },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
                             colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
                             )
                         )
                     }
@@ -412,12 +411,40 @@ fun PostsCard(
                             value = editableDescription,
                             onValueChange = { editableDescription = it },
                             label = { Text("Description") },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
                             colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
                             )
                         )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ){
+                        TextField(value = editableLocation,
+                            onValueChange = { editableLocation = it },
+                            label = { Text("Location") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
+                            ))
+
                     }
 
                     // Rate TextField with Border
@@ -433,11 +460,15 @@ fun PostsCard(
                             value = editableRate,
                             onValueChange = { editableRate = it },
                             label = { Text("Estimated Budget") },
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines = 1,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
                             colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
                             )
                         )
                     }
@@ -458,18 +489,23 @@ fun PostsCard(
 
                         ) {
                             val categories = listOf(
-                                "Plumbing", "Carpentry", "Electrical",
-                                "Home Cleaning", "Painter and Decorator", "Fence Installer"
+                                "Carpentry",
+                                "Painting",
+                                "Welding",
+                                "Electrician",
+                                "Plumbing",
+                                "Masonry",
+                                "Roofing",
+                                "AC Repair",
+                                "Mechanics",
+                                "Cleaning"
                             )
 
                             categories.forEach { category ->
                                 val isSelected = selectedCategories.contains(category)
                                 Box(
                                     modifier = Modifier
-                                        .clickable {
-                                            if (isSelected) selectedCategories.remove(category)
-                                            else selectedCategories.add(category)
-                                        }
+
                                         .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
                                         .clip(RoundedCornerShape(30.dp))
                                         .background(if (isSelected) Color.Gray else Color.White)
@@ -634,151 +670,196 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun FabPosting(
-    onPostNewService: (ServicePosting) -> Unit // Pass a function to handle new post submission
-) {
-    var isDialogVisible by remember { mutableStateOf(false) }
-    var title by remember { mutableStateOf("") } // Use simple variables for input
-    var description by remember { mutableStateOf("") }
-    var rate by remember { mutableStateOf("") }
-    var selectedCategories = remember { mutableStateListOf<String>() }
-
-    FloatingActionButton(
-        onClick = { isDialogVisible = true },
-        containerColor = Color.Gray,
-        contentColor = Color.White,
-        shape = CircleShape
+    fun FabPosting(
+        onPostNewService: (ServicePosting) -> Unit // Pass a function to handle new post submission
     ) {
-        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Icon")
-    }
+        var isDialogVisible by remember { mutableStateOf(false) }
+        var title by remember { mutableStateOf("") } // Use simple variables for input
+        var description by remember { mutableStateOf("") }
+        var location by remember { mutableStateOf("") }
+        var rate by remember { mutableStateOf("") }
+        var selectedCategories = remember { mutableStateListOf<String>() }
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-    if (isDialogVisible) {
-        Dialog(onDismissRequest = { isDialogVisible = false }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Column(
+        FloatingActionButton(
+            onClick = { isDialogVisible = true },
+            containerColor = Color.Gray,
+            contentColor = Color.White,
+            shape = CircleShape
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Icon")
+        }
+
+        if (isDialogVisible) {
+            Dialog(onDismissRequest = { isDialogVisible = false }) {
+                Card(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                        .clip(RoundedCornerShape(8.dp))
                 ) {
-                    Text(
-                        text = "Create New Post",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                    Text(
-                        text = "Provide details of your new service",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
-                    )
-
-                    // Title TextField
-                    TextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.textFieldColors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        )
-                    )
-
-                    // Description TextField
-                    TextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = { Text("Description") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.textFieldColors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        )
-                    )
-
-                    // Rate TextField
-                    TextField(
-                        value = rate,
-                        onValueChange = { rate = it },
-                        label = { Text("Estimated Budget") },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 1,
-                        colors = TextFieldDefaults.textFieldColors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        )
-                    )
-
                     Column(
-                        modifier = Modifier.padding(5.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        Text(text = "Select Service Category", fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Create New Post",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        Text(
+                            text = "Provide details of your new service",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
 
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            val categories = listOf(
-                                "Plumbing", "Carpentry", "Electrical",
-                                "Home Cleaning", "Painter and Decorator", "Fence Installer"
+                        // Title TextField
+                        TextField(
+                            value = title,
+                            onValueChange = { title = it },
+                            label = { Text("Title") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
                             )
+                        )
 
-                            categories.forEach { category ->
-                                val isSelected = selectedCategories.contains(category)
-                                Box(
-                                    modifier = Modifier
-                                        .clickable {
-                                            if (isSelected) selectedCategories.remove(category)
-                                            else selectedCategories.add(category)
-                                        }
-                                        .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
-                                        .clip(RoundedCornerShape(30.dp))
-                                        .background(if (isSelected) Color.Gray else Color.White)
-                                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = category,
-                                        color = if (isSelected) Color.White else Color.Black
-                                    )
+                        // Description TextField
+                        TextField(
+                            value = description,
+                            onValueChange = { description = it },
+                            label = { Text("Description") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
+                            )
+                        )
+                        TextField(
+                            value = location,
+                            onValueChange = { location = it },
+                            label = { Text("Location") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),
+
+                            shape = RoundedCornerShape(8.dp), // Rounded Corners
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White, // White background
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
+                            )
+                        )
+
+
+                        // Rate TextField
+                        TextField(
+                            value = rate,
+                            onValueChange = { rate = it },
+                            label = { Text("Estimated Budget") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
+                            )
+                        )
+
+                        Column(
+                            modifier = Modifier.padding(5.dp),
+                            verticalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text(text = "Select Service Category", fontWeight = FontWeight.Bold)
+
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                val categories = listOf(
+                                    "Carpentry",
+                                    "Painting",
+                                    "Welding",
+                                    "Electrician",
+                                    "Plumbing",
+                                    "Masonry",
+                                    "Roofing",
+                                    "AC Repair",
+                                    "Mechanics",
+                                    "Cleaning"
+                                )
+
+                                categories.forEach { category ->
+                                    val isSelected = selectedCategories.contains(category)
+                                    Box(
+                                        modifier = Modifier
+                                            .clickable {
+                                                if (isSelected) {
+                                                    selectedCategories.remove(category) // Remove if already selected
+                                                } else if (selectedCategories.size < 3) {
+                                                    selectedCategories.add(category) // Add only if less than 3
+                                                }
+                                            }
+                                            .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
+                                            .clip(RoundedCornerShape(30.dp))
+                                            .background(if (isSelected) Color.Gray else Color.White)
+                                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = category,
+                                            color = if (isSelected) Color.White else Color.Black
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(onClick = { isDialogVisible = false }) {
-                            Text("Cancel")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = {
-                            val newPost = ServicePosting(
-                                title = title,
-                                description = description,
-                                rate = rate.toString(),
-                                postedDate = System.currentTimeMillis().toString(), // Current timestamp
-                                isActive = true, // Default to active
-                                category = selectedCategories.joinToString(", "), // Join selected categories
-                                applicantsCount = 0 // Initial count of applicants
-                            )
-                            isDialogVisible = false
-                            onPostNewService(newPost) // Send the new post to the parent Composable
-                        }) {
-                            Text("Post")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Button(onClick = { isDialogVisible = false }) {
+                                Text("Cancel")
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(onClick = {
+                                val newPost = ServicePosting(
+                                    title = title,
+                                    description = description,
+                                    location = location,
+                                    rate = rate.toString(),
+                                    postedDate = currentDate.toString(),
+                                    isActive = true,
+                                    category = if (selectedCategories.isNotEmpty()) selectedCategories.joinToString(", ") else "Uncategorized",
+                                    applicantsCount = 0
+                                )
+                                isDialogVisible = false
+                                onPostNewService(newPost) // Send the new post to the parent Composable
+                            }) {
+                                Text("Post")
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
