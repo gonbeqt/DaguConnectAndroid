@@ -1,5 +1,7 @@
 package com.example.androidproject.view.pages2
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -227,34 +229,34 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
     val jobState by getJobsViewModel.jobsState.collectAsState()
     val listState = rememberLazyListState()
-
-    // Only trigger getJobs when jobState is Idle (first load)
-    LaunchedEffect(jobState) {
-        if (jobState is GetJobsViewModel.JobsState.Idle) {
-            getJobsViewModel.getJobs()
-        }
-    }
 
     val jobs = when (val state = jobState) {
         is GetJobsViewModel.JobsState.Success -> state.data
         else -> emptyList<GetJobs>()
     }
 
-    // Check if we need to load more data when nearing the end of the list
-    val shouldLoadMore = remember {
-        derivedStateOf {
-            val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItemIndex >= jobs.size - 5 // Load next page when 5 items are left
+    LaunchedEffect(Unit) { // Only trigger getJobs when jobState is Idle (first load)
+        if (jobState is GetJobsViewModel.JobsState.Idle && getJobsViewModel.isFetching.value.not()) {
+            getJobsViewModel.getJobs()
         }
     }
 
-    // Load more jobs when needed
-    LaunchedEffect(shouldLoadMore.value) {
-        if (shouldLoadMore.value && jobState !is GetJobsViewModel.JobsState.Loading) {
+    val shouldLoadMore = remember { // Check if we need to load more data when nearing the end of the list
+        derivedStateOf {
+            val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val totalItems = listState.layoutInfo.totalItemsCount
+            lastVisibleItemIndex >= totalItems - 5 && totalItems > 0
+        }
+    }
+
+
+    LaunchedEffect(shouldLoadMore.value) { // Load more jobs when needed
+        if (shouldLoadMore.value && getJobsViewModel.isFetching.value.not()) {
             getJobsViewModel.getJobs()
         }
     }
@@ -275,14 +277,15 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
                         TopMatchesItem(job, navController)
                     }
                     item {
-                        // Show a loading spinner at the bottom if jobs are loading
-                        if (jobState is GetJobsViewModel.JobsState.Loading) {
-                            CircularProgressIndicator(
+                        if (getJobsViewModel.isFetching.value) {
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .wrapContentWidth(Alignment.CenterHorizontally)
-                            )
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }

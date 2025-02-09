@@ -1,6 +1,7 @@
 package com.example.androidproject.viewmodel.jobs
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
@@ -14,36 +15,38 @@ class GetJobsViewModel (private val apiService: ApiService, private val context:
     private val _jobsState = MutableStateFlow<JobsState>(JobsState.Idle)
     val jobsState = _jobsState.asStateFlow() // Exposing as StateFlow
 
-    private var isFetching = false
+    private val _isFetching = MutableStateFlow(false)
+    val isFetching = _isFetching.asStateFlow()
     private var currentPage = 1
     private val jobsList = mutableListOf<GetJobs>()
     private var isLastPage = false
 
     fun getJobs() {
-        if (isFetching || isLastPage) return // Stop if already fetching or at the last page
+        if (_isFetching.value || isLastPage) return // Prevent duplicate calls
+
         viewModelScope.launch {
-            isFetching = true // Set fetching flag
+            _isFetching.value = true
             _jobsState.value = JobsState.Loading
             try {
                 val response = apiService.getJobs(page = currentPage)
                 if (response.isSuccessful) {
                     val body = response.body()
                     val newJobs = body?.jobs ?: emptyList()
-
+                    Log.d("API Response", newJobs.toString())
                     if (newJobs.isEmpty()) {
-                        isLastPage = true // ✅ Mark as last page
-                    } else {
-                        jobsList.addAll(newJobs) // Append new jobs
-                        _jobsState.value = JobsState.Success(jobsList.toList())
-                        currentPage++ // Move to the next page
+                        isLastPage = true // Stop fetching if no new jobs
                     }
+                    jobsList.addAll(newJobs)
+                    _jobsState.value = JobsState.Success(jobsList.toList()) // ✅ Always update UI
+                    currentPage++ // Move to the next page
                 } else {
-                    _jobsState.value = JobsState.Error(response.message())
+                    _jobsState.value = JobsState.Error("Error: ${response.code()} ${response.message()}")
                 }
             } catch (e: Exception) {
-                _jobsState.value = JobsState.Error(e.localizedMessage ?: "Unknown error")
+                Log.e("GetJobsViewModel", "Error fetching jobs", e)
+                _jobsState.value = JobsState.Error("Failed to load jobs. Please try again.")
             } finally {
-                isFetching = false // Reset flag
+                _isFetching.value = false
             }
         }
     }
