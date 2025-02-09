@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -223,6 +224,7 @@ fun RoofingItem(resume: resumesItem, navController: NavController) {
                 contentDescription = resume.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
+                    .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
                     .background(Color.Gray, RoundedCornerShape(25.dp))
             )
             Spacer(modifier = Modifier.width(16.dp))

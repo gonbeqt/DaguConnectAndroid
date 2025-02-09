@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.client.GetClientsBooking
@@ -427,6 +428,7 @@ fun AllItem(Booking : GetClientsBooking,navController: NavController) {
         WindowType.MEDIUM -> 400.dp to 180.dp
         WindowType.LARGE -> 410.dp to 190.dp
     }
+
     Card(
         modifier = Modifier
             .size(cardHeight.first,cardHeight.second)
@@ -447,12 +449,13 @@ fun AllItem(Booking : GetClientsBooking,navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Tradesman image
-                Image(
-                    painter = painterResource(id = R.drawable.pfp),
+                AsyncImage(
+                    model = Booking.tradesmanprofile,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(100.dp)
                         .padding(start = 10.dp)
+
                 )
 
                 // Tradesman details
@@ -577,8 +580,8 @@ fun ActiveItems(booking: GetClientsBooking) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Tradesman image
-                Image(
-                    painter = painterResource(id = R.drawable.pfp),
+                AsyncImage(
+                    model = booking.tradesmanprofile,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(100.dp)
@@ -709,8 +712,8 @@ fun PendingItem(booking : GetClientsBooking, navController:NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(id = R.drawable.pfp),
+                    AsyncImage(
+                        model = booking.tradesmanprofile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -877,8 +880,8 @@ fun CompletedItem(booking: GetClientsBooking, navController:NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(id = R.drawable.pfp),
+                    AsyncImage(
+                        model = booking.tradesmanprofile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -1046,8 +1049,8 @@ fun CancelledItem(booking: GetClientsBooking, navController:NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(id = R.drawable.pfp),
+                    AsyncImage(
+                        model = booking.tradesmanprofile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)

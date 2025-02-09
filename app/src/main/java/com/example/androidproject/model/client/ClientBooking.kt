@@ -17,6 +17,8 @@ data class GetClientsBooking(
     val phonenumber: String,
     @SerializedName("tradesman_fullname")
     val tradesmanfullname : String,
+    @SerializedName("tradesman_profile")
+    val tradesmanprofile : String,
     @SerializedName("work_fee")
     val workfee: Int,
     @SerializedName("client_fullname")
@@ -30,5 +32,6 @@ data class GetClientsBooking(
     @SerializedName("tradesmanid")
     val tradesman_id: Int,
     @SerializedName("user_id")
-    val userid: Int,
+    val userid: Int
+
 )
