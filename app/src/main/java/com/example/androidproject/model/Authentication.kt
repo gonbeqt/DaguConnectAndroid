@@ -20,7 +20,7 @@ data class User(
     @SerializedName("last_name")
     val lastName: String,
     val username: String,
-    val age: Int,
+    val birthdate: String,
     val suspend: Boolean,
     @SerializedName("email_verified_at")
     val emailVerifiedAt: String,

@@ -110,7 +110,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "signup") {
+                NavHost(navController = navController, startDestination = "confirmbook") {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
