@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.client.GetClientsBooking
@@ -227,9 +228,18 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
 
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
 
@@ -267,9 +277,18 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel) {
 
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
     }
@@ -303,9 +322,18 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
             }
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
     }
@@ -338,9 +366,18 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
             }
         }
         is GetClientBookingViewModel.GetClientBookings.Error -> {
-            val errorMessage = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Error).message
-            Text(text = "Error: $errorMessage")
-            Log.d("bookerror", errorMessage)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center, // Centers vertically
+                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
+            ) {
+                Text(
+                    text = "NO BOOKINGS",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+            }
         }
         else ->  Unit
     }
@@ -415,8 +452,8 @@ fun AllItem(Booking : GetClientsBooking,navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Tradesman image
-                Image(
-                    painter = painterResource(id = R.drawable.pfp),
+                AsyncImage(
+                    model = Booking.tradesmanprofile,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(100.dp)
@@ -515,7 +552,6 @@ fun AllItem(Booking : GetClientsBooking,navController: NavController) {
 }
 
 
-
 //Design for activeItems
 @Composable
 fun ActiveItems(booking: GetClientsBooking) {
@@ -546,8 +582,8 @@ fun ActiveItems(booking: GetClientsBooking) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Tradesman image
-                Image(
-                    painter = painterResource(id = R.drawable.pfp),
+                AsyncImage(
+                    model = booking.tradesmanprofile,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(100.dp)
@@ -671,8 +707,8 @@ fun PendingItem(booking : GetClientsBooking, navController:NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(id = R.drawable.pfp),
+                    AsyncImage(
+                        model = booking.tradesmanprofile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -833,8 +869,8 @@ fun CompletedItem(booking: GetClientsBooking, navController:NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(id = R.drawable.pfp),
+                    AsyncImage(
+                        model = booking.tradesmanprofile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -996,8 +1032,8 @@ fun CancelledItem(booking: GetClientsBooking, navController:NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(id = R.drawable.pfp),
+                    AsyncImage(
+                        model = booking.tradesmanprofile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)

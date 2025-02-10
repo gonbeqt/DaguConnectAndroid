@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.Feedback
 import com.example.androidproject.view.Tradesman
@@ -157,8 +158,8 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.pfp),
+                                    AsyncImage(
+                                        model = resume.profilepic,
                                         contentDescription = "Tradesman Image",
                                         modifier = Modifier
                                             .size(100.dp)

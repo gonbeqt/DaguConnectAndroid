@@ -125,7 +125,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -151,34 +151,34 @@ class MainActivity : ComponentActivity() {
                         CancellationDetails(trade,navController)
                     }
                     composable("acrepair"){
-                        ACRepair(navController)
+                        ACRepair(navController,getResumesViewModel)
                     }
                     composable("plumbing") {
-                        Plumbing(navController)
+                        Plumbing(navController,getResumesViewModel)
                     }
                     composable("carpentry") {
-                        Carpentry(navController)
+                        Carpentry(navController,getResumesViewModel)
                     }
                     composable("electrician") {
-                        Electrician(navController)
+                        Electrician(navController,getResumesViewModel)
                     }
                     composable("masonry"){
-                        Masonry(navController)
+                        Masonry(navController,getResumesViewModel)
                     }
                     composable("cleaning") {
-                        Cleaning(navController)
+                        Cleaning(navController,getResumesViewModel)
                     }
                     composable("mechanics"){
-                        Mechanics(navController)
+                        Mechanics(navController,getResumesViewModel)
                     }
                     composable("painting"){
-                        Painting(navController)
+                        Painting(navController,getResumesViewModel)
                     }
                     composable("roofing"){
-                        Roofing(navController)
+                        Roofing(navController,getResumesViewModel)
                     }
                     composable("welding"){
-                        Welding(navController)
+                        Welding(navController,getResumesViewModel)
                     }
                     composable("alltradesman"){
                         AllTradesman(navController,getResumesViewModel)

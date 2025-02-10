@@ -26,8 +26,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -36,31 +40,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 @Composable
-fun Welding(navController: NavController){
+fun Welding(navController: NavController, getResumesViewModel: GetResumesViewModel){
+val ResumeState by getResumesViewModel.resumeState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        getResumesViewModel.getResumes()
+    }
 
 
 
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "AC Repair", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Welding", "P500/hr", 4.5, R.drawable.bookmark)
-
-    )
-
-    // Filter only Plumbers
-    val weldings = tradesmen.filter { it.category == "Welding" }
 
     Box(
         modifier = Modifier
@@ -158,20 +153,44 @@ fun Welding(navController: NavController){
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-
-                        // LazyColumn with CompletedItem layout
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .size(500.dp)
-                                .background(Color(0xFFF9F9F9)),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(weldings.size) { index ->
-                                val trade = weldings[index]
-                                WeldingItem(trade, navController)
+                        when(ResumeState){
+                            is GetResumesViewModel.ResumeState.Loading ->{
+                                // Show a loading indicator if needed
+                                Text(
+                                    text = "Loading...",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
                             }
+                            is GetResumesViewModel.ResumeState.Success ->{
+                                val resume = (ResumeState as GetResumesViewModel.ResumeState.Success).data
+
+                                val welding = resume.filter{it.specialties.contains("Welding")}
+                                // LazyColumn with CompletedItem layout
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .size(500.dp)
+                                        .background(Color(0xFFF9F9F9)),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    items(welding.size) { index ->
+                                        val resumes = welding[index]
+                                        WeldingItem(resumes, navController)
+                                    }
+                                }
+                            }
+                            is GetResumesViewModel.ResumeState.Error ->{
+                                // Show an error message if needed
+                                Text(
+                                    text = "Error loading resumes. Please try again later.",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
+                            }
+                            else -> Unit
                         }
+
                     }
                 }
             }
@@ -180,7 +199,7 @@ fun Welding(navController: NavController){
 }
 
 @Composable
-fun WeldingItem(trade: Tradesman, navController: NavController) {
+fun WeldingItem(resume: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -197,11 +216,12 @@ fun WeldingItem(trade: Tradesman, navController: NavController) {
             horizontalArrangement = Arrangement.Start
         ) {
             // Profile Picture
-            Image(
-                painter = painterResource(trade.imageResId),
-                contentDescription = trade.username,
+            AsyncImage(
+                model = resume.profilepic,
+                contentDescription = resume.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
+                    .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
                     .background(Color.Gray, RoundedCornerShape(25.dp))
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -211,7 +231,7 @@ fun WeldingItem(trade: Tradesman, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = trade.username,
+                    text =  resume.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -227,7 +247,7 @@ fun WeldingItem(trade: Tradesman, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = trade.rate,
+                            text = "P${resume.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -248,7 +268,7 @@ fun WeldingItem(trade: Tradesman, navController: NavController) {
                                 .padding(top = 7.dp, start = 2.dp)
                         )
                         Text(
-                            text = trade.reviews.toString(),
+                            text = "4",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                         )

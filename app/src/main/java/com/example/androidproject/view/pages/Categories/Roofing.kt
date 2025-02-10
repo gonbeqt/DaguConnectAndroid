@@ -26,8 +26,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -36,30 +41,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 @Composable
-fun Roofing(navController: NavController){
+fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewModel){
+    val ResumeState by getResumesViewModel.resumeState.collectAsState();
 
 
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "AC Repair", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Roofing", "P500/hr", 4.5, R.drawable.bookmark)
+    LaunchedEffect(Unit) {
+        getResumesViewModel.getResumes()
+    }
 
-    )
 
-    // Filter only Plumbers
-    val roofings = tradesmen.filter { it.category == "Roofing" }
+
 
     Box(
         modifier = Modifier
@@ -157,20 +155,45 @@ fun Roofing(navController: NavController){
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-
-                        // LazyColumn with CompletedItem layout
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .size(500.dp)
-                                .background(Color(0xFFF9F9F9)),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(roofings.size) { index ->
-                                val trade = roofings[index]
-                                RoofingItem(trade, navController)
+                        when(ResumeState){
+                            is GetResumesViewModel.ResumeState.Loading->{
+                                // Show a loading indicator if needed
+                                Text(
+                                    text = "Loading...",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
                             }
+                            is GetResumesViewModel.ResumeState.Success-> {
+                                val resume = (ResumeState as GetResumesViewModel.ResumeState.Success).data
+                                // Filter only Plumbers
+                                val roofings = resume.filter { it.specialties.contains("Roofing") }
+                                // LazyColumn with CompletedItem layout
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .size(500.dp)
+                                        .background(Color(0xFFF9F9F9)),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    items(roofings.size) { index ->
+                                        val resumes = roofings[index]
+                                        RoofingItem(resumes, navController)
+                                    }
+                                }
+                            }
+                            is GetResumesViewModel.ResumeState.Error -> {
+                                // Show an error message if needed
+                                Text(
+                                    text = "Error loading resumes. Please try again later.",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
+                            }
+                            else -> Unit
                         }
+
+
                     }
                 }
             }
@@ -179,7 +202,7 @@ fun Roofing(navController: NavController){
 }
 
 @Composable
-fun RoofingItem(trade: Tradesman, navController: NavController) {
+fun RoofingItem(resume: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -196,11 +219,12 @@ fun RoofingItem(trade: Tradesman, navController: NavController) {
             horizontalArrangement = Arrangement.Start
         ) {
             // Profile Picture
-            Image(
-                painter = painterResource(trade.imageResId),
-                contentDescription = trade.username,
+            AsyncImage(
+                model = resume.profilepic,
+                contentDescription = resume.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
+                    .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
                     .background(Color.Gray, RoundedCornerShape(25.dp))
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -210,7 +234,7 @@ fun RoofingItem(trade: Tradesman, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = trade.username,
+                    text = resume.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -226,7 +250,7 @@ fun RoofingItem(trade: Tradesman, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = trade.rate,
+                            text = "P${resume.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -247,7 +271,7 @@ fun RoofingItem(trade: Tradesman, navController: NavController) {
                                 .padding(top = 7.dp, start = 2.dp)
                         )
                         Text(
-                            text = trade.reviews.toString(),
+                            text = "4",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                         )

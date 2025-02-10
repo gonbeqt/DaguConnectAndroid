@@ -22,7 +22,8 @@ data class resumesItem(
     @SerializedName("work_fee")
     val workfee: Int,
     @SerializedName("about_me")
-    val aboutme: String
+    val aboutme: String,
+    val is_active: Int
 )
 
 

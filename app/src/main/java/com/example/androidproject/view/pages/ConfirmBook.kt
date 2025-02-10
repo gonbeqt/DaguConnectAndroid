@@ -55,6 +55,10 @@ import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.theme.myGradient3
 import java.util.Calendar
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -177,6 +181,11 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                                 imageVector = Icons.Default.Bookmark,
                                                 contentDescription = "Star Icon",
                                                 modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.size(4.dp))
+                                            Text(
+                                                text = "Add to bookmark",
+                                                fontSize = 12.sp
                                             )
                                         }
                                     }
