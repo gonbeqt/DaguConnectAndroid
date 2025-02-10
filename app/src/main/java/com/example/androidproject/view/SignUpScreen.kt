@@ -214,7 +214,7 @@ fun InputFieldForSignUp(
         { _, year, month, dayOfMonth ->
             val birthDate = LocalDate.of(year, month + 1, dayOfMonth)
             selectedDate = birthDate
-            val formattedDate = birthDate.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))
+            val formattedDate = birthDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             onBirthDateChange(formattedDate)
         },
         LocalDate.now().year - 18, // Default year (18 years ago)
