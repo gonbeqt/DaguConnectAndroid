@@ -38,6 +38,7 @@ import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import androidx.compose.ui.platform.LocalContext
+import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 
@@ -53,7 +54,7 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
 
     )
     var selectedItem by remember {
-        mutableStateOf(0)
+        mutableStateOf(4)
     }
     val activity = LocalContext.current as ComponentActivity
     val getJobsViewModel = remember { ViewModelSetups.setupGetJobsViewModel(activity) }
@@ -73,7 +74,15 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
                         },
                         label = {
                             (Text(text = item.nav_label, fontSize = 10.sp))
-                        }
+                        },
+                        colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White, // Green when selected
+                            unselectedIconColor = Color.Black, // Gray when not selected
+                            selectedTextColor = Color.Black, // Green text when selected
+                            unselectedTextColor = Color.Black,
+                            indicatorColor = Color(0xFF3CC0B0)
+                        )
+
                     )
                 }
             }

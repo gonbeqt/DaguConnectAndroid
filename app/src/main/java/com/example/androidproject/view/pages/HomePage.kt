@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -30,15 +32,23 @@ import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +65,8 @@ import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.view.theme.myGradient
+import com.example.androidproject.view.theme.myGradient2
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 
@@ -84,10 +96,10 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.4, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.9, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
     )
@@ -102,7 +114,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Provide navController to the SearchField
-            SearchField(navController,windowSize )
+            HomeTopSection(navController,windowSize )
             Spacer(modifier = Modifier.height(5.dp))
 
             Column(modifier = Modifier
@@ -121,93 +133,49 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
     }
 }
 @Composable
-fun SearchField(navController: NavController,windowSize: WindowSize) {
-    var searchQuery by remember { mutableStateOf("") }
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 32.dp
-        WindowType.MEDIUM -> 34.dp
-        WindowType.LARGE -> 36.dp
-    }
-
-    val textSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
+fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .size(90.dp)
+            .shadow(1.dp)
             .background(Color.White)
-            .padding(horizontal = 25.dp)
+            .padding(top = 10.dp)
     ) {
         Row(
             modifier = Modifier
-                .width(280.dp)
+                .fillMaxWidth()
                 .height(70.dp)
-                .padding(top = 20.dp)
-                .background(
-                    Color(0xFFFFFFFF),
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .border(
-                    1.dp,
-                    Color(0xFF3CC0B0),
-                    shape = RoundedCornerShape(8.dp)
-                ),
+                .padding(horizontal = 16.dp), // Added padding inside for spacing
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search Icon",
-                tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(iconSize)
-                    .padding(start = 10.dp)
+            // Left-aligned text
+            Text(
+                text = "Home",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Medium
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            BasicTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.weight(1f),
-                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, color = Color(0xFF3CC0B0)),
-                decorationBox = { innerTextField ->
-                    if (searchQuery.isEmpty()) {
-                        Text(
-                            text = "Search for services or tradespeople...",
-                            style = androidx.compose.ui.text.TextStyle(fontSize = textSize, color = Color.Gray)
-                        )
-                    }
-                    innerTextField()
-                }
-            )
-        }
 
-        // Notification and Message Icons outside the search field
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(top = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications Icon",
-                tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(iconSize)
-            )
-            Icon(
-                imageVector = Icons.Default.Message,
-                contentDescription = "Message Icon",
-                tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(iconSize)
-                    .clickable {
-                        navController.navigate("message_screen")
-
-                    }
-            )
+            // Right-aligned icons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier.size(32.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.Message,
+                    contentDescription = "Message Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { navController.navigate("message_screen") }
+                )
+            }
         }
     }
 }
@@ -331,7 +299,8 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavC
             is GetResumesViewModel.ResumeState.Success ->{
                 val resumes = (resumeState as GetResumesViewModel.ResumeState.Success).data
                 // Sort resumes by ID and take the top 5
-                val topResumes = resumes.sortedBy { it.id }.take(5)
+                val activeresume = resumes.filter { it.is_active  == 1}
+                val topResumes = activeresume.sortedBy { it.id }.take(5)
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -364,53 +333,85 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavC
 @Composable
 fun ExploreNow(windowSize: WindowSize){
     val textSize = when (windowSize.width) {
-        WindowType.SMALL -> 16.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
     }
 
     val imageSize = when (windowSize.width) {
-        WindowType.SMALL -> 250.dp to 250.dp
-        WindowType.MEDIUM -> 300.dp to 300.dp
-        WindowType.LARGE -> 350.dp to 350.dp
+        WindowType.SMALL -> 270.dp to 270.dp
+        WindowType.MEDIUM -> 370.dp to 370.dp
+        WindowType.LARGE -> 370.dp to 370.dp
     }
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .size(180.dp)
-        .padding(start = 25.dp, end = 25.dp)
-        .background(
-            brush = Brush.linearGradient(
-                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
-                start = androidx.compose.ui.geometry.Offset(0f, 1f),
-                end = androidx.compose.ui.geometry.Offset(1f, 1f)
-            ), shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-        ),
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 25.dp, end = 25.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(myGradient2)
     ) {
-        Column(modifier= Modifier
-            .fillMaxHeight()
-            .size(150.dp)){
-            Text(text ="What service do you need today?",
-                color = Color.White,
-                fontSize = textSize,
-                fontWeight = FontWeight(500),
-                modifier = Modifier.padding(start = 20.dp, top = 20.dp)
-            )
-            Button(onClick = {},
-                modifier = Modifier.padding(start = 20.dp, top = 20.dp),
-                colors = ButtonDefaults.buttonColors(Color(0xFF0B2103)),) {
-                Text(text = "Explore Now")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(180.dp)
+                .padding(start = 25.dp, end = 25.dp)
+
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(150.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.logoexplore),
+                        contentDescription = "logo explore",
+                        modifier = Modifier.size(50.dp)
+                    )
+
+                    Text(
+                        text = "DaguConnect",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                    )
+                }
+                Text(
+                    text = "What service do you need today?",
+                    color = Color.White,
+                    fontSize = textSize,
+                    fontWeight = FontWeight(500),
+                    modifier = Modifier.padding(start = 20.dp, top = 10.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(start = 20.dp, top = 10.dp)
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                        .background(Color.Transparent)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "Explore Now",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+
             }
+            Image(
+                painter = painterResource(R.drawable.workers),
+                contentDescription = "Workers Images",
+                modifier = Modifier
+                    .size(imageSize.first, imageSize.second)
+                    .padding(top = 20.dp)
+            )
 
 
         }
-        Image(painter = painterResource(R.drawable.workers),
-            contentDescription = "Workers Images",
-            modifier= Modifier
-                .size(imageSize.first, imageSize.second)
-                .padding(top = 20.dp)
-        )
-
-
     }
 }
 @Composable
@@ -420,7 +421,7 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
             .size(120.dp, 100.dp)
 
             .clickable { onClick() }, //implementation here
-        shape = RoundedCornerShape(8.dp)
+        shape = CircleShape
     ) {
         Box(
             modifier = Modifier
@@ -435,10 +436,14 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(50.dp)
+                        .shadow(3.dp, shape = CircleShape)
+
                         .background(
-                            color = (Color(0xFFFFF2DD)),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                        ),
+                            color = (Color.White),
+                            shape = CircleShape
+                        )
+                        ,
+
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -467,6 +472,9 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         WindowType.MEDIUM -> 40.dp
         WindowType.LARGE -> 50.dp
     }
+    var showMenu by remember { mutableStateOf(false) }
+    var showReportDialog by remember { mutableStateOf(false) }
+    var reportText by remember { mutableStateOf("") }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -552,14 +560,78 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
 
 
                 }
-                Image(painter = painterResource(id = R.drawable.bookmark),
-                    contentDescription = "Bookmark Image",
-                    modifier = Modifier
-                        .size(iconSize)
-                        .padding(end = 5.dp)
-                        .clickable { }
-                )
+                // Bookmark Icon with Clickable Popup Menu
+                Box {
+                    Image(
+                        painter = painterResource(R.drawable.menu),
+                        contentDescription = "Bookmark Image",
+                        modifier = Modifier
+                            .size(iconSize)
+                            .padding(end = 5.dp)
+                            .clickable { showMenu = true
+                            }
+                    )
+
+                    // Popup Menu
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = {
+                            showMenu = false
+                        },
+                        modifier = Modifier.background(Color.White)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Report") },
+                            onClick = {
+                                showMenu = false
+                                showReportDialog = true
+
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Uninterested") },
+                            onClick = {
+                                showMenu = false
+                            }
+                        )
+                    }
+                }
             }
         }
+    }
+    if (showReportDialog) {
+        AlertDialog(
+            onDismissRequest = { showReportDialog = false },
+            title = { Text("Report Tradesman") },
+            text = {
+                Column {
+                    Text("Please enter a reason for reporting this tradesman:")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = reportText,
+                        onValueChange = { reportText = it },
+                        placeholder = { Text("Enter report reason...") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (reportText.isNotBlank()) {
+                            println("Report submitted: $reportText")
+                            showReportDialog = false
+                        }
+                    }
+                ) {
+                    Text("Submit")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showReportDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

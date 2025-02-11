@@ -149,15 +149,15 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Welcome Back",
+                    text = "Welcome Back!",
                     fontSize = when (windowSize.width) {
-                        WindowType.SMALL -> 20.sp
-                        WindowType.MEDIUM -> 24.sp
-                        else -> 28.sp
+                        WindowType.SMALL -> 24.sp
+                        WindowType.MEDIUM -> 28.sp
+                        else -> 32.sp
                     },
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
-                    modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)
+                    modifier = Modifier.offset(x = (-110).dp)
                 )
 
                 InputFieldForLogin(email = email,
@@ -322,7 +322,7 @@ fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: 
             .height(50.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
     ) {
-        Text(text = "Log In", color = Color.White)
+        Text(text = "Log In", color = Color.White, fontSize = 16.sp)
     }
 }
 

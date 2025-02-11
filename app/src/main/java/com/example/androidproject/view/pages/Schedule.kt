@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.theme.myGradient
+import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.view.theme.myGradient4
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -52,11 +55,31 @@ fun ScheduleScreen(modifier: Modifier = Modifier,navController: NavController) {
             onDateSelected = { selectedDate = it },
             onMonthChange = { currentMonth = it }
         )
+
+        // Selected date display
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(Modifier.fillMaxWidth() .padding(16.dp)
+        ) {
+            Text(
+                text = selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy")),
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp
+                , color = Color.Black
+            )
+            Text(
+                text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Gray
+            )
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxHeight()
                 .size(420.dp)
-                .background(Color(0xFFD9D9D9))
+                .background(Color.White)
+                .padding(bottom = 70.dp)
             ,
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -75,32 +98,29 @@ fun ScheduleScreen(modifier: Modifier = Modifier,navController: NavController) {
 fun ScheduleTopSection(navController: NavController){
     Row(
         modifier = Modifier
-            .padding(top = 10.dp)
+            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
             .fillMaxWidth()
-            .height(70.dp)
-
-        ,
-        horizontalArrangement = Arrangement.spacedBy(140.dp),
+            .height(70.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text="Schedule",
-            fontSize = 24.sp,
-            fontWeight =
-            FontWeight(500),
-            modifier = Modifier.padding(16.dp),
+        // Left-aligned text
+        Text(
+            text = "Schedule",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Medium
+        )
 
-
-
-            )
-        Row (modifier = Modifier.fillMaxWidth()
-            .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)){
+        // Right-aligned icons
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(32.dp)
-
+                modifier = Modifier.size(32.dp)
             )
             Icon(
                 imageVector = Icons.Default.Message,
@@ -108,14 +128,9 @@ fun ScheduleTopSection(navController: NavController){
                 tint = Color(0xFF3CC0B0),
                 modifier = Modifier
                     .size(32.dp)
-
-                    .clickable {
-                        navController.navigate("message_screen")
-
-                    }
+                    .clickable { navController.navigate("message_screen") }
             )
         }
-
     }
 }
 @Composable
@@ -125,92 +140,112 @@ fun CalendarSection(
     onDateSelected: (LocalDate) -> Unit,
     onMonthChange: (YearMonth) -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        //navigation for month (e.g jan to feb)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp), // Set rounded corners
+    ){
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(brush = myGradient4) // Apply gradient
+                .padding(16.dp) // Padding inside the card
         ) {
-            IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
-                Icon(Icons.Default.ArrowBackIos, contentDescription = "Previous Month")
-            }
-            Text(
-                text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
-                Icon(Icons.Default.ArrowForwardIos, contentDescription = "Next Month")
-            }
-        }
-
-        // days of the week header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN").forEach { day ->
-                Text(text = day, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            //navigation for month (e.g jan to feb)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
+                    Icon(
+                        Icons.Default.ArrowBackIos,
+                        contentDescription = "Previous Month",
+                        tint = Color.White
+                    )
+                }
+                Text(
+                    text = "${
+                        currentMonth.month.getDisplayName(
+                            TextStyle.FULL,
+                            Locale.getDefault()
+                        )
+                    } ${currentMonth.year}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold, color = Color.White
+                )
+                IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
+                    Icon(
+                        Icons.Default.ArrowForwardIos,
+                        contentDescription = "Next Month",
+                        tint = Color.White
+                    )
+                }
             }
-        }
 
-        // display days of the current month
-        val daysInMonth = currentMonth.lengthOfMonth()
-        val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value % 7 // Adjust for Monday start
+            // days of the week header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN").forEach { day ->
+                    Text(
+                        text = day,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
 
-        Column {
-            var day = 1 - firstDayOfWeek // Start rendering from the correct position
-            while (day <= daysInMonth) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    for (i in 0..6) {
-                        if (day in 1..daysInMonth) {
-                            val date = currentMonth.atDay(day)
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        if (date == selectedDate) Color.Green else Color.Transparent,
-                                        shape = MaterialTheme.shapes.small
+            // display days of the current month
+            val daysInMonth = currentMonth.lengthOfMonth()
+            val firstDayOfWeek =
+                currentMonth.atDay(1).dayOfWeek.value % 7 // Adjust for Monday start
+
+            Column {
+                var day = 1 - firstDayOfWeek // Start rendering from the correct position
+                while (day <= daysInMonth) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        for (i in 0..6) {
+                            if (day in 1..daysInMonth) {
+                                val date = currentMonth.atDay(day)
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .background(
+                                            if (date == selectedDate) Color.Black else Color.Transparent,
+                                            shape = MaterialTheme.shapes.small
+                                        )
+                                        .clickable { onDateSelected(date) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = day.toString(),
+                                        color = if (date == selectedDate) Color.White else Color.White,
+                                        fontWeight = FontWeight.Bold
                                     )
-                                    .clickable { onDateSelected(date) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = day.toString(),
-                                    color = if (date == selectedDate) Color.White else Color.Black,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.size(40.dp)) // empty spaces for alignment
                             }
-                        } else {
-                            Spacer(modifier = Modifier.size(40.dp)) // empty spaces for alignment
+                            day++
                         }
-                        day++
                     }
                 }
             }
         }
 
-        // Selected date display
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy")),
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-        Text(
-            text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Normal,
-            color = Color.Gray
-        )
+        }
     }
 }
 

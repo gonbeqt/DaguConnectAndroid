@@ -53,6 +53,7 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.Feedback
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +98,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFF81D796))
+                            .background(myGradient3)
                             .verticalScroll(rememberScrollState()),
                         shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
                     ) {

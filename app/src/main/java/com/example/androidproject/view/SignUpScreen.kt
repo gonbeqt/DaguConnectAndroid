@@ -1,10 +1,12 @@
 package com.example.androidproject.view
 
+import android.app.DatePickerDialog
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,8 +30,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Work
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,7 +50,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +58,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.RegisterViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Preview(showBackground = true)
 @Composable
@@ -79,8 +82,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
     var userName by remember {
         mutableStateOf("")
     }
-    var age by remember {
-        mutableStateOf(0)
+    var birthdate by remember {
+        mutableStateOf("")
     }
     var email by remember {
         mutableStateOf("")
@@ -112,9 +115,9 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         WindowType.LARGE -> 0.55f
     }
     val cardHeight = when (windowSize.height) {
-        WindowType.SMALL -> 620.dp
-        WindowType.MEDIUM -> 720.dp
-        WindowType.LARGE -> 800.dp
+        WindowType.SMALL -> 650.dp
+        WindowType.MEDIUM -> 750.dp
+        WindowType.LARGE -> 850.dp
     }
 
     Box(
@@ -155,8 +158,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     onLastNameChange = { lastName = it },
                     userName = userName,
                     onUserNameChange = { userName = it },
-                    age = age,
-                    onAgeChange = { age = it },
+                    birthdate = birthdate,
+                    onBirthDateChange = { birthdate = it },
                     email = email,
                     onEmailChange = { email = it },
                     password = password,
@@ -167,7 +170,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                 Roles(isClient = isClient, onIsClientChange = {isClient = it})
 
                 Spacer(modifier = Modifier.height(30.dp))
-                RegistrationButton(navController, viewModel, firstName, lastName, userName, email, age.toInt(), isClient, password, confirmPassword, registerState, windowSize)
+                RegistrationButton(navController, viewModel, firstName, lastName, userName, email, birthdate, isClient, password, confirmPassword, registerState, windowSize)
 
                 Spacer(modifier = Modifier.height(5.dp))
                 RegistrationLoginButton(navController)
@@ -187,8 +190,8 @@ fun InputFieldForSignUp(
     onLastNameChange: (String) -> Unit,
     userName: String,
     onUserNameChange: (String) -> Unit,
-    age: Int,
-    onAgeChange: (Int) -> Unit,
+    birthdate: String,
+    onBirthDateChange: (String) -> Unit,
     email: String,
     onEmailChange: (String) -> Unit,
     password: String,
@@ -197,22 +200,37 @@ fun InputFieldForSignUp(
     ){
 
     var passwordVisible by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
+
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
     else
         painterResource(id = R.drawable.visibility_off)
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    val context = LocalContext.current
 
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val birthDate = LocalDate.of(year, month + 1, dayOfMonth)
+            selectedDate = birthDate
+            val formattedDate = birthDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            onBirthDateChange(formattedDate)
+        },
+        LocalDate.now().year - 18, // Default year (18 years ago)
+        LocalDate.now().monthValue - 1,
+        LocalDate.now().dayOfMonth
+    )
     Text(
         text = "Create an Account",
         fontSize = when (windowSize.width) {
-            WindowType.SMALL -> 20.sp
-            WindowType.MEDIUM -> 24.sp
-            else -> 28.sp
+            WindowType.SMALL -> 24.sp
+            WindowType.MEDIUM -> 28.sp
+            else -> 32.sp
         },
-        textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         color = Color.Black,
-        modifier = Modifier.offset(y = (-25).dp)
+        modifier = Modifier.offset(x = (-90).dp).padding(8.dp)
     )
     Row(Modifier.fillMaxWidth()
         .padding(horizontal = 25.dp),
@@ -313,40 +331,33 @@ fun InputFieldForSignUp(
         )
     )
     Spacer(modifier = Modifier.height(10.dp))
-    OutlinedTextField(
-        value = age.toString(),
-        onValueChange = {
-            newValue -> // Convert String back to Int safely
-            val intValue = newValue.toIntOrNull() ?: 0
-            onAgeChange(intValue)
-        },
-        label = { Text("Age") },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Last Name Icon"
-            )
-        },
-        singleLine = true,
-
+    Button(
+        onClick = { datePickerDialog.show() },
         modifier = Modifier
             .width(360.dp)
-            .heightIn(min = 56.dp), // Adjust height as needed
-        shape = RoundedCornerShape(16.dp), // Set corner radius here
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Blue,
-            unfocusedIndicatorColor = Color.Gray,
-            focusedLabelColor = Color.Blue,
-            unfocusedLabelColor = Color.Gray,
-            cursorColor = Color.Black
+            .heightIn(min = 56.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White
         ),
-        textStyle = TextStyle(
-            fontSize = 16.sp, // Adjust text size for visibility
-            color = Color.Black // Ensure text is visible
-        )
-    )
+        border = BorderStroke(1.dp, Color.Gray),
+
+    ) {
+        Row (Modifier.fillMaxWidth().offset(x = (-10).dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically){
+            Icon(imageVector = Icons.Default.CalendarToday,
+                contentDescription = "Calendar Icon",
+                tint = Color.Gray)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = if (birthdate.isNotEmpty()) birthdate else "Select Birthdate",
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+        }
+
+    }
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(
         value = email,
@@ -380,7 +391,10 @@ fun InputFieldForSignUp(
     )
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedTextField(value = password,
-        onValueChange = onPasswordChange,
+        onValueChange = {
+            onPasswordChange(it)
+            passwordError = it.isNotEmpty() && it.length < 8
+                        },
         label = { Text("Password") },
         leadingIcon = {
             Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
@@ -398,6 +412,7 @@ fun InputFieldForSignUp(
         visualTransformation = if (passwordVisible) VisualTransformation.None
         else PasswordVisualTransformation(),
         singleLine = true,
+        isError = passwordError, // Show error state
         modifier = Modifier
             .width(360.dp)
             .heightIn(min = 56.dp), // Adjust height as needed
@@ -415,15 +430,38 @@ fun InputFieldForSignUp(
             fontSize = 16.sp, // Adjust text size for visibility
             color = Color.Black // Ensure text is visible
         )
+
     )
+    if (passwordError) {
+        Text(
+            text = "● At least 8 characters required.",
+            color = Color.Red,
+            fontSize = 14.sp,
+            modifier = Modifier.offset(x = 70.dp)
+                .padding(top = 10.dp)
+        )
+    }
 }
 @Composable
 fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
     val selectedCard = remember { mutableStateOf<Boolean?>(null) }
 
-    Row(
+    Column(
         modifier = Modifier
-            .fillMaxWidth().padding(start = 15.dp,end = 15.dp),
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "Select your role",
+            fontSize = 20.sp,
+            color = Color.Gray,
+            fontWeight = FontWeight.Bold
+        )
+    }
+        Row(
+        modifier = Modifier
+            .fillMaxWidth().padding(horizontal = 25.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -463,7 +501,7 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Client",
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     color = if (selectedCard.value == true) Color.White else Color.Black
                 )
             }
@@ -506,7 +544,7 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Tradesman",
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     color =  if (selectedCard.value == false) Color.White else Color.Black
                 )
             }
@@ -514,7 +552,7 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit){
     }
 }
 @Composable
-fun RegistrationButton(navController: NavController, viewModel: RegisterViewModel, firstName: String, lastName: String, userName: String, email: String, age: Int, isClient: Boolean, password: String, confirmPassword: String, registerState: RegisterViewModel.RegisterState, windowSize: WindowSize){
+fun RegistrationButton(navController: NavController, viewModel: RegisterViewModel, firstName: String, lastName: String, userName: String, email: String, birthdate: String, isClient: Boolean, password: String, confirmPassword: String, registerState: RegisterViewModel.RegisterState, windowSize: WindowSize){
     val context = LocalContext.current
 
     Row(
@@ -523,7 +561,7 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
     ) {
         Button(
             onClick = {
-                viewModel.register(firstName, lastName, userName, age, email,  isClient, password, confirmPassword)
+                viewModel.register(firstName, lastName, userName, birthdate, email,  isClient, password, confirmPassword)
                 when (registerState) {
                     is RegisterViewModel.RegisterState.Loading -> {
                         // Do nothing
@@ -548,7 +586,7 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826)),
         )
         {
-            Text(text = "Sign Up", color = Color.White)
+            Text(text = "Sign Up", color = Color.White, fontSize = 16.sp)
         }
     }
 }

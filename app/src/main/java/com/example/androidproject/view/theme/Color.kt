@@ -17,11 +17,43 @@ val  DarkGreen = Color(0xFF122826)
 
 val myGradient = Brush.linearGradient(
     colors = listOf(
-        Color(0xFF030706), // 0% (Dark color at the bottom)
-        Color(0xFF265147), // 30%
-        Color(0xFF21473E), // 50%
-        Color(0xFF418A79), // 100% (Lightest color at the top)
+        Color(0xFF030706),
+        Color(0xFF265147),
+        Color(0xFF21473E),
+        Color(0xFF418A79),
     ),
-    start = Offset(0f, Float.POSITIVE_INFINITY), // Start from the bottom
+    start = Offset(0f, Float.POSITIVE_INFINITY),
     end = Offset(0f, 0f) // Move upwards
+)
+val myGradient2 = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFF79F1BB),
+        Color(0xFF418A79),
+        Color(0xFF327760),
+        Color(0xFF418A79),
+        Color(0xFF79F1BB),
+
+    )
+)
+val myGradient3 = Brush.horizontalGradient(
+    colors = listOf(
+        Color(0xFF030706),
+        Color(0xFF21473E),
+        Color(0xFF418A79),
+        Color(0xFF21473E),
+        Color(0xFF030706),
+
+        )
+
+)
+val myGradient4 = Brush.linearGradient(
+    colors = listOf(
+        Color(0xFF21473E),
+        Color(0xFF79F1BB),
+        Color(0xFF418A79),
+        Color(0xFF265147),
+        Color(0xFF21473E),
+    ),
+    start = Offset(0f, 0f),  // Top-left corner
+    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY) // Bottom-right corner
 )

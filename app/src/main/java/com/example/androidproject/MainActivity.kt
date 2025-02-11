@@ -30,6 +30,7 @@ import com.example.androidproject.view.ClientPov.ChangePassword
 import com.example.androidproject.view.ClientPov.EmailVerification
 import com.example.androidproject.view.ClientPov.ReportProblem
 import com.example.androidproject.view.Feedback
+import com.example.androidproject.view.LandingPage2
 import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.SignUpScreen
@@ -44,6 +45,7 @@ import com.example.androidproject.view.pages.RateAndReviews
 import com.example.androidproject.view.pages2.BookingsTradesman
 import com.example.androidproject.view.pages2.BookmarkedTradesman
 import com.example.androidproject.view.pages2.HomeTradesman
+import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.view.pages2.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
@@ -109,9 +111,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination) {
+                NavHost(navController = navController, startDestination = "profiletradesman") {
                     composable("landing_page") {
                         LandingPageScreen(navController)
+                    }
+                    composable("landingpage2") {
+                        LandingPage2(navController)
                     }
                     composable("signup") {
                         SignUpScreen(navController,registerViewModel)
@@ -210,6 +215,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("scheduletradesman") {
                         ScheduleTradesman(modifier = Modifier,navController)
+                    }
+                    composable("profiletradesman") {
+                        ProfileTradesman(modifier = Modifier,navController)
                     }
 
                 }

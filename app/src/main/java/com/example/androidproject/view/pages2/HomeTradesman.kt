@@ -140,90 +140,39 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
 }
 @Composable
 fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize) {
-    var searchQuery by remember { mutableStateOf("") }
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 32.dp
-        WindowType.MEDIUM -> 34.dp
-        WindowType.LARGE -> 36.dp
-    }
-
-    val textSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
-    Box(
+    Row(
         modifier = Modifier
+            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
             .fillMaxWidth()
-            .size(90.dp)
-            .background(Color.White)
-            .padding(horizontal = 25.dp)
+            .height(70.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .width(280.dp)
-                .height(70.dp)
-                .padding(top = 20.dp)
-                .background(
-                    Color(0xFFFFFFFF),
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .border(
-                    1.dp,
-                    Color(0xFF3CC0B0),
-                    shape = RoundedCornerShape(8.dp)
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search Icon",
-                tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(iconSize)
-                    .padding(start = 10.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            BasicTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.weight(1f),
-                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, color = Color(0xFF3CC0B0)),
-                decorationBox = { innerTextField ->
-                    if (searchQuery.isEmpty()) {
-                        Text(
-                            text = "Search for jobs or services...",
-                            style = androidx.compose.ui.text.TextStyle(fontSize = textSize, color = Color.Gray)
-                        )
-                    }
-                    innerTextField()
-                }
-            )
-        }
+        // Left-aligned text
+        Text(
+            text = "Schedule",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Medium
+        )
 
-        // Notification and Message Icons outside the search field
+        // Right-aligned icons
         Row(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(top = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(iconSize)
+                modifier = Modifier.size(32.dp)
             )
             Icon(
                 imageVector = Icons.Default.Message,
                 contentDescription = "Message Icon",
                 tint = Color(0xFF3CC0B0),
                 modifier = Modifier
-                    .size(iconSize)
-                    .clickable {
-                        navController.navigate("message_screen")
-                    }
+                    .size(32.dp)
+                    .clickable { navController.navigate("message_screen") }
             )
         }
     }
