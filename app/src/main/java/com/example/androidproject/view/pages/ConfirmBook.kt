@@ -125,7 +125,9 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 100.dp)
+                        .verticalScroll(rememberScrollState())
                         ,
+
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
                 ) {
                     Column(
@@ -166,30 +168,6 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                     color = Color.Black,
                                     fontSize = 16.sp,
                                 )
-                                Row(
-                                    modifier = Modifier.padding(top = 10.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Rate Box (Bookmark Option)
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable { }
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Bookmark,
-                                                contentDescription = "Star Icon",
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.size(4.dp))
-                                            Text(
-                                                text = "Add to bookmark",
-                                                fontSize = 12.sp
-                                            )
-                                        }
-                                    }
-                                }
                             }
 
                             // Tradesman Reviews Box
@@ -274,6 +252,7 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                     .fillMaxWidth()
                                     .padding(10.dp)
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Box(
                                 modifier = Modifier
@@ -301,8 +280,46 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                     ),
                                 )
                             }
-                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Specialties",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(500),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                val values = listOf("Value 1", "Value 2", "Value 3") // Sample values
+                                values.forEach { value ->
+                                    Box(
+                                        modifier = Modifier
+                                            .width(100.dp)
+                                            .height(40.dp)
+                                            .background(
+                                                Color.LightGray,
+                                                RoundedCornerShape(50.dp)
+                                            ),
+                                        contentAlignment = Alignment.Center // Centers text inside the Box
+                                    ) {
+                                        Text(text = value, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                                    }
+                                }
+                            }
 
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = "Select a Date for Your Booking",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight(500),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
                             DatePickerWithRestrictions { date ->
                                 selectedDate = date
                             }
