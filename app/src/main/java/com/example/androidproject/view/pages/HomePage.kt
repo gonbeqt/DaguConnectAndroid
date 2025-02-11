@@ -299,7 +299,8 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavC
             is GetResumesViewModel.ResumeState.Success ->{
                 val resumes = (resumeState as GetResumesViewModel.ResumeState.Success).data
                 // Sort resumes by ID and take the top 5
-                val topResumes = resumes.sortedBy { it.id }.take(5)
+                val activeresume = resumes.filter { it.is_active  == 1}
+                val topResumes = activeresume.sortedBy { it.id }.take(5)
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
