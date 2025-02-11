@@ -1,8 +1,10 @@
 package com.example.androidproject.view.pages
 
 import LogoutViewModel
+import android.app.DatePickerDialog
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Edit
@@ -42,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -59,6 +63,8 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ServicePosting
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -127,8 +133,8 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
-                                start = androidx.compose.ui.geometry.Offset(0f, 1f),
-                                end = androidx.compose.ui.geometry.Offset(1f, 1f)
+                                start = Offset(0f, 1f),
+                                end = Offset(1f, 1f)
                             ), shape = RoundedCornerShape(8.dp)
                         )
                         .padding(16.dp),
@@ -206,9 +212,14 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
                 contentAlignment = Alignment.BottomEnd // Ensures FAB stays at bottom-end
             ) {
                 // Pass the callback function to update the postsList
-                FabPosting(onPostNewService = { newPost ->
-                    postsList = postsList + newPost // Add the new post to the list
-                })
+                FabPosting(
+                    onPostNewService = { newPost ->
+                        postsList = postsList + newPost
+                    },
+                    onDeadlineChange = { deadline ->
+                        println("Selected Deadline: $deadline") // Handle deadline change if needed
+                    }
+                )
             }
         }
 
@@ -229,10 +240,11 @@ fun MyPostsTab(servicePostings: List<ServicePosting>) {
         items(servicePostings) { posting ->
             PostsCard(
                 servicePosting = posting,
-                onEditClick = { title, description, rate ->
+                onEditClick = { title, description, rate, deadline ->
                     // Handle edit functionality here if needed
                 },
                 onApplicantsClick = { /* Handle applicants click */ }
+
             )
         }
     }
@@ -242,21 +254,25 @@ fun MyPostsTab(servicePostings: List<ServicePosting>) {
 @Composable
 fun PostsCard(
     servicePosting: ServicePosting,
-    onEditClick: (String, String, String) -> Unit,
-    onApplicantsClick: () -> Unit
+    onEditClick: (String, String, String,String) -> Unit,
+    onApplicantsClick: () -> Unit,
 ) {
     var isDialogVisible by remember { mutableStateOf(false) }
     var editableTitle by remember { mutableStateOf(servicePosting.title) }
     var editableDescription by remember { mutableStateOf(servicePosting.description) }
     var editableLocation by remember { mutableStateOf(servicePosting.location) }
-
+    var editableDeadline by remember { mutableStateOf(servicePosting.deadline ?: "Select Deadline") } // Added deadline
     var editableRate by remember { mutableStateOf(servicePosting.rate) }
+
     val originalTitle = remember { servicePosting.title }
     val originalDescription = remember { servicePosting.description }
     val originalRate = remember { servicePosting.rate }
+    val originalDeadline = remember { servicePosting.deadline ?: "Select Deadline" }
+
     val selectedCategories = remember { mutableStateListOf<String>().apply {
         addAll(servicePosting.category.split(", ").filter { it.isNotBlank() })
     } }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -335,6 +351,7 @@ fun PostsCard(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onApplicantsClick() }
                 )
+                Text(text = "Deadline: $editableDeadline", fontSize = 16.sp, color = Color.Red) // Display Deadline
 
                 // Other card content
                 Text(
@@ -472,6 +489,30 @@ fun PostsCard(
                             )
                         )
                     }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
+                    ) {
+                        TextField(
+                            value = editableDeadline,
+                            onValueChange = { editableDeadline = it },
+                            label = { Text("Deadline") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black
+                            )
+                        )
+                    }
                     Column(
                         modifier = Modifier.padding(5.dp),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -530,6 +571,7 @@ fun PostsCard(
                             editableTitle = originalTitle
                             editableDescription = originalDescription
                             editableRate = originalRate
+                            editableDeadline = originalDeadline
                             isDialogVisible = false
                         }) {
                             Text("Cancel")
@@ -538,7 +580,7 @@ fun PostsCard(
                         Button(onClick = {
                             // Save the new values
                             isDialogVisible = false
-                            onEditClick(editableTitle, editableDescription, editableRate)
+                            onEditClick(editableTitle, editableDescription, editableRate,editableDeadline)
                         }) {
                             Text("Save")
                         }
@@ -671,7 +713,8 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
     fun FabPosting(
-        onPostNewService: (ServicePosting) -> Unit // Pass a function to handle new post submission
+        onPostNewService: (ServicePosting) -> Unit,
+        onDeadlineChange:(String) ->Unit
     ) {
         var isDialogVisible by remember { mutableStateOf(false) }
         var title by remember { mutableStateOf("") } // Use simple variables for input
@@ -679,8 +722,32 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
         var location by remember { mutableStateOf("") }
         var rate by remember { mutableStateOf("") }
         var selectedCategories = remember { mutableStateListOf<String>() }
-        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+     val context = LocalContext.current
+     val today = LocalDate.now() // Get today's date
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var deadline by remember { mutableStateOf("") }
 
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val pickedDate = LocalDate.of(year, month + 1, dayOfMonth)
+            if (!pickedDate.isBefore(today)) { // Ensure it's today or later
+                selectedDate = pickedDate
+                val formattedDate = pickedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                deadline = formattedDate
+                onDeadlineChange(formattedDate)
+            } else {
+                Toast.makeText(context, "You cannot select a past date!", Toast.LENGTH_SHORT).show()
+            }
+        },
+        today.year,  // Default year
+        today.monthValue - 1, // Default month (zero-based index)
+        today.dayOfMonth // Default day
+    ).apply {
+        datePicker.minDate = System.currentTimeMillis() // Set minimum selectable date to today
+    }
         FloatingActionButton(
             onClick = { isDialogVisible = true },
             containerColor = Color.Gray,
@@ -783,6 +850,33 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 cursorColor = Color.Black
                             )
                         )
+                        Button(
+                            onClick = { datePickerDialog.show() },
+                            modifier = Modifier
+                                .width(360.dp)
+                                .heightIn(min = 56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White
+                            ),
+                            border = BorderStroke(1.dp, Color.Gray),
+
+                            ) {
+                            Row (Modifier.fillMaxWidth().offset(x = (-10).dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically){
+                                Icon(imageVector = Icons.Default.CalendarToday,
+                                    contentDescription = "Calendar Icon",
+                                    tint = Color.Gray)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (deadline.isNotEmpty()) deadline else "Select Deadline",
+                                    fontSize = 16.sp,
+                                    color = Color.Gray
+                                )
+                            }
+
+                        }
 
                         Column(
                             modifier = Modifier.padding(5.dp),
@@ -847,6 +941,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                     description = description,
                                     location = location,
                                     rate = rate.toString(),
+                                    deadline = deadline,
                                     postedDate = currentDate.toString(),
                                     isActive = true,
                                     category = if (selectedCategories.isNotEmpty()) selectedCategories.joinToString(", ") else "Uncategorized",

@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages2
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,22 +23,43 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.androidproject.R
+import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.view.ServicePosting
+import com.example.androidproject.view.pages.FabPosting
+import com.example.androidproject.view.pages.MyPostsTab
+import com.example.androidproject.view.pages.SettingsScreen
 
 @Composable
 fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController) {
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabNames = listOf("My Resume", "General")
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -53,7 +75,7 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
         ) {
             // Left-aligned text
             Text(
-                text = "Profile",
+                text = "My Profile",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -79,6 +101,7 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
                 )
             }
         }
+
 
         // Profile Info
         Column(
@@ -133,108 +156,236 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
             }
         }
 
-        // Additional Layout from Image
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically){
-                Text(text = "Status : Available", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Box(modifier = Modifier
-                    .size(30.dp)
-                    .background(Color.White, RoundedCornerShape(50.dp))
-                    .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit Status",
-                        tint = Color.LightGray
-                    )
-                }
 
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically){
-                Text(text = "Est. Rate : ₱500", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Box(modifier = Modifier
-                    .size(30.dp)
-                    .background(Color.White, RoundedCornerShape(50.dp))
-                    .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit Estimated Rate",
-                        tint = Color.LightGray
+        // Tab Selection
+        Column {
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                tabNames.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = { Text(title, fontSize = 14.sp) },
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Column{
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically){
-                    Text(text = "About Me", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Box(modifier = Modifier
-                        .size(30.dp)
-                        .background(Color.White, RoundedCornerShape(50.dp))
-                        .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Edit About Me",
-                            tint = Color.LightGray
-                        )
-                    }
-                }
-                Text(text = "Descripton about yourself", fontSize = 18.sp, fontWeight = FontWeight.Normal)
 
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Column{
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Specialties", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Box(modifier = Modifier
-                        .size(30.dp)
-                        .background(Color.White, RoundedCornerShape(50.dp))
-                        .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Edit Specialties",
-                            tint = Color.LightGray
-                        )
-                    }                }
-                Spacer(modifier = Modifier.height(14.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    repeat(3) {
-                        Box(
-                            modifier = Modifier
-                                .width(100.dp)
-                                .height(40.dp)
-                                .background(
-                                    Color.LightGray,
-                                    RoundedCornerShape(50.dp)
-                                )
-                        )
-                    }
+            // Tab Content
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(16.dp)
+            ) {
+                when (selectedTabIndex) {
+                    0 -> MyResume()
+                    1 -> SettingsTradesmanScreen(navController)
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Ratings and Testimonials", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Text(text = "Feedback from satisfied clients", fontSize = 14.sp, color = Color.Gray)
-                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally){
-                        Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
-                        Text(
-                            text = "Showcase your services to earn reviews!",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                    }
-                }
+        }
+    }
+}
+
+@Composable
+fun MyResume(){
+
+    // Additional Layout from Image
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically){
+            Text(text = "Status : Available", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Box(modifier = Modifier
+                .size(30.dp)
+                .background(Color.White, RoundedCornerShape(50.dp))
+                .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit Status",
+                    tint = Color.LightGray
+                )
             }
 
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically){
+            Text(text = "Est. Rate : ₱500", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Box(modifier = Modifier
+                .size(30.dp)
+                .background(Color.White, RoundedCornerShape(50.dp))
+                .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit Estimated Rate",
+                    tint = Color.LightGray
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Column{
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically){
+                Text(text = "About Me", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Box(modifier = Modifier
+                    .size(30.dp)
+                    .background(Color.White, RoundedCornerShape(50.dp))
+                    .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit About Me",
+                        tint = Color.LightGray
+                    )
+                }
+            }
+            Text(text = "Descripton about yourself", fontSize = 18.sp, fontWeight = FontWeight.Normal)
+
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column{
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Specialties", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Box(modifier = Modifier
+                    .size(30.dp)
+                    .background(Color.White, RoundedCornerShape(50.dp))
+                    .border(2.dp, Color.LightGray, RoundedCornerShape(50.dp)),contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit Specialties",
+                        tint = Color.LightGray
+                    )
+                }                }
+            Spacer(modifier = Modifier.height(14.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                repeat(3) {
+                    Box(
+                        modifier = Modifier
+                            .width(100.dp)
+                            .height(40.dp)
+                            .background(
+                                Color.LightGray,
+                                RoundedCornerShape(50.dp)
+                            )
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "Ratings and Testimonials", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Feedback from satisfied clients", fontSize = 14.sp, color = Color.Gray)
+            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                    Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
+                    Text(
+                        text = "Showcase your services to earn reviews!",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+fun GeneralTradesmanSettings(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .background(Color.White)
+            .padding(8.dp)
+            .clickable { onClick() }
+    ) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF9F9F9),
+                shape = RoundedCornerShape(8.dp))) {
+
+            Column(modifier = Modifier.padding(10.dp)) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                    Text(
+                        text = title,
+                        modifier = Modifier.padding(start = 14.dp)
+                    )
+
+                }
+                Text(
+                    text = description,
+                    modifier = Modifier.padding(top = 5.dp, start = 10.dp)
+                )
+
+            }
+
+        }
+    }
+
+}
+
+
+@Composable
+fun SettingsTradesmanScreen(navController: NavController) {
+    Column {
+
+        GeneralTradesmanSettings(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_notification),
+            title = "Notification",
+            description = "Manage alerts and updates.",
+            onClick = { /* Handle Notification click */ }
+        )
+        GeneralTradesmanSettings(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
+            title = "Privacy",
+            description = "Change your password.",
+            onClick = { navController.navigate("emailverification") }
+        )
+        Text(
+            text = "Help and Support", fontWeight = FontWeight(500),
+            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
+        )
+        GeneralTradesmanSettings(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_about),
+            title = "About Us",
+            description = "Know more about our team.",
+            onClick = { navController.navigate("aboutus") }
+        )
+        GeneralTradesmanSettings(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_report),
+            title = "Report a Problem",
+            description = "Report a problem.",
+            onClick = { /* Handle Report a Problem click */ }
+        )
+        Text(
+            text = "Log Out", fontWeight = FontWeight(500),
+            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
+        )
+        GeneralTradesmanSettings(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
+            title = "Log Out",
+            description = "",
+            onClick = {
+
+            }
+        )
     }
 }
