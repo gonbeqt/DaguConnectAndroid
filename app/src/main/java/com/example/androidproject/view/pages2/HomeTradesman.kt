@@ -57,6 +57,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
@@ -181,52 +183,22 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
-    val jobState by getJobsViewModel.jobsState.collectAsState()
-    val listState = rememberLazyListState()
+    val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
 
-    val jobs = when (val state = jobState) {
-        is GetJobsViewModel.JobsState.Success -> state.data
-        else -> emptyList<GetJobs>()
-    }
-
-    LaunchedEffect(Unit) { // Only trigger getJobs when jobState is Idle (first load)
-        if (jobState is GetJobsViewModel.JobsState.Idle && getJobsViewModel.isFetching.value.not()) {
-            getJobsViewModel.getJobs()
-        }
-    }
-
-    val shouldLoadMore = remember { // Check if we need to load more data when nearing the end of the list
-        derivedStateOf {
-            val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            val totalItems = listState.layoutInfo.totalItemsCount
-            lastVisibleItemIndex >= totalItems - 5 && totalItems > 0
-        }
-    }
-
-
-    LaunchedEffect(shouldLoadMore.value) { // Load more jobs when needed
-        if (shouldLoadMore.value && getJobsViewModel.isFetching.value.not()) {
-            getJobsViewModel.getJobs()
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
-        when (jobState) {
-            is GetJobsViewModel.JobsState.Loading -> {
-                // Optionally show a spinner here when the jobState is Loading
-            }
-            is GetJobsViewModel.JobsState.Success -> {
                 LazyColumn(
-                    state = listState,
-                    modifier = Modifier.padding(bottom = 100.dp)
-                    ,
+                    modifier = Modifier.padding(bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    itemsIndexed(jobs) { index, job ->
-                        TopMatchesItem(job, navController)
+                    items(jobsList.itemCount) { index ->
+                        val job = jobsList[index]
+                        if (job != null) {
+                            TopMatchesItem(job, navController)
+                        }
                     }
                     item {
-                        if (getJobsViewModel.isFetching.value) {
+                        if (jobsList.loadState.append == LoadState.Loading) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -237,18 +209,6 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
                             }
                         }
                     }
-                }
-            }
-
-            is GetJobsViewModel.JobsState.Error -> {
-                val errorMessage = (jobState as GetJobsViewModel.JobsState.Error).message
-                Text(
-                    text = "Error: $errorMessage",
-                    color = Color.Red,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            else -> Unit
         }
     }
 }
