@@ -514,9 +514,9 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
     val getbookdate = ViewModelSetups.formatDateTime(allBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 170.dp
-        WindowType.MEDIUM -> 400.dp to 180.dp
-        WindowType.LARGE -> 410.dp to 190.dp
+        WindowType.SMALL -> 390.dp to 180.dp
+        WindowType.MEDIUM -> 400.dp to 190.dp
+        WindowType.LARGE -> 410.dp to 200.dp
     }
     Card(
         modifier = Modifier

@@ -1,6 +1,8 @@
 package com.example.androidproject.viewmodel.Resumes
 
 import android.content.Context
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -18,7 +20,11 @@ import kotlinx.coroutines.launch
 
 class GetResumesViewModel(private val apiService: ApiService, private val context: Context) : ViewModel() {
     private val _pagingSource = MutableStateFlow<GetResumePagingSource?>(null)
+    private val _dismissedResumes = mutableStateOf(setOf<Int>())
+    val dismissedResumes: State<Set<Int>> = _dismissedResumes
+
     val resumePagingData: Flow<PagingData<resumesItem>> = Pager(
+
         config = PagingConfig(
             pageSize = 10,
             initialLoadSize = 10,
@@ -30,8 +36,13 @@ class GetResumesViewModel(private val apiService: ApiService, private val contex
         }
     ).flow.cachedIn(viewModelScope)
 
+        fun dismissResume(resumeId: Int) {
+            _dismissedResumes.value = _dismissedResumes.value + resumeId
+        }
+
     // Function to invalidate the PagingSource
     fun invalidatePagingSource() {
         _pagingSource.value?.invalidate()
     }
+
 }

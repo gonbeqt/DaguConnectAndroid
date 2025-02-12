@@ -203,10 +203,16 @@ fun InputFieldForLogin(
 }
 @Composable
 fun EmailField(email: String, onEmailChange: (String) -> Unit, windowSize: WindowSize){
+    var emailError by remember { mutableStateOf(false) }
 
     OutlinedTextField(
         value = email,
-        onValueChange = onEmailChange,
+        onValueChange = {
+            onEmailChange(it)
+            emailError =  it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
+        },
+        isError = emailError,
+
         label = { Text("Email") },
         leadingIcon = {
             Icon(
@@ -235,10 +241,21 @@ fun EmailField(email: String, onEmailChange: (String) -> Unit, windowSize: Windo
         ),
         textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
+    if (emailError) {
+        Text(
+            text = "● Invalid email format.",
+            color = Color.Red,
+            fontSize = 14.sp,
+            modifier = Modifier.offset(x = 70.dp)
+                .padding(top = 10.dp)
+        )
+    }
 }
 
 @Composable
 fun PasswordField(password: String, onPasswordChange: (String) -> Unit, windowSize: WindowSize){
+    var passwordError by remember { mutableStateOf(false) }
+
     var passwordVisible by remember { mutableStateOf(false) }
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
@@ -251,7 +268,11 @@ fun PasswordField(password: String, onPasswordChange: (String) -> Unit, windowSi
     }
     OutlinedTextField(
         value = password,
-        onValueChange = onPasswordChange,
+        onValueChange = {
+            onPasswordChange(it)
+            passwordError = it.isNotEmpty() && it.length < 8
+
+        },
         label = { Text("Password") },
         leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") },
         trailingIcon = {
@@ -261,6 +282,7 @@ fun PasswordField(password: String, onPasswordChange: (String) -> Unit, windowSi
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         singleLine = true,
+        isError = passwordError,
         modifier = Modifier
             .fillMaxWidth(
                 when (windowSize.width) {
@@ -281,7 +303,15 @@ fun PasswordField(password: String, onPasswordChange: (String) -> Unit, windowSi
         ),
         textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
-
+    if (passwordError) {
+        Text(
+            text = "● At least 8 characters required.",
+            color = Color.Red,
+            fontSize = 14.sp,
+            modifier = Modifier.offset(x = 70.dp)
+                .padding(top = 10.dp)
+        )
+    }
 }
 
 @Composable
@@ -307,10 +337,19 @@ fun ForgotPassword(windowSize: WindowSize) {
 
 @Composable
 fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize){
+    val context = LocalContext.current
 
     Button(
         onClick = {
-            viewModel.login(email, password)
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(context, "Fields cannot be empty", Toast.LENGTH_SHORT).show()
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
+            } else if (password.length < 8) {
+                Toast.makeText(context, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
+            } else {
+                viewModel.login(email, password)
+            }
         },
         modifier = Modifier
             .fillMaxWidth(

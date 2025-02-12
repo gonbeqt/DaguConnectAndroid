@@ -67,6 +67,8 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
+    val values = listOf("Value 1", "Value 2", "Value 3") // Sample values
+    var selectedValue by remember { mutableStateOf<String?>(null) }
 
 
     val tradesmen = listOf(
@@ -293,19 +295,30 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
-                                val values = listOf("Value 1", "Value 2", "Value 3") // Sample values
-                                values.forEach { value ->
-                                    Box(
-                                        modifier = Modifier
-                                            .width(100.dp)
-                                            .height(40.dp)
-                                            .background(
-                                                Color.LightGray,
-                                                RoundedCornerShape(50.dp)
-                                            ),
-                                        contentAlignment = Alignment.Center // Centers text inside the Box
-                                    ) {
-                                        Text(text = value, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    values.forEach { value ->
+                                        Box(
+                                            modifier = Modifier
+                                                .width(100.dp)
+                                                .height(40.dp)
+                                                .background(
+                                                    if (selectedValue == value) Color(0xFF122826) else Color.LightGray, // Change color if selected
+                                                    RoundedCornerShape(50.dp)
+                                                )
+                                                .clickable { selectedValue = value }, // Update selected value
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = value,
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = if (selectedValue == value) Color.White else Color.Black // Change text color when selected
+                                            )
+                                        }
                                     }
                                 }
                             }
