@@ -1,5 +1,7 @@
 package com.example.androidproject.view.pages2
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,6 +57,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
@@ -176,76 +180,35 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
-    val jobState by getJobsViewModel.jobsState.collectAsState()
-    val listState = rememberLazyListState()
+    val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
 
-    // Only trigger getJobs when jobState is Idle (first load)
-    LaunchedEffect(jobState) {
-        if (jobState is GetJobsViewModel.JobsState.Idle) {
-            getJobsViewModel.getJobs()
-        }
-    }
-
-    val jobs = when (val state = jobState) {
-        is GetJobsViewModel.JobsState.Success -> state.data
-        else -> emptyList<GetJobs>()
-    }
-
-    // Check if we need to load more data when nearing the end of the list
-    val shouldLoadMore = remember {
-        derivedStateOf {
-            val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItemIndex >= jobs.size - 5 // Load next page when 5 items are left
-        }
-    }
-
-    // Load more jobs when needed
-    LaunchedEffect(shouldLoadMore.value) {
-        if (shouldLoadMore.value && jobState !is GetJobsViewModel.JobsState.Loading) {
-            getJobsViewModel.getJobs()
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
-        when (jobState) {
-            is GetJobsViewModel.JobsState.Loading -> {
-                // Optionally show a spinner here when the jobState is Loading
-            }
-            is GetJobsViewModel.JobsState.Success -> {
                 LazyColumn(
-                    state = listState,
-                    modifier = Modifier.padding(bottom = 100.dp)
-                    ,
+                    modifier = Modifier.padding(bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    itemsIndexed(jobs) { index, job ->
-                        TopMatchesItem(job, navController)
-                    }
-                    item {
-                        // Show a loading spinner at the bottom if jobs are loading
-                        if (jobState is GetJobsViewModel.JobsState.Loading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .wrapContentWidth(Alignment.CenterHorizontally)
-                            )
+                    items(jobsList.itemCount) { index ->
+                        val job = jobsList[index]
+                        if (job != null) {
+                            TopMatchesItem(job, navController)
                         }
                     }
-                }
-            }
-
-            is GetJobsViewModel.JobsState.Error -> {
-                val errorMessage = (jobState as GetJobsViewModel.JobsState.Error).message
-                Text(
-                    text = "Error: $errorMessage",
-                    color = Color.Red,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            else -> Unit
+                    item {
+                        if (jobsList.loadState.append == LoadState.Loading) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
         }
     }
 }

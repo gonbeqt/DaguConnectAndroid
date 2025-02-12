@@ -1,56 +1,30 @@
 package com.example.androidproject.viewmodel.jobs
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.JobsResponse
+import com.example.androidproject.viewmodel.jobs.paginate.GetJobsPagingSource
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class GetJobsViewModel (private val apiService: ApiService, private val context: Context): ViewModel(){
-    private val _jobsState = MutableStateFlow<JobsState>(JobsState.Idle)
-    val jobsState = _jobsState.asStateFlow() // Exposing as StateFlow
-
-    private var isFetching = false
-    private var currentPage = 1
-    private val jobsList = mutableListOf<GetJobs>()
-    private var isLastPage = false
-
-    fun getJobs() {
-        if (isFetching || isLastPage) return // Stop if already fetching or at the last page
-        viewModelScope.launch {
-            isFetching = true // Set fetching flag
-            _jobsState.value = JobsState.Loading
-            try {
-                val response = apiService.getJobs(page = currentPage)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val newJobs = body?.jobs ?: emptyList()
-
-                    if (newJobs.isEmpty()) {
-                        isLastPage = true // ✅ Mark as last page
-                    } else {
-                        jobsList.addAll(newJobs) // Append new jobs
-                        _jobsState.value = JobsState.Success(jobsList.toList())
-                        currentPage++ // Move to the next page
-                    }
-                } else {
-                    _jobsState.value = JobsState.Error(response.message())
-                }
-            } catch (e: Exception) {
-                _jobsState.value = JobsState.Error(e.localizedMessage ?: "Unknown error")
-            } finally {
-                isFetching = false // Reset flag
-            }
-        }
-    }
-    sealed class JobsState {
-        object Idle : JobsState()
-        object Loading : JobsState()
-        data class Success(val data: List<GetJobs>) : JobsState()
-        data class Error(val message: String) : JobsState()
-    }
+    val jobsPagingData: Flow<PagingData<GetJobs>> = Pager(
+        config = PagingConfig(
+            pageSize = 10, // Keep it consistent with API
+            initialLoadSize = 10, // Prevents large first requests
+            prefetchDistance = 2, // Reduces prefetching aggressiveness
+            enablePlaceholders = false // Helps prevent extra loads
+        ),
+        pagingSourceFactory = { GetJobsPagingSource(apiService) }
+    ).flow.cachedIn(viewModelScope)
 }

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
@@ -50,12 +53,11 @@ import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 
 @Composable
 fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewModel) {
-    val ResumeState by getResumesViewModel.resumeState.collectAsState()
+    val cleaningList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getResumesViewModel.getResumes()
+        getResumesViewModel.invalidatePagingSource()
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -149,42 +151,31 @@ fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewMod
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                        when(ResumeState){
-                            is GetResumesViewModel.ResumeState.Loading -> {
+                        LazyColumn(
 
-                                // Show a loading indicator if needed
-                                Text(
-                                    text = "Loading...",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
+                            modifier = Modifier
+                                .fillMaxSize() // Ensure LazyColumn takes up the remaining space
+                                .background(Color(0xFFECECEC)),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(cleaningList.itemCount) { index ->
+                                val Cleaning = cleaningList[index]
+                                if (Cleaning != null) {
+                                    CleaningItem(Cleaning, navController)
+                                }
                             }
-                            is GetResumesViewModel.ResumeState.Success -> {
-                                val resume = (ResumeState as GetResumesViewModel.ResumeState.Success).data
-                                val cleanings = resume.filter { it.specialties.contains("Cleaning") }
-                                // LazyColumn with CompletedItem layout
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .size(500.dp)
-                                        .background(Color(0xFFF9F9F9)),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    items(cleanings.size) { index ->
-                                        val resumes = cleanings[index]
-                                        CleaningItem(resumes, navController)
+                            item {
+                                if (cleaningList.loadState.append == LoadState.Loading) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        CircularProgressIndicator()
                                     }
                                 }
                             }
-                            is GetResumesViewModel.ResumeState.Error -> {
-                                // Show an error message if needed
-                                Text(
-                                    text = "Error loading resumes. Please try again later.",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                            }
-                            else -> Unit
                         }
 
                     }
@@ -195,7 +186,7 @@ fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun CleaningItem(resume: resumesItem, navController: NavController) {
+fun CleaningItem(cleaning: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -213,8 +204,8 @@ fun CleaningItem(resume: resumesItem, navController: NavController) {
         ) {
             // Profile Picture
             AsyncImage(
-                model = resume.profilepic,
-                contentDescription = resume.tradesmanfullname,
+                model = cleaning.profilepic,
+                contentDescription = cleaning.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -227,7 +218,7 @@ fun CleaningItem(resume: resumesItem, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = resume.tradesmanfullname,
+                    text = cleaning.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -243,7 +234,7 @@ fun CleaningItem(resume: resumesItem, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = "P${resume.workfee}/hr",
+                            text = "P${cleaning.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )

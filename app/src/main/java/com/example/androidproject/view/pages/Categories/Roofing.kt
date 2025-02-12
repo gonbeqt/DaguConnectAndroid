@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
@@ -49,11 +52,11 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 @Composable
 fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewModel){
-    val ResumeState by getResumesViewModel.resumeState.collectAsState();
+    val roofingList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
-
+    // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
-        getResumesViewModel.getResumes()
+        getResumesViewModel.invalidatePagingSource()
     }
 
 
@@ -155,42 +158,31 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                        when(ResumeState){
-                            is GetResumesViewModel.ResumeState.Loading->{
-                                // Show a loading indicator if needed
-                                Text(
-                                    text = "Loading...",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
+                        LazyColumn(
+
+                            modifier = Modifier
+                                .fillMaxSize() // Ensure LazyColumn takes up the remaining space
+                                .background(Color(0xFFECECEC)),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(roofingList.itemCount) { index ->
+                                val Roofing = roofingList[index]
+                                if (Roofing != null) {
+                                    RoofingItem(Roofing, navController)
+                                }
                             }
-                            is GetResumesViewModel.ResumeState.Success-> {
-                                val resume = (ResumeState as GetResumesViewModel.ResumeState.Success).data
-                                // Filter only Plumbers
-                                val roofings = resume.filter { it.specialties.contains("Roofing") }
-                                // LazyColumn with CompletedItem layout
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .size(500.dp)
-                                        .background(Color(0xFFF9F9F9)),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    items(roofings.size) { index ->
-                                        val resumes = roofings[index]
-                                        RoofingItem(resumes, navController)
+                            item {
+                                if (roofingList.loadState.append == LoadState.Loading) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        CircularProgressIndicator()
                                     }
                                 }
                             }
-                            is GetResumesViewModel.ResumeState.Error -> {
-                                // Show an error message if needed
-                                Text(
-                                    text = "Error loading resumes. Please try again later.",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                            }
-                            else -> Unit
                         }
 
 
@@ -202,7 +194,7 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
 }
 
 @Composable
-fun RoofingItem(resume: resumesItem, navController: NavController) {
+fun RoofingItem(roofing: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,8 +212,8 @@ fun RoofingItem(resume: resumesItem, navController: NavController) {
         ) {
             // Profile Picture
             AsyncImage(
-                model = resume.profilepic,
-                contentDescription = resume.tradesmanfullname,
+                model = roofing.profilepic,
+                contentDescription = roofing.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -234,7 +226,7 @@ fun RoofingItem(resume: resumesItem, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = resume.tradesmanfullname,
+                    text = roofing.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -250,7 +242,7 @@ fun RoofingItem(resume: resumesItem, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = "P${resume.workfee}/hr",
+                            text = "P${roofing.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )

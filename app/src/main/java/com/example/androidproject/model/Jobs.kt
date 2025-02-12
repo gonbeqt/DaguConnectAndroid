@@ -23,7 +23,11 @@ data class PostJobResponse(
 )
 
 data class JobsResponse(
-    val jobs: List<GetJobs>
+    val jobs: List<GetJobs>,
+    @SerializedName("current_page")
+    val currentPage: Int,
+    @SerializedName("total_pages")
+    val totalPages: Int
 )
 
 data class GetJobs(
@@ -32,8 +36,8 @@ data class GetJobs(
     val userId: Int,
     @SerializedName("client_fullname")
     val clientFullname: String,
-    @SerializedName("client_profile")
-    val clientProfile: String?,
+    @SerializedName("client_profile_picture")
+    val clientProfilePicture: String?,
     val salary: Double,
     @SerializedName("job_type")
     val jobType: String,

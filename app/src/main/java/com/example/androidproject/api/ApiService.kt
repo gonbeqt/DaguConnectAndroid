@@ -10,6 +10,7 @@ import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.resumesItem
 
 
@@ -42,7 +43,7 @@ interface ApiService {
 
 
     @GET("/user/getresumes")
-    suspend fun getResumes(@Header("Authorization",) token: String,@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<List<resumesItem>>
+    suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
 
     @GET("/user/getresume/{resumeId}")
     suspend fun getResumeById(@Header("Authorization") token: String, @Path("resumeId") resumeId: Int): Response<viewResume>

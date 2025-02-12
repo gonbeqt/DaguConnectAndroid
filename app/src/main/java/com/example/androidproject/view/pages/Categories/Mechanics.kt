@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +41,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
@@ -48,11 +51,11 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 @Composable
 fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewModel) {
-  val ResumeStete by getResumesViewModel.resumeState.collectAsState()
+    val mechanicsList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
-   LaunchedEffect(Unit) {
-        getResumesViewModel.getResumes()
-   }
+    LaunchedEffect(Unit) {
+        getResumesViewModel.invalidatePagingSource()
+    }
 
     Box(
         modifier = Modifier
@@ -150,41 +153,31 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                        when(ResumeStete){
-                            is GetResumesViewModel.ResumeState.Loading ->{
-                                // Show a loading indicator if needed
-                                Text(
-                                    text = "Loading...",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
+                        LazyColumn(
+
+                            modifier = Modifier
+                                .fillMaxSize() // Ensure LazyColumn takes up the remaining space
+                                .background(Color(0xFFECECEC)),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(mechanicsList.itemCount) { index ->
+                                val Mechanics = mechanicsList[index]
+                                if (Mechanics != null) {
+                                    MechanicsItem(Mechanics, navController)
+                                }
                             }
-                            is GetResumesViewModel.ResumeState.Success ->{
-                                val resume = (ResumeStete as GetResumesViewModel.ResumeState.Success).data
-                                val mechanics = resume.filter{it.specialties.contains("Mechanics")}
-                                // LazyColumn with CompletedItem layout
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .size(500.dp)
-                                        .background(Color(0xFFF9F9F9)),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    items(mechanics.size) { index ->
-                                        val resumes = mechanics[index]
-                                        MechanicsItem(resumes, navController)
+                            item {
+                                if (mechanicsList.loadState.append == LoadState.Loading) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        CircularProgressIndicator()
                                     }
                                 }
                             }
-                            is GetResumesViewModel.ResumeState.Error ->{
-                                // Show an error message if needed
-                                Text(
-                                    text = "Error loading resumes. Please try again later.",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                            }
-                            else -> Unit
                         }
                     }
                 }
@@ -194,7 +187,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
 }
 
 @Composable
-fun MechanicsItem(resume: resumesItem, navController: NavController) {
+fun MechanicsItem(mechanics: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -212,8 +205,8 @@ fun MechanicsItem(resume: resumesItem, navController: NavController) {
         ) {
             // Profile Picture
             AsyncImage(
-                model = resume.profilepic,
-                contentDescription = resume.tradesmanfullname,
+                model = mechanics.profilepic,
+                contentDescription = mechanics.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -226,7 +219,7 @@ fun MechanicsItem(resume: resumesItem, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = resume.tradesmanfullname,
+                    text = mechanics.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -242,7 +235,7 @@ fun MechanicsItem(resume: resumesItem, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = "P${resume.workfee}/hr",
+                            text = "P${mechanics.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
