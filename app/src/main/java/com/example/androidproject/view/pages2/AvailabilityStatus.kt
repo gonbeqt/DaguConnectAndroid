@@ -59,7 +59,7 @@ fun AvailabilityStatusScreen (modifier: Modifier = Modifier){
                 tint = Color.Black
             )
             Text(
-                text = "Change Your Status",
+                text = "Help",
                 fontSize = 20.sp,
                 modifier = Modifier.weight(1f)
             )
@@ -143,56 +143,6 @@ fun AvailabilityStatusScreen (modifier: Modifier = Modifier){
                 fontSize = 16.sp,
                 color = Color.Black
             )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize() // Ensures the Box takes up the whole screen
-        ) {
-            Spacer(modifier = Modifier.height(10.dp)) // Creates space for the shadow effect
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter) // Pushes the Row to the bottom
-                    .shadow(elevation = 8.dp)
-                    .background(Color.White)
-                    .padding(horizontal = 8.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically // Centers content vertically inside Row
-            ) {
-                Button(
-                    modifier = Modifier
-                        .width(180.dp)
-                        .border(2.dp, Color.Black, shape = RoundedCornerShape(10.dp)) // Add black border around the button
-                        .background(Color.Transparent), // Make button background transparent
-                    onClick = { /* Handle button click */ },
-                    contentPadding = PaddingValues(0.dp), // Remove default padding to let the border fit the content
-                    colors = ButtonDefaults.buttonColors(Color.Transparent)
-                ) {
-                    Text(
-                        text = "Cancel",
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                        color = Color.Black, // Set text color to black
-                        modifier = Modifier.weight(1f) // Center the text inside the button
-                    )
-                }
-                Button(
-                    modifier = Modifier
-                        .width(180.dp)
-                        .background(Color.Black, shape = RoundedCornerShape(10.dp)), // Make button background transparent
-                    onClick = { /* Handle button click */ },
-                    contentPadding = PaddingValues(0.dp), // Remove default padding to let the border fit the content
-                    colors = ButtonDefaults.buttonColors(Color.Black)
-                ) {
-                    Text(
-                        text = "Turn On",
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                        color = Color.White, // Set text color to black
-                        modifier = Modifier.weight(1f) // Center the text inside the button
-                    )
-                }
-            }
         }
 
     }
