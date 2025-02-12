@@ -1,7 +1,14 @@
 package com.example.androidproject.model.client
 
 import com.google.gson.annotations.SerializedName
-
+data class ResumesResponse(
+    @SerializedName("resume")
+    val resumes: List<resumesItem>,
+    @SerializedName("current_page")
+    val currentPage: Int,
+    @SerializedName("total_pages")
+    val totalPages: Int
+)
 
 data class resumesItem(
     @SerializedName("created_at")

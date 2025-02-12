@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +41,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
@@ -48,10 +51,12 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 @Composable
 fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewModel) {
-    val resumeState by getResumesViewModel.resumeState.collectAsState()
+    val plumberList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
+
+    // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
-        getResumesViewModel.getResumes()
+        getResumesViewModel.invalidatePagingSource()
     }
 
 
@@ -148,49 +153,31 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                        when (resumeState){
-                            is GetResumesViewModel.ResumeState.Loading -> {
-                                // Show a loading indicator if needed
-                                Text(
-                                    text = "Loading...",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                            }
-                            is GetResumesViewModel.ResumeState.Success -> {
-                                val resume = (resumeState as GetResumesViewModel.ResumeState.Success).data
-                                val plumbers = resume.filter { it.specialties.contains("Plumber") }
+                        LazyColumn(
 
-                                if (plumbers.isNotEmpty()) {
-                                    // LazyColumn with CompletedItem layout
-                                    LazyColumn(
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .size(500.dp)
-                                            .background(Color(0xFFF9F9F9)),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    ) {
-                                        items(plumbers.size) { index ->
-                                            val Plumbers = plumbers[index]
-                                            PlumbingItem(Plumbers, navController)
-                                        }
-                                    }
-
-                                } else {
-                                    Text("No plumbers found.")
+                            modifier = Modifier
+                                .fillMaxSize() // Ensure LazyColumn takes up the remaining space
+                                .background(Color(0xFFECECEC)),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(plumberList.itemCount) { index ->
+                                val Plumber = plumberList[index]
+                                if (Plumber != null) {
+                                    PlumbingItem(Plumber, navController)
                                 }
-
                             }
-                            is GetResumesViewModel.ResumeState.Error -> {
-                                // Show an error message if needed
-                                Text(
-                                    text = "Error loading resumes. Please try again later.",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
+                            item {
+                                if (plumberList.loadState.append == LoadState.Loading) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
                             }
-                            else -> Unit
-
                         }
 
                     }
@@ -210,7 +197,7 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun PlumbingItem(resume: resumesItem, navController: NavController) {
+fun PlumbingItem(plumber: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,8 +215,8 @@ fun PlumbingItem(resume: resumesItem, navController: NavController) {
         ) {
             // Profile Picture
             AsyncImage(
-                model = resume.profilepic,
-                contentDescription = resume.tradesmanfullname,
+                model = plumber.profilepic,
+                contentDescription = plumber.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -242,7 +229,7 @@ fun PlumbingItem(resume: resumesItem, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = resume.tradesmanfullname,
+                    text = plumber.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -258,7 +245,7 @@ fun PlumbingItem(resume: resumesItem, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = "P${resume.workfee}/hr",
+                            text = "P${plumber.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )

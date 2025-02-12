@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
@@ -238,11 +239,14 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 @Composable
 fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavController) {
     val windowSize = rememberWindowSizeClass()
-    val resumeState by getResumesViewModel.resumeState.collectAsState()
+    val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    val topResumes = resumeList.itemSnapshotList.items.sortedBy { it.id }.take(5)
 
+    // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
-        getResumesViewModel.getResumes()
+        getResumesViewModel.invalidatePagingSource()
     }
+
 
 
 
@@ -287,39 +291,16 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavC
             .background(Color.White),
         shape = RoundedCornerShape(8.dp),
     ) {
-        when (resumeState){
-            is GetResumesViewModel.ResumeState.Loading ->{
-                // Show a loading indicator if needed
-                Text(
-                    text = "Loading...",
-                    fontSize = textSize,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
+
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(Color(0xFFECECEC)),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            topResumes.forEach { resumes ->
+                TradesmanItem(resumes, navController = navController, cardHeight, textSize)
             }
-            is GetResumesViewModel.ResumeState.Success ->{
-                val resumes = (resumeState as GetResumesViewModel.ResumeState.Success).data
-                // Sort resumes by ID and take the top 5
-                val activeresume = resumes.filter { it.is_active  == 1}
-                val topResumes = activeresume.sortedBy { it.id }.take(5)
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .background(Color(0xFFECECEC)),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    topResumes.forEach { resumes ->
-                        TradesmanItem(resumes, navController = navController, cardHeight, textSize)
-                    }
-                }
-            }
-            is GetResumesViewModel.ResumeState.Error ->{
-                Text(
-                    text = "Error fetching data",
-                    fontSize = textSize,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-            else -> Unit
         }
 
     }

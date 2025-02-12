@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +41,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
@@ -48,12 +51,12 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 
 @Composable
 fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewModel) {
-    val ResumeState by getResumesViewModel.resumeState.collectAsState()
-
+    val carpentryList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getResumesViewModel.getResumes()
+        getResumesViewModel.invalidatePagingSource()
     }
+
 
     Box(
         modifier = Modifier
@@ -151,42 +154,31 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
                             color = Color.Black,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                        when(ResumeState){
-                            is GetResumesViewModel.ResumeState.Loading -> {
+                        LazyColumn(
 
-                                // Show a loading indicator if needed
-                                Text(
-                                    text = "Loading...",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
+                            modifier = Modifier
+                                .fillMaxSize() // Ensure LazyColumn takes up the remaining space
+                                .background(Color(0xFFECECEC)),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(carpentryList.itemCount) { index ->
+                                val Carpentry = carpentryList[index]
+                                if (Carpentry != null) {
+                                    CarpentryItem(Carpentry, navController)
+                                }
                             }
-                            is GetResumesViewModel.ResumeState.Success -> {
-                                val resume = (ResumeState as GetResumesViewModel.ResumeState.Success ).data
-                                val carpentrys = resume.filter { it.specialties.contains("Carpentry") }
-                                // LazyColumn with CompletedItem layout
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .size(500.dp)
-                                        .background(Color(0xFFF9F9F9)),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    items(carpentrys.size) { index ->
-                                        val resumes = carpentrys[index]
-                                        CarpentryItem(resumes, navController)
+                            item {
+                                if (carpentryList.loadState.append == LoadState.Loading) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        CircularProgressIndicator()
                                     }
                                 }
                             }
-                            is GetResumesViewModel.ResumeState.Error -> {
-                                // Show an error message if needed
-                                Text(
-                                    text = "Error loading resumes. Please try again later.",
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                            }
-                            else -> Unit
                         }
 
                     }
@@ -197,7 +189,7 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
 }
 
 @Composable
-fun CarpentryItem(resume: resumesItem, navController: NavController) {
+fun CarpentryItem(carpentry: resumesItem, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -215,8 +207,8 @@ fun CarpentryItem(resume: resumesItem, navController: NavController) {
         ) {
             // Profile Picture
             AsyncImage(
-                model = resume.profilepic,
-                contentDescription = resume.tradesmanfullname,
+                model = carpentry.profilepic,
+                contentDescription = carpentry.tradesmanfullname,
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -229,7 +221,7 @@ fun CarpentryItem(resume: resumesItem, navController: NavController) {
                     .align(Alignment.CenterVertically)
             ) {
                 Text(
-                    text = resume.tradesmanfullname,
+                    text = carpentry.tradesmanfullname,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -245,7 +237,7 @@ fun CarpentryItem(resume: resumesItem, navController: NavController) {
                             )
                     ) {
                         Text(
-                            text = "P${resume.workfee}/hr",
+                            text = "P${carpentry.workfee}/hr",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +41,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.GetJobs
@@ -51,35 +54,13 @@ import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 
 @Composable
 fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) {
-    val resumeState by getResumes.resumeState.collectAsState()
-    val listState = rememberLazyListState()
+    val resumeList = getResumes.resumePagingData.collectAsLazyPagingItems()
+    Log.d("AllTradesmanItem", "$resumeList")
 
-    LaunchedEffect(resumeState) {
-      if (resumeState is GetResumesViewModel.ResumeState.Idle){
-          getResumes.getResumes()
-      }
+    // Example: Call this after adding a new resume
+    LaunchedEffect(Unit) {
+        getResumes.invalidatePagingSource()
     }
-
-        val resume = when (val state = resumeState) {
-            is GetResumesViewModel.ResumeState.Success -> state.data
-            else -> emptyList<resumesItem>()
-        }
-
-
-        // Check if we need to load more data when nearing the end of the list
-        val shouldLoadMore = remember {
-            derivedStateOf {
-                val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                lastVisibleItemIndex >= resume.size - 5 // Load next page when 5 items are left
-            }
-        }
-
-        // Load more jobs when needed
-        LaunchedEffect(shouldLoadMore.value) {
-            if (shouldLoadMore.value && resumeState !is GetResumesViewModel.ResumeState.Loading) {
-                getResumes.getResumes()
-            }
-        }
 
 
 
@@ -141,36 +122,33 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) 
                 }
             }
 
-            // Remove the verticalScroll modifier and ensure LazyColumn takes up the remaining space
-            when (resumeState) {
-                is GetResumesViewModel.ResumeState.Loading -> {
-                    Text(text = "Loading...")
-                }
-                is GetResumesViewModel.ResumeState.Success -> {
-                    val activeresume = resume.filter { it.is_active  == 1}
                     LazyColumn(
-                        state = listState,
+
                         modifier = Modifier
                             .fillMaxSize() // Ensure LazyColumn takes up the remaining space
                             .background(Color(0xFFECECEC)),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(activeresume.size) { index ->
-                            val resumes = activeresume[index]
-                            AllTradesmanItem(resumes, navController, cardHeight, textSize)
+                        items(resumeList.itemCount) { index ->
+                            val resume = resumeList[index]
+                            if (resume != null) {
+                                AllTradesmanItem(resume, navController, cardHeight, textSize)
+                            }
+                        }
+                        item {
+                            if (resumeList.loadState.append == LoadState.Loading) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
                         }
                     }
-                }
-                is GetResumesViewModel.ResumeState.Error -> {
-                    val errorMessage = (resumeState as GetResumesViewModel.ResumeState.Error).message
-                    Log.d("testeralltradesman", "Error: $errorMessage")
-                    Text(
-                        text = "Error: $errorMessage",
-                        color = Color.Red
-                    )
-                }
-                else -> Unit
-            }
+
         }
     }
 }
