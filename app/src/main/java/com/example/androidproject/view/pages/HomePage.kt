@@ -167,6 +167,7 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
                     contentDescription = "Notifications Icon",
                     tint = Color(0xFF3CC0B0),
                     modifier = Modifier.size(32.dp)
+                        .clickable { navController.navigate("notification") }
                 )
                 Icon(
                     imageVector = Icons.Default.Message,
