@@ -136,8 +136,9 @@ class MainActivity : ComponentActivity() {
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
                         BookNow(viewResumeViewModel, navController,resumeId)
                     }
-                    composable("confirmbook") {
-                        ConfirmBook(trade,navController)
+                    composable("confirmbook/{resumeId}") {backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        ConfirmBook(viewResumeViewModel,navController,resumeId)
                     }
                     composable("bookingdetails") {
                         BookingDetails(trade,navController)

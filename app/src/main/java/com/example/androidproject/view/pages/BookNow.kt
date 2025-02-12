@@ -344,7 +344,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 
                         Box(
                             modifier = Modifier
-                                .clickable {navController.navigate("confirmbook") }
+                                .clickable {navController.navigate("confirmbook/${resume.id}") }
                                 .background(
                                     color = Color(0xFFECAB1E),
                                     shape = RoundedCornerShape(12.dp)

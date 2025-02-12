@@ -8,6 +8,8 @@ import com.example.androidproject.model.LoginRequest
 import com.example.androidproject.model.LoginResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
+import com.example.androidproject.model.client.BookTradesmanRequest
+import com.example.androidproject.model.client.BookTradesmanResponse
 
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.model.client.ResumesResponse
@@ -53,5 +55,8 @@ interface ApiService {
 
     @GET("/user/chat/get")
     suspend fun getChat(): Response <GetChats>
+
+    @POST("/user/client/booktradesman/{tradesman_Id}")
+    suspend fun booktradesman(@Header("Authorization") token: String, @Body request: BookTradesmanRequest, @Path("tradesman_Id") tradesman_Id: Int): Response<BookTradesmanResponse>
 
 }

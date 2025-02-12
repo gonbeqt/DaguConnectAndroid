@@ -36,6 +36,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,9 +53,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import org.json.JSONArray
 import java.util.Calendar
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -62,73 +67,92 @@ import java.time.temporal.TemporalAdjusters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmBook(trade: Tradesman, navController: NavController){
+fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavController,resumeId: String){
     var taskDescription by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
-    val values = listOf("Value 1", "Value 2", "Value 3") // Sample values
     var selectedValue by remember { mutableStateOf<String?>(null) }
+    val ResumeId = resumeId.toIntOrNull() ?: return
+    val resumeState by viewResumeViewModel.viewResumeState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewResumeViewModel.viewResume(ResumeId)
+    }
 
 
     val tradesmen = listOf(
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark)
     )
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Main Content Area (Scrollable)
-
-        // Header Card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(myGradient3)
-                .verticalScroll(rememberScrollState()),
-            shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
-        ) {
-
-            Column(
-                modifier = Modifier
-                    .background(myGradient3)
-                    .fillMaxWidth()
-                    .size(100.dp)
-                    .padding(top = 20.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBackIosNew,
-                        contentDescription = "Arrow Back",
-                        Modifier.clickable { navController.popBackStack() }
-                            .padding(16.dp),
-                        tint = Color.White
-                    )
-
-
-                    Text(
-                        text = "Bookings",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(top = 15.dp, end = 50.dp)
-                            .weight(1f) // Ensures the text takes available space and is centered
-                    )
-                }
-
-            }
+    when(resumeState){
+        is ViewResumeViewModel.ViewResumeState.Loading -> {
+            Text(text = "Loading...")
         }
+        is ViewResumeViewModel.ViewResumeState.Success -> {
+            val resume = (resumeState as ViewResumeViewModel.ViewResumeState.Success).data
+            val specialtiesJsonString = resume.specialties // Assuming this is the JSON string
+            val values = try {
+                JSONArray(specialtiesJsonString).let { jsonArray ->
+                    List(jsonArray.length()) { index -> jsonArray.getString(index) }
+                }
+            } catch (e: Exception) {
+                emptyList() // Fallback in case of parsing errors
+            }
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Main Content Area (Scrollable)
+
+                // Header Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(myGradient3)
+                        .verticalScroll(rememberScrollState()),
+                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .background(myGradient3)
+                            .fillMaxWidth()
+                            .size(100.dp)
+                            .padding(top = 20.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBackIosNew,
+                                contentDescription = "Arrow Back",
+                                Modifier.clickable { navController.popBackStack() }
+                                    .padding(16.dp),
+                                tint = Color.White
+                            )
+
+
+                            Text(
+                                text = "Bookings",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(top = 15.dp, end = 50.dp)
+                                    .weight(1f) // Ensures the text takes available space and is centered
+                            )
+                        }
+
+                    }
+                }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 100.dp)
                         .verticalScroll(rememberScrollState())
-                        ,
+                    ,
 
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
                 ) {
@@ -145,8 +169,8 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Tradesman image
-                            Image(
-                                painter = painterResource(trade.imageResId),
+                            AsyncImage(
+                                model = resume.profilepic,
                                 contentDescription = "Tradesman Image",
                                 modifier = Modifier
                                     .size(100.dp)
@@ -159,14 +183,17 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                     .padding(start = 10.dp)
                             ) {
                                 Text(
-                                    text = trade.username,
+                                    text = resume.tradesmanfullname,
                                     color = Color.Black,
                                     fontWeight = FontWeight(500),
                                     fontSize = 20.sp,
                                     modifier = Modifier.padding(top = 10.dp)
                                 )
                                 Text(
-                                    text = trade.category,
+                                    text = resume.preferedworklocation
+                                        .replace("[","")
+                                        .replace("]","")
+                                        .replace("\"",""),
                                     color = Color.Black,
                                     fontSize = 16.sp,
                                 )
@@ -190,7 +217,7 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = trade.reviews.toString(),
+                                        text = "4",
                                         fontSize = 14.sp
                                     )
                                 }
@@ -240,7 +267,7 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
 
                                     ),
 
-                                )
+                                    )
                             }
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -395,10 +422,16 @@ fun ConfirmBook(trade: Tradesman, navController: NavController){
                         }
 
 
+                    }
                 }
-          }
 
-     }
+            }
+        }
+        is ViewResumeViewModel.ViewResumeState.Error -> {
+            Text(text = "Error: ${(resumeState as ViewResumeViewModel.ViewResumeState.Error).message}")
+        }
+        else -> Unit
+    }
 }
 
 @Composable
