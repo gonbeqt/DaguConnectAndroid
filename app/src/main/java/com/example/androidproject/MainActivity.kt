@@ -61,10 +61,12 @@ import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
+import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 
 class MainActivity : ComponentActivity() {
@@ -108,6 +110,10 @@ class MainActivity : ComponentActivity() {
         val getChatsViewModelFactory = GetChatViewModelFactory(apiService, this)
         val getChatsViewModel = ViewModelProvider(this, getChatsViewModelFactory)[GetChatViewModel::class.java]
 
+        val postJobViewModelFactory = PostJobViewModelFactory(apiService, this)
+        val postJobViewModel = ViewModelProvider(this, postJobViewModelFactory)[PostJobViewModel::class.java]
+
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -126,7 +132,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel, postJobViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)

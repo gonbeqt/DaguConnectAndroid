@@ -41,10 +41,11 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier) {
+fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel, postJobViewModel: PostJobViewModel, modifier: Modifier = Modifier) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
@@ -95,7 +96,8 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
             getJobsViewModel,
             logoutViewModel,
             getClientsBooking,
-            getResumesViewModel)
+            getResumesViewModel,
+            postJobViewModel)
     }
 }
 
@@ -107,7 +109,8 @@ fun ContentScreen(
     getJobsViewModel: GetJobsViewModel,
     logoutViewModel: LogoutViewModel,
     getClientsBooking: GetClientBookingViewModel,
-    getResumesViewModel: GetResumesViewModel
+    getResumesViewModel: GetResumesViewModel,
+    postJobViewModel: PostJobViewModel
 ) {
 
     val role = AccountManager.getAccount()?.isClient
@@ -118,7 +121,7 @@ fun ContentScreen(
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
             3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp),navController)
             4 -> ProfileScreen(
-                modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel
+                modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobViewModel
             )
         }
     } else {

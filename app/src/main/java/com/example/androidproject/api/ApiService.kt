@@ -1,5 +1,7 @@
 package com.example.androidproject.api
 
+import com.example.androidproject.model.CreateJob
+import com.example.androidproject.model.CreateJobResponse
 import com.example.androidproject.model.GetChats
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.Job
@@ -41,7 +43,6 @@ interface ApiService {
     @DELETE("/user/logout")
     suspend fun logout(@Header("Authorization") token: String): Response<Unit>
 
-
     @GET("/user/getresumes")
     suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
 
@@ -54,4 +55,6 @@ interface ApiService {
     @GET("/user/chat/get")
     suspend fun getChat(): Response <GetChats>
 
+    @POST("/user/client/create-job")
+    suspend fun postJobs(@Body request: CreateJob): Response<CreateJobResponse>
 }

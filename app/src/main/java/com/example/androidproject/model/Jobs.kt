@@ -73,3 +73,20 @@ data class ViewJob(
     @SerializedName("created_at")
     val createdAt: String
 )
+
+data class CreateJob(
+    @SerializedName("client_fullname")
+    val clienFullname: String,
+    val salary: Double,
+    @SerializedName("job_type")
+    val jobType: String,
+    @SerializedName("job_description")
+    val jobDescription: String,
+    val location: String,
+    val status: String,
+    val deadline: String,
+)
+
+data class CreateJobResponse(
+    val message: String
+)

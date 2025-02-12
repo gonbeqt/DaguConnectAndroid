@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -62,6 +63,7 @@ import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ServicePosting
+import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -69,7 +71,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logoutViewModel:LogoutViewModel) {
+fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logoutViewModel:LogoutViewModel, postJobViewModel:PostJobViewModel) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
     var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
@@ -218,7 +220,8 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
                     },
                     onDeadlineChange = { deadline ->
                         println("Selected Deadline: $deadline") // Handle deadline change if needed
-                    }
+                    },
+                    postJobViewModel
                 )
             }
         }
@@ -318,7 +321,9 @@ fun PostsCard(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit Icon",
                                 tint = Color.Black,
-                                modifier = Modifier.padding(end = 8.dp).size(15.dp)
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .size(15.dp)
                             )
                         }
                     }
@@ -608,8 +613,10 @@ fun GeneralSettings(
     ) {
         Box(modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF9F9F9),
-                shape = RoundedCornerShape(8.dp))) {
+            .background(
+                Color(0xFFF9F9F9),
+                shape = RoundedCornerShape(8.dp)
+            )) {
 
             Column(modifier = Modifier.padding(10.dp)) {
 
@@ -714,7 +721,8 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 @Composable
     fun FabPosting(
         onPostNewService: (ServicePosting) -> Unit,
-        onDeadlineChange:(String) ->Unit
+        onDeadlineChange:(String) ->Unit,
+        postJobViewModel: PostJobViewModel
     ) {
         var isDialogVisible by remember { mutableStateOf(false) }
         var title by remember { mutableStateOf("") } // Use simple variables for input
@@ -722,12 +730,41 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
         var location by remember { mutableStateOf("") }
         var rate by remember { mutableStateOf("") }
         var selectedCategories = remember { mutableStateListOf<String>() }
+        var selectedCategoriesString by remember { mutableStateOf("") }
             val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-     val context = LocalContext.current
-     val today = LocalDate.now() // Get today's date
+    val context = LocalContext.current
+    val today = LocalDate.now() // Get today's date
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var deadline by remember { mutableStateOf("") }
 
+    val rateInt = rate.toDoubleOrNull() ?: 0.0
+    val jobState by postJobViewModel.postJobState.collectAsState()
+    val fullName = (AccountManager.getAccount()?.firstName ?: "" ) + " " + (AccountManager.getAccount()?.lastName
+        ?: " ")
+    when(jobState) {
+        is PostJobViewModel.PostJobState.Success -> {
+            Toast.makeText(context, (jobState as PostJobViewModel.PostJobState.Success).data.message, Toast.LENGTH_SHORT).show()
+        }
+        is PostJobViewModel.PostJobState.Error -> {
+            Toast.makeText(
+                context,
+                (jobState as PostJobViewModel.PostJobState.Error).message,
+                Toast.LENGTH_SHORT
+            ).show()
+            postJobViewModel.resetState()
+        }
+        PostJobViewModel.PostJobState.Idle -> {
+            //Nothing
+        }
+        PostJobViewModel.PostJobState.Loading -> {
+            CircularProgressIndicator()
+        }
+        else -> {}
+    }
+
+    LaunchedEffect(selectedCategories) {
+        selectedCategoriesString = selectedCategories.joinToString(", ")
+    }
 
     val datePickerDialog = DatePickerDialog(
         context,
@@ -832,8 +869,6 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 cursorColor = Color.Black
                             )
                         )
-
-
                         // Rate TextField
                         TextField(
                             value = rate,
@@ -862,7 +897,10 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             border = BorderStroke(1.dp, Color.Gray),
 
                             ) {
-                            Row (Modifier.fillMaxWidth().offset(x = (-10).dp),
+                            Row (
+                                Modifier
+                                    .fillMaxWidth()
+                                    .offset(x = (-10).dp),
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically){
                                 Icon(imageVector = Icons.Default.CalendarToday,
@@ -890,16 +928,16 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 val categories = listOf(
-                                    "Carpentry",
-                                    "Painting",
-                                    "Welding",
-                                    "Electrician",
-                                    "Plumbing",
-                                    "Masonry",
-                                    "Roofing",
-                                    "AC Repair",
-                                    "Mechanics",
-                                    "Cleaning"
+                                    "carpenter",
+                                    "painter",
+                                    "welder ",
+                                    "electrician",
+                                    "plumber",
+                                    "mason",
+                                    "roofer",
+                                    "ac_technician",
+                                    "mechanic",
+                                    "cleaner"
                                 )
 
                                 categories.forEach { category ->
@@ -909,9 +947,10 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                             .clickable {
                                                 if (isSelected) {
                                                     selectedCategories.remove(category) // Remove if already selected
-                                                } else if (selectedCategories.size < 3) {
+                                                } else if (selectedCategories.size <= 1) {
                                                     selectedCategories.add(category) // Add only if less than 3
                                                 }
+                                                selectedCategoriesString = selectedCategories.joinToString(", ")
                                             }
                                             .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
                                             .clip(RoundedCornerShape(30.dp))
@@ -936,19 +975,15 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(onClick = {
-                                val newPost = ServicePosting(
-                                    title = title,
-                                    description = description,
-                                    location = location,
-                                    rate = rate.toString(),
-                                    deadline = deadline,
-                                    postedDate = currentDate.toString(),
-                                    isActive = true,
-                                    category = if (selectedCategories.isNotEmpty()) selectedCategories.joinToString(", ") else "Uncategorized",
-                                    applicantsCount = 0
+                                postJobViewModel.postJob(
+                                    fullName,
+                                    rateInt,
+                                    selectedCategoriesString,
+                                    description,
+                                    location,
+                                    "Available",
+                                    deadline
                                 )
-                                isDialogVisible = false
-                                onPostNewService(newPost) // Send the new post to the parent Composable
                             }) {
                                 Text("Post")
                             }

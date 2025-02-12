@@ -185,6 +185,10 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
 
+    // Example: Call this after adding a new resume
+    LaunchedEffect(Unit) {
+        getJobsViewModel.invalidatePagingSource()
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
                 LazyColumn(
