@@ -11,8 +11,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -107,14 +110,16 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
                     contentDescription = "Notifications Icon",
                     tint = Color(0xFF3CC0B0),
                     modifier = Modifier.size(32.dp)
+                        .clickable { navController.navigate("notification") }
+
                 )
                 Icon(
-                    imageVector = Icons.Default.Message,
-                    contentDescription = "Message Icon",
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Account Settings Icon",
                     tint = Color(0xFF3CC0B0),
                     modifier = Modifier
                         .size(32.dp)
-                        .clickable { navController.navigate("message_screen") }
+                        .clickable { navController.navigate("accountsettings") }
                 )
             }
         }
@@ -171,12 +176,6 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
                             style = TextStyle(fontSize = 14.sp)
                         )
                     }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit Profile",
-                        tint = Color.LightGray
-                    )
                 }
             }
 
@@ -663,7 +662,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             logoutViewModel.resetLogoutResult()
         }
     }
-    Column {
+    Column (modifier = Modifier.verticalScroll(rememberScrollState())){
 
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_notification),
@@ -675,7 +674,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
             title = "Privacy",
             description = "Change your password.",
-            onClick = { navController.navigate("emailverification") }
+            onClick = { navController.navigate("changepassword") }
         )
         Text(
             text = "Help and Support", fontWeight = FontWeight(500),

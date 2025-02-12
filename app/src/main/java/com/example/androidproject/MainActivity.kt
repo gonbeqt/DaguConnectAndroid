@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key.Companion.Notification
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -35,12 +36,14 @@ import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.SignUpScreen
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.pages.AccountSettings
 import com.example.androidproject.view.pages.BookNow
 import com.example.androidproject.view.pages.BookingDetails
 import com.example.androidproject.view.pages.BookingsScreen
 import com.example.androidproject.view.pages.CancellationDetails
 import com.example.androidproject.view.pages.ConfirmBook
 import com.example.androidproject.view.pages.MessageScreen
+import com.example.androidproject.view.pages.NotificationScreen
 import com.example.androidproject.view.pages.RateAndReviews
 import com.example.androidproject.view.pages2.BookingsTradesman
 import com.example.androidproject.view.pages2.BookmarkedTradesman
@@ -117,7 +120,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination  ) {
+                NavHost(navController = navController, startDestination = "main_screen") {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -201,6 +204,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("reportproblem"){
                         ReportProblem(navController)
+                    }
+                    composable("notification"){
+                        NotificationScreen(navController)
+                    }
+                    composable("accountsettings"){
+                        AccountSettings(navController)
                     }
 
 

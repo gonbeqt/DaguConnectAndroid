@@ -152,7 +152,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
     ) {
         // Left-aligned text
         Text(
-            text = "Schedule",
+            text = "Home",
             fontSize = 28.sp,
             fontWeight = FontWeight.Medium
         )

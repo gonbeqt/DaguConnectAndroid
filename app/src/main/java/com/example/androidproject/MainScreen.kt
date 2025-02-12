@@ -55,7 +55,7 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
 
     )
     var selectedItem by remember {
-        mutableStateOf(4)
+        mutableStateOf(0)
     }
     val activity = LocalContext.current as ComponentActivity
     val getJobsViewModel = remember { ViewModelSetups.setupGetJobsViewModel(activity) }

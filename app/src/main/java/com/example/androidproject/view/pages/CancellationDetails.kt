@@ -50,8 +50,7 @@ fun HeaderSection(navController: NavController) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
-                .verticalScroll(rememberScrollState()),
+                .background(Color.White),
             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
         ) {
             Column(

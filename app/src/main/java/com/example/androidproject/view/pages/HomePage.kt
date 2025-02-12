@@ -167,6 +167,7 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
                     contentDescription = "Notifications Icon",
                     tint = Color(0xFF3CC0B0),
                     modifier = Modifier.size(32.dp)
+                        .clickable { navController.navigate("notification") }
                 )
                 Icon(
                     imageVector = Icons.Default.Message,
@@ -237,18 +238,23 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 }
 
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavController) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
-    val topResumes = resumeList.itemSnapshotList.items.sortedBy { it.id }.take(5)
 
-    // Example: Call this after adding a new resume
+    var displayedResumes by remember { mutableStateOf(resumeList.itemSnapshotList.items.sortedBy { it.id }.take(5)) }
+
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
     }
 
-
-
+    LaunchedEffect(dismissedResumes) {
+        displayedResumes = resumeList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+            .take(5) // Keep a maximum of 5
+    }
 
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 120.dp
@@ -261,6 +267,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavC
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
     }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -273,8 +280,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavC
             fontWeight = FontWeight(500),
             modifier = Modifier.padding(top = 10.dp)
         )
-        TextButton(onClick = { navController.navigate("alltradesman")
-            }) {
+        TextButton(onClick = { navController.navigate("alltradesman") }) {
             Text(
                 text = "See All",
                 color = Color.Gray,
@@ -291,21 +297,25 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel,navController: NavC
             .background(Color.White),
         shape = RoundedCornerShape(8.dp),
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .background(Color(0xFFECECEC)),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            topResumes.forEach { resumes ->
-                TradesmanItem(resumes, navController = navController, cardHeight, textSize)
+            displayedResumes.forEach { resume ->
+                TradesmanItem(
+                    resumes = resume,
+                    navController = navController,
+                    cardHeight = cardHeight,
+                    textSize = textSize,
+                    onUninterested = {
+                        getResumesViewModel.dismissResume(resume.id) // Store dismissed resume
+                    }
+                )
             }
         }
-
     }
-
-
 }
 
 
@@ -446,7 +456,7 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit) {
+fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit,onUninterested: () -> Unit) {
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 30.dp
@@ -573,6 +583,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             text = { Text("Uninterested") },
                             onClick = {
                                 showMenu = false
+                                onUninterested()
                             }
                         )
                     }
