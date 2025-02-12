@@ -927,16 +927,16 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 val categories = listOf(
-                                    "carpenter",
-                                    "painter",
-                                    "welder ",
-                                    "electrician",
-                                    "plumber",
-                                    "mason",
-                                    "roofer",
-                                    "ac_technician",
-                                    "mechanic",
-                                    "cleaner"
+                                    "Carpenter",
+                                    "Painter",
+                                    "Welder ",
+                                    "Electrician",
+                                    "Plumber",
+                                    "Mason",
+                                    "Roofer",
+                                    "Ac_technician",
+                                    "Mechanic",
+                                    "Cleaner"
                                 )
 
                                 categories.forEach { category ->
