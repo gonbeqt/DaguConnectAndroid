@@ -67,13 +67,14 @@ import java.time.temporal.TemporalAdjusters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavController,resumeId: String){
+fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavController,resumeId: String,tradesmanId: String){
     var taskDescription by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
     var selectedValue by remember { mutableStateOf<String?>(null) }
     val ResumeId = resumeId.toIntOrNull() ?: return
+    val TradesmanId = tradesmanId.toIntOrNull()?: return
     val resumeState by viewResumeViewModel.viewResumeState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -99,6 +100,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
             } catch (e: Exception) {
                 emptyList() // Fallback in case of parsing errors
             }
+
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
