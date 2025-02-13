@@ -1,6 +1,8 @@
 package com.example.androidproject.view.pages
 
 import android.app.DatePickerDialog
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -58,6 +60,7 @@ import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import org.json.JSONArray
 import java.util.Calendar
 import java.time.DayOfWeek
@@ -67,19 +70,23 @@ import java.time.temporal.TemporalAdjusters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavController,resumeId: String,tradesmanId: String){
+fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavController,resumeId: String,tradesmanId: String, bookingTradesmanViewModel: BooktradesmanViewModel){
     var taskDescription by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
-    var selectedValue by remember { mutableStateOf<String?>(null) }
+    var selectedTaskType by remember { mutableStateOf<String?>(null) }
     val ResumeId = resumeId.toIntOrNull() ?: return
     val TradesmanId = tradesmanId.toIntOrNull()?: return
+    val context = LocalContext.current
     val resumeState by viewResumeViewModel.viewResumeState.collectAsState()
+    val bookingState by bookingTradesmanViewModel.bookTradesmanState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
+
+
 
 
     val tradesmen = listOf(
@@ -335,17 +342,17 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                                 .width(100.dp)
                                                 .height(40.dp)
                                                 .background(
-                                                    if (selectedValue == value) Color(0xFF122826) else Color.LightGray, // Change color if selected
+                                                    if (selectedTaskType == value) Color(0xFF122826) else Color.LightGray, // Change color if selected
                                                     RoundedCornerShape(50.dp)
                                                 )
-                                                .clickable { selectedValue = value }, // Update selected value
+                                                .clickable { selectedTaskType = value }, // Update selected value
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
                                                 text = value,
                                                 fontSize = 14.sp,
                                                 fontWeight = FontWeight.Medium,
-                                                color = if (selectedValue == value) Color.White else Color.Black // Change text color when selected
+                                                color = if (selectedTaskType == value) Color.White else Color.Black // Change text color when selected
                                             )
                                         }
                                     }
@@ -362,9 +369,10 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .fillMaxWidth()
                                     .padding(10.dp)
                             )
-                            DatePickerWithRestrictions { date ->
-                                selectedDate = date
+                            DatePickerWithRestrictions(selectedDate) { date ->
+                                selectedDate = date // ✅ Update selectedDate in ConfirmBook
                             }
+                            Log.d("DatePickerWithRestrictions", "Selected Date: $selectedDate")
                             Spacer(Modifier.height(4.dp))
 
                             Text(
@@ -411,7 +419,12 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .padding(vertical = 10.dp)
                             ) {
                                 Button(
-                                    onClick = {},
+                                    onClick = {
+                                        selectedTaskType?.let {
+                                            bookingTradesmanViewModel.BookTradesman(phoneNumber,address,
+                                                it,taskDescription,selectedDate,TradesmanId)
+                                        }
+                                    },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonColors(
                                         Color(0xFFECAB1E), Color.White,
@@ -419,6 +432,19 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     )
                                 ) {
                                     Text(text = "Confirm")
+                                }
+                                when(bookingState){
+                                    is BooktradesmanViewModel.BookTradesmanState.Loading ->{
+                                        Text(text = "Loading...")
+                                    }
+                                    is BooktradesmanViewModel.BookTradesmanState.Success ->{
+                                        Toast.makeText(context,"Booking Successful", Toast.LENGTH_SHORT).show()
+                                    }
+                                    is BooktradesmanViewModel.BookTradesmanState.Error ->{
+                                        Text(text = "Error: ${(bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message}")
+                                        Toast.makeText(context,"Error: ${(bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                    else -> Unit
                                 }
                             }
                         }
@@ -435,9 +461,8 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
         else -> Unit
     }
 }
-
 @Composable
-fun DatePickerWithRestrictions(onDateSelected: (String) -> Unit) {
+fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -445,15 +470,11 @@ fun DatePickerWithRestrictions(onDateSelected: (String) -> Unit) {
     calendar.add(Calendar.DAY_OF_YEAR, 1)
     val minDate = calendar.timeInMillis
 
-    // Restore calendar to today (for UI display)
-    calendar.add(Calendar.DAY_OF_YEAR, -1)
-
-    var selectedDate by remember { mutableStateOf("Select a Date") }
-
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
-            selectedDate = "$year/${month + 1}/$dayOfMonth"
+            val formattedDate = "$year-${month + 1}-$dayOfMonth"
+            onDateSelected(formattedDate) // ✅ Send selected date to ConfirmBook
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
@@ -462,32 +483,39 @@ fun DatePickerWithRestrictions(onDateSelected: (String) -> Unit) {
         datePicker.minDate = minDate // Restrict past dates
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 5.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(horizontal = 5.dp)
+    ) {
         Button(
             onClick = { datePickerDialog.show() },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
-                ,
+                .height(50.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White
             ),
             border = BorderStroke(1.dp, Color.White)
         ) {
-            Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically){
-                Icon(imageVector = Icons.Default.CalendarToday,
-                    contentDescription = "Calendar Icon"
-                , tint = Color.Gray)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = "Calendar Icon",
+                    tint = Color.Gray
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = selectedDate,
+                    text = selectedDate, // ✅ Show updated selected date
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
-             }
-
+            }
         }
     }
 }
+

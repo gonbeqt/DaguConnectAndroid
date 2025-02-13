@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
         val getChatsViewModel = ViewModelProvider(this, getChatsViewModelFactory)[GetChatViewModel::class.java]
 
         val bookTradesmanVMFactory = BookTradesmanViewModelFactory(apiService, this)
-        val bookingViewModel = ViewModelProvider(this, bookTradesmanVMFactory)[BooktradesmanViewModel::class.java]
+        val bookingTradesmanViewModel = ViewModelProvider(this, bookTradesmanVMFactory)[BooktradesmanViewModel::class.java]
 
         setContent {
             AndroidProjectTheme {
@@ -144,7 +144,7 @@ class MainActivity : ComponentActivity() {
                     composable("confirmbook/{resumeId}/{tradesmanId}") {backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
                         val tradesmanId = backStackEntry.arguments?.getString("tradesmanId")?:""
-                        ConfirmBook(viewResumeViewModel,navController,resumeId,tradesmanId)
+                        ConfirmBook(viewResumeViewModel,navController,resumeId,tradesmanId,bookingTradesmanViewModel)
                     }
                     composable("bookingdetails") {
                         BookingDetails(trade,navController)
