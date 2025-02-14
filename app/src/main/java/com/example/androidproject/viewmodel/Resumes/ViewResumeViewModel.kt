@@ -21,7 +21,7 @@ class ViewResumeViewModel (private val apiService: ApiService, private val conte
             try{
                 val token = TokenManager.getToken()
 
-                val response = apiService.getResumeById("Bearer $token",id)
+                val response = apiService.getResumeById(id)
                 val body = response.body()
                 if (response.isSuccessful && body != null){
                     _viewResumeState.value = ViewResumeState.Success(body)

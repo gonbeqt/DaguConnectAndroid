@@ -13,6 +13,7 @@ import com.example.androidproject.model.client.BookTradesmanResponse
 
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.model.client.ResumesResponse
+import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.resumesItem
 
 
@@ -48,10 +49,13 @@ interface ApiService {
     suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
 
     @GET("/user/getresume/{resumeId}")
-    suspend fun getResumeById(@Header("Authorization") token: String, @Path("resumeId") resumeId: Int): Response<viewResume>
+    suspend fun getResumeById(@Path("resumeId") resumeId: Int): Response<viewResume>
 
     @GET("/user/client/getbooking")
     suspend fun getClientBooking(@Header("Authorization") token: String): Response<List<GetClientsBooking>>
+
+    @GET("/user/client/viewbooking/{resumeId}")
+    suspend fun getCleintBookingById(@Path("resumeId") resumeId: Int): Response<ViewClientBooking>
 
     @GET("/user/chat/get")
     suspend fun getChat(): Response <GetChats>

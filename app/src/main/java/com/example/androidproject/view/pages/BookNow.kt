@@ -66,14 +66,6 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
         viewResumeViewModel.viewResume(ResumeId)
     }
 
-    var booknow by remember { mutableStateOf(false) }
-
-    // Tradesmen list (you can optimize this if needed)
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark)
-    )
-
     when(val state =viewResumeState){
         is ViewResumeViewModel.ViewResumeState.Loading -> {
             Text(text = "Loading...")
