@@ -35,11 +35,13 @@ import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.SignUpScreen
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.pages.AcceptNow
 import com.example.androidproject.view.pages.AccountSettings
 import com.example.androidproject.view.pages.BookNow
 import com.example.androidproject.view.pages.BookingDetails
 import com.example.androidproject.view.pages.BookingsScreen
-import com.example.androidproject.view.pages.CancellationDetails
+import com.example.androidproject.view.pages.CancelNow
+import com.example.androidproject.view.pages.CancelledDetails
 import com.example.androidproject.view.pages.ConfirmBook
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.pages.NotificationScreen
@@ -122,7 +124,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination ) {
+                NavHost(navController = navController, startDestination = "main_screen" ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -156,6 +158,15 @@ class MainActivity : ComponentActivity() {
                     composable("bookingdetails") {
                         BookingDetails(trade,navController)
                     }
+                    composable("cancelleddetails") {
+                        CancelledDetails(trade,navController)
+                    }
+                    composable("cancelnow"){
+                        CancelNow(trade,navController)
+                    }
+                    composable("acceptnow"){
+                        AcceptNow(trade,navController)
+                    }
                     composable("booking") {
                         BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel)
                     }
@@ -163,9 +174,7 @@ class MainActivity : ComponentActivity() {
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
                         RateAndReviews(viewClientBookingViewModel,navController,resumeId)
                     }
-                    composable("cancellationdetails") {
-                        CancellationDetails(trade,navController)
-                    }
+
                     composable("acrepair"){
                         ACRepair(navController,getResumesViewModel)
                     }

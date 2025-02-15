@@ -925,7 +925,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { /* Chat Action */ }
+                            .clickable { navController.navigate("cancelnow") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -943,7 +943,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
 
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("bookingdetails") }
+                            .clickable { navController.navigate("acceptnow") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)

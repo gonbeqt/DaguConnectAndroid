@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -110,7 +111,9 @@ fun ExpandableCard(question: String, answer: String) {
         modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(8.dp),) {
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(Color(0xFFEDEDED))
+    ) {
             Column(
                 modifier = Modifier
                     .clickable { expanded = !expanded }

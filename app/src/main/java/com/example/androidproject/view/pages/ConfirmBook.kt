@@ -427,8 +427,8 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonColors(
-                                        Color(0xFFECAB1E), Color.White,
-                                        Color(0xFFECAB1E), Color.White
+                                        Color(0xFF42C2AE), Color.White,
+                                        Color(0xFF42C2AE), Color.White
                                     )
                                 ) {
                                     Text(text = "Confirm")
