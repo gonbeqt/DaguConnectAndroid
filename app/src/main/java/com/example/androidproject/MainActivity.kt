@@ -55,12 +55,16 @@ import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
+import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
+import com.example.androidproject.viewmodel.factories.bookings.ViewClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
@@ -85,6 +89,8 @@ class MainActivity : ComponentActivity() {
         val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService,this)
         val getClientBookingViewModel = ViewModelProvider(this,getClientsBookingVMFactory)[GetClientBookingViewModel::class.java]
 
+        val viewClientBookingVMFactory = ViewClientBookingViewModelFactory(apiService,this)
+        val viewClientBookingViewModel = ViewModelProvider(this, viewClientBookingVMFactory)[ViewClientBookingViewModel::class.java]
 
         val getResumesVMFactory = GetResumesViewModelFactory(apiService,this)
         val getResumesViewModel = ViewModelProvider(this, getResumesVMFactory)[GetResumesViewModel::class.java]
@@ -109,6 +115,9 @@ class MainActivity : ComponentActivity() {
 
         val getChatsViewModelFactory = GetChatViewModelFactory(apiService, this)
         val getChatsViewModel = ViewModelProvider(this, getChatsViewModelFactory)[GetChatViewModel::class.java]
+
+        val bookTradesmanVMFactory = BookTradesmanViewModelFactory(apiService, this)
+        val bookingTradesmanViewModel = ViewModelProvider(this, bookTradesmanVMFactory)[BooktradesmanViewModel::class.java]
 
         setContent {
             AndroidProjectTheme {
@@ -136,10 +145,13 @@ class MainActivity : ComponentActivity() {
 
                     composable("booknow/{resumeId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        Log.d("rateid",resumeId)
                         BookNow(viewResumeViewModel, navController,resumeId)
                     }
-                    composable("confirmbook") {
-                        ConfirmBook(trade,navController)
+                    composable("confirmbook/{resumeId}/{tradesmanId}") {backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        val tradesmanId = backStackEntry.arguments?.getString("tradesmanId")?:""
+                        ConfirmBook(viewResumeViewModel,navController,resumeId,tradesmanId,bookingTradesmanViewModel)
                     }
                     composable("bookingdetails") {
                         BookingDetails(trade,navController)
@@ -147,8 +159,9 @@ class MainActivity : ComponentActivity() {
                     composable("booking") {
                         BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel)
                     }
-                    composable("rateandreviews") {
-                        RateAndReviews(trade,navController)
+                    composable("rateandreviews/{resumeId}") { backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        RateAndReviews(viewClientBookingViewModel,navController,resumeId)
                     }
                     composable("cancellationdetails") {
                         CancellationDetails(trade,navController)
