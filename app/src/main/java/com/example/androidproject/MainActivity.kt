@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key.Companion.Notification
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -114,7 +113,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "signup") {
+                NavHost(navController = navController, startDestination = startDestination ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }

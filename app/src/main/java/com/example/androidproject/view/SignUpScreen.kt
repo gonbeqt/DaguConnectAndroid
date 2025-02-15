@@ -118,9 +118,9 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         WindowType.LARGE -> 0.55f
     }
     val cardHeight = when (windowSize.height) {
-        WindowType.SMALL -> 650.dp
-        WindowType.MEDIUM -> 750.dp
-        WindowType.LARGE -> 850.dp
+        WindowType.SMALL -> 695.dp
+        WindowType.MEDIUM -> 795.dp
+        WindowType.LARGE -> 895.dp
     }
 
     Box(
@@ -157,7 +157,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     .fillMaxSize()
                     .background(Color.White) // Background color for clarity
             ) {
-                val (titleText,firstNameAndlastName,username, birthdatelayout,emaillayout, passwordlayout, roles, signUpButton, loginButton) = createRefs()
+                val (titleText,FirstnameField,LastnameField,username, birthdatelayout,emaillayout, passwordlayout, roles, signUpButton, loginButton) = createRefs()
                 val verticalGuideline1= createGuidelineFromStart(0.05f) // 10% from the start
                 val verticalGuideline2 = createGuidelineFromStart(0.95f) // 10% from the start
                 val verticalGuideline3= createGuidelineFromStart(0.075f) // 10% from the start
@@ -179,24 +179,38 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
 
                     }
                 )
-                FirstAndLastNameField(
+                FirstnameField(
                     firstName = firstName,
                     onFirstNameChange = { firstName = it },
-                    lastName = lastName,
-                    onLastNameChange = { lastName = it },
-                    modifier = Modifier.constrainAs(firstNameAndlastName) {
+                    modifier = Modifier.constrainAs(FirstnameField) {
                         top.linkTo(titleText.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
+                        width = Dimension.fillToConstraints
+
                     }
+                )
+                LastnameField(
+                    lastName = lastName,
+                    onLastNameChange = { lastName = it },
+                    modifier = Modifier.constrainAs(LastnameField) {
+                        top.linkTo(FirstnameField.bottom, margin = 10.dp)
+                        start.linkTo(verticalGuideline1)
+                        end.linkTo(verticalGuideline2)
+                        width = Dimension.fillToConstraints
+
+                    }
+
                 )
                 UsernameField(
                     userName = userName,
                     onUserNameChange = { userName = it },
                     modifier = Modifier.constrainAs(username) {
-                        top.linkTo(firstNameAndlastName.bottom, margin =10.dp)
+                        top.linkTo(LastnameField.bottom, margin =10.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
+                        width = Dimension.fillToConstraints
+
                     }
                 )
                 EmailField(
@@ -204,8 +218,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     onEmailChange = { email = it },
                     modifier = Modifier.constrainAs(emaillayout) {
                         top.linkTo(username.bottom, margin =10.dp)
-                        start.linkTo(verticalGuideline3)
-                        end.linkTo(verticalGuideline4)
+                        start.linkTo(verticalGuideline1)
+                        end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
 
                     }
@@ -219,6 +233,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                         top.linkTo(emaillayout.bottom, margin =16.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
+                        width = Dimension.fillToConstraints
+
                     }
 
                 )
@@ -227,8 +243,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     onPasswordChange = { password = it },
                     modifier = Modifier.constrainAs(passwordlayout) {
                         top.linkTo(birthdatelayout.bottom, margin =10.dp)
-                        start.linkTo(verticalGuideline3)
-                        end.linkTo(verticalGuideline4)
+                        start.linkTo(verticalGuideline1)
+                        end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
                     }
                 )
@@ -267,7 +283,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                 RegistrationLoginButton(
                     navController = navController,
                     modifier = Modifier.constrainAs(loginButton) {
-                        top.linkTo(signUpButton.bottom, margin =16.dp)
+                        top.linkTo(signUpButton.bottom, margin =8.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
@@ -284,18 +300,12 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
 }
 
 @Composable
-fun FirstAndLastNameField(firstName: String,
+fun FirstnameField(firstName: String,
                           onFirstNameChange: (String) -> Unit,
-                          lastName: String,
-                          onLastNameChange: (String) -> Unit,
                           modifier: Modifier = Modifier){
     Column(modifier = modifier) {
 
-        Row(
-            Modifier.fillMaxWidth()
-                .padding(horizontal = 25.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
+
             OutlinedTextField(
                 value = firstName,
                 onValueChange = onFirstNameChange, // Updates the `firstName` state
@@ -309,7 +319,7 @@ fun FirstAndLastNameField(firstName: String,
                 singleLine = true,
 
                 modifier = Modifier
-                    .width(170.dp)
+                    .fillMaxWidth()
                     .heightIn(min = 56.dp), // Adjust height as needed
                 shape = RoundedCornerShape(16.dp), // Set corner radius here
                 colors = TextFieldDefaults.colors(
@@ -327,38 +337,48 @@ fun FirstAndLastNameField(firstName: String,
                 )
 
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            OutlinedTextField(
-                value = lastName,
-                onValueChange = onLastNameChange,
-                label = { Text("Last Name") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Last Name Icon"
-                    )
-                },
-                singleLine = true,
 
-                modifier = Modifier
-                    .width(170.dp)
-                    .heightIn(min = 56.dp), // Adjust height as needed
-                shape = RoundedCornerShape(16.dp), // Set corner radius here
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Blue,
-                    unfocusedIndicatorColor = Color.Gray,
-                    focusedLabelColor = Color.Blue,
-                    unfocusedLabelColor = Color.Gray,
-                    cursorColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontSize = 16.sp, // Adjust text size for visibility
-                    color = Color.Black // Ensure text is visible
-                )
-            )
         }
+
+}
+@Composable
+fun LastnameField(
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+){
+    Column(modifier = modifier) {
+
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = onLastNameChange,
+            label = { Text("Last Name") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Last Name Icon"
+                )
+            },
+            singleLine = true,
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp), // Adjust height as needed
+            shape = RoundedCornerShape(16.dp), // Set corner radius here
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Blue,
+                unfocusedIndicatorColor = Color.Gray,
+                focusedLabelColor = Color.Blue,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Black
+            ),
+            textStyle = TextStyle(
+                fontSize = 16.sp, // Adjust text size for visibility
+                color = Color.Black // Ensure text is visible
+            )
+        )
     }
 }
 
@@ -382,7 +402,7 @@ fun UsernameField(
             singleLine = true,
 
             modifier = Modifier
-                .width(360.dp)
+                .fillMaxWidth()
                 .heightIn(min = 56.dp), // Adjust height as needed
             shape = RoundedCornerShape(16.dp), // Set corner radius here
             colors = TextFieldDefaults.colors(
@@ -478,7 +498,7 @@ fun BirthdayCalendar(birthdate: String,
         Button(
             onClick = { datePickerDialog.show() },
             modifier = Modifier
-                .width(360.dp)
+                .fillMaxWidth()
                 .heightIn(min = 56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
@@ -494,8 +514,7 @@ fun BirthdayCalendar(birthdate: String,
             ) {
                 Icon(
                     imageVector = Icons.Default.CalendarToday,
-                    contentDescription = "Calendar Icon",
-                    tint = Color.Gray
+                    contentDescription = "Calendar Icon"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
