@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel, modifier = Modifier,getChatsViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
