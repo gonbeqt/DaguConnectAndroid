@@ -120,10 +120,11 @@ class MainActivity : ComponentActivity() {
 
         val bookTradesmanVMFactory = BookTradesmanViewModelFactory(apiService, this)
         val bookingTradesmanViewModel = ViewModelProvider(this, bookTradesmanVMFactory)[BooktradesmanViewModel::class.java]
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination ) {
+                NavHost(navController = navController, startDestination = "main_screen" ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -138,7 +139,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
