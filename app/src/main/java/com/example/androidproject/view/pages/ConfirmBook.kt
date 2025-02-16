@@ -93,12 +93,12 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
         Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark)
     )
-    when(resumeState){
+    when(val resumestate = resumeState){
         is ViewResumeViewModel.ViewResumeState.Loading -> {
             Text(text = "Loading...")
         }
         is ViewResumeViewModel.ViewResumeState.Success -> {
-            val resume = (resumeState as ViewResumeViewModel.ViewResumeState.Success).data
+            val resume = resumestate.data
             val specialtiesJsonString = resume.specialties // Assuming this is the JSON string
             val values = try {
                 JSONArray(specialtiesJsonString).let { jsonArray ->
@@ -434,13 +434,13 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     Text(text = "Confirm")
                                 }
                                 LaunchedEffect(bookingState) {
-                                    when (bookingState) {
+                                    when (val bookingstate =bookingState) {
                                         is BooktradesmanViewModel.BookTradesmanState.Success -> {
                                             Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
                                             bookingTradesmanViewModel.resetState() // Reset state to prevent re-triggering
                                         }
                                         is BooktradesmanViewModel.BookTradesmanState.Error -> {
-                                            val errorMessage = (bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message
+                                            val errorMessage = bookingstate.message
                                             Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
                                             Log.e("BookTradesman", "Error: $errorMessage") // Debugging
                                             bookingTradesmanViewModel.resetState() // Reset state to prevent repeated error
@@ -458,7 +458,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
             }
         }
         is ViewResumeViewModel.ViewResumeState.Error -> {
-            Text(text = "Error: ${(resumeState as ViewResumeViewModel.ViewResumeState.Error).message}")
+            Text(text = "Error: ${resumestate.message}")
         }
         else -> Unit
     }

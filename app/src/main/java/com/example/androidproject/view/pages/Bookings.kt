@@ -925,7 +925,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("cancelnow") }
+                            .clickable { navController.navigate("cancelnow/${pendingBooking.resumeid}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)

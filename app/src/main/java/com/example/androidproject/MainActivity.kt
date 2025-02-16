@@ -147,7 +147,6 @@ class MainActivity : ComponentActivity() {
 
                     composable("booknow/{resumeId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
-                        Log.d("rateid",resumeId)
                         BookNow(viewResumeViewModel, navController,resumeId)
                     }
                     composable("confirmbook/{resumeId}/{tradesmanId}") {backStackEntry ->
@@ -161,8 +160,9 @@ class MainActivity : ComponentActivity() {
                     composable("cancelleddetails") {
                         CancelledDetails(trade,navController)
                     }
-                    composable("cancelnow"){
-                        CancelNow(trade,navController)
+                    composable("cancelnow/{resumeId}"){ backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        CancelNow(viewClientBookingViewModel,navController,resumeId)
                     }
                     composable("acceptnow"){
                         AcceptNow(trade,navController)
