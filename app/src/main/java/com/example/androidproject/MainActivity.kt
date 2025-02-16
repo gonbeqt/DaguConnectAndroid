@@ -46,9 +46,11 @@ import com.example.androidproject.view.pages.ConfirmBook
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.pages.NotificationScreen
 import com.example.androidproject.view.pages.RateAndReviews
+import com.example.androidproject.view.pages2.AvailabilityStatus
 import com.example.androidproject.view.pages2.BookingsTradesman
 import com.example.androidproject.view.pages2.BookmarkedTradesman
 import com.example.androidproject.view.pages2.HomeTradesman
+import com.example.androidproject.view.pages2.ManageProfile
 import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.view.pages2.TradesmanApply
@@ -146,7 +148,6 @@ class MainActivity : ComponentActivity() {
 
                     composable("booknow/{resumeId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
-                        Log.d("rateid",resumeId)
                         BookNow(viewResumeViewModel, navController,resumeId)
                     }
                     composable("confirmbook/{resumeId}/{tradesmanId}") {backStackEntry ->
@@ -160,8 +161,9 @@ class MainActivity : ComponentActivity() {
                     composable("cancelleddetails") {
                         CancelledDetails(trade,navController)
                     }
-                    composable("cancelnow"){
-                        CancelNow(trade,navController)
+                    composable("cancelnow/{resumeId}"){ backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        CancelNow(viewClientBookingViewModel,navController,resumeId)
                     }
                     composable("acceptnow"){
                         AcceptNow(trade,navController)
@@ -246,8 +248,15 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                        ProfileTradesman(modifier = Modifier,navController)
+                         ProfileTradesman(modifier = Modifier, navController)
                     }
+                    composable("manageprofile") {
+                        ManageProfile(modifier = Modifier, navController)
+                    }
+                    composable("availabilitystatus") {
+                        AvailabilityStatus(modifier = Modifier, navController)
+                    }
+
 
                 }
             }

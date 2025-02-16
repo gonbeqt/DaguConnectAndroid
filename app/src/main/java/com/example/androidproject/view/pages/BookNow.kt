@@ -66,7 +66,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
         viewResumeViewModel.viewResume(ResumeId)
     }
 
-    when(val state =viewResumeState){
+    when(val state = viewResumeState){
         is ViewResumeViewModel.ViewResumeState.Loading -> {
             Text(text = "Loading...")
         }
