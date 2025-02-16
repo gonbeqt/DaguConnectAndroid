@@ -19,7 +19,6 @@ class ViewResumeViewModel (private val apiService: ApiService, private val conte
         viewModelScope.launch{
             _viewResumeState.value = ViewResumeState.Loading
             try{
-                val token = TokenManager.getToken()
 
                 val response = apiService.getResumeById(id)
                 val body = response.body()

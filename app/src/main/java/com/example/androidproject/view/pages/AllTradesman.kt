@@ -1,7 +1,6 @@
-package com.example.androidproject.view.ClientPov
+package com.example.androidproject.view.pages
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,43 +13,33 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.example.androidproject.R
-import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 
 @Composable
 fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) {
@@ -71,11 +60,6 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) 
         WindowType.LARGE -> 160.dp
     }
 
-    val textSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
 
     Box(
         modifier = Modifier
@@ -101,11 +85,11 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) 
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBackIosNew,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Arrow Back",
                             Modifier.clickable { navController.navigate("main_screen") }
                                 .padding(16.dp),
-                            tint = Color.Black
+                            tint = Color(0xFF81D796)
                         )
 
                         Text(
@@ -125,14 +109,15 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) 
                     LazyColumn(
 
                         modifier = Modifier
-                            .fillMaxSize() // Ensure LazyColumn takes up the remaining space
-                            .background(Color(0xFFECECEC)),
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .background(Color.White),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(resumeList.itemCount) { index ->
                             val resume = resumeList[index]
                             if (resume != null) {
-                                AllTradesmanItem(resume, navController, cardHeight, textSize)
+                                AllTradesmanItem(resume, navController, cardHeight)
                             }
                         }
                         item {
@@ -153,22 +138,32 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) 
     }
 }
 @Composable
-fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit) {
+fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp) {
     val windowSize = rememberWindowSizeClass()
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 30.dp
-        WindowType.MEDIUM -> 40.dp
-        WindowType.LARGE -> 50.dp
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
     }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(cardHeight)
             .clickable { navController.navigate("booknow/${resumes.id}")}, //implementation here
-        shape = RoundedCornerShape(8.dp),
-
-
-        ) {
+         shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -193,7 +188,7 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                         text = resumes.tradesmanfullname,
                         color = Color.Black,
                         fontWeight = FontWeight(500),
-                        fontSize = textSize,
+                        fontSize = nameTextSize,
                         modifier = Modifier.padding(top = 10.dp)
 
                     )
@@ -202,7 +197,7 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                             .replace("[", "")  // Remove opening bracket
                             .replace("]", ""),  // Remove closing bracket ,
                         color = Color.Black,
-                        fontSize = textSize,
+                        fontSize = taskTextSize,
                     )
                     Row(modifier = Modifier.size(185.dp, 110.dp)) {
                         Box(
@@ -216,7 +211,7 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                         ) {
                             Text(
                                 text = "P${resumes.workfee}/hr",
-                                fontSize = textSize,
+                                fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )
                         }
@@ -237,12 +232,11 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                             )
                             Text(
                                 text = "4",
-                                fontSize = 14.sp,
+                                fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                             )
                         }
                     }
-
 
                 }
             }
