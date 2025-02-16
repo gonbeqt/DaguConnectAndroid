@@ -1,6 +1,5 @@
 package com.example.androidproject.view.pages2
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,10 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -28,8 +25,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,25 +32,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
-import com.example.androidproject.data.preferences.AccountManager
-import com.example.androidproject.data.preferences.TokenManager
-import com.example.androidproject.view.ServicePosting
-import com.example.androidproject.view.pages.FabPosting
-import com.example.androidproject.view.pages.MyPostsTab
-import com.example.androidproject.view.pages.SettingsScreen
 
 
 @Composable
@@ -179,7 +165,7 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
                     .padding(10.dp)
             ) {
                 when (selectedTabIndex) {
-                    0 -> MyResume()
+                    0 -> MyResume(navController)
                     1 -> SettingsTradesmanScreen(navController)
                 }
             }
@@ -188,31 +174,37 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
 }
 
 @Composable
-fun MyResume(){
-
+fun MyResume(navController: NavController){
     // Additional Layout from Image
     Column(modifier = Modifier.padding(8.dp)) {
         Box(modifier = Modifier
             .border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier
                 .padding(10.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                    ){
-                    Box(
-                        modifier = Modifier
-                            .size(30.dp)
-                            .background(Color.White, RoundedCornerShape(10.dp))
-                            .border(2.dp, Color.LightGray, RoundedCornerShape(10.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Edit profile and skills",
-                            tint = Color.LightGray
-                        )
-                    }
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black, RoundedCornerShape(10.dp))
+                    .clickable {navController.navigate("manageprofile")  },
+                    contentAlignment = Alignment.Center){
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                        ){
+                        Box(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(30.dp)
+                                .background(Color.Black, RoundedCornerShape(10.dp))
+                                .border(2.dp, Color.White, RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Edit profile and skills",
+                                tint = Color.White
+                            )
+                        }
 
+                    }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -364,7 +356,7 @@ fun SettingsTradesmanScreen(navController: NavController) {
             icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
             title = "Privacy",
             description = "Change your password.",
-            onClick = {navController.navigate("changepassword") }
+            onClick = {navController.navigate("changepassword")}
         )
         Text(
             text = "Help and Support", fontWeight = FontWeight(500),
@@ -374,7 +366,7 @@ fun SettingsTradesmanScreen(navController: NavController) {
             icon = ImageVector.vectorResource(id = R.drawable.ic_about),
             title = "About Us",
             description = "Know more about our team.",
-            onClick = {navController.navigate("aboutus") }
+            onClick = {navController.navigate("aboutus")}
         )
         GeneralTradesmanSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_report),
