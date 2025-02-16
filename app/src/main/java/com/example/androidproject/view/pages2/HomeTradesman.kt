@@ -187,28 +187,28 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
 
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
-                LazyColumn(
-                    modifier = Modifier.padding(bottom = 100.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    items(jobsList.itemCount) { index ->
-                        val job = jobsList[index]
-                        if (job != null) {
-                            TopMatchesItem(job, navController)
-                        }
+        LazyColumn(
+            modifier = Modifier.padding(bottom = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(jobsList.itemCount) { index ->
+                val job = jobsList[index]
+                if (job != null) {
+                    TopMatchesItem(job, navController)
+                }
+            }
+            item {
+                if (jobsList.loadState.append == LoadState.Loading) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
-                    item {
-                        if (jobsList.loadState.append == LoadState.Loading) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
+                }
+            }
         }
     }
 }
@@ -221,7 +221,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController){
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-            navController.navigate("tradesmanapply/${getJobs.id}")
+                navController.navigate("tradesmanapply/${getJobs.id}")
             },
         colors = CardDefaults.cardColors(Color.White)
     ) {
@@ -289,7 +289,7 @@ fun RecentJobs(navController: NavController){
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFD9D9D9))
-             .padding(bottom = 100.dp)
+            .padding(bottom = 100.dp)
 
 
         ,
