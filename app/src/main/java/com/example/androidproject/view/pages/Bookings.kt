@@ -925,7 +925,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { /* Chat Action */ }
+                            .clickable { navController.navigate("cancelnow") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -943,7 +943,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
 
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("bookingdetails") }
+                            .clickable { navController.navigate("acceptnow") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1251,7 +1251,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("booknow")}
+                            .clickable { navController.navigate("booknow/${completedBooking.resumeid}")}
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1269,7 +1269,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
 
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("rateandreviews") }
+                            .clickable { navController.navigate("rateandreviews/${completedBooking.resumeid}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)

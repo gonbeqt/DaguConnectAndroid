@@ -48,6 +48,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
@@ -59,9 +61,8 @@ import com.example.androidproject.viewmodel.LoginViewModel
 fun LogInScreenPreview() {
     //LogInScreen(navController = rememberNavController())
 }
-
 @Composable
-fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
+fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
     val windowSize = rememberWindowSizeClass()
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
@@ -84,12 +85,8 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
         }
     }
 
-
-    var email by remember {
-        mutableStateOf("") }
-
-    var password by remember {
-        mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     val cardOffsetY = remember { Animatable(500f) } // Start off-screen to the bottom
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
@@ -116,13 +113,12 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                 .offset(y = (-150).dp)
         )
 
-
         // Card with adaptive size and padding
         Card(
             modifier = Modifier
                 .offset(y = cardOffsetY.value.dp)
                 .align(Alignment.BottomCenter)
-            .size(
+                .size(
                     width = when (windowSize.width) {
                         WindowType.SMALL -> 500.dp
                         WindowType.MEDIUM -> 350.dp
@@ -133,7 +129,6 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
                         WindowType.MEDIUM -> 450.dp
                         else -> 450.dp
                     }
-
                 ),
             shape = RoundedCornerShape(
                 topEnd = 20.dp,
@@ -141,156 +136,193 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel){
             ),
             elevation = CardDefaults.cardElevation(8.dp),
             colors = CardDefaults.cardColors(Color.White)
+        ) {
+            ConstraintLayout(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Create references for the components
+                val (welcomeText, emailField, passwordField, forgotPassword, loginButton, signUpText) = createRefs()
 
-            ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Welcome Back!",
-                    fontSize = when (windowSize.width) {
-                        WindowType.SMALL -> 24.sp
-                        WindowType.MEDIUM -> 28.sp
-                        else -> 32.sp
-                    },
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.offset(x = (-110).dp)
+                // Create guidelines
+                val verticalGuideline1= createGuidelineFromStart(0.05f) // 10% from the start
+                val verticalGuideline2 = createGuidelineFromStart(0.95f) // 10% from the start
+
+                val horizontalGuideline = createGuidelineFromTop(0.1f) // 20% from the top
+
+                // Welcome Text
+                WelcomeText(
+                    windowSize = windowSize,
+                    modifier = Modifier.constrainAs(welcomeText) {
+                        top.linkTo(horizontalGuideline)
+                        start.linkTo(verticalGuideline1)
+                    }
                 )
 
-                InputFieldForLogin(email = email,
+                // Email Field
+                EmailField(
+                    email = email,
                     onEmailChange = { email = it },
+                    windowSize = windowSize,
+                    modifier = Modifier.constrainAs(emailField) {
+                        top.linkTo(welcomeText.bottom, margin = 24.dp)
+                        start.linkTo(verticalGuideline1)
+                        end.linkTo(verticalGuideline2)
+                        width = Dimension.fillToConstraints
+                    }
+                )
+
+                // Password Field
+                PasswordField(
                     password = password,
                     onPasswordChange = { password = it },
-                    windowSize,
-                    )
+                    windowSize = windowSize,
+                    modifier = Modifier.constrainAs(passwordField) {
+                        top.linkTo(emailField.bottom, margin = 16.dp)
+                        start.linkTo(verticalGuideline1)
+                        end.linkTo(verticalGuideline2)
+                        width = Dimension.fillToConstraints
+                    }
+                )
 
-                ForgotPassword(windowSize)
+                // Forgot Password
+                ForgotPassword(
+                    windowSize = windowSize,
+                    modifier = Modifier.constrainAs(forgotPassword) {
+                        top.linkTo(passwordField.bottom, margin = 16.dp)
+                        end.linkTo(verticalGuideline2)
+                    }
+                )
 
-                Spacer(modifier = Modifier.height(10.dp))
-                ButtonLogin(navController, viewModel, email, password,  windowSize)
+                // Login Button
+                LoginButton(
+                    navController = navController,
+                    viewModel = viewModel,
+                    email = email,
+                    password = password,
+                    windowSize = windowSize,
+                    modifier = Modifier.constrainAs(loginButton) {
+                        top.linkTo(forgotPassword.bottom, margin = 24.dp)
+                        start.linkTo(verticalGuideline1)
+                        end.linkTo(verticalGuideline2)
+                        width = Dimension.fillToConstraints
+                    }
+                )
 
-                Spacer(modifier = Modifier.height(10.dp))
-                SignUpButton(navController, windowSize)
+                // Sign Up Button
+                SignUpButton(
+                    navController = navController,
+                    windowSize = windowSize,
+                    modifier = Modifier.constrainAs(signUpText) {
+                        top.linkTo(loginButton.bottom, margin = 16.dp)
+                        start.linkTo(verticalGuideline1)
+                        end.linkTo(verticalGuideline2)
+                    }
+                )
             }
-
-
         }
-
     }
+}
+@Composable
+fun WelcomeText(windowSize: WindowSize, modifier: Modifier = Modifier) {
+    Text(
+        text = "Welcome Back!",
+        fontSize = when (windowSize.width) {
+            WindowType.SMALL -> 24.sp
+            WindowType.MEDIUM -> 28.sp
+            else -> 32.sp
+        },
+        fontWeight = FontWeight.Bold,
+        color = Color.Black,
+        modifier = modifier
+    )
 }
 
 @Composable
-fun InputFieldForLogin(
+fun EmailField(
     email: String,
     onEmailChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    windowSize: WindowSize
-    ){
-
-
-    Spacer(modifier = Modifier.height(10.dp))
-
-    EmailField(email = email, onEmailChange = onEmailChange, windowSize)
-
-    Spacer(modifier = Modifier.height(10.dp))
-
-    PasswordField(password = password, onPasswordChange = onPasswordChange, windowSize)
-
-}
-@Composable
-fun EmailField(email: String, onEmailChange: (String) -> Unit, windowSize: WindowSize){
+    windowSize: WindowSize,
+    modifier: Modifier = Modifier
+) {
     var emailError by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
-        value = email,
-        onValueChange = {
-            onEmailChange(it)
-            emailError =  it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
-        },
-        isError = emailError,
-
-        label = { Text("Email") },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Email,
-                contentDescription = "Email Icon"
-            )
-        },
-        singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth(
-                when (windowSize.width) {
-                    WindowType.SMALL -> 0.9f
-                    else -> 0.8f
-                }
-            )
-            .heightIn(min = 56.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Blue,
-            unfocusedIndicatorColor = Color.Gray,
-            focusedLabelColor = Color.Blue,
-            unfocusedLabelColor = Color.Gray,
-            cursorColor = Color.Black
-        ),
-        textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
-    )
-    if (emailError) {
-        Text(
-            text = "● Invalid email format.",
-            color = Color.Red,
-            fontSize = 14.sp,
-            modifier = Modifier.offset(x = 70.dp)
-                .padding(top = 10.dp)
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            value = email,
+            onValueChange = {
+                onEmailChange(it)
+                emailError = it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
+            },
+            isError = emailError,
+            label = { Text("Email") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Email,
+                    contentDescription = "Email Icon"
+                )
+            },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Blue,
+                unfocusedIndicatorColor = Color.Gray,
+                focusedLabelColor = Color.Blue,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Black
+            ),
+            textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
         )
+
+        if (emailError) {
+            Text(
+                text = "● Invalid email format.",
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth()
+            )
+        }
     }
 }
-
 @Composable
-fun PasswordField(password: String, onPasswordChange: (String) -> Unit, windowSize: WindowSize){
-    var passwordError by remember { mutableStateOf(false) }
+fun PasswordField(password: String,
+                  onPasswordChange: (String) -> Unit,
 
+                  windowSize: WindowSize, modifier: Modifier = Modifier) {
+    var passwordError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
     else
         painterResource(id = R.drawable.visibility_off)
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 20.dp // Smaller screen
-        WindowType.MEDIUM -> 24.dp // Medium screen
-        WindowType.LARGE -> 30.dp // Larger screen
-    }
+    Column(modifier = modifier) {
     OutlinedTextField(
         value = password,
         onValueChange = {
             onPasswordChange(it)
             passwordError = it.isNotEmpty() && it.length < 8
-
         },
         label = { Text("Password") },
         leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") },
         trailingIcon = {
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(painter = icon, contentDescription = "Toggle Password Visibility", modifier = Modifier.size(iconSize))
+                Icon(painter = icon, contentDescription = "Toggle Password Visibility", modifier = Modifier.size(24.dp))
             }
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         singleLine = true,
         isError = passwordError,
-        modifier = Modifier
-            .fillMaxWidth(
-                when (windowSize.width) {
-                    WindowType.SMALL -> 0.9f
-                    else -> 0.8f
-                }
-            )
-            .heightIn(min = 56.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            ,
         shape = RoundedCornerShape(16.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
@@ -308,35 +340,25 @@ fun PasswordField(password: String, onPasswordChange: (String) -> Unit, windowSi
             text = "● At least 8 characters required.",
             color = Color.Red,
             fontSize = 14.sp,
-            modifier = Modifier.offset(x = 70.dp)
-                .padding(top = 10.dp)
+            modifier = Modifier.padding(top = 10.dp)
         )
     }
+        }
 }
-
 @Composable
-fun ForgotPassword(windowSize: WindowSize) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-
-            ,
-        horizontalArrangement = Arrangement.End
-    ) {
-        Text(
-            text = "Forgot Password?",
-            color = Color.Gray,
-            fontSize = when (windowSize.width) {
-                WindowType.SMALL -> 12.sp
-                else -> 14.sp
-            }
-        )
-    }
+fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier) {
+    Text(
+        text = "Forgot Password?",
+        color = Color.Gray,
+        fontSize = when (windowSize.width) {
+            WindowType.SMALL -> 12.sp
+            else -> 14.sp
+        },
+        modifier = modifier.clickable { /* Handle forgot password */ }
+    )
 }
-
 @Composable
-fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize){
+fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
     Button(
@@ -351,13 +373,7 @@ fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: 
                 viewModel.login(email, password)
             }
         },
-        modifier = Modifier
-            .fillMaxWidth(
-                when (windowSize.width) {
-                    WindowType.SMALL -> 0.9f
-                    else -> 0.8f
-                }
-            )
+        modifier = modifier
             .height(50.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
     ) {
@@ -366,11 +382,8 @@ fun ButtonLogin(navController: NavController, viewModel: LoginViewModel, email: 
 }
 
 @Composable
-fun SignUpButton(navController: NavController, windowSize: WindowSize) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
+fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier: Modifier = Modifier) {
+    Row(modifier = modifier) {
         Text(
             text = "Don't have an account? ",
             color = Color.Gray,

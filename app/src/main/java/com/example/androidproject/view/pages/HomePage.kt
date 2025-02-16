@@ -242,15 +242,17 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
-    var displayedResumes by remember { mutableStateOf(resumeList.itemSnapshotList.items.sortedBy { it.id }.take(5)) }
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
     val dismissedResumes by getResumesViewModel.dismissedResumes
 
     LaunchedEffect(Unit) {
+        Log.d("TradesmanColumn", "Invalidating paging source")
         getResumesViewModel.invalidatePagingSource()
     }
 
-    LaunchedEffect(dismissedResumes) {
+    LaunchedEffect(resumeList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
         displayedResumes = resumeList.itemSnapshotList.items
             .filter { it.id !in dismissedResumes } // Remove dismissed
             .take(5) // Keep a maximum of 5

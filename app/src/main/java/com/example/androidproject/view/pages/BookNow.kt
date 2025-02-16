@@ -66,14 +66,6 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
         viewResumeViewModel.viewResume(ResumeId)
     }
 
-    var booknow by remember { mutableStateOf(false) }
-
-    // Tradesmen list (you can optimize this if needed)
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark)
-    )
-
     when(val state =viewResumeState){
         is ViewResumeViewModel.ViewResumeState.Loading -> {
             Text(text = "Loading...")
@@ -323,10 +315,10 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                             modifier = Modifier
                                 .clickable { navController.navigate("message_screen") }
                                 .background(
-                                    color = Color.Transparent,
+                                    color = Color(0xFF42C2AE),
                                     shape = RoundedCornerShape(12.dp)
                                 )
-                                .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp) )
+                                .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp) )
                                 .width(150.dp)
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
@@ -336,17 +328,18 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Message,
-                                    contentDescription = "Message Icon"
+                                    contentDescription = "Message Icon",
+                                    tint = Color.White
                                 )
-                                Text(text = "Chat Me")
+                                Text(text = "Chat Me", color = Color.White)
                             }
                         }
 
                         Box(
                             modifier = Modifier
-                                .clickable {navController.navigate("confirmbook") }
+                                .clickable {navController.navigate("confirmbook/${resume.id}/${resume.userid}") }
                                 .background(
-                                    color = Color(0xFFECAB1E),
+                                    color = Color(0xFF42C2AE),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .width(150.dp)
