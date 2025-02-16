@@ -46,9 +46,11 @@ import com.example.androidproject.view.pages.ConfirmBook
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.pages.NotificationScreen
 import com.example.androidproject.view.pages.RateAndReviews
+import com.example.androidproject.view.pages2.AvailabilityStatus
 import com.example.androidproject.view.pages2.BookingsTradesman
 import com.example.androidproject.view.pages2.BookmarkedTradesman
 import com.example.androidproject.view.pages2.HomeTradesman
+import com.example.androidproject.view.pages2.ManageProfile
 import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.view.pages2.TradesmanApply
@@ -120,11 +122,10 @@ class MainActivity : ComponentActivity() {
 
         val bookTradesmanVMFactory = BookTradesmanViewModelFactory(apiService, this)
         val bookingTradesmanViewModel = ViewModelProvider(this, bookTradesmanVMFactory)[BooktradesmanViewModel::class.java]
-
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "main_screen" ) {
+                NavHost(navController = navController, startDestination = startDestination ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -139,7 +140,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel, modifier = Modifier,getChatsViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -161,8 +162,9 @@ class MainActivity : ComponentActivity() {
                     composable("cancelleddetails") {
                         CancelledDetails(trade,navController)
                     }
-                    composable("cancelnow"){
-                        CancelNow(trade,navController)
+                    composable("cancelnow/{resumeId}"){ backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        CancelNow(viewClientBookingViewModel,navController,resumeId)
                     }
                     composable("acceptnow"){
                         AcceptNow(trade,navController)
@@ -247,8 +249,15 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                        ProfileTradesman(modifier = Modifier,navController)
+                         ProfileTradesman(modifier = Modifier, navController)
                     }
+                    composable("manageprofile") {
+                        ManageProfile(modifier = Modifier, navController)
+                    }
+                    composable("availabilitystatus") {
+                        AvailabilityStatus(modifier = Modifier, navController)
+                    }
+
 
                 }
             }
