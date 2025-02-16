@@ -295,7 +295,6 @@ fun PasswordField(password: String,
                   onPasswordChange: (String) -> Unit,
 
                   windowSize: WindowSize, modifier: Modifier = Modifier) {
-    var passwordError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
     val icon = if (passwordVisible)
@@ -307,7 +306,6 @@ fun PasswordField(password: String,
         value = password,
         onValueChange = {
             onPasswordChange(it)
-            passwordError = it.isNotEmpty() && it.length < 8
         },
         label = { Text("Password") },
         leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") },
@@ -318,7 +316,6 @@ fun PasswordField(password: String,
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         singleLine = true,
-        isError = passwordError,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
@@ -335,15 +332,8 @@ fun PasswordField(password: String,
         ),
         textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
-    if (passwordError) {
-        Text(
-            text = "● At least 8 characters required.",
-            color = Color.Red,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(top = 10.dp)
-        )
+
     }
-        }
 }
 @Composable
 fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier) {

@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +64,14 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewModel) {
     val plumberList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(plumberList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = plumberList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+    }
 
     // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
@@ -113,7 +121,7 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack() }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -178,21 +186,44 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(plumberList.itemCount) { index ->
-                                val Plumber = plumberList[index]
-                                if (Plumber != null) {
-                                    PlumbingItem(Plumber, navController)
+                            val filteredList = plumberList.itemSnapshotList.items.filter {it.specialties.contains("Plumbing") && it.id !in dismissedResumes  }
+
+                            items(filteredList.size) { index ->
+                                val plumberList = filteredList[index]
+                                if (plumberList != null && plumberList.id !in dismissedResumes) {
+                                    PlumbingItem(plumberList, navController){
+                                        getResumesViewModel.dismissResume(plumberList.id)
+                                    }
                                 }
                             }
-                            item {
-                                if (plumberList.loadState.append == LoadState.Loading) {
-                                    Row(
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
                                         modifier = Modifier
-                                            .fillMaxWidth()
+                                            .fillParentMaxSize()
                                             .padding(16.dp),
-                                        horizontalArrangement = Arrangement.Center
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        CircularProgressIndicator()
+                                        Text(
+                                            text = "No Plumber workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                item {
+                                    if (plumberList.loadState.append == LoadState.Loading) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
                                     }
                                 }
                             }
@@ -215,7 +246,7 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun PlumbingItem(plumber: resumesItem, navController: NavController) {
+fun PlumbingItem(plumber: resumesItem, navController: NavController,onUninterested: () -> Unit) {
      var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var reportText by remember { mutableStateOf("") }
@@ -297,6 +328,7 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }
