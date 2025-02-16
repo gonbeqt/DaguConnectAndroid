@@ -76,12 +76,12 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
     }
 
 
-    when (val viewClinetBooking = viewClientBookingstate) {
+    when (val viewClientBooking = viewClientBookingstate) {
         is ViewClientBookingViewModel.ViewClientBookings.Loading -> {
             //do nothing
         }
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
-            val viewclientbooking = viewClinetBooking.data
+            val viewclientbooking = viewClientBooking.data
             val getbookdate = ViewModelSetups.formatDateTime(viewclientbooking.bookingdate)
             Column( // Change Box to Column
                 modifier = Modifier

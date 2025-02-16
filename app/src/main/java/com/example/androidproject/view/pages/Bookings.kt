@@ -1049,7 +1049,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
 
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("bookingdetails") }
+                            .clickable { navController.navigate("bookingdetails/${pendingBooking.resumeid}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
