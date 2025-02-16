@@ -49,16 +49,6 @@ import com.example.androidproject.view.theme.myGradient3
 
 @Composable
 fun BookingDetails(trade: Tradesman, navController: NavController) {
-    var Cancel by remember { mutableStateOf(false) }
-    val checkboxStates = remember { mutableStateListOf(false, false, false, false, false, false) }
-    val reasons = listOf(
-        "Change of Mind",
-        "Found a Different Service Provider",
-        "No Longer Needed",
-        "Scheduled Time Conflict",
-        "Personal Reasons",
-        "Others"
-    )
     Column( // Change Box to Column
         modifier = Modifier
             .fillMaxSize()
@@ -140,10 +130,10 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .size(200.dp),
-                colors =  CardDefaults.cardColors( Color.White),
+                colors = CardDefaults.cardColors(Color.White),
 
-                shape = RoundedCornerShape( 0.dp, 0.dp,15.dp, 15.dp) // Keep card shape
-            ){
+                shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp) // Keep card shape
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -153,9 +143,7 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp)
-
-                        ,
+                            .padding(10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -298,7 +286,7 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
                                     .weight(1f)
                                     .padding(start = 10.dp)
                             ) {
-                                Row (Modifier.fillMaxWidth()){
+                                Row(Modifier.fillMaxWidth()) {
                                     Text(
                                         text = "Clients Name",
                                         color = Color.Black,
@@ -354,20 +342,24 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
                             fontSize = 18.sp,
                             color = Color.Black
                         )
-                        Row (modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween){
-                                Row (){
-                                    Icon(
-                                        imageVector = Icons.Default.Message,
-                                        contentDescription = "Message Icon",
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                    )
-                                    Text(text="Contact Tradesman",
-                                        modifier = Modifier.padding(start = 10.dp))
-                                }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row() {
+                                Icon(
+                                    imageVector = Icons.Default.Message,
+                                    contentDescription = "Message Icon",
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                )
+                                Text(
+                                    text = "Contact Tradesman",
+                                    modifier = Modifier.padding(start = 10.dp)
+                                )
+                            }
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowRight,
                                 contentDescription = "Arrow Right Icon",
@@ -376,19 +368,23 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
                             )
                         }
                         Spacer(Modifier.height(10.dp))
-                        Row (modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween){
-                            Row (){
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row() {
                                 Icon(
                                     imageVector = Icons.Default.Help,
                                     contentDescription = "Help Icon",
                                     modifier = Modifier
                                         .size(32.dp)
                                 )
-                                Text(text="Help",
-                                    modifier = Modifier.padding(start = 10.dp))
+                                Text(
+                                    text = "Help",
+                                    modifier = Modifier.padding(start = 10.dp)
+                                )
                             }
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowRight,
@@ -399,120 +395,11 @@ fun BookingDetails(trade: Tradesman, navController: NavController) {
                         }
 
 
-
                     }
 
-                }
-
-
-
-            }
-
-        }
-        Spacer(Modifier.height(10.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .size(80.dp)
-                .background(Color.White),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-
-            Box(
-                modifier = Modifier
-                    .clickable { Cancel = true }
-                    .background(
-                        color = Color.Transparent,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .border(1.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp))
-                    .padding(8.dp)
-                    .size(300.dp, 30.dp),
-                contentAlignment = Alignment.Center
-            ) {
-
-                Text(text = "Cancel Appointment", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight(500))
-            }
-        }
-
-
-    }
-    if (Cancel) {
-        Dialog(onDismissRequest = { Cancel = false }) {
-            // Dialog content
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center // Center content inside the Box
-
-
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)), // Border added here
-                    shape = RoundedCornerShape(12.dp), // Rounded corners
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Reason for Cancellation", fontSize = 20.sp, color = Color(0xFF42C2AE))
-
-                        Column(modifier = Modifier.padding(top = 16.dp)) {
-                            reasons.forEachIndexed { index, reason ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                ) {
-                                    Checkbox(
-                                        checked = checkboxStates[index],
-                                        onCheckedChange = { checkboxStates[index] = it }
-                                    )
-                                    Text(text = reason, fontSize = 16.sp, fontWeight = FontWeight(500), modifier = Modifier.padding(start = 8.dp))
-                                }
-                            }
-                        }
-
-
-
-
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                            ,
-
-                        ) {
-                            Button(
-                                onClick = {
-                                    Cancel = false
-                                },
-                                modifier = Modifier.size(110.dp,45.dp),
-
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECAB1E)) // Corrected placement of colors
-
-                            ) {
-                                Text("Submit")
-                            }
-                            Button(
-                                onClick = {
-                                    Cancel = false
-                                },
-                                modifier = Modifier.size(110.dp,45.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECAB1E)) // Corrected placement of colors
-
-                            ) {
-                                Text("Cancel")
-                            }
-                        }
-                    }
                 }
             }
         }
     }
+
 }
