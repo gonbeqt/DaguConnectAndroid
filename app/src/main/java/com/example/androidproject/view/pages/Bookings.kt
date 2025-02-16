@@ -703,9 +703,9 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
     val getbookdate = ViewModelSetups.formatDateTime(activeBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 170.dp
-        WindowType.MEDIUM -> 400.dp to 180.dp
-        WindowType.LARGE -> 410.dp to 190.dp
+        WindowType.SMALL -> 380.dp to 240.dp
+        WindowType.MEDIUM -> 390.dp to 250.dp
+        WindowType.LARGE -> 400.dp to 260.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -736,100 +736,152 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
                 .background(Color.White),
             contentAlignment = Alignment.CenterStart
         ) {
-            Row(
+            Column( // Using Column to stack elements vertically inside the Card
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                AsyncImage(
-                    model = activeBooking.tradesmanprofile,
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .padding(start = 10.dp)
-                )
-
-                // Tradesman details
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-
-                        .padding(start = 10.dp)
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = activeBooking.tradesmanfullname,
-                        color = Color.Black,
-                        fontWeight = FontWeight(500),
-                        fontSize = nameTextSize,
-                        modifier = Modifier.padding(top = 10.dp)
+                    // Tradesman image
+                    AsyncImage(
+                        model = activeBooking.tradesmanprofile,
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
                     )
-                    Text(
-                        text = activeBooking.tasktype,
-                        color = Color.Black,
-                        fontSize = taskTextSize,
-                    )
-                    Row(
-                        modifier = Modifier.padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Rate Box
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = (Color(0xFFFFF2DD)),
-                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "P${activeBooking.workfee}/hr",
-                                fontSize = smallTextSize,
-                                modifier = Modifier.padding(horizontal = 4.dp)
-                            )
-                        }
 
-                        // Reviews Box
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = (Color(0xFFFFF2DD)),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = activeBooking.tradesmanfullname,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = nameTextSize,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = activeBooking.tasktype,
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = "Star Icon",
-                                    tint = Color(0xFFFFA500),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.size(4.dp))
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
                                 Text(
-                                    text = "4",
-                                    fontSize = smallTextSize
+                                    text = "P${activeBooking.workfee}/hr",
+                                    fontSize = smallTextSize,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
                                 )
                             }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = "4",
+                                        fontSize = smallTextSize
+                                    )
+                                }
+                            }
                         }
+                        Text(
+                            text = "Weekdays Selected",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                            modifier = Modifier.fillMaxWidth()
+
+                        )
+                        Text(
+                            text = getbookdate,
+                            color = Color.Gray,
+                            fontSize = smallTextSize,
+
+                            )
                     }
-                    Text(
-                        text = "Weekdays Selected",
-                        color = Color.Black,
-                        fontSize = taskTextSize,
-                        modifier = Modifier.fillMaxWidth()
 
-                        )
-                    Text(
-                        text = getbookdate,
-                        color = Color.Gray,
-                        fontSize = smallTextSize,
-
-                        )
                 }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Reject", fontSize = smallTextSize)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(
+                            text = "Completed",
+                            color = Color(0xFFECAB1E),
+                            fontSize = smallTextSize
+                        )
+                    }
+                }
+
             }
         }
     }
@@ -997,7 +1049,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
 
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("acceptnow") }
+                            .clickable { navController.navigate("bookingdetails") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1154,27 +1206,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                 // Spacer between text and buttons
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("cancellationdetails") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
 
-
-                        Text(text = "Cancellation  Details", fontSize = smallTextSize)
-
-                    }
 
                     Box(
                         modifier = Modifier
@@ -1192,7 +1224,6 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                         Text(text = "Book Again", color = Color(0xFFECAB1E), fontSize = smallTextSize)
                     }
                 }
-            }
         }
     }
 }

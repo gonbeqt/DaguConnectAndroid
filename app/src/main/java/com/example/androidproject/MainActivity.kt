@@ -166,9 +166,7 @@ class MainActivity : ComponentActivity() {
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
                         CancelNow(viewClientBookingViewModel,navController,resumeId)
                     }
-                    composable("acceptnow"){
-                        AcceptNow(trade,navController)
-                    }
+
                     composable("booking") {
                         BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel)
                     }
