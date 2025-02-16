@@ -248,7 +248,7 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController)
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel)
                     }
                     composable("manageprofile") {
                         ManageProfile(modifier = Modifier, navController)
