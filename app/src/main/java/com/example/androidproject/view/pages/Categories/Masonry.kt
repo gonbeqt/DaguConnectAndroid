@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +64,14 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewModel){
     val masonryList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(masonryList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = masonryList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+    }
     LaunchedEffect(Unit)  {
         getResumesViewModel.invalidatePagingSource()
     }
@@ -113,7 +121,7 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack() }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -178,10 +186,33 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(masonryList.itemCount) { index ->
-                                val Masonry = masonryList[index]
-                                if (Masonry != null) {
-                                    MasonryItem(Masonry, navController)
+                            val filteredList = masonryList.itemSnapshotList.items.filter {it.specialties.contains("Masonry") && it.id !in dismissedResumes  }
+
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No Masonry workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(filteredList.size) { index ->
+                                    val masonryList = filteredList[index]
+                                    if (masonryList != null && masonryList.id !in dismissedResumes) {
+                                        MasonryItem(masonryList, navController){
+                                            getResumesViewModel.dismissResume(masonryList.id)
+                                        }
+                                    }
                                 }
                             }
                             item {
@@ -206,7 +237,7 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
 }
 
 @Composable
-fun MasonryItem(masonry: resumesItem, navController: NavController) {
+fun MasonryItem(masonry: resumesItem, navController: NavController,onUninterested: () -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var reportText by remember { mutableStateOf("") }
@@ -288,6 +319,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }

@@ -123,7 +123,7 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack() }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -190,11 +190,31 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
                         ) {
                             val filteredList = carpentryList.itemSnapshotList.items.filter {it.specialties.contains("Carpentry") && it.id !in dismissedResumes  }
 
-                            items(filteredList.size) { index ->
-                                val Carpentry = filteredList[index]
-                                if (Carpentry != null && Carpentry.id !in dismissedResumes) {
-                                    CarpentryItem(Carpentry, navController){
-                                        getResumesViewModel.dismissResume(Carpentry.id)
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No Carpentry workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+                            else {
+                                items(filteredList.size) { index ->
+                                    val Carpentry = filteredList[index]
+                                    if (Carpentry != null && Carpentry.id !in dismissedResumes) {
+                                        CarpentryItem(Carpentry, navController){
+                                            getResumesViewModel.dismissResume(Carpentry.id)
+                                        }
                                     }
                                 }
                             }

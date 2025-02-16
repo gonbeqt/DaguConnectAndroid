@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +64,14 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewModel){
     val roofingList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(roofingList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = roofingList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+    }
     // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
@@ -116,7 +124,7 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack() }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -181,10 +189,33 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(roofingList.itemCount) { index ->
-                                val Roofing = roofingList[index]
-                                if (Roofing != null) {
-                                    RoofingItem(Roofing, navController)
+                            val filteredList = roofingList.itemSnapshotList.items.filter {it.specialties.contains("Roofing") && it.id !in dismissedResumes  }
+
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No Roofing workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(filteredList.size) { index ->
+                                    val roofingList = filteredList[index]
+                                    if (roofingList != null && roofingList.id !in dismissedResumes) {
+                                        RoofingItem(roofingList, navController){
+                                            getResumesViewModel.dismissResume(roofingList.id)
+                                        }
+                                    }
                                 }
                             }
                             item {
@@ -210,7 +241,7 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
 }
 
 @Composable
-fun RoofingItem(roofing: resumesItem, navController: NavController) {
+fun RoofingItem(roofing: resumesItem, navController: NavController,onUninterested: () -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var reportText by remember { mutableStateOf("") }
@@ -292,6 +323,7 @@ fun RoofingItem(roofing: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }

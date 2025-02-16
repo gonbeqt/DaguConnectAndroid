@@ -30,6 +30,7 @@ fun MessagingScreen(messages: List<String>) {
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
                             modifier = Modifier.size(24.dp)
+
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(

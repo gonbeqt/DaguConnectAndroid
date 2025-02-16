@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +64,14 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun Painting(navController: NavController,getResumesViewModel: GetResumesViewModel){
     val paintingList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(paintingList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = paintingList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+    }
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
     }
@@ -115,7 +123,7 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack() }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -180,10 +188,33 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(paintingList.itemCount) { index ->
-                                val Painter = paintingList[index]
-                                if (Painter != null) {
-                                    PaintingsItem(Painter, navController)
+                            val filteredList = paintingList.itemSnapshotList.items.filter {it.specialties.contains("Painting") && it.id !in dismissedResumes  }
+
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No Painter workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(filteredList.size) { index ->
+                                    val paintingList = filteredList[index]
+                                    if (paintingList != null && paintingList.id !in dismissedResumes) {
+                                        PaintingsItem(paintingList, navController){
+                                            getResumesViewModel.dismissResume(paintingList.id)
+                                        }
+                                    }
                                 }
                             }
                             item {
@@ -208,7 +239,7 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun PaintingsItem(painter: resumesItem, navController: NavController) {
+fun PaintingsItem(painter: resumesItem, navController: NavController,onUninterested: () -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var reportText by remember { mutableStateOf("") }
@@ -290,6 +321,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }

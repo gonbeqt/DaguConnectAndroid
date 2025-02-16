@@ -60,7 +60,7 @@ fun AboutUs(navController: NavController){
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             ) {
-                IconButton(onClick = { navController.navigate("main_screen") }) {
+                IconButton(onClick = { navController.popBackStack()}) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back",
                         tint = Color(0xFF81D796)
                     )

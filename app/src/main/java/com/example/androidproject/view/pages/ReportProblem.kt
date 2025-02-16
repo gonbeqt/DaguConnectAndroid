@@ -56,7 +56,7 @@ fun ReportProblem(navController: NavController){
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(onClick = { navController.navigate("main_screen") }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back",
                     tint = Color(0xFF00A99D)
                 )

@@ -121,7 +121,7 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack() }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -188,12 +188,30 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             val filteredList = ACRepairList.itemSnapshotList.items.filter { it.specialties.contains("ACRepair") && it.id !in dismissedResumes }
-
-                            items(filteredList.size) { index ->
-                                val ACRepair = filteredList[index]
-                                if (ACRepair != null && ACRepair.id !in dismissedResumes) { // Filter directly
-                                    ACRepairItem(ACRepair, navController){
-                                        getResumesViewModel.dismissResume(ACRepair.id)
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No ACRepair Workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(filteredList.size) { index ->
+                                    val ACRepair = filteredList[index]
+                                    if (ACRepair != null && ACRepair.id !in dismissedResumes) { // Filter directly
+                                        ACRepairItem(ACRepair, navController) {
+                                            getResumesViewModel.dismissResume(ACRepair.id)
+                                        }
                                     }
                                 }
                             }
