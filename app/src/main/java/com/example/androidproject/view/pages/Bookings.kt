@@ -81,7 +81,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
         WindowType.LARGE -> 16.sp
     }
     var selectedTabIndex by remember { mutableStateOf(0) }
-    var selectedSection by remember { mutableStateOf("My Bookings") }
+    var selectedSection by remember { mutableStateOf("My Clients") }
 
     // Define tab titles based on selected section
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
@@ -93,6 +93,44 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                    .fillMaxWidth()
+                    .height(70.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left-aligned text
+                Text(
+                    text = "Bookings",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                // Right-aligned icons
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications Icon",
+                        tint = Color(0xFF3CC0B0),
+                        modifier = Modifier.size(32.dp)
+                            .clickable { navController.navigate("notification")}
+
+                    )
+                    Icon(
+                        imageVector = Icons.Default.Message,
+                        contentDescription = "Message Icon",
+                        tint = Color(0xFF3CC0B0),
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clickable { navController.navigate("message_screen") }
+                    )
+                }
+            }
             BookingsTopSection(navController, selectedSection) { section ->
                 selectedSection = section
                 selectedTabIndex = 0
@@ -123,7 +161,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
                         .padding(16.dp)
                 ) {
                     when (selectedSection) {
-                        "My Bookings" -> when (selectedTabIndex) {
+                        "My Clients" -> when (selectedTabIndex) {
                                 0 -> AllBookingsContent(getClientsBooking,navController)
                                 1 -> PendingBookingsContent(getClientsBooking,navController)
                                 2 -> DeclinedBookingsContent(getClientsBooking,navController)
@@ -153,7 +191,7 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(60.dp)
 
         ,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -162,21 +200,21 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
         // Left-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == "My Bookings") myGradient3 else SolidColor(Color.Transparent))
+                .background(if (selectedSection == "My Clients") myGradient3 else SolidColor(Color.Transparent))
                 .padding(4.dp)
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {
             TextButton(
-                onClick = { onSectionSelected("My Bookings") },
+                onClick = { onSectionSelected("My Clients") },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Bookings") Color.White else Color.Black
+                    contentColor = if (selectedSection == "My Clients") Color.White else Color.Black
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
-                    text = "My Bookings",
-                    fontSize = 28.sp,
+                    text = "My Clients",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -185,20 +223,20 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
         // Right-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == "My Applicant") myGradient3 else SolidColor(Color.Transparent))
+                .background(if (selectedSection == "My Applicants") myGradient3 else SolidColor(Color.Transparent))
                 .padding(4.dp)
                 .weight(1f),
         ) {
             TextButton(
-                onClick = { onSectionSelected("My Applicant") },
+                onClick = { onSectionSelected("My Applicants") },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Applicant") Color.White else Color.Black
+                    contentColor = if (selectedSection == "My Applicants") Color.White else Color.Black
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
-                    text = "My Applicant",
-                    fontSize = 28.sp,
+                    text = "My Applicants",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -514,9 +552,9 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
     val getbookdate = ViewModelSetups.formatDateTime(allBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 170.dp
-        WindowType.MEDIUM -> 400.dp to 180.dp
-        WindowType.LARGE -> 410.dp to 190.dp
+        WindowType.SMALL -> 390.dp to 180.dp
+        WindowType.MEDIUM -> 400.dp to 190.dp
+        WindowType.LARGE -> 410.dp to 200.dp
     }
     Card(
         modifier = Modifier
@@ -887,7 +925,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { /* Chat Action */ }
+                            .clickable { navController.navigate("cancelnow") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -905,7 +943,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
 
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("bookingdetails") }
+                            .clickable { navController.navigate("acceptnow") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1213,7 +1251,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("booknow")}
+                            .clickable { navController.navigate("booknow/${completedBooking.resumeid}")}
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1231,7 +1269,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
 
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("rateandreviews") }
+                            .clickable { navController.navigate("rateandreviews/${completedBooking.resumeid}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)

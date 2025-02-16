@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
@@ -26,7 +24,7 @@ import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
 
 @Composable
-fun CancellationDetails(trade: Tradesman, navController: NavController) {
+fun CancelledDetails(trade: Tradesman, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,8 +48,7 @@ fun HeaderSection(navController: NavController) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
-                .verticalScroll(rememberScrollState()),
+                .background(Color.White),
             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
         ) {
             Column(

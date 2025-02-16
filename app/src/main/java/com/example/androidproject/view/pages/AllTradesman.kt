@@ -245,13 +245,6 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
 
 
                 }
-                Image(painter = painterResource(id = R.drawable.bookmark),
-                    contentDescription = "Bookmark Image",
-                    modifier = Modifier
-                        .size(iconSize)
-                        .padding(end = 5.dp)
-                        .clickable { }
-                )
             }
         }
     }

@@ -57,6 +57,7 @@ fun BookmarkedScreen(modifier: Modifier = Modifier,navController:NavController) 
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
+
             BookmarkTopSection(navController)
 
             LazyColumn(
