@@ -15,20 +15,19 @@ import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
-import com.example.androidproject.view.ClientPov.AllTradesman
-import com.example.androidproject.view.ClientPov.Categories.ACRepair
-import com.example.androidproject.view.ClientPov.Categories.Carpentry
-import com.example.androidproject.view.ClientPov.Categories.Cleaning
-import com.example.androidproject.view.ClientPov.Categories.Electrician
-import com.example.androidproject.view.ClientPov.Categories.Masonry
-import com.example.androidproject.view.ClientPov.Categories.Mechanics
-import com.example.androidproject.view.ClientPov.Categories.Painting
-import com.example.androidproject.view.ClientPov.Categories.Plumbing
-import com.example.androidproject.view.ClientPov.Categories.Roofing
-import com.example.androidproject.view.ClientPov.Categories.Welding
-import com.example.androidproject.view.ClientPov.ChangePassword
-import com.example.androidproject.view.ClientPov.EmailVerification
-import com.example.androidproject.view.ClientPov.ReportProblem
+import com.example.androidproject.view.pages.AllTradesman
+import com.example.androidproject.view.pages.Categories.ACRepair
+import com.example.androidproject.view.pages.Categories.Cleaning
+import com.example.androidproject.view.pages.Categories.Electrician
+import com.example.androidproject.view.pages.Categories.Masonry
+import com.example.androidproject.view.pages.Categories.Mechanics
+import com.example.androidproject.view.pages.Categories.Painting
+import com.example.androidproject.view.pages.Categories.Plumbing
+import com.example.androidproject.view.pages.Categories.Roofing
+import com.example.androidproject.view.pages.Categories.Welding
+import com.example.androidproject.view.pages.ChangePassword
+import com.example.androidproject.view.pages.EmailVerification
+import com.example.androidproject.view.pages.ReportProblem
 import com.example.androidproject.view.Feedback
 import com.example.androidproject.view.LandingPage2
 import com.example.androidproject.view.LandingPageScreen
@@ -42,6 +41,7 @@ import com.example.androidproject.view.pages.BookingDetails
 import com.example.androidproject.view.pages.BookingsScreen
 import com.example.androidproject.view.pages.CancelNow
 import com.example.androidproject.view.pages.CancelledDetails
+import com.example.androidproject.view.pages.Categories.Carpentry
 import com.example.androidproject.view.pages.ConfirmBook
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.pages.NotificationScreen
@@ -120,7 +120,6 @@ class MainActivity : ComponentActivity() {
 
         val bookTradesmanVMFactory = BookTradesmanViewModelFactory(apiService, this)
         val bookingTradesmanViewModel = ViewModelProvider(this, bookTradesmanVMFactory)[BooktradesmanViewModel::class.java]
-
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -139,7 +138,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
