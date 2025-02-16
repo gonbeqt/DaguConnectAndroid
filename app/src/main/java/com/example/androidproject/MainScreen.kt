@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -38,18 +39,20 @@ import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import androidx.compose.ui.platform.LocalContext
+import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.chats.GetChatViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier) {
+fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier,viewModel:GetChatViewModel) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
-        NavigationItem("Bookmarks", Icons.Default.CollectionsBookmark),
+        NavigationItem("Message", Icons.Default.Message),
         NavigationItem("Profile", Icons.Default.Person)
 
     )
@@ -95,7 +98,8 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
             getJobsViewModel,
             logoutViewModel,
             getClientsBooking,
-            getResumesViewModel)
+            getResumesViewModel,
+            viewModel)
     }
 }
 
@@ -107,7 +111,8 @@ fun ContentScreen(
     getJobsViewModel: GetJobsViewModel,
     logoutViewModel: LogoutViewModel,
     getClientsBooking: GetClientBookingViewModel,
-    getResumesViewModel: GetResumesViewModel
+    getResumesViewModel: GetResumesViewModel,
+    viewModel: GetChatViewModel
 ) {
 
     val role = AccountManager.getAccount()?.isClient
@@ -116,7 +121,7 @@ fun ContentScreen(
             0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel)
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
-            3 -> BookmarkedScreen(modifier.padding(bottom = 0.1.dp),navController)
+            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileScreen(
                 modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel
             )
@@ -126,7 +131,7 @@ fun ContentScreen(
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel)
             1 -> BookingsTradesman(modifier.padding(bottom = 0.1.dp),navController)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp),navController)
-            3 -> BookmarkedTradesman(modifier.padding(bottom = 0.1.dp),navController)
+            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController)
         }
     }

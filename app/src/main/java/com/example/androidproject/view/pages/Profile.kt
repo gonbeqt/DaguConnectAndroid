@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -99,27 +100,16 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
             )
 
             // Right-aligned icons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
+                    tint = Color.Black,
+                    modifier = Modifier.size(35.dp)
                         .clickable { navController.navigate("notification") }
 
                 )
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Account Settings Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clickable { navController.navigate("accountsettings") }
-                )
-            }
+
         }
 
 
@@ -605,10 +595,12 @@ fun GeneralSettings(
             .padding(8.dp)
             .clickable { onClick() }
     ) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF9F9F9),
-                shape = RoundedCornerShape(8.dp))) {
+        Card(modifier = Modifier
+            .fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),)
+
+            {
 
             Column(modifier = Modifier.padding(10.dp)) {
 
@@ -689,24 +681,51 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             text = "Log Out", fontWeight = FontWeight(500),
             fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
         )
-        GeneralSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
-            title = "Log Out",
-            description = "",
-            onClick = {
-                val token = TokenManager.getToken()
-                if (token != null) {
-                    logoutViewModel.logout("Bearer $token")
-                } else {
-                    // Handle case where token is null
-                    TokenManager.clearToken()
-                    AccountManager.clearAccountData()
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 5.dp)// Added padding to avoid edge clipping
+                .clickable {
+                    val token = TokenManager.getToken()
+                    if (token != null) {
+                        logoutViewModel.logout("Bearer $token")
+                    } else {
+                        // Handle case where token is null
+                        TokenManager.clearToken()
+                        AccountManager.clearAccountData()
+                        navController.navigate("login") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        }
                     }
+                },
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) // Added elevation
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center // Centers the content inside the Card
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_logout),
+                        contentDescription = "Logout Icon"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Log Out",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
-        )
+        }
+
+
     }
 }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

@@ -1,4 +1,4 @@
-package com.example.androidproject.view.ClientPov
+package com.example.androidproject.view.pages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
