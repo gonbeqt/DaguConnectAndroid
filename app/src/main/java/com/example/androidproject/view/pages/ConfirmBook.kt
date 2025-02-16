@@ -433,18 +433,20 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                 ) {
                                     Text(text = "Confirm")
                                 }
-                                when(bookingState){
-                                    is BooktradesmanViewModel.BookTradesmanState.Loading ->{
-                                        Text(text = "Loading...")
+                                LaunchedEffect(bookingState) {
+                                    when (bookingState) {
+                                        is BooktradesmanViewModel.BookTradesmanState.Success -> {
+                                            Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
+                                            bookingTradesmanViewModel.resetState() // Reset state to prevent re-triggering
+                                        }
+                                        is BooktradesmanViewModel.BookTradesmanState.Error -> {
+                                            val errorMessage = (bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message
+                                            Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                                            Log.e("BookTradesman", "Error: $errorMessage") // Debugging
+                                            bookingTradesmanViewModel.resetState() // Reset state to prevent repeated error
+                                        }
+                                        else -> Unit
                                     }
-                                    is BooktradesmanViewModel.BookTradesmanState.Success ->{
-                                        Toast.makeText(context,"Booking Successful", Toast.LENGTH_SHORT).show()
-                                    }
-                                    is BooktradesmanViewModel.BookTradesmanState.Error ->{
-                                        Text(text = "Error: ${(bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message}")
-                                        Toast.makeText(context,"Error: ${(bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message}", Toast.LENGTH_SHORT).show()
-                                    }
-                                    else -> Unit
                                 }
                             }
                         }
