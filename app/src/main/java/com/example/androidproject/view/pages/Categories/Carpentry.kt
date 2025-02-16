@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -67,6 +68,13 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewModel) {
     val carpentryList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(carpentryList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = carpentryList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes }
+    }
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
     }
@@ -176,14 +184,18 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
                         LazyColumn(
 
                             modifier = Modifier
-                                .fillMaxSize() // Ensure LazyColumn takes up the remaining space
+                                .fillMaxSize()
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(carpentryList.itemCount) { index ->
-                                val Carpentry = carpentryList[index]
-                                if (Carpentry != null) {
-                                    CarpentryItem(Carpentry, navController)
+                            val filteredList = carpentryList.itemSnapshotList.items.filter {it.specialties.contains("Carpentry") && it.id !in dismissedResumes  }
+
+                            items(filteredList.size) { index ->
+                                val Carpentry = filteredList[index]
+                                if (Carpentry != null && Carpentry.id !in dismissedResumes) {
+                                    CarpentryItem(Carpentry, navController){
+                                        getResumesViewModel.dismissResume(Carpentry.id)
+                                    }
                                 }
                             }
                             item {
@@ -208,7 +220,7 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
 }
 
 @Composable
-fun CarpentryItem(carpentry: resumesItem, navController: NavController) {
+fun CarpentryItem(carpentry: resumesItem, navController: NavController,onUninterested:() -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var reportText by remember { mutableStateOf("") }
@@ -290,6 +302,7 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }

@@ -382,7 +382,7 @@ fun PlumbingRepairCard(trade: Tradesmandate) {
                 Row(
                     modifier = Modifier.padding(top = 5.dp)
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceAround
 
                 ) {
                     Column {

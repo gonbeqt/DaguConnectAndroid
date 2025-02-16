@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,10 +64,18 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewModel){
     val ACRepairList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(ACRepairList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = ACRepairList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+    }
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
     }
+
 
     Box(
         modifier = Modifier
@@ -178,10 +187,14 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(ACRepairList.itemCount) { index ->
-                                val ACRepair = ACRepairList[index]
-                                if (ACRepair != null) {
-                                    ACRepairItem(ACRepair, navController)
+                            val filteredList = ACRepairList.itemSnapshotList.items.filter { it.specialties.contains("ACRepair") && it.id !in dismissedResumes }
+
+                            items(filteredList.size) { index ->
+                                val ACRepair = filteredList[index]
+                                if (ACRepair != null && ACRepair.id !in dismissedResumes) { // Filter directly
+                                    ACRepairItem(ACRepair, navController){
+                                        getResumesViewModel.dismissResume(ACRepair.id)
+                                    }
                                 }
                             }
                             item {
@@ -206,7 +219,7 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun ACRepairItem(ACRepair: resumesItem, navController: NavController) {
+fun ACRepairItem(ACRepair: resumesItem, navController: NavController,onUninterested: () -> Unit) {
 
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
@@ -291,6 +304,8 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
+
                                 }
                             )
                         }

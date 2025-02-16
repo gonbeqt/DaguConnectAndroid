@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,7 +67,14 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
     val weldingList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
 
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(weldingList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = weldingList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes }
+    }
     // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
@@ -181,10 +189,14 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(weldingList.itemCount) { index ->
-                                val Welding = weldingList [index]
-                                if (Welding != null) {
-                                    WeldingItem(Welding, navController)
+                            val filteredList = weldingList.itemSnapshotList.items.filter {it.specialties.contains("Welding  ") && it.id !in dismissedResumes }
+
+                            items(filteredList.size) { index ->
+                                val weldingList = filteredList[index]
+                                if (weldingList != null && weldingList.id !in dismissedResumes) { // Filter directly
+                                    WeldingItem(weldingList, navController){
+                                        getResumesViewModel.dismissResume(weldingList.id)
+                                    }
                                 }
                             }
                             item {
@@ -209,7 +221,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun WeldingItem(welding: resumesItem, navController: NavController) {
+fun WeldingItem(welding: resumesItem, navController: NavController,onUninterested: () -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var reportText by remember { mutableStateOf("") }
@@ -291,6 +303,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }

@@ -453,7 +453,7 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
         modifier = Modifier
             .size(120.dp, 100.dp)
 
-            .clickable { onClick() },
+            .clickable { onClick() }, //implementation here
         shape = CircleShape
     ) {
         Box(
