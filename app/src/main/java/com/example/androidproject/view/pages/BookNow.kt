@@ -171,10 +171,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             modifier = Modifier.padding(top = 10.dp)
                                         )
                                         Text(
-                                            text = resume.preferedworklocation
-                                                .replace("[","")
-                                                .replace("]","")
-                                                .replace("\"",""),
+                                            text = resume.preferedworklocation,
                                             color = Color.Black,
                                             fontSize = 16.sp
                                         )

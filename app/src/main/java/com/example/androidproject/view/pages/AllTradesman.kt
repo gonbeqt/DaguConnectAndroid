@@ -44,6 +44,7 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) {
     val resumeList = getResumes.resumePagingData.collectAsLazyPagingItems()
+    val dismissedResumes = getResumes.dismissedResumes.value
     Log.d("AllTradesmanItem", "$resumeList")
 
     // Example: Call this after adding a new resume
@@ -114,9 +115,12 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel) 
                             .background(Color.White),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(resumeList.itemCount) { index ->
+                        items(
+                            count = resumeList.itemCount,
+                            key = { index -> resumeList[index]?.id ?: index }
+                        ) { index ->
                             val resume = resumeList[index]
-                            if (resume != null) {
+                            if (resume != null && !dismissedResumes.contains(resume.id)) {
                                 AllTradesmanItem(resume, navController, cardHeight)
                             }
                         }
