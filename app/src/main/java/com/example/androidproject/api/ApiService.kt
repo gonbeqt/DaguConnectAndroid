@@ -4,6 +4,7 @@ import com.example.androidproject.model.CreateJob
 import com.example.androidproject.model.CreateJobResponse
 import com.example.androidproject.model.GetChats
 import com.example.androidproject.model.GetJobs
+import com.example.androidproject.model.GetRecentJob
 import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.model.LoginRequest
@@ -46,7 +47,6 @@ interface ApiService {
     @DELETE("/user/logout")
     suspend fun logout(@Header("Authorization") token: String): Response<Unit>
 
-
     @GET("/user/getresumes")
     suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
 
@@ -64,7 +64,10 @@ interface ApiService {
 
     @POST("/user/client/create-job")
     suspend fun postJobs(@Body request: CreateJob): Response<CreateJobResponse>
+
     @POST("/user/client/booktradesman/{tradesman_Id}")
     suspend fun booktradesman(@Header("Authorization") token: String, @Body request: BookTradesmanRequest, @Path("tradesman_Id") tradesman_Id: Int): Response<BookTradesmanResponse>
 
+    @GET("/user/jobs/recent")
+    suspend fun getRecentJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetRecentJob>
 }
