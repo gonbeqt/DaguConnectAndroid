@@ -49,6 +49,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -125,8 +126,8 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .padding(4.dp)
                                 .background(Color(0xFFD9D9D9))
-
                         ) {
                             when (selectedTabIndex) {
                                 0 -> TopMatches(navController, getJobsViewModel)
@@ -142,40 +143,37 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
 }
 @Composable
 fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize) {
-    Row(
+    Box(
         modifier = Modifier
-            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
             .fillMaxWidth()
-            .height(70.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .shadow(1.dp)
+            .background(Color.White)
+            .padding(top = 10.dp)
     ) {
-        // Left-aligned text
-        Text(
-            text = "Home",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Medium
-        )
-
-        // Right-aligned icons
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .padding(horizontal = 25.dp), // Added padding inside for spacing
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Left-aligned text
+            Text(
+                text = "Home",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Medium
+            )
+
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
-                tint = Color(0xFF3CC0B0),
-                modifier = Modifier.size(32.dp)
+                tint = Color.Black,
+                modifier = Modifier.size(35.dp)
+                    .clickable { navController.navigate("notification") }
             )
-            Icon(
-                imageVector = Icons.Default.Message,
-                contentDescription = "Message Icon",
-                tint = Color(0xFF3CC0B0),
-                modifier = Modifier
-                    .size(32.dp)
-                    .clickable { navController.navigate("message_screen") }
-            )
+
+
         }
     }
 }
@@ -184,12 +182,10 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
 @Composable
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
-
-
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFE9E9E9))) {
         LazyColumn(
-            modifier = Modifier.padding(bottom = 100.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(bottom = 70.dp, top = 2.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(jobsList.itemCount) { index ->
                 val job = jobsList[index]
