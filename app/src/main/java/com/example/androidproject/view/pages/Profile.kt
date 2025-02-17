@@ -17,11 +17,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,8 +33,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -55,6 +64,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.Role.Companion.RadioButton
+import androidx.compose.ui.semantics.Role.Companion.Switch
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -171,12 +182,20 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier.fillMaxWidth(),
+                indicator = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                        color = Color(0xFF3CC0B0)
+                    )
+                }
             ) {
                 tabNames.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
                         onClick = { selectedTabIndex = index },
-                        text = { Text(title, fontSize = 14.sp) },
+                        text = { Text(title, fontSize = 14.sp,
+                            color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else  Color.Black) },
+
                     )
                 }
             }
@@ -359,7 +378,8 @@ fun PostsCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(8.dp)),
+                colors = CardDefaults.cardColors(Color.White)
             ) {
                 Column(
                     modifier = Modifier
@@ -379,129 +399,113 @@ fun PostsCard(
                         color = Color.Gray
                     )
                     // Title TextField with Border
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ) {
-                        TextField(
+
+                        OutlinedTextField(
                             value = editableTitle,
                             onValueChange = { editableTitle = it },
                             label = { Text("Title") },
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
-                    }
+
 
                     // Description TextField with Border
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ) {
-                        TextField(
+                        OutlinedTextField(
                             value = editableDescription,
                             onValueChange = { editableDescription = it },
                             label = { Text("Description") },
+                            shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ){
-                        TextField(value = editableLocation,
+
+
+                        OutlinedTextField(value = editableLocation,
                             onValueChange = { editableLocation = it },
                             label = { Text("Location") },
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
-                            ))
+                            )
+                        )
 
-                    }
+
 
                     // Rate TextField with Border
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ) {
-                        TextField(
+
+                        OutlinedTextField(
                             value = editableRate,
                             onValueChange = { editableRate = it },
                             label = { Text("Estimated Budget") },
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)) // Add border
-                    ) {
-                        TextField(
+
+
+                        OutlinedTextField(
                             value = editableDeadline,
                             onValueChange = { editableDeadline = it },
                             label = { Text("Deadline") },
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
-                    }
+
                     Column(
                         modifier = Modifier.padding(5.dp),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -538,7 +542,7 @@ fun PostsCard(
 
                                         .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
                                         .clip(RoundedCornerShape(30.dp))
-                                        .background(if (isSelected) Color.Gray else Color.White)
+                                        .background(if (isSelected) Color(0xFF3CC0B0) else Color.White)
                                         .padding(horizontal = 12.dp, vertical = 8.dp)
                                 ) {
                                     Text(
@@ -562,7 +566,8 @@ fun PostsCard(
                             editableRate = originalRate
                             editableDeadline = originalDeadline
                             isDialogVisible = false
-                        }) {
+                        }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
+                            ) {
                             Text("Cancel")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
@@ -570,7 +575,7 @@ fun PostsCard(
                             // Save the new values
                             isDialogVisible = false
                             onEditClick(editableTitle, editableDescription, editableRate,editableDeadline)
-                        }) {
+                        }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))) {
                             Text("Save")
                         }
                     }
@@ -587,47 +592,54 @@ fun GeneralSettings(
     icon: ImageVector,
     title: String,
     description: String,
+    trailingIcon: ImageVector?,
     onClick: () -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
-            .background(Color.White)
-            .padding(8.dp)
-            .clickable { onClick() }
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Card(modifier = Modifier
-            .fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),)
-
-            {
-
-            Column(modifier = Modifier.padding(10.dp)) {
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 10.dp)
-                    )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Column(modifier = Modifier.padding(start = 14.dp)) {
                     Text(
                         text = title,
-                        modifier = Modifier.padding(start = 14.dp)
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
-
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                 }
-                Text(
-                    text = description,
-                    modifier = Modifier.padding(top = 5.dp, start = 10.dp)
-                )
-
             }
-
+            trailingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                        .clickable { onClick() }
+                )
+            }
         }
     }
-
 }
 
 
@@ -635,6 +647,7 @@ fun GeneralSettings(
 fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewModel) {
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
+    var isChecked by remember { mutableStateOf(true) }
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
             // Clear tokens and navigate regardless of result
@@ -649,16 +662,59 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
     }
     Column (modifier = Modifier.verticalScroll(rememberScrollState())){
 
-        GeneralSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_notification),
-            title = "Notification",
-            description = "Manage alerts and updates.",
-            onClick = { /* Handle Notification click */ }
-        )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .clickable { },
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector =Icons.Default.NotificationsNone,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column(modifier = Modifier.padding(start = 14.dp)) {
+                        Text(
+                            text = "Notification",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = "Manage alerts update",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+                Switch(
+                    checked = isChecked,
+                    onCheckedChange = { isChecked = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF3CC0B0),
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = Color.Gray
+                    )
+                )
+            }
+        }
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
             title = "Privacy",
             description = "Change your password.",
+            trailingIcon = Icons.Default.ArrowForwardIos,
             onClick = { navController.navigate("changepassword") }
         )
         Text(
@@ -669,13 +725,15 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             icon = ImageVector.vectorResource(id = R.drawable.ic_about),
             title = "About Us",
             description = "Know more about our team.",
+            trailingIcon = Icons.Default.ArrowForwardIos,
             onClick = { navController.navigate("aboutus") }
         )
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_report),
             title = "Report a Problem",
             description = "Report a problem.",
-            onClick = { /* Handle Report a Problem click */ }
+            trailingIcon = Icons.Default.ArrowForwardIos,
+            onClick = { navController.navigate("reportproblem") }
         )
         Text(
             text = "Log Out", fontWeight = FontWeight(500),
@@ -684,7 +742,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(70.dp)
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 5.dp)// Added padding to avoid edge clipping
                 .clickable {
@@ -704,28 +762,27 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) // Added elevation
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center // Centers the content inside the Card
+                modifier = Modifier.fillMaxSize()
             ) {
                 Row(
+                    modifier = Modifier.align(Alignment.CenterStart).padding(16.dp), // Aligns Row to center-start
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Start
+
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_logout),
-                        contentDescription = "Logout Icon"
-                    )
+                        contentDescription = "Logout Icon",
+                        modifier = Modifier.padding(start = 5.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Log Out",
                         style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Start
                     )
                 }
             }
         }
-
-
     }
 }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -781,7 +838,8 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(
                         modifier = Modifier
@@ -802,69 +860,83 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                         )
 
                         // Title TextField
-                        TextField(
+                        OutlinedTextField(
                             value = title,
                             onValueChange = { title = it },
                             label = { Text("Title") },
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
 
                         // Description TextField
-                        TextField(
+                        OutlinedTextField(
                             value = description,
                             onValueChange = { description = it },
                             label = { Text("Description") },
+                            shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
-                        TextField(
+                        OutlinedTextField(
                             value = location,
                             onValueChange = { location = it },
                             label = { Text("Location") },
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),
-
-                            shape = RoundedCornerShape(8.dp), // Rounded Corners
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White, // White background
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
 
 
                         // Rate TextField
-                        TextField(
+                        OutlinedTextField(
                             value = rate,
                             onValueChange = { rate = it },
                             label = { Text("Estimated Budget") },
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White, shape = RoundedCornerShape(8.dp)),                        maxLines = 1,
-                            shape = RoundedCornerShape(8.dp),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
+                                .heightIn(min = 56.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
                                 cursorColor = Color.Black
                             )
                         )
@@ -933,7 +1005,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                             }
                                             .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
                                             .clip(RoundedCornerShape(30.dp))
-                                            .background(if (isSelected) Color.Gray else Color.White)
+                                            .background(if (isSelected) Color(0xFF3CC0B0) else Color.White)
                                             .padding(horizontal = 12.dp, vertical = 8.dp)
                                     ) {
                                         Text(
@@ -949,7 +1021,8 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            Button(onClick = { isDialogVisible = false }) {
+                            Button(onClick = { isDialogVisible = false }
+                                ,colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))) {
                                 Text("Cancel")
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -967,7 +1040,9 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 )
                                 isDialogVisible = false
                                 onPostNewService(newPost) // Send the new post to the parent Composable
-                            }) {
+
+                            },colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
+                            ) {
                                 Text("Post")
                             }
                         }

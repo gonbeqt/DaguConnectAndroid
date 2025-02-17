@@ -90,7 +90,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
     val windowSize = rememberWindowSizeClass()
 
 
-    val categories = listOf(
+    val categories = listOf(    
         Categories(R.drawable.carpentry, "Carpentry"),
         Categories(R.drawable.painting, "Painting"),
         Categories(R.drawable.welding, "Welding"),
@@ -544,7 +544,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                 Column(
                     modifier = Modifier
                         .size(250.dp, 100.dp)
-                        .padding(start = 10.dp)
+                        .padding(start = 24.dp)
                 )
                 {
                     Row(

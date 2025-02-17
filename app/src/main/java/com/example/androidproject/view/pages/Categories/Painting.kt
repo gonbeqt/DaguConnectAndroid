@@ -169,7 +169,7 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
                         )
 
                         Text(
-                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
+                            text = "Find skilled house painters for interior and exterior painting, ensuring a flawless finish with high-quality, long-lasting results.",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start

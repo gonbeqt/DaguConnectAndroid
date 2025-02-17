@@ -167,7 +167,7 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
                         )
 
                         Text(
-                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
+                            text = "Find skilled aircon technicians for repairs, maintenance, and installation, ensuring efficient cooling and top-quality service.",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start
@@ -177,6 +177,8 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
+
+
                             modifier = Modifier.padding(top = 8.dp)
                         )
 

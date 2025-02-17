@@ -170,7 +170,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                         )
 
                         Text(
-                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
+                            text = "Find skilled welders for metal fabrication, repairs, and installations, ensuring strong, precise, and durable craftsmanship.",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start

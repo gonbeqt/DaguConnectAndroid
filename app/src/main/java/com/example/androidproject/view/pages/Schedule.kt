@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
@@ -44,12 +45,25 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
 
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
+    var selectedFilter by remember { mutableStateOf("My Clients") }
 
-    val tradesman = listOf(
+    val clients = listOf(
         Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
-        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-18"),
-        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-19")
+        Tradesmandate(R.drawable.pfp, "John", "Electrician", "P600/hr", 4.2, R.drawable.bookmark, "2025-02-18"),
+        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
+        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
+        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
+
+        )
+
+    val applicants = listOf(
+        Tradesmandate(R.drawable.pfp, "Sarah", "Carpenter", "P550/hr", 4.3, R.drawable.bookmark, "2025-02-19"),
+        Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20"),
+        Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20"),
+                Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20")
+
     )
+
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     fun parseDate(dateStr: String): LocalDate? {
         return try {
@@ -58,7 +72,8 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
             null
         }
     }
-    val filteredTradesmen = tradesman.filter { trade ->
+
+    val filteredList = (if (selectedFilter == "My Clients") clients else applicants).filter { trade ->
         parseDate(trade.date)?.isEqual(selectedDate) ?: false
     }
 
@@ -78,7 +93,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
                 selectedDate = selectedDate,
                 onDateSelected = { date -> selectedDate = date },
                 onMonthChange = { month -> currentMonth = month },
-                tradesmen = tradesman
+                tradesmen = clients + applicants
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -86,19 +101,54 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
                 Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
+
             ) {
-                Text(
-                    text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
-                    color = Color.Black
-                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically) {
+
+                    Text(
+                        text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp,
+                        color = Color.Black
+                    )
+                    // Dropdown for filtering
+                    var expanded by remember { mutableStateOf(false) }
+                    Box(contentAlignment = Alignment.Center,
+                        modifier = Modifier.wrapContentSize(Alignment.Center)
+                    ) {
+                        TextButton(onClick = { expanded = true }) {
+                            Text(text = selectedFilter, color = Color(0xFF3CC0B0))
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF3CC0B0))
+                        }
+                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                            DropdownMenuItem(
+                                colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
+                                text = { Text("My Clients") },
+                                onClick = {
+                                    selectedFilter = "My Clients"
+                                    expanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
+                                text = { Text("My Applicants") },
+                                onClick = {
+                                    selectedFilter = "My Applicants"
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 Text(
                     text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.Gray
                 )
+
             }
 
             LazyColumn(
@@ -107,17 +157,17 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
                     .size(420.dp)
                     .background(Color.White)
                     .padding(bottom = 100.dp),
-                contentPadding = PaddingValues(12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                items(filteredTradesmen.size) { index ->
-                    val trade = filteredTradesmen[index]
+                items(filteredList.size) { index ->
+                    val trade = filteredList[index]
                     PlumbingRepairCard(trade)
                 }
             }
         }
     }
 }
+
 
 
 
@@ -279,6 +329,7 @@ fun CalendarSection(
 
 @Composable
 fun PlumbingRepairCard(trade: Tradesmandate) {
+
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -298,7 +349,7 @@ fun PlumbingRepairCard(trade: Tradesmandate) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(6.dp),
+            .padding(16.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -317,17 +368,24 @@ fun PlumbingRepairCard(trade: Tradesmandate) {
                     .padding(end = 10.dp))
             Column(
                 modifier = Modifier.weight(1f)
-                    .padding(top = 7.dp)
+                    .padding(top = 7.dp, start = 8.dp)
 
             ) {
+                Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                    Text(
+                        modifier = Modifier.padding( top = 5.dp),
+                        text = trade.username,
+                        color = Color.Black,
+                        fontSize = nameTextSize
+                    )
+                    Text(
+                        modifier = Modifier.padding( top = 5.dp, end = 15.dp),
+                        text = "Pending",
+                        color = Color.Black,
+                        fontSize = smallTextSize
+                    )
+                }
 
-                Text(
-                    modifier = Modifier.padding( top = 5.dp),
-                    text = trade.username,
-                    color = Color.Black,
-
-                    fontSize = nameTextSize
-                )
                 Text(
                     text = trade.category,
                     color = Color.Gray,

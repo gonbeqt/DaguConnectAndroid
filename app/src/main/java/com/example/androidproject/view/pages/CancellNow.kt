@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -30,7 +31,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,7 +63,9 @@ import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 @Composable
 fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navController: NavController,resumeId: String) {
     var Cancel by remember { mutableStateOf(false) }
-    val checkboxStates = remember { mutableStateListOf(false, false, false, false, false, false) }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+
     val reasons = listOf(
         "Change of Mind",
         "Found a Different Service Provider",
@@ -504,7 +510,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                         Text(
                             "Reason for Cancellation",
                             fontSize = 20.sp,
-                            color = Color.White, // White text color
+                            color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
 
@@ -515,27 +521,48 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                                     modifier = Modifier.padding(vertical = 8.dp)
                                 ) {
                                     Checkbox(
-                                        checked = checkboxStates[index],
-                                        onCheckedChange = { checkboxStates[index] = it },
+                                        checked = selectedIndex == index,
+                                        onCheckedChange = {
+                                            selectedIndex = if (selectedIndex == index) -1 else index
+                                        },
                                         colors = CheckboxDefaults.colors(
-                                            uncheckedColor = Color.Black
-                                            ,
-                                            checkedColor = Color(
-                                                0xFF42C2AE
-                                            )
+                                            uncheckedColor = Color.Black,
+                                            checkedColor = Color(0xFF42C2AE)
                                         )
                                     )
                                     Text(
                                         text = reason,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Medium,
-                                        color = Color.Black, // White text color
+                                        color = Color.Black,
                                         modifier = Modifier.padding(start = 8.dp)
                                     )
                                 }
                             }
                         }
 
+                        if (selectedIndex == reasons.lastIndex) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = otherReason,
+                                onValueChange = { otherReason = it },
+                                placeholder = { Text("Enter your reason") },
+                                shape = RoundedCornerShape(16.dp),
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 56.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Blue,
+                                    unfocusedIndicatorColor = Color.Gray,
+                                    focusedLabelColor = Color.Blue,
+                                    unfocusedLabelColor = Color.Gray,
+                                    cursorColor = Color.Black
+                                )
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
@@ -551,7 +578,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                                     )
                                 )
                             ) {
-                                Text("Submit", color = Color.White)
+                                Text("Cancel", color = Color.White)
                             }
                             Button(
                                 onClick = { Cancel = false },
@@ -562,7 +589,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                                     )
                                 )
                             ) {
-                                Text("Cancel", color = Color.White)
+                                Text("Submit", color = Color.White)
                             }
                         }
                     }

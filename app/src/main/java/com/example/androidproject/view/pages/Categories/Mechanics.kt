@@ -166,7 +166,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                         )
 
                         Text(
-                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
+                            text = "Find skilled mechanics for vehicle repairs, maintenance, and diagnostics, ensuring top performance and reliability.",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start

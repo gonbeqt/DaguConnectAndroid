@@ -170,7 +170,7 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
                         )
 
                         Text(
-                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
+                            text = "Find skilled roofing workers for installations, repairs, and maintenance, ensuring durable and weatherproof protection for your home.",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start
