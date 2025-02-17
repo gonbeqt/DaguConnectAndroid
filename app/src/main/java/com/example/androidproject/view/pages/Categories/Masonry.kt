@@ -167,7 +167,7 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
                         )
 
                         Text(
-                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
+                            text = "Get expert masonry services for brickwork, stonework, and concrete repairs, delivering durable and high-quality craftsmanship.",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Start

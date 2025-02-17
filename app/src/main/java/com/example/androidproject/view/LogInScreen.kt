@@ -213,7 +213,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
                     navController = navController,
                     windowSize = windowSize,
                     modifier = Modifier.constrainAs(signUpText) {
-                        top.linkTo(loginButton.bottom, margin = 16.dp)
+                        top.linkTo(loginButton.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
@@ -258,7 +258,7 @@ fun EmailField(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
-                    contentDescription = "Email Icon"
+                    contentDescription = "Email Icon", tint = Color.Black
                 )
             },
             singleLine = true,
@@ -308,10 +308,10 @@ fun PasswordField(password: String,
             onPasswordChange(it)
         },
         label = { Text("Password") },
-        leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") },
+        leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon", tint = Color.Black) },
         trailingIcon = {
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(painter = icon, contentDescription = "Toggle Password Visibility", modifier = Modifier.size(24.dp))
+                Icon(painter = icon, contentDescription = "Toggle Password Visibility", modifier = Modifier.size(24.dp), tint = Color.Black)
             }
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

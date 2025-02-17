@@ -38,13 +38,13 @@ import com.example.androidproject.R
 @Composable
 fun AboutUs(navController: NavController){
         val faqs = listOf(
-            "What is DaguConnect?" to "DaguConnect is a platform that connects clients with tradespeople.",
-            "How do I sign up as a tradesperson?" to "You can sign up through the DaguConnect website or mobile app.",
-            "Can clients contact tradespeople directly?" to "Yes, clients can contact tradespeople via the app.",
-            "How do I receive job requests?" to "Job requests will appear in your dashboard once a client selects your service.",
-            "Is there a way to verify a tradesperson’s credibility?" to "Yes, we have a review and rating system for verification.",
-            "How are payments handled?" to "Payments are securely processed through our platform.",
-            "What should I do if I encounter an issue?" to "You can reach out to our support team for assistance."
+            "What is DaguConnect?" to "DaguConnect is a platform that connects clients with skilled tradespeople across various industries, including aircon repair, masonry, mechanics, house painting, roofing, welding, and more. Whether you need repairs, installations, or maintenance services, DaguConnect helps you find reliable professionals to get the job done efficiently and with high-quality craftsmanship.",
+            "How do I sign up as a tradesperson?" to "You can sign up as a tradesperson through the DaguConnect website or mobile app by creating an account, providing your skills and experience, and verifying your details to start connecting with clients.",
+            "Can clients contact tradespeople directly?" to "Yes, clients can contact tradespeople directly via the DaguConnect app, allowing for easy communication, service inquiries, and job scheduling.",
+            "How do I receive job requests?" to "Job requests will appear in your bookings pending as soon as a client selects your service, allowing you to review details, communicate with the client, and accept or decline the request.",
+            "Is there a way to verify a tradesperson’s credibility?" to "Yes, we have a detailed review and rating system in place to help verify a tradesperson's credibility. Customers can leave feedback based on their experiences, which allows future clients to assess the quality of the tradesperson's work. This system also includes ratings for professionalism, punctuality, and the overall job quality. We encourage transparent reviews to ensure that tradespeople maintain high standards and build trust with their clients.",
+            "How are payments handled?" to "Payments are securely handled through face-to-face transactions. The tradesperson and customer can agree on the payment terms directly, and all payments are processed in person, ensuring transparency and trust. We recommend using secure payment methods, and we encourage both parties to keep a record of the transaction for future reference.",
+            "What should I do if I encounter an issue?" to "If you encounter any issues, you can reach out to our dedicated support team for assistance. Our team is available to help resolve any concerns you may have, whether it’s related to payments, services, or any other aspect of your experience. We’re committed to ensuring that any problems are addressed quickly and efficiently to provide you with the best possible service."
         )
 
         Column(
