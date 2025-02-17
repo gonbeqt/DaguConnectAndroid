@@ -66,7 +66,7 @@ fun HeaderSection(navController: NavController) {
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Arrow Back",
                         Modifier
-                            .clickable { navController.navigate("main_screen") }
+                            .clickable { navController.popBackStack() }
                             .padding(16.dp),
                         tint = Color(0xFF81D796)
                     )

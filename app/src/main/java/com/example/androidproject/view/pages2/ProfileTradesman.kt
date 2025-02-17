@@ -1,5 +1,7 @@
 package com.example.androidproject.view.pages2
 
+import LogoutViewModel
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +27,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,10 +47,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.TokenManager
 
 
 @Composable
-fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController) {
+fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController,logoutViewModel: LogoutViewModel) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Resume", "General")
 
@@ -166,7 +173,7 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
             ) {
                 when (selectedTabIndex) {
                     0 -> MyResume(navController)
-                    1 -> SettingsTradesmanScreen(navController)
+                    1 -> SettingsTradesmanScreen(navController,logoutViewModel)
                 }
             }
         }
@@ -343,7 +350,22 @@ fun GeneralTradesmanSettings(
 
 
 @Composable
-fun SettingsTradesmanScreen(navController: NavController) {
+fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel) {
+
+    val logoutResult by logoutViewModel.logoutResult.collectAsState()
+    val context = LocalContext.current
+    LaunchedEffect(logoutResult) {
+        logoutResult?.let {
+            // Clear tokens and navigate regardless of result
+            TokenManager.clearToken()
+            AccountManager.clearAccountData()
+            Toast.makeText(context, "logout successful", Toast.LENGTH_SHORT).show()
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }
+            logoutViewModel.resetLogoutResult()
+        }
+    }
     Column {
 
         GeneralTradesmanSettings(
@@ -383,7 +405,17 @@ fun SettingsTradesmanScreen(navController: NavController) {
             title = "Log Out",
             description = "",
             onClick = {
-
+                val token = TokenManager.getToken()
+                if (token != null) {
+                    logoutViewModel.logout("Bearer $token")
+                } else {
+                    // Handle case where token is null
+                    TokenManager.clearToken()
+                    AccountManager.clearAccountData()
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                }
             }
         )
     }

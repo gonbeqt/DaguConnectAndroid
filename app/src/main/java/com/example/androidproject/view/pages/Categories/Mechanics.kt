@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +64,14 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewModel) {
     val mechanicsList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(mechanicsList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = mechanicsList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+    }
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
     }
@@ -112,7 +120,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack()}
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -177,10 +185,33 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(mechanicsList.itemCount) { index ->
-                                val Mechanics = mechanicsList[index]
-                                if (Mechanics != null) {
-                                    MechanicsItem(Mechanics, navController)
+                            val filteredList = mechanicsList.itemSnapshotList.items.filter {it.specialties.contains("Mechanics") && it.id !in dismissedResumes  }
+
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No Mechanic workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(filteredList.size) { index ->
+                                    val mechanicsList = filteredList[index]
+                                    if (mechanicsList != null && mechanicsList.id !in dismissedResumes) {
+                                        MechanicsItem(mechanicsList, navController){
+                                            getResumesViewModel.dismissResume(mechanicsList.id)
+                                        }
+                                    }
                                 }
                             }
                             item {
@@ -204,7 +235,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
 }
 
 @Composable
-fun MechanicsItem(mechanics: resumesItem, navController: NavController) {
+fun MechanicsItem(mechanics: resumesItem, navController: NavController,onUninterested: () -> Unit) {
         var showMenu by remember { mutableStateOf(false) }
         var showReportDialog by remember { mutableStateOf(false) }
         var reportText by remember { mutableStateOf("") }
@@ -286,6 +317,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }

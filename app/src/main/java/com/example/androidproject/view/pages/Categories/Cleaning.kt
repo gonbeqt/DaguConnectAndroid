@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages.Categories
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,7 +64,14 @@ import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 @Composable
 fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewModel) {
     val cleaningList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
+    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
+    val dismissedResumes by getResumesViewModel.dismissedResumes
+    LaunchedEffect(cleaningList.itemSnapshotList, dismissedResumes) {
+        Log.d("TradesmanColumn", "Updating displayed resumes")
+        displayedResumes = cleaningList.itemSnapshotList.items
+            .filter { it.id !in dismissedResumes } // Remove dismissed
+    }
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
     }
@@ -108,7 +116,7 @@ fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewMod
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable { navController.popBackStack() }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -173,10 +181,33 @@ fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(cleaningList.itemCount) { index ->
-                                val Cleaning = cleaningList[index]
-                                if (Cleaning != null) {
-                                    CleaningItem(Cleaning, navController)
+                            val filteredList = cleaningList.itemSnapshotList.items.filter {it.specialties.contains("Cleaning") && it.id !in dismissedResumes  }
+
+                            if (filteredList.isEmpty()) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No Cleaner workers",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(filteredList.size) { index ->
+                                    val cleaningList = filteredList[index]
+                                    if (cleaningList != null && cleaningList.id !in dismissedResumes) {
+                                        CleaningItem(cleaningList, navController){
+                                            getResumesViewModel.dismissResume(cleaningList.id)
+                                        }
+                                    }
                                 }
                             }
                             item {
@@ -201,7 +232,7 @@ fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun CleaningItem(cleaning: resumesItem, navController: NavController) {
+fun CleaningItem(cleaning: resumesItem, navController: NavController,onUninterested: () -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var reportText by remember { mutableStateOf("") }
@@ -283,6 +314,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController) {
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
+                                    onUninterested()
                                 }
                             )
                         }

@@ -109,7 +109,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                 Icon(
                                     imageVector = Icons.Default.ArrowBackIosNew,
                                     contentDescription = "Arrow Back",
-                                    Modifier.clickable { navController.navigate("main_screen") }
+                                    Modifier.clickable { navController.popBackStack() }
                                         .padding(16.dp)
                                     ,
                                     tint = Color.White

@@ -741,7 +741,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
         var rate by remember { mutableStateOf("") }
         var selectedCategories = remember { mutableStateListOf<String>() }
             val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-     val context = LocalContext.current
+        val context = LocalContext.current
      val today = LocalDate.now() // Get today's date
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var deadline by remember { mutableStateOf("") }

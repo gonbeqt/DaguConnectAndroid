@@ -76,12 +76,12 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
     }
 
 
-    when (val viewClinetBooking = viewClientBookingstate) {
+    when (val viewClientBooking = viewClientBookingstate) {
         is ViewClientBookingViewModel.ViewClientBookings.Loading -> {
             //do nothing
         }
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
-            val viewclientbooking = viewClinetBooking.data
+            val viewclientbooking = viewClientBooking.data
             val getbookdate = ViewModelSetups.formatDateTime(viewclientbooking.bookingdate)
             Column( // Change Box to Column
                 modifier = Modifier
@@ -99,25 +99,25 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
                 ) {
 
-                    Column(
-                        modifier = Modifier
-                            .background(Color.White)
-                            .fillMaxWidth()
-                            .size(100.dp)
-                            .padding(top = 20.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Arrow Back",
-                                Modifier
-                                    .clickable { navController.navigate("main_screen") }
-                                    .padding(16.dp),
-                                tint = Color(0xFF81D796)
-                            )
+            Column(
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .size(100.dp)
+                    .padding(top = 20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Arrow Back",
+                        Modifier
+                            .clickable { navController.popBackStack() }
+                            .padding(16.dp),
+                        tint = Color(0xFF81D796)
+                    )
 
 
                             Text(

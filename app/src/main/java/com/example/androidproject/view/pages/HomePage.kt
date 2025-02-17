@@ -266,18 +266,14 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
 
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
-    val dismissedResumes by getResumesViewModel.dismissedResumes
 
     LaunchedEffect(Unit) {
-        Log.d("TradesmanColumn", "Invalidating paging source")
         getResumesViewModel.invalidatePagingSource()
     }
 
-    LaunchedEffect(resumeList.itemSnapshotList, dismissedResumes) {
-        Log.d("TradesmanColumn", "Updating displayed resumes")
+    LaunchedEffect(resumeList.itemSnapshotList) {
         displayedResumes = resumeList.itemSnapshotList.items
-            .filter { it.id !in dismissedResumes } // Remove dismissed
-            .take(5) // Keep a maximum of 5
+            .take(5)
     }
 
     val cardHeight = when (windowSize.width) {
@@ -332,9 +328,6 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                     navController = navController,
                     cardHeight = cardHeight,
                     textSize = textSize,
-                    onUninterested = {
-                        getResumesViewModel.dismissResume(resume.id) // Store dismissed resume
-                    }
                 )
             }
         }
@@ -498,7 +491,7 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit,onUninterested: () -> Unit) {
+fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit) {
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 25.dp
@@ -587,13 +580,6 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                     onClick = {
                                         showMenu = false
                                         showReportDialog = true
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Uninterested") },
-                                    onClick = {
-                                        showMenu = false
-                                        onUninterested()
                                     }
                                 )
                             }
