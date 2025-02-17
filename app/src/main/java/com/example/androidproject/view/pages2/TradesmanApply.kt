@@ -48,6 +48,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 
 @Composable
@@ -75,22 +76,20 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
             Column( // Change Box to Column
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White)
+                    .background(myGradient3)
             ) {
 
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
                         .verticalScroll(rememberScrollState()),
-                    shape = RectangleShape
                 ) {
 
                     Column(
                         modifier = Modifier
-                            .background(Color.White)
+                            .background(myGradient3)
                             .fillMaxWidth()
-                            .size(100.dp)
+                            .size(80.dp)
                             .padding(top = 20.dp)
                     ) {
                         Row(
@@ -102,16 +101,16 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                 contentDescription = "Arrow Back",
                                 Modifier
                                     .clickable { navController.navigate("main_screen") }
-                                    .padding(16.dp),
+                                    .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
                                 tint = Color(0xFF81D796)
                             )
                             Text(
                                 text = "Bookings Details",
-                                fontSize = 24.sp,
-                                color = Color.Black,
+                                fontSize = 20.sp,
+                                color = Color.White,
                                 textAlign = TextAlign.Left,
                                 modifier = Modifier
-                                    .padding(top = 15.dp)
+                                    .padding(top = 10.dp)
                                     .weight(1f) // Ensures the text takes available space and is centered
                             )
                         }
@@ -119,15 +118,14 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                 }
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White),
-                    shape = RectangleShape,
-                    colors = CardDefaults.cardColors(Color.White)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp), // Apply top corner radius
+                    colors = CardDefaults.cardColors(Color.White) // Set background color inside Card
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.White)
+                            .padding(10.dp) // Apply padding here, instead of background
                     ) {
 
                         Row(
@@ -190,17 +188,17 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                             }
                         }
                         Spacer(Modifier.height(8.dp))
-                        Row (modifier = Modifier.fillMaxWidth().padding(horizontal =25.dp), horizontalArrangement = Arrangement.SpaceBetween){
+                        Row (modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceBetween){
                             Text(text = "Hiring: ${job.job.jobType}", fontSize = 24.sp, fontWeight = FontWeight(500))
                         }
-                        Text(text = "Posted on $date - Active",Modifier.padding(horizontal = 25.dp))
+                        Text(text = "Posted on $date - Active",Modifier.padding(horizontal = 20.dp))
 
                         Card(modifier = Modifier.fillMaxWidth().height(100.dp),
                             border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
                             colors = CardDefaults.cardColors(Color.White),
                             shape = RectangleShape
                         ){
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalArrangement = Arrangement.Center,
+                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 20.dp), verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(text = job.job.jobDescription)
                             }
@@ -290,31 +288,33 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                             Text(text = "Other services needed by this client (0)", fontSize = 18.sp, fontWeight = FontWeight(500))
 
                         }
-                        Spacer(Modifier.height(40.dp))
-
                         Box(
                             modifier = Modifier
+                                .background(myGradient3)
                                 .fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             Button(
-                                onClick = {},
+                                onClick = {navController.navigate("hiringdetails")},
                                 modifier = Modifier.width(200.dp),
                                 colors = ButtonDefaults.buttonColors(Color.White),
                                 border = BorderStroke(1.dp, Color.Black)
                             ) {
                                 Text(
                                     text = "Apply Now",
-                                    fontSize = 16.sp,
+                                    fontSize = 14.sp,
                                     fontWeight = FontWeight(500),
                                     color = Color.Black
                                 )
                             }
                         }
+
                     }
+
                 }
             }
         }
+
         is ViewJobViewModel.JobState.Error -> {
             val errorMessage = (viewJobState as ViewJobViewModel.JobState.Error).message
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

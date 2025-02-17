@@ -49,6 +49,7 @@ import com.example.androidproject.view.pages.RateAndReviews
 import com.example.androidproject.view.pages2.AvailabilityStatus
 import com.example.androidproject.view.pages2.BookingsTradesman
 import com.example.androidproject.view.pages2.BookmarkedTradesman
+import com.example.androidproject.view.pages2.HiringDetails
 import com.example.androidproject.view.pages2.HomeTradesman
 import com.example.androidproject.view.pages2.ManageProfile
 import com.example.androidproject.view.pages2.ProfileTradesman
@@ -125,7 +126,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "bookingstradesman" ) {
+                NavHost(navController = navController, startDestination = "main_screen" ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -238,6 +239,9 @@ class MainActivity : ComponentActivity() {
                         Log.e("Job ID" , jobId)
                         TradesmanApply(jobId, navController, viewJobViewModel)
                     }
+                    composable("hiringdetails") {
+                        HiringDetails(modifier = Modifier, navController)
+                    }
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController)
                     }
@@ -256,6 +260,7 @@ class MainActivity : ComponentActivity() {
                     composable("availabilitystatus") {
                         AvailabilityStatus(modifier = Modifier, navController)
                     }
+
 
 
                 }

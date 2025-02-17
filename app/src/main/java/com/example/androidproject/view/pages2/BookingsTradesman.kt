@@ -140,7 +140,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color(0xFFD9D9D9))
-                            .padding(16.dp)
+                            .padding(8.dp)
                     ) {
                         when (selectedSection) {
                             "My Jobs" -> when (selectedTabIndex) {
@@ -261,6 +261,7 @@ fun PendingBookingsTradesmanContent(navController: NavController) {
     )
     LazyColumn(
         modifier = Modifier
+            .padding(bottom = 80.dp)
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9))
@@ -291,6 +292,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController) {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .padding(bottom = 70.dp)
             .background(Color(0xFFD9D9D9))
 
         ,
@@ -320,6 +322,8 @@ fun ActiveBookingsTradesmanContent() {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .padding(bottom = 70.dp)
+
             .background(Color(0xFFD9D9D9))
 
         ,
@@ -349,6 +353,8 @@ fun CompletedBookingsTradesmanContent(navController: NavController) {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .padding(bottom = 70.dp)
+
             .background(Color(0xFFD9D9D9))
 
         ,
@@ -377,6 +383,8 @@ fun CancelledBookingsTradesmanContent(navController: NavController) {
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
+            .padding(bottom = 70.dp)
+
             .background(Color(0xFFD9D9D9))
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -718,6 +726,7 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
         )
     }
     // decline Reasons Dialog
+    // Decline Reasons Dialog
     if (showDeclineReasons) {
         var selectedReason by remember { mutableStateOf<String?>(null) }
 
@@ -1038,6 +1047,8 @@ fun AllApplicantsTradesmanContent() {
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
+            .padding(bottom = 70.dp)
+
             .size(420.dp)
             .background(Color(0xFFD9D9D9))
 
@@ -1067,6 +1078,8 @@ fun PendingApplicantsTradesmanContent(navController: NavController) {
     )
     LazyColumn(
         modifier = Modifier
+            .padding(bottom = 70.dp)
+
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9))
@@ -1095,6 +1108,8 @@ fun DeclinedApplicantsTradesmanContent(navController: NavController) {
     )
     LazyColumn(
         modifier = Modifier
+            .padding(bottom = 70.dp)
+
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9))
@@ -1124,6 +1139,8 @@ fun ActiveApplicantsTradesmanContent() {
     )
     LazyColumn(
         modifier = Modifier
+            .padding(bottom = 70.dp)
+
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9))
@@ -1153,6 +1170,8 @@ fun CompletedApplicantsTradesmanContent(navController: NavController) {
     )
     LazyColumn(
         modifier = Modifier
+            .padding(bottom = 70.dp)
+
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9))
@@ -1182,6 +1201,8 @@ fun CancelledApplicantsTradesmanContent(navController: NavController) {
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
+            .padding(bottom = 70.dp)
+
             .size(420.dp)
             .background(Color(0xFFD9D9D9))
         ,
