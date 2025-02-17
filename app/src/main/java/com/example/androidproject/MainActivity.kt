@@ -145,6 +145,7 @@ class MainActivity : ComponentActivity() {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
                     }
 
+
                     composable("booknow/{resumeId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
                         Log.d("rateid",resumeId)

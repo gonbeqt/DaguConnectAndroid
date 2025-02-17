@@ -160,7 +160,9 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 100.dp)
-                        .verticalScroll(rememberScrollState())
+                        .background(myGradient3)
+
+                    .verticalScroll(rememberScrollState())
                     ,
 
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
@@ -512,7 +514,7 @@ fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) ->
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = selectedDate, // ✅ Show updated selected date
+                    text = selectedDate,
                     fontSize = 16.sp,
                     color = Color.Gray
                 )

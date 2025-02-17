@@ -34,6 +34,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
@@ -132,14 +134,21 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
                 ScrollableTabRow(
                     selectedTabIndex = selectedTabIndex,
                     modifier = Modifier.fillMaxWidth(),
-                    edgePadding = 5.dp
+                    edgePadding = 5.dp,
+                    indicator = { tabPositions ->
+                        TabRowDefaults.Indicator(
+                            Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                            color = Color(0xFF3CC0B0)
+                        )
+                    }
                 ) {
                     tabTitles.forEachIndexed { index, title ->
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { Text(title, fontSize = textSize) },
-                            modifier = Modifier.background(Color.White)
+                            text = { Text(title, fontSize = textSize,
+                                color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else  Color.Black) },
+                            modifier = Modifier.background(Color.White),
                         )
                     }
                 }
