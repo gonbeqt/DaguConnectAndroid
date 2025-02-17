@@ -856,17 +856,16 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
                         modifier = Modifier
                             .clickable { }
                             .background(
-                                color = Color.Transparent,
+                                color = Color(0xFFC51B1B),
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
 
 
-                        Text(text = "Reject", fontSize = smallTextSize)
+                        Text(text = "Cancell", fontSize = smallTextSize, color = Color.White)
 
                     }
 
@@ -874,10 +873,9 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
                         modifier = Modifier
                             .clickable { }
                             .background(
-                                color = Color.Transparent,
+                                color = Color(0xFF42C2AE),
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
@@ -885,7 +883,7 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
 
                         Text(
                             text = "Completed",
-                            color = Color(0xFFECAB1E),
+                            color = Color.White,
                             fontSize = smallTextSize
                         )
                     }
