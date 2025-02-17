@@ -34,7 +34,6 @@ import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.SignUpScreen
 import com.example.androidproject.view.Tradesman
-import com.example.androidproject.view.pages.AcceptNow
 import com.example.androidproject.view.pages.AccountSettings
 import com.example.androidproject.view.pages.BookNow
 import com.example.androidproject.view.pages.BookingDetails
@@ -156,8 +155,9 @@ class MainActivity : ComponentActivity() {
                         val tradesmanId = backStackEntry.arguments?.getString("tradesmanId")?:""
                         ConfirmBook(viewResumeViewModel,navController,resumeId,tradesmanId,bookingTradesmanViewModel)
                     }
-                    composable("bookingdetails") {
-                        BookingDetails(trade,navController)
+                    composable("bookingdetails/{resumeId}") {backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        BookingDetails(viewClientBookingViewModel,navController,resumeId)
                     }
                     composable("cancelleddetails") {
                         CancelledDetails(trade,navController)
@@ -247,7 +247,7 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController)
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel)
                     }
                     composable("manageprofile") {
                         ManageProfile(modifier = Modifier, navController)
