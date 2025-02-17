@@ -6,11 +6,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://192.168.1.217:8000/"
+    private const val BASE_URL = "http://192.168.1.157:8000/"
 
     // Add the logging interceptor
     private val logging = HttpLoggingInterceptor().apply {

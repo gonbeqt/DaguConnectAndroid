@@ -16,7 +16,7 @@ data class resumesItem(
     val email: String,
     val id: Int,
     @SerializedName("prefered_work_location")
-    val preferedworklocation: List<String>,
+    val preferedworklocation: String,
     @SerializedName("profile_pic")
     val profilepic: String,
     val specialties: List<String>,
