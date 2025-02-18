@@ -100,7 +100,7 @@ fun BookingsScreen(modifier: Modifier = Modifier,navController: NavController,ge
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
-                    .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                    .padding(horizontal = 25.dp)
                     .fillMaxWidth()
                     .height(70.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -200,7 +200,6 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-
         ,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

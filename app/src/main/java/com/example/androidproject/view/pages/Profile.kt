@@ -97,7 +97,7 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
     ) {
         Row(
             modifier = Modifier
-                .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                .padding(horizontal = 25.dp)
                 .fillMaxWidth()
                 .height(70.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -615,6 +615,7 @@ fun GeneralSettings(
                     imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
+                    , tint = Color.Black
                 )
                 Column(modifier = Modifier.padding(start = 14.dp)) {
                     Text(
@@ -634,8 +635,11 @@ fun GeneralSettings(
                 Icon(
                     imageVector = it,
                     contentDescription = null,
+
+                    tint = Color.Black,
                     modifier = Modifier.size(24.dp)
                         .clickable { onClick() }
+
                 )
             }
         }
@@ -681,8 +685,9 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector =Icons.Default.NotificationsNone,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        contentDescription = "Notification Icon",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Black
                     )
                     Column(modifier = Modifier.padding(start = 14.dp)) {
                         Text(
@@ -736,7 +741,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             onClick = { navController.navigate("reportproblem") }
         )
         Text(
-            text = "Log Out", fontWeight = FontWeight(500),
+            text = "Log Out", fontWeight = FontWeight(500), color = Color.Black,
             fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
         )
         Card(
@@ -773,12 +778,14 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_logout),
                         contentDescription = "Logout Icon",
-                        modifier = Modifier.padding(start = 5.dp))
+                        modifier = Modifier.padding(start = 5.dp),
+                        tint = Color.Black)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Log Out",
                         style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Start
+                        textAlign = TextAlign.Start,
+                        color = Color.Black
                     )
                 }
             }
