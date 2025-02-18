@@ -556,7 +556,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
 //Design For Items
 @Composable
 fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
-    val getbookdate = ViewModelSetups.formatDateTime(allBooking.bookingdate)
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 470.dp to 210.dp
@@ -682,7 +682,7 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 
                         )
                     Text(
-                        text = getbookdate,
+                        text = allBooking.bookingdate,
                         color = Color.Gray,
                         fontSize = smallTextSize,
 
@@ -708,7 +708,6 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 //Design for activeItems
 @Composable
 fun ActiveItems(activeBooking: GetClientsBooking) {
-    val getbookdate = ViewModelSetups.formatDateTime(activeBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -839,7 +838,7 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
 
                         )
                         Text(
-                            text = getbookdate,
+                            text = activeBooking.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
 
@@ -896,7 +895,7 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
 
 @Composable
 fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController) {
-    val getbookdate = ViewModelSetups.formatDateTime(pendingBooking.bookingdate)
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -1020,7 +1019,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = getbookdate,
+                            text = pendingBooking.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )
@@ -1201,7 +1200,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = "Monday",
+                            text = declineBooking.bookingdate,
                             color = Color.Gray,
                             fontSize =smallTextSize,
                         )
@@ -1235,7 +1234,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
 }
 @Composable
 fun CompletedItem(completedBooking: GetClientsBooking, navController:NavController) {
-    val getbookdate = ViewModelSetups.formatDateTime(completedBooking.bookingdate)
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -1359,7 +1358,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = getbookdate,
+                            text = completedBooking.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize
                         )
@@ -1538,7 +1537,7 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = "Monday",
+                            text = cancelledBooking.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )

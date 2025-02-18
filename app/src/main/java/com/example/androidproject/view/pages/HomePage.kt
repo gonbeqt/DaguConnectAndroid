@@ -1,6 +1,7 @@
 package com.example.androidproject.view.pages
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -67,6 +68,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +77,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -88,10 +91,11 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.view.theme.myGradient2
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 
 @Composable
-fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel) {
+fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
 
@@ -135,7 +139,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
                 CategoryRow(categories,navController)
 
                 Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(getResumesViewModel,navController)
+                TradesmanColumn(getResumesViewModel,navController,reportViewModel)
             }
         }
     }
@@ -167,7 +171,8 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
-                    modifier = Modifier.size(35.dp)
+                    modifier = Modifier
+                        .size(35.dp)
                         .clickable { navController.navigate("notification") }
                 )
 
@@ -265,7 +270,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 
 
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController,reportViewModel: ReportViewModel) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
@@ -333,6 +338,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                     navController = navController,
                     cardHeight = cardHeight,
                     textSize = textSize,
+                    reportViewModels = reportViewModel
                 )
             }
         }
@@ -496,10 +502,12 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit) {
+fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportViewModels: ReportViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
+    val reportState by reportViewModels.reportState.collectAsState()
+    val context = LocalContext.current
 
     val reasons = listOf(
         "Abusive or Harassing Behavior",
@@ -538,7 +546,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         modifier = Modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .clickable { navController.navigate("booknow/${resumes.id}")}, //implementation here
+            .clickable { navController.navigate("booknow/${resumes.id}") }, //implementation here
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
 
@@ -617,7 +625,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 .padding(top = 15.dp, end = 5.dp)
                                 .background(
                                     color = (Color(0xFFFFF2DD)),
-                                    shape =RoundedCornerShape(12.dp)
+                                    shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
                             Text(
@@ -689,7 +697,9 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             reasons.forEachIndexed { index, reason ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
                                 ) {
                                     Checkbox(
                                         checked = selectedIndex == index,
@@ -788,7 +798,22 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 Text("Cancel", color = Color.White)
                             }
                             Button(
-                                onClick = { showReportDialog = false },
+                                onClick = {
+
+                                    if (selectedIndex == -1) {
+                                        // Show a message to the user indicating that they need to select a reason
+                                        Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                            // If "Others" is selected, use the value from the otherReason field
+                                            otherReason
+                                        } else {
+                                            // Otherwise, use the selected reason from the list
+                                            reasons[selectedIndex]
+                                        }
+                                        reportViewModels.report(selectedReason, reasonDescription, resumes.userid)
+                                    }
+                                          },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Color(
@@ -798,10 +823,34 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             ) {
                                 Text("Submit", color = Color.White)
                             }
+                            LaunchedEffect(reportState) {
+                                when(val report = reportState){
+                                    is ReportViewModel.ReportState.Loading -> {
+                                        //do nothing
+                                    }
+                                    is ReportViewModel.ReportState.Success -> {
+                                        val responsereport = report.data?.message
+                                        Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
+
+                                        reportViewModels.resetState()
+                                        // Close the dialog
+                                        showReportDialog = false
+                                    }
+                                    is ReportViewModel.ReportState.Error -> {
+                                        val errorMessage = report.message
+                                        Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                                        showReportDialog = true
+                                        reportViewModels.resetState()
+                                    }
+                                    else -> Unit
+                                    }
+                                }
+                            }
+
                         }
                     }
                 }
             }
         }
     }
-}
+

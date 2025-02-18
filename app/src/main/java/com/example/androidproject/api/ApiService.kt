@@ -12,6 +12,8 @@ import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
 
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.model.client.ReportRequest
+import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.resumesItem
@@ -63,4 +65,6 @@ interface ApiService {
     @POST("/user/client/booktradesman/{tradesman_Id}")
     suspend fun booktradesman(@Header("Authorization") token: String, @Body request: BookTradesmanRequest, @Path("tradesman_Id") tradesman_Id: Int): Response<BookTradesmanResponse>
 
+    @POST("/user/client/reporttradesman/{tradesmanId}")
+    suspend fun report(@Header("Authorization") token: String, @Body request: ReportRequest, @Path("tradesmanId") tradesmanId: Int): Response<ReportResponse>
 }

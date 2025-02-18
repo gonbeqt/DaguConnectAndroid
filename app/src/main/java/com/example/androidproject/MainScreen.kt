@@ -44,10 +44,11 @@ import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier,viewModel:GetChatViewModel) {
+fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier,viewModel:GetChatViewModel,reportViewModel: ReportViewModel) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
@@ -99,7 +100,8 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
             logoutViewModel,
             getClientsBooking,
             getResumesViewModel,
-            viewModel)
+            viewModel,
+            reportViewModel)
     }
 }
 
@@ -112,13 +114,14 @@ fun ContentScreen(
     logoutViewModel: LogoutViewModel,
     getClientsBooking: GetClientBookingViewModel,
     getResumesViewModel: GetResumesViewModel,
-    viewModel: GetChatViewModel
+    viewModel: GetChatViewModel,
+    reportViewModel: ReportViewModel
 ) {
 
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
-            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel)
+            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportViewModel)
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
