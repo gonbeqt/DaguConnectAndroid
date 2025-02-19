@@ -1,6 +1,11 @@
 package com.example.androidproject.view.pages
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,31 +22,44 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,12 +68,16 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -69,16 +91,16 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.view.theme.myGradient2
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 
 @Composable
-fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel) {
+fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
 
-    val selectedCategory = remember { mutableStateOf<String?>(null) }
 
-    val categories = listOf(
+    val categories = listOf(    
         Categories(R.drawable.carpentry, "Carpentry"),
         Categories(R.drawable.painting, "Painting"),
         Categories(R.drawable.welding, "Welding"),
@@ -92,18 +114,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
 
     )
 
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Cleaning", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Liam", "Carpentry", "P450/hr", 4.2, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
-    )
+
 
 
 
@@ -128,7 +139,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
                 CategoryRow(categories,navController)
 
                 Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(getResumesViewModel,navController)
+                TradesmanColumn(getResumesViewModel,navController,reportViewModel)
             }
         }
     }
@@ -140,13 +151,12 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
             .fillMaxWidth()
             .shadow(1.dp)
             .background(Color.White)
-            .padding(top = 10.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
-                .padding(horizontal = 16.dp), // Added padding inside for spacing
+                .padding(horizontal = 25.dp), // Added padding inside for spacing
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -157,31 +167,19 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
                 fontWeight = FontWeight.Medium
             )
 
-            // Right-aligned icons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
+                    tint = Color.Black,
+                    modifier = Modifier
+                        .size(35.dp)
                         .clickable { navController.navigate("notification") }
                 )
-                Icon(
-                    imageVector = Icons.Default.Message,
-                    contentDescription = "Message Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clickable { navController.navigate("message_screen") }
-                )
-            }
+
+
         }
     }
 }
-
 @Composable
 fun CategoryRow(categories: List<Categories>, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
@@ -190,72 +188,102 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
         WindowType.MEDIUM -> 120.dp to 100.dp
         WindowType.LARGE -> 140.dp to 120.dp
     }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 25.dp, vertical = 25.dp ),
-             horizontalArrangement = Arrangement.Start
-    ) {
-        Text(
-            text = "Categories",
-            fontSize = when (windowSize.width) {
-                WindowType.SMALL -> 18.sp
-                WindowType.MEDIUM -> 20.sp
-                WindowType.LARGE -> 22.sp
-            },
-            fontWeight = FontWeight(500),
-        )
 
+    val scrollState = rememberLazyListState()
+    val itemCount = categories.size
+    val visibleItems = 3
+    val totalDots = (itemCount - visibleItems).coerceAtLeast(1)
+    val currentIndex by remember {
+        derivedStateOf { scrollState.firstVisibleItemIndex }
     }
 
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(cardSize.second)
-            .background(Color(0xFFECECEC)),
-    ) {
-        items(categories.size) { index ->
-            val category = categories[index]
-            CategoryItem(category) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp, vertical = 15.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Text(
+                text = "Categories",
+                fontSize = when (windowSize.width) {
+                    WindowType.SMALL -> 18.sp
+                    WindowType.MEDIUM -> 20.sp
+                    WindowType.LARGE -> 22.sp
+                },
+                fontWeight = FontWeight(500),
+            )
+        }
 
-                when (category.name) {
-                    "Plumbing" -> navController.navigate("plumbing")
-                    "Cleaning" -> navController.navigate("cleaning")
-                    "Carpentry" -> navController.navigate("carpentry")
-                    "Electrician" -> navController.navigate("electrician")
-                    "AC Repair" -> navController.navigate("acrepair")
-                    "Masonry" -> navController.navigate("masonry")
-                    "Mechanics" -> navController.navigate("mechanics")
-                    "Painting" -> navController.navigate("painting")
-                    "Roofing" -> navController.navigate("roofing")
-                    "Welding" -> navController.navigate("welding")
-
-
+        LazyRow(
+            state = scrollState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(cardSize.second)
+                .background(Color(0xFFECECEC)),
+        ) {
+            items(categories) { category ->
+                CategoryItem(category) {
+                    when (category.name) {
+                        "Plumbing" -> navController.navigate("plumbing")
+                        "Cleaning" -> navController.navigate("cleaning")
+                        "Carpentry" -> navController.navigate("carpentry")
+                        "Electrician" -> navController.navigate("electrician")
+                        "AC Repair" -> navController.navigate("acrepair")
+                        "Masonry" -> navController.navigate("masonry")
+                        "Mechanics" -> navController.navigate("mechanics")
+                        "Painting" -> navController.navigate("painting")
+                        "Roofing" -> navController.navigate("roofing")
+                        "Welding" -> navController.navigate("welding")
+                    }
                 }
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(totalDots) { index ->
+                val animatedSize by animateDpAsState(
+                    targetValue = if (index == currentIndex) 20.dp else 8.dp,
+                    animationSpec = tween(durationMillis = 300)
+                )
+                val animatedColor by animateColorAsState(
+                    targetValue = if (index == currentIndex) Color(0xFF3CC0B0) else Color(0xFFBBF7D0),
+                    animationSpec = tween(durationMillis = 300)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(animatedSize)
+                        .background(animatedColor, shape = CircleShape)
+                )
             }
         }
     }
 }
 
+
+
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController,reportViewModel: ReportViewModel) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
-    val dismissedResumes by getResumesViewModel.dismissedResumes
 
     LaunchedEffect(Unit) {
-        Log.d("TradesmanColumn", "Invalidating paging source")
         getResumesViewModel.invalidatePagingSource()
     }
 
-    LaunchedEffect(resumeList.itemSnapshotList, dismissedResumes) {
-        Log.d("TradesmanColumn", "Updating displayed resumes")
+    LaunchedEffect(resumeList.itemSnapshotList) {
         displayedResumes = resumeList.itemSnapshotList.items
-            .filter { it.id !in dismissedResumes } // Remove dismissed
-            .take(5) // Keep a maximum of 5
+            .take(5)
     }
 
     val cardHeight = when (windowSize.width) {
@@ -280,14 +308,13 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
             text = "Top-Rated",
             fontSize = 18.sp,
             fontWeight = FontWeight(500),
-            modifier = Modifier.padding(top = 10.dp)
+            modifier = Modifier.padding(top = 15.dp)
         )
         TextButton(onClick = { navController.navigate("alltradesman") }) {
             Text(
                 text = "See All",
                 color = Color.Gray,
                 fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 10.dp)
             )
         }
     }
@@ -311,9 +338,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                     navController = navController,
                     cardHeight = cardHeight,
                     textSize = textSize,
-                    onUninterested = {
-                        getResumesViewModel.dismissResume(resume.id) // Store dismissed resume
-                    }
+                    reportViewModels = reportViewModel
                 )
             }
         }
@@ -324,89 +349,108 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
 
 
 @Composable
-fun ExploreNow(windowSize: WindowSize){
+fun ExploreNow(windowSize: WindowSize) {
+    val titleTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
     val textSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
+        WindowType.SMALL -> 16.sp
         WindowType.MEDIUM -> 20.sp
         WindowType.LARGE -> 22.sp
     }
+    val buttonTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
 
     val imageSize = when (windowSize.width) {
-        WindowType.SMALL -> 270.dp to 270.dp
-        WindowType.MEDIUM -> 370.dp to 370.dp
-        WindowType.LARGE -> 370.dp to 370.dp
+        WindowType.SMALL -> 150.dp to 150.dp
+        WindowType.MEDIUM -> 270.dp to 270.dp
+        WindowType.LARGE -> 320.dp to 320.dp
     }
+
+    val boxHeight = when (windowSize.width) {
+        WindowType.SMALL -> 160.dp
+        WindowType.MEDIUM -> 180.dp
+        WindowType.LARGE -> 200.dp
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, end = 25.dp)
+            .height(boxHeight)
+            .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(myGradient2)
     ) {
+        // DaguConnect Row positioned at the top-left
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .size(180.dp)
-                .padding(start = 25.dp, end = 25.dp)
+                ,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logoexplore),
+                contentDescription = "logo explore",
+                modifier = Modifier.size(40.dp)
+            )
 
+            Text(
+                text = "DaguConnect",
+                color = Color.White,
+                fontSize = titleTextSize,
+                fontWeight = FontWeight.Light
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 30.dp, top = 20.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(150.dp)
+                modifier = Modifier.weight(1f)
             ) {
-                Row(
-                    modifier = Modifier.padding(top = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.logoexplore),
-                        contentDescription = "logo explore",
-                        modifier = Modifier.size(50.dp)
-                    )
-
-                    Text(
-                        text = "DaguConnect",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                    )
-                }
                 Text(
                     text = "What service do you need today?",
                     color = Color.White,
                     fontSize = textSize,
-                    fontWeight = FontWeight(500),
-                    modifier = Modifier.padding(start = 20.dp, top = 10.dp)
+                    fontWeight = FontWeight.Medium
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Box(
                     modifier = Modifier
-                        .padding(start = 20.dp, top = 10.dp)
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                         .background(Color.Transparent)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "Explore Now",
                         color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = buttonTextSize,
+                        fontWeight = FontWeight.Light,
                     )
                 }
-
-
             }
+
             Image(
-                painter = painterResource(R.drawable.workers),
+                painter = painterResource(R.drawable.explorebg),
                 contentDescription = "Workers Images",
                 modifier = Modifier
                     .size(imageSize.first, imageSize.second)
-                    .padding(top = 20.dp)
+                    .padding(start = 12.dp)
             )
-
-
         }
     }
 }
+
 @Composable
 fun CategoryItem(category: Categories,onClick: () -> Unit) {
     Card(
@@ -458,22 +502,53 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit,onUninterested: () -> Unit) {
+fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportViewModels: ReportViewModel) {
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var reasonDescription by remember { mutableStateOf("") }
+    val reportState by reportViewModels.reportState.collectAsState()
+    val context = LocalContext.current
+
+    val reasons = listOf(
+        "Abusive or Harassing Behavior",
+        "Inappropriate Content or Language",
+        "Fraudulent Activity or Scam",
+        "Poor Quality of Service",
+        "Unprofessional Conduct",
+        "Safety Concerns",
+        "Others"
+    )
     val windowSize = rememberWindowSizeClass()
+
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 30.dp
-        WindowType.MEDIUM -> 40.dp
-        WindowType.LARGE -> 50.dp
+        WindowType.SMALL -> 25.dp
+        WindowType.MEDIUM -> 35.dp
+        WindowType.LARGE -> 45.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
     }
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
-    var reportText by remember { mutableStateOf("") }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .clickable { navController.navigate("booknow/${resumes.id}")}, //implementation here
+            .clickable { navController.navigate("booknow/${resumes.id}") }, //implementation here
         shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
 
 
         ) {
@@ -481,6 +556,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White),
+
             contentAlignment = Alignment.CenterStart
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -494,44 +570,74 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                 Column(
                     modifier = Modifier
                         .size(250.dp, 100.dp)
-                        .padding(start = 10.dp)
+                        .padding(start = 24.dp)
                 )
                 {
-                    Text(
-                        text = resumes.tradesmanfullname,
-                        color = Color.Black,
-                        fontWeight = FontWeight(500),
-                        fontSize = textSize,
-                        modifier = Modifier.padding(top = 10.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = resumes.tradesmanfullname,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = nameTextSize,
+                        )
 
-                    )
+                        // Menu Icon
+                        Box {
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Menu Icon",
+                                modifier = Modifier
+                                    .size(iconSize)
+                                    .clickable { showMenu = true }
+                            )
+
+                            // Popup Menu
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false },
+                                modifier = Modifier.background(Color.White)
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Report") },
+                                    onClick = {
+                                        showMenu = false
+                                        showReportDialog = true
+                                    }
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = "${resumes.specialties}"
                             .replace("[", "")  // Remove opening bracket
                             .replace("]", ""),  // Remove closing bracket ,
                         color = Color.Black,
-                        fontSize = textSize,
+                        fontSize = taskTextSize,
                         )
                     Row(modifier = Modifier.size(185.dp, 110.dp)) {
                         Box(
                             modifier = Modifier
                                 .size(70.dp, 50.dp)
-                                .padding(top = 10.dp)
+                                .padding(top = 15.dp, end = 5.dp)
                                 .background(
                                     color = (Color(0xFFFFF2DD)),
-                                    shape =RoundedCornerShape(12.dp)
+                                    shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
                             Text(
                                 text = "P${resumes.workfee}/hr",
-                                fontSize = textSize,
+                                fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )
                         }
                         Box(
                             modifier = Modifier
                                 .size(70.dp, 50.dp)
-                                .padding(top = 10.dp, start = 10.dp)
+                                .padding(top = 15.dp, start = 10.dp, end = 10.dp)
                                 .background(
                                     color = (Color(0xFFFFF2DD)),
                                     shape = RoundedCornerShape(12.dp)
@@ -545,7 +651,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             )
                             Text(
                                 text = "4",
-                                fontSize = 14.sp,
+                                fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                             )
                         }
@@ -553,79 +659,198 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
 
 
                 }
-                // Bookmark Icon with Clickable Popup Menu
-                Box {
-                    Image(
-                        painter = painterResource(R.drawable.menu),
-                        contentDescription = "Bookmark Image",
+
+            }
+        }
+    }
+    if (showReportDialog) {
+        Dialog(onDismissRequest = { showReportDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                ,
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
                         modifier = Modifier
-                            .size(iconSize)
-                            .padding(end = 5.dp)
-                            .clickable { showMenu = true
-                            }
-                    )
-
-                    // Popup Menu
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = {
-                            showMenu = false
-                        },
-                        modifier = Modifier.background(Color.White)
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("Report") },
-                            onClick = {
-                                showMenu = false
-                                showReportDialog = true
+                        Text(
+                            "Reason for Cancellation",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
 
+                        Column(modifier = Modifier.padding(top = 16.dp)) {
+                            reasons.forEachIndexed { index, reason ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Checkbox(
+                                        checked = selectedIndex == index,
+                                        onCheckedChange = {
+                                            selectedIndex = if (selectedIndex == index) -1 else index
+                                        },
+                                        colors = CheckboxDefaults.colors(
+                                            uncheckedColor = Color.Black,
+                                            checkedColor = Color(0xFF42C2AE)
+                                        )
+                                    )
+
+                                    if (reason == "Others") {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = reason,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color.Black
+                                            )
+
+                                            if (selectedIndex == index) {
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                TextField(
+                                                    value = otherReason,
+                                                    onValueChange = { otherReason = it },
+                                                    placeholder = { Text("Enter other reason") },
+                                                    singleLine = true,
+                                                    modifier = Modifier
+                                                        .weight(1f) // Pushes the field to the right
+                                                        .heightIn(min = 40.dp),
+                                                    colors = TextFieldDefaults.colors(
+                                                        focusedContainerColor = Color.Transparent,
+                                                        unfocusedContainerColor = Color.Transparent,
+                                                        focusedIndicatorColor = Color.Blue,
+                                                        unfocusedIndicatorColor = Color.Gray,
+                                                        cursorColor = Color.Black
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Text(
+                                            text = reason,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
                             }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Uninterested") },
-                            onClick = {
-                                showMenu = false
-                                onUninterested()
+
+                            OutlinedTextField(
+                                    value = reasonDescription,
+                            onValueChange = { reasonDescription = it },
+                            placeholder = { Text("Enter Your Explanation") },
+                            shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 100.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Blue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                unfocusedLabelColor = Color.Gray,
+                                cursorColor = Color.Black
+                            )
+                            )
+
+                        }
+
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Button(
+                                onClick = { showReportDialog = false },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Cancel", color = Color.White)
                             }
-                        )
+                            Button(
+                                onClick = {
+
+                                    if (selectedIndex == -1) {
+                                        // Show a message to the user indicating that they need to select a reason
+                                        Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                            // If "Others" is selected, use the value from the otherReason field
+                                            otherReason
+                                        } else {
+                                            // Otherwise, use the selected reason from the list
+                                            reasons[selectedIndex]
+                                        }
+                                        reportViewModels.report(selectedReason, reasonDescription, resumes.userid)
+                                    }
+                                          },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Submit", color = Color.White)
+                            }
+                            LaunchedEffect(reportState) {
+                                when(val report = reportState){
+                                    is ReportViewModel.ReportState.Loading -> {
+                                        //do nothing
+                                    }
+                                    is ReportViewModel.ReportState.Success -> {
+                                        val responsereport = report.data?.message
+                                        Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
+
+                                        reportViewModels.resetState()
+                                        // Close the dialog
+                                        showReportDialog = false
+                                    }
+                                    is ReportViewModel.ReportState.Error -> {
+                                        val errorMessage = report.message
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                        showReportDialog = true
+                                        reportViewModels.resetState()
+                                    }
+                                    else -> Unit
+                                    }
+                                }
+                            }
+
+                        }
                     }
                 }
             }
         }
     }
-    if (showReportDialog) {
-        AlertDialog(
-            onDismissRequest = { showReportDialog = false },
-            title = { Text("Report Tradesman") },
-            text = {
-                Column {
-                    Text("Please enter a reason for reporting this tradesman:")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = reportText,
-                        onValueChange = { reportText = it },
-                        placeholder = { Text("Enter report reason...") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (reportText.isNotBlank()) {
-                            println("Report submitted: $reportText")
-                            showReportDialog = false
-                        }
-                    }
-                ) {
-                    Text("Submit")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showReportDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
+

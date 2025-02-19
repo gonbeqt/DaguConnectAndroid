@@ -15,6 +15,8 @@ import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
 
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.model.client.ReportRequest
+import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.resumesItem
@@ -47,6 +49,7 @@ interface ApiService {
     @DELETE("/user/logout")
     suspend fun logout(@Header("Authorization") token: String): Response<Unit>
 
+
     @GET("/user/getresumes")
     suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
 
@@ -70,4 +73,7 @@ interface ApiService {
 
     @GET("/user/jobs/recent")
     suspend fun getRecentJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetRecentJob>
+
+    @POST("/user/client/reporttradesman/{tradesmanId}")
+    suspend fun report(@Header("Authorization") token: String, @Body request: ReportRequest, @Path("tradesmanId") tradesmanId: Int): Response<ReportResponse>
 }

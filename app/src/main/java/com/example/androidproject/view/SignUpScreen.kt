@@ -118,9 +118,9 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         WindowType.LARGE -> 0.55f
     }
     val cardHeight = when (windowSize.height) {
-        WindowType.SMALL -> 695.dp
-        WindowType.MEDIUM -> 795.dp
-        WindowType.LARGE -> 895.dp
+        WindowType.SMALL -> 675.dp
+        WindowType.MEDIUM -> 775.dp
+        WindowType.LARGE -> 875.dp
     }
 
     Box(
@@ -183,7 +183,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     firstName = firstName,
                     onFirstNameChange = { firstName = it },
                     modifier = Modifier.constrainAs(FirstnameField) {
-                        top.linkTo(titleText.bottom, margin = 24.dp)
+                        top.linkTo(titleText.bottom, margin = 16.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -194,7 +194,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     lastName = lastName,
                     onLastNameChange = { lastName = it },
                     modifier = Modifier.constrainAs(LastnameField) {
-                        top.linkTo(FirstnameField.bottom, margin = 10.dp)
+                        top.linkTo(FirstnameField.bottom, margin = 5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -206,7 +206,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     userName = userName,
                     onUserNameChange = { userName = it },
                     modifier = Modifier.constrainAs(username) {
-                        top.linkTo(LastnameField.bottom, margin =10.dp)
+                        top.linkTo(LastnameField.bottom, margin =5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -217,7 +217,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     email = email,
                     onEmailChange = { email = it },
                     modifier = Modifier.constrainAs(emaillayout) {
-                        top.linkTo(username.bottom, margin =10.dp)
+                        top.linkTo(username.bottom, margin =5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -230,7 +230,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     birthdate = birthdate,
                     onBirthDateChange = { birthdate = it },
                     modifier = Modifier.constrainAs(birthdatelayout){
-                        top.linkTo(emaillayout.bottom, margin =16.dp)
+                        top.linkTo(emaillayout.bottom, margin =10.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -242,7 +242,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     password = password,
                     onPasswordChange = { password = it },
                     modifier = Modifier.constrainAs(passwordlayout) {
-                        top.linkTo(birthdatelayout.bottom, margin =10.dp)
+                        top.linkTo(birthdatelayout.bottom, margin =5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -252,7 +252,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     isClient = isClient,
                     onIsClientChange = {isClient = it},
                     modifier = Modifier.constrainAs(roles){
-                        top.linkTo(passwordlayout.bottom, margin =10.dp)
+                        top.linkTo(passwordlayout.bottom)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
@@ -272,7 +272,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     confirmPassword = confirmPassword,
                     registerState = registerState,
                     modifier = Modifier.constrainAs(signUpButton) {
-                        top.linkTo(roles.bottom, margin =16.dp,)
+                        top.linkTo(roles.bottom, margin =10.dp,)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -283,7 +283,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                 RegistrationLoginButton(
                     navController = navController,
                     modifier = Modifier.constrainAs(loginButton) {
-                        top.linkTo(signUpButton.bottom, margin =8.dp)
+                        top.linkTo(signUpButton.bottom, margin =5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
@@ -313,7 +313,7 @@ fun FirstnameField(firstName: String,
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "First Name Icon"
+                        contentDescription = "First Name Icon", tint = Color.Black
                     )
                 },
                 singleLine = true,
@@ -356,7 +356,7 @@ fun LastnameField(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = "Last Name Icon"
+                    contentDescription = "Last Name Icon", tint = Color.Black
                 )
             },
             singleLine = true,
@@ -396,7 +396,7 @@ fun UsernameField(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = "Username Icon"
+                    contentDescription = "Username Icon", tint = Color.Black
                 )
             },
             singleLine = true,
@@ -442,7 +442,8 @@ fun EmailField(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
-                    contentDescription = "Email Icon"
+                    contentDescription = "Email Icon", tint = Color.Black
+
                 )
             },
             singleLine = true,
@@ -514,7 +515,7 @@ fun BirthdayCalendar(birthdate: String,
             ) {
                 Icon(
                     imageVector = Icons.Default.CalendarToday,
-                    contentDescription = "Calendar Icon"
+                    contentDescription = "Calendar Icon", tint = Color.Black
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -550,7 +551,7 @@ fun PasswordField(
             },
             label = { Text("Password") },
             leadingIcon = {
-                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon")
+                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon", tint = Color.Black)
             },
 
             trailingIcon = {

@@ -66,7 +66,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
         viewResumeViewModel.viewResume(ResumeId)
     }
 
-    when(val state =viewResumeState){
+    when(val state = viewResumeState){
         is ViewResumeViewModel.ViewResumeState.Loading -> {
             Text(text = "Loading...")
         }
@@ -97,7 +97,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 
                         Column(
                             modifier = Modifier
-                                .background(Color(0xFF81D796))
+                                .background(myGradient3)
                                 .fillMaxWidth()
                                 .size(100.dp)
                                 .padding(top = 20.dp)
@@ -109,7 +109,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                 Icon(
                                     imageVector = Icons.Default.ArrowBackIosNew,
                                     contentDescription = "Arrow Back",
-                                    Modifier.clickable { navController.navigate("main_screen") }
+                                    Modifier.clickable { navController.popBackStack() }
                                         .padding(16.dp)
                                     ,
                                     tint = Color.White
@@ -134,7 +134,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0xFF81D796)),
+                                .background(myGradient3),
                             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
                         ) {
                             Column(
@@ -171,10 +171,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             modifier = Modifier.padding(top = 10.dp)
                                         )
                                         Text(
-                                            text = resume.preferedworklocation
-                                                .replace("[","")
-                                                .replace("]","")
-                                                .replace("\"",""),
+                                            text = resume.preferedworklocation,
                                             color = Color.Black,
                                             fontSize = 16.sp
                                         )
@@ -383,21 +380,16 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 @Composable
 fun BoxRow(specialties: List<String>) {
 
-
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-
-        horizontalArrangement = Arrangement.Absolute.SpaceAround // Distributes the boxes evenly
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         specialties.forEach { specialties ->
             Box(
                 modifier = Modifier
-                    .size(120.dp,50.dp)
-                    .background(Color(0xFFF1F1F1))
-                    .padding(4.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .width(100.dp)
+                    .height(40.dp)
+                    .background(Color(0xFFF1F1F1), RoundedCornerShape(50.dp))
 
             ) {
                 // Content for each Box
@@ -405,6 +397,8 @@ fun BoxRow(specialties: List<String>) {
                     text = specialties,
                     modifier = Modifier.align(Alignment.Center),
                     color = Color.Black,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
                 )
             }
         }

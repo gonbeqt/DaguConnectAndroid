@@ -17,8 +17,8 @@ fun rememberWindowSizeClass(): WindowSize {
     val configuration = LocalConfiguration.current
     return WindowSize(
         width = when {
-            configuration.screenWidthDp < 600 -> WindowType.SMALL
-            configuration.screenWidthDp < 840 -> WindowType.MEDIUM
+            configuration.screenWidthDp < 500 -> WindowType.SMALL
+            configuration.screenWidthDp < 600 -> WindowType.MEDIUM
             else -> WindowType.LARGE
         },
         height = when {

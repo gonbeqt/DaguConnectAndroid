@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -50,7 +51,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,42 +66,32 @@ import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import org.json.JSONArray
 import java.util.Calendar
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAdjusters
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavController,resumeId: String,tradesmanId: String, bookingTradesmanViewModel: BooktradesmanViewModel){
     var taskDescription by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var selectedDate by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf("Select A Date") }
     var selectedTaskType by remember { mutableStateOf<String?>(null) }
     val ResumeId = resumeId.toIntOrNull() ?: return
     val TradesmanId = tradesmanId.toIntOrNull()?: return
     val context = LocalContext.current
     val resumeState by viewResumeViewModel.viewResumeState.collectAsState()
     val bookingState by bookingTradesmanViewModel.bookTradesmanState.collectAsState()
-
+    var isValid by remember { mutableStateOf(false) }
+    val phoneRegex = "^09[0-9]{9}$".toRegex()
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
 
-
-
-
-    val tradesmen = listOf(
-        Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp, "Alex", "Electrical", "P600/hr", 4.8, R.drawable.bookmark)
-    )
-    when(resumeState){
+    when(val resumestate = resumeState){
         is ViewResumeViewModel.ViewResumeState.Loading -> {
             Text(text = "Loading...")
         }
         is ViewResumeViewModel.ViewResumeState.Success -> {
-            val resume = (resumeState as ViewResumeViewModel.ViewResumeState.Success).data
+            val resume = resumestate.data
             val specialtiesJsonString = resume.specialties // Assuming this is the JSON string
             val values = try {
                 JSONArray(specialtiesJsonString).let { jsonArray ->
@@ -160,7 +153,9 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 100.dp)
-                        .verticalScroll(rememberScrollState())
+                        .background(myGradient3)
+
+                    .verticalScroll(rememberScrollState())
                     ,
 
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
@@ -299,24 +294,41 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color(0xFFF5F5F5))
                             ) {
-                                TextField(
-                                    value = phoneNumber,
-                                    onValueChange = { phoneNumber = it },
-                                    modifier = Modifier.fillMaxWidth()
-                                        .background(Color.White),
+                                Column {
+                                    TextField(
+                                        value = phoneNumber,
+                                        onValueChange = { phoneNumber = it
+                                            isValid = phoneNumber.isNotEmpty() && !phoneRegex.matches(phoneNumber)                                                        }, // Invalid if it doesn't match the regex
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color.White),
+                                        placeholder = { Text(text = "+63 | Enter Mobile Number") },
+                                        maxLines = 1,
+                                        keyboardOptions = KeyboardOptions.Default.copy(
+                                            keyboardType = KeyboardType.Phone
+                                        ),
+                                        isError = isValid, // Shows error if the length is not 11
+                                        colors = TextFieldDefaults.colors(
+                                            focusedContainerColor = Color.White,
+                                            unfocusedContainerColor = Color.White,
+                                            focusedIndicatorColor = Color.Transparent,
+                                            unfocusedIndicatorColor = Color.Transparent,
+                                            focusedTextColor = Color.Black,
+                                            unfocusedTextColor = Color.Black,
+                                            cursorColor = Color.Black,
+                                            errorIndicatorColor = Color.Red // Error indicator color when invalid
+                                        ),
+                                    )
 
-                                    placeholder = { Text(text = " +63 | Enter Mobile Number") },
-                                    maxLines = 3,
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.White,
-                                        unfocusedContainerColor = Color.White,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = Color.Black,
-                                        unfocusedTextColor = Color.Black,
-                                        cursorColor = Color.Black
-                                    ),
-                                )
+                                    if (isValid) {
+                                        Text(
+                                            text = "Please enter a valid phone number starting with 09",
+                                            color = Color.Red,
+                                            style = TextStyle(fontSize = 12.sp),
+                                            modifier = Modifier.padding(top = 4.dp, start = 4.dp ) // Adding some space between the text and TextField
+                                        )
+                                    }
+                                }
                             }
                             Text(
                                 text = "Specialties",
@@ -433,18 +445,20 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                 ) {
                                     Text(text = "Confirm")
                                 }
-                                when(bookingState){
-                                    is BooktradesmanViewModel.BookTradesmanState.Loading ->{
-                                        Text(text = "Loading...")
+                                LaunchedEffect(bookingState) {
+                                    when (val bookingstate =bookingState) {
+                                        is BooktradesmanViewModel.BookTradesmanState.Success -> {
+                                            Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
+                                            bookingTradesmanViewModel.resetState() // Reset state to prevent re-triggering
+                                        }
+                                        is BooktradesmanViewModel.BookTradesmanState.Error -> {
+                                            val errorMessage = bookingstate.message
+                                            Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                                            Log.e("BookTradesman", "Error: $errorMessage") // Debugging
+                                            bookingTradesmanViewModel.resetState() // Reset state to prevent repeated error
+                                        }
+                                        else -> Unit
                                     }
-                                    is BooktradesmanViewModel.BookTradesmanState.Success ->{
-                                        Toast.makeText(context,"Booking Successful", Toast.LENGTH_SHORT).show()
-                                    }
-                                    is BooktradesmanViewModel.BookTradesmanState.Error ->{
-                                        Text(text = "Error: ${(bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message}")
-                                        Toast.makeText(context,"Error: ${(bookingState as BooktradesmanViewModel.BookTradesmanState.Error).message}", Toast.LENGTH_SHORT).show()
-                                    }
-                                    else -> Unit
                                 }
                             }
                         }
@@ -456,7 +470,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
             }
         }
         is ViewResumeViewModel.ViewResumeState.Error -> {
-            Text(text = "Error: ${(resumeState as ViewResumeViewModel.ViewResumeState.Error).message}")
+            Text(text = "Error: ${resumestate.message}")
         }
         else -> Unit
     }
@@ -510,7 +524,7 @@ fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) ->
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = selectedDate, // ✅ Show updated selected date
+                    text = selectedDate,
                     fontSize = 16.sp,
                     color = Color.Gray
                 )

@@ -16,40 +16,42 @@ import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
-import com.example.androidproject.view.ClientPov.AllTradesman
-import com.example.androidproject.view.ClientPov.Categories.ACRepair
-import com.example.androidproject.view.ClientPov.Categories.Carpentry
-import com.example.androidproject.view.ClientPov.Categories.Cleaning
-import com.example.androidproject.view.ClientPov.Categories.Electrician
-import com.example.androidproject.view.ClientPov.Categories.Masonry
-import com.example.androidproject.view.ClientPov.Categories.Mechanics
-import com.example.androidproject.view.ClientPov.Categories.Painting
-import com.example.androidproject.view.ClientPov.Categories.Plumbing
-import com.example.androidproject.view.ClientPov.Categories.Roofing
-import com.example.androidproject.view.ClientPov.Categories.Welding
-import com.example.androidproject.view.ClientPov.ChangePassword
-import com.example.androidproject.view.ClientPov.EmailVerification
-import com.example.androidproject.view.ClientPov.ReportProblem
+import com.example.androidproject.view.pages.AllTradesman
+import com.example.androidproject.view.pages.Categories.ACRepair
+import com.example.androidproject.view.pages.Categories.Cleaning
+import com.example.androidproject.view.pages.Categories.Electrician
+import com.example.androidproject.view.pages.Categories.Masonry
+import com.example.androidproject.view.pages.Categories.Mechanics
+import com.example.androidproject.view.pages.Categories.Painting
+import com.example.androidproject.view.pages.Categories.Plumbing
+import com.example.androidproject.view.pages.Categories.Roofing
+import com.example.androidproject.view.pages.Categories.Welding
+import com.example.androidproject.view.pages.ChangePassword
+import com.example.androidproject.view.pages.EmailVerification
+import com.example.androidproject.view.pages.ReportProblem
 import com.example.androidproject.view.Feedback
 import com.example.androidproject.view.LandingPage2
 import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.SignUpScreen
 import com.example.androidproject.view.Tradesman
-import com.example.androidproject.view.pages.AcceptNow
 import com.example.androidproject.view.pages.AccountSettings
 import com.example.androidproject.view.pages.BookNow
 import com.example.androidproject.view.pages.BookingDetails
 import com.example.androidproject.view.pages.BookingsScreen
 import com.example.androidproject.view.pages.CancelNow
 import com.example.androidproject.view.pages.CancelledDetails
+import com.example.androidproject.view.pages.Categories.Carpentry
 import com.example.androidproject.view.pages.ConfirmBook
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.pages.NotificationScreen
 import com.example.androidproject.view.pages.RateAndReviews
+import com.example.androidproject.view.pages2.AvailabilityStatus
 import com.example.androidproject.view.pages2.BookingsTradesman
 import com.example.androidproject.view.pages2.BookmarkedTradesman
+import com.example.androidproject.view.pages2.HiringDetails
 import com.example.androidproject.view.pages2.HomeTradesman
+import com.example.androidproject.view.pages2.ManageProfile
 import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.view.pages2.TradesmanApply
@@ -70,11 +72,13 @@ import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFact
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
+import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +92,8 @@ class MainActivity : ComponentActivity() {
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 
+        val reportVMFactory = ReportViewModelFactory(apiService,this)
+        val reportViewModel = ViewModelProvider(this, reportVMFactory)[ReportViewModel::class.java]
 
         val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService,this)
         val getClientBookingViewModel = ViewModelProvider(this,getClientsBookingVMFactory)[GetClientBookingViewModel::class.java]
@@ -129,7 +135,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "main_screen" ) {
+                NavHost(navController = navController, startDestination = startDestination ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -160,18 +166,18 @@ class MainActivity : ComponentActivity() {
                         val tradesmanId = backStackEntry.arguments?.getString("tradesmanId")?:""
                         ConfirmBook(viewResumeViewModel,navController,resumeId,tradesmanId,bookingTradesmanViewModel)
                     }
-                    composable("bookingdetails") {
-                        BookingDetails(trade,navController)
+                    composable("bookingdetails/{resumeId}") {backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        BookingDetails(viewClientBookingViewModel,navController,resumeId)
                     }
                     composable("cancelleddetails") {
                         CancelledDetails(trade,navController)
                     }
-                    composable("cancelnow"){
-                        CancelNow(trade,navController)
+                    composable("cancelnow/{resumeId}"){ backStackEntry ->
+                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
+                        CancelNow(viewClientBookingViewModel,navController,resumeId)
                     }
-                    composable("acceptnow"){
-                        AcceptNow(trade,navController)
-                    }
+
                     composable("booking") {
                         BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel)
                     }
@@ -181,37 +187,37 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("acrepair"){
-                        ACRepair(navController,getResumesViewModel)
+                        ACRepair(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("plumbing") {
-                        Plumbing(navController,getResumesViewModel)
+                        Plumbing(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("carpentry") {
-                        Carpentry(navController,getResumesViewModel)
+                        Carpentry(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("electrician") {
-                        Electrician(navController,getResumesViewModel)
+                        Electrician(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("masonry"){
-                        Masonry(navController,getResumesViewModel)
+                        Masonry(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("cleaning") {
-                        Cleaning(navController,getResumesViewModel)
+                        Cleaning(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("mechanics"){
-                        Mechanics(navController,getResumesViewModel)
+                        Mechanics(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("painting"){
-                        Painting(navController,getResumesViewModel)
+                        Painting(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("roofing"){
-                        Roofing(navController,getResumesViewModel)
+                        Roofing(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("welding"){
-                        Welding(navController,getResumesViewModel)
+                        Welding(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("alltradesman"){
-                        AllTradesman(navController,getResumesViewModel)
+                        AllTradesman(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("emailverification"){
                         EmailVerification(navController)
@@ -242,6 +248,9 @@ class MainActivity : ComponentActivity() {
                         Log.e("Job ID" , jobId)
                         TradesmanApply(jobId, navController, viewJobViewModel)
                     }
+                    composable("hiringdetails") {
+                        HiringDetails(modifier = Modifier, navController)
+                    }
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController)
                     }
@@ -252,9 +261,14 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                        ProfileTradesman(modifier = Modifier,navController)
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel)
                     }
-
+                    composable("manageprofile") {
+                        ManageProfile(modifier = Modifier, navController)
+                    }
+                    composable("availabilitystatus") {
+                        AvailabilityStatus(modifier = Modifier, navController)
+                    }
                 }
             }
         }

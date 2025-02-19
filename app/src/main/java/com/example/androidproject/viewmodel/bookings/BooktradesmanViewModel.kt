@@ -26,23 +26,31 @@ class BooktradesmanViewModel (private val apiService: ApiService): ViewModel(){
                     BookTradesmanRequest(address, booking_date, phone_number, taskdescription, tasktype),
                     tradesmanId
                 )
+
                 if (response.isSuccessful) {
-                    _BookTradesmanState.value = BookTradesmanState.Success(response.body())
-                    val registerResponse = response.body()
-                    if (registerResponse != null) {
-                        Log.d("LoginViewModel", "Login state:: ${_BookTradesmanState.value}")
+                    val responseBody = response.body()
+                    if (responseBody != null) {
+                        _BookTradesmanState.value = BookTradesmanState.Success(responseBody)
+                    } else {
+                        _BookTradesmanState.value = BookTradesmanState.Error("Response body is null")
                     }
                 } else {
+                    // Handle error response
                     val errorJson = response.errorBody()?.string()
-                    val errorMessage = JsonErrorParser.extractField(errorJson, "message")
+                    val errorMessage = JsonErrorParser.extractField(errorJson, "message") ?: "Unknown error"
                     _BookTradesmanState.value = BookTradesmanState.Error(errorMessage)
                 }
-                // Handle the response here
             } catch (e: Exception) {
-                // Handle the exception here
+                _BookTradesmanState.value = BookTradesmanState.Error("An unexpected error occurred: ${e.message}")
             }
         }
+
     }
+
+    fun resetState() {
+        _BookTradesmanState.value = BookTradesmanState.Idle // Add an idle state
+    }
+
     sealed class BookTradesmanState {
         object Idle : BookTradesmanState()
         object Loading : BookTradesmanState()

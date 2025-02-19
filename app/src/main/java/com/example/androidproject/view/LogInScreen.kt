@@ -213,7 +213,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
                     navController = navController,
                     windowSize = windowSize,
                     modifier = Modifier.constrainAs(signUpText) {
-                        top.linkTo(loginButton.bottom, margin = 16.dp)
+                        top.linkTo(loginButton.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
@@ -258,7 +258,7 @@ fun EmailField(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
-                    contentDescription = "Email Icon"
+                    contentDescription = "Email Icon", tint = Color.Black
                 )
             },
             singleLine = true,
@@ -295,7 +295,6 @@ fun PasswordField(password: String,
                   onPasswordChange: (String) -> Unit,
 
                   windowSize: WindowSize, modifier: Modifier = Modifier) {
-    var passwordError by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
     val icon = if (passwordVisible)
@@ -307,18 +306,16 @@ fun PasswordField(password: String,
         value = password,
         onValueChange = {
             onPasswordChange(it)
-            passwordError = it.isNotEmpty() && it.length < 8
         },
         label = { Text("Password") },
-        leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon") },
+        leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = "Password Icon", tint = Color.Black) },
         trailingIcon = {
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(painter = icon, contentDescription = "Toggle Password Visibility", modifier = Modifier.size(24.dp))
+                Icon(painter = icon, contentDescription = "Toggle Password Visibility", modifier = Modifier.size(24.dp), tint = Color.Black)
             }
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         singleLine = true,
-        isError = passwordError,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
@@ -335,15 +332,8 @@ fun PasswordField(password: String,
         ),
         textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
-    if (passwordError) {
-        Text(
-            text = "● At least 8 characters required.",
-            color = Color.Red,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(top = 10.dp)
-        )
+
     }
-        }
 }
 @Composable
 fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier) {

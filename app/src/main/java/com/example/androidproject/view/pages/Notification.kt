@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -66,7 +67,18 @@ fun NotificationTopSection(navController: NavController) {
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Arrow Back",
                     Modifier
-                        .clickable { navController.navigate("main_screen") }
+                        .clickable {
+                            if (navController.previousBackStackEntry != null) {
+                                navController.navigateUp()
+
+                            } else {
+                                navController.navigate("main_screen") {
+                                    popUpTo("Home") { inclusive = false }
+                                }
+                            }
+                            Log.d("Navigation", "Previous BackStack Entry: ${navController.previousBackStackEntry?.destination?.route}")
+
+                        }
                         .padding(16.dp),
                     tint = Color(0xFF81D796)
                 )

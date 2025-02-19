@@ -36,13 +36,16 @@ class GetResumesViewModel(private val apiService: ApiService, private val contex
         }
     ).flow.cachedIn(viewModelScope)
 
-        fun dismissResume(resumeId: Int) {
-            _dismissedResumes.value = _dismissedResumes.value + resumeId
-        }
+
 
     // Function to invalidate the PagingSource
     fun invalidatePagingSource() {
         _pagingSource.value?.invalidate()
+    }
+
+    fun dismissResume(resumeId: Int) {
+        _dismissedResumes.value = _dismissedResumes.value + resumeId
+        invalidatePagingSource() // Force reload after dismissal
     }
 
 }
