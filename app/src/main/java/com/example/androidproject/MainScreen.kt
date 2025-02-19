@@ -49,7 +49,7 @@ import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel, postJobViewModel: PostJobViewModel, modifier: Modifier = Modifier) {
+fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel, postJobViewModel: PostJobViewModel, getChatViewModel: GetChatViewModel, reportViewModel: ReportViewModel, modifier: Modifier = Modifier) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
@@ -101,9 +101,8 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
             logoutViewModel,
             getClientsBooking,
             getResumesViewModel,
-            postJobViewModel)
-            getResumesViewModel,
-            viewModel,
+            postJobViewModel,
+            getChatViewModel,
             reportViewModel)
     }
 }
@@ -117,9 +116,8 @@ fun ContentScreen(
     logoutViewModel: LogoutViewModel,
     getClientsBooking: GetClientBookingViewModel,
     getResumesViewModel: GetResumesViewModel,
-    postJobViewModel: PostJobViewModel
-    getResumesViewModel: GetResumesViewModel,
-    viewModel: GetChatViewModel,
+    postJobViewModel: PostJobViewModel,
+    getChatViewModel: GetChatViewModel,
     reportViewModel: ReportViewModel
 ) {
 
@@ -129,7 +127,7 @@ fun ContentScreen(
             0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportViewModel)
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
-            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
+            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, getChatViewModel)
             4 -> ProfileScreen(
                 modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobViewModel
             )
@@ -139,7 +137,7 @@ fun ContentScreen(
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel)
             1 -> BookingsTradesman(modifier = Modifier,navController)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp),navController)
-            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
+            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, getChatViewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController,logoutViewModel)
         }
     }
