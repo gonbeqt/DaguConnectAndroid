@@ -838,7 +838,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                     }
                                     is ReportViewModel.ReportState.Error -> {
                                         val errorMessage = report.message
-                                        Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         showReportDialog = true
                                         reportViewModels.resetState()
                                     }
