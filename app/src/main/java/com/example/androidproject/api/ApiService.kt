@@ -44,7 +44,7 @@ interface ApiService {
     suspend fun getJobById(@Path("id") id: Int): Response<Job>
 
     @DELETE("/user/logout")
-    suspend fun logout(@Header("Authorization") token: String): Response<Unit>
+    suspend fun logout(): Response<Unit>
 
 
     @GET("/user/getresumes")
@@ -54,7 +54,7 @@ interface ApiService {
     suspend fun getResumeById(@Path("resumeId") resumeId: Int): Response<viewResume>
 
     @GET("/user/client/getbooking")
-    suspend fun getClientBooking(@Header("Authorization") token: String): Response<List<GetClientsBooking>>
+    suspend fun getClientBooking(): Response<List<GetClientsBooking>>
 
     @GET("/user/client/viewbooking/{resumeId}")
     suspend fun getCleintBookingById(@Path("resumeId") resumeId: Int): Response<ViewClientBooking>
@@ -63,8 +63,8 @@ interface ApiService {
     suspend fun getChat(): Response <GetChats>
 
     @POST("/user/client/booktradesman/{tradesman_Id}")
-    suspend fun booktradesman(@Header("Authorization") token: String, @Body request: BookTradesmanRequest, @Path("tradesman_Id") tradesman_Id: Int): Response<BookTradesmanResponse>
+    suspend fun booktradesman( @Body request: BookTradesmanRequest, @Path("tradesman_Id") tradesman_Id: Int): Response<BookTradesmanResponse>
 
     @POST("/user/client/reporttradesman/{tradesmanId}")
-    suspend fun report(@Header("Authorization") token: String, @Body request: ReportRequest, @Path("tradesmanId") tradesmanId: Int): Response<ReportResponse>
+    suspend fun report( @Body request: ReportRequest, @Path("tradesmanId") tradesmanId: Int): Response<ReportResponse>
 }
