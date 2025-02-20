@@ -6,8 +6,10 @@ import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.model.LoginRequest
 import com.example.androidproject.model.LoginResponse
+import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
+import com.example.androidproject.model.RequestJobs
 import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
 
@@ -43,9 +45,11 @@ interface ApiService {
     @GET("/user/job/view/{id}")
     suspend fun getJobById(@Path("id") id: Int): Response<Job>
 
+    @POST("/user/client/create-job")
+    suspend fun postJob(@Body request: RequestJobs): Response<PostJobResponse>
+
     @DELETE("/user/logout")
     suspend fun logout(@Header("Authorization") token: String): Response<Unit>
-
 
     @GET("/user/getresumes")
     suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
