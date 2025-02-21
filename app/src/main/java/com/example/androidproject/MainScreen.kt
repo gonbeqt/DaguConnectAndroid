@@ -44,11 +44,12 @@ import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
+import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier,viewModel:GetChatViewModel,reportViewModel: ReportViewModel) {
+fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier,viewModel:GetChatViewModel,reportViewModel: ReportViewModel, postJobsViewModel: PostJobViewModel) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
@@ -101,7 +102,9 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
             getClientsBooking,
             getResumesViewModel,
             viewModel,
-            reportViewModel)
+            reportViewModel,
+            postJobsViewModel
+            )
     }
 }
 
@@ -115,7 +118,8 @@ fun ContentScreen(
     getClientsBooking: GetClientBookingViewModel,
     getResumesViewModel: GetResumesViewModel,
     viewModel: GetChatViewModel,
-    reportViewModel: ReportViewModel
+    reportViewModel: ReportViewModel,
+    postJobsViewModel: PostJobViewModel
 ) {
 
     val role = AccountManager.getAccount()?.isClient
@@ -126,7 +130,7 @@ fun ContentScreen(
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileScreen(
-                modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel
+                modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel
             )
         }
     } else {

@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.rememberAsyncImagePainter
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
@@ -208,6 +209,7 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
 @Composable
 fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
+    val profilePicture = getJobs.clientProfilePicture
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -221,7 +223,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
         ) {
             Row {
                 Image(
-                    painter = painterResource(id = R.drawable.pfp),
+                    painter = rememberAsyncImagePainter(model = profilePicture),
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(40.dp)
@@ -258,12 +260,12 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                 Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
                     Text(text = getJobs.jobDescription, fontSize = 14.sp)
                     Text(text = "Est. Budget: ${getJobs.salary} pesos", fontSize = 14.sp)
-                    Text(text = "Location: ${getJobs.location}", fontSize = 14.sp)
+                    Text(text = "Location: ${getJobs.address}", fontSize = 14.sp)
                 }
                 Row(modifier = Modifier.padding(start = 5.dp)) {
                     TextButton(onClick = {}) {
                         Text(
-                            text = "5 Applicant",
+                            text = "${getJobs.totalApplicants} Applicant",
                             fontSize = 16.sp,
                             color = Color.Black,
                             fontWeight = FontWeight(500),

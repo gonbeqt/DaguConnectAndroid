@@ -1,24 +1,25 @@
 package com.example.androidproject.viewmodel.jobs
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.PostJobResponse
-import com.example.androidproject.model.RequestJobs
+import com.example.androidproject.model.PostJobs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PostJobViewModel(private val apiService: ApiService) : ViewModel()  {
+class PostJobViewModel(private val apiService: ApiService, context: Context) : ViewModel()  {
     private val _postJobState = MutableStateFlow<PostJobState>(PostJobState.Idle)
     val postJobState = _postJobState.asStateFlow()
 
-    fun postJob(salary: Double, applicantLimitCount: Int, jobType: String, jobDescription: String, address: String, status: String, deadline: String) {
+    fun postJob(salary: Double, applicantLimitCount: Int, jobType: String, jobDescription: String, location: String, status: String, deadline: String) {
         viewModelScope.launch {
             _postJobState.value = PostJobState.Loading
             try {
-                val response = apiService.postJob(RequestJobs(salary, applicantLimitCount, jobType, jobDescription, address, status, deadline))
+                val response = apiService.postJob(PostJobs(salary, applicantLimitCount, jobType, jobDescription, location, status, deadline))
                 if (response.isSuccessful) {
                     val message = response.body()
                     if (message != null) {

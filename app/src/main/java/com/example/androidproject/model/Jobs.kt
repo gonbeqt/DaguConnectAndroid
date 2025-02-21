@@ -1,10 +1,9 @@
 package com.example.androidproject.model
 
-import android.os.Parcelable.Creator
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDate
+
 // Add jobs
-data class RequestJobs(
+data class PostJobs(
     val salary: Double,
     @SerializedName("applicant_limit_count")
     val applicantLimitCount: Int,
@@ -12,7 +11,7 @@ data class RequestJobs(
     val jobType: String,
     @SerializedName("job_description")
     val jobDescription: String,
-    val address: String,
+    val location: String,
     val status: String,
     val deadline: String,
 )
@@ -48,12 +47,14 @@ data class GetJobs(
     @SerializedName("job_description")
     val jobDescription: String,
     val address: String,
+    val latitude: Double?,
+    val longitude: Double?,
     val status: String,
     val deadline: String,
-    val longitude: Double?,
-    val latitude: Double?,
     @SerializedName("created_at")
-    val createdAt: String
+    val createdAt: String,
+    @SerializedName("total_applicants")
+    val totalApplicants: Int
 )
 
 data class Job(

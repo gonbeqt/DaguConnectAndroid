@@ -77,6 +77,7 @@ import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ServicePosting
+import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -84,7 +85,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logoutViewModel:LogoutViewModel) {
+fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logoutViewModel:LogoutViewModel, postJobViewModel: PostJobViewModel) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
     var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
@@ -226,7 +227,8 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
                     },
                     onDeadlineChange = { deadline ->
                         println("Selected Deadline: $deadline") // Handle deadline change if needed
-                    }
+                    },
+                    postJobViewModel
                 )
             }
         }
@@ -796,19 +798,23 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 @Composable
     fun FabPosting(
         onPostNewService: (ServicePosting) -> Unit,
-        onDeadlineChange:(String) ->Unit
+        onDeadlineChange:(String) ->Unit,
+        postJobViewModel: PostJobViewModel
     ) {
+        val postJobState by postJobViewModel.postJobState.collectAsState()
+
         var isDialogVisible by remember { mutableStateOf(false) }
-        var title by remember { mutableStateOf("") } // Use simple variables for input
+        var applicantCount by remember { mutableStateOf("") } // Use simple variables for input
         var description by remember { mutableStateOf("") }
         var location by remember { mutableStateOf("") }
         var rate by remember { mutableStateOf("") }
         var selectedCategories = remember { mutableStateListOf<String>() }
-            val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val context = LocalContext.current
-     val today = LocalDate.now() // Get today's date
-    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
-    var deadline by remember { mutableStateOf("") }
+        val today = LocalDate.now() // Get today's date
+        var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+        var deadline by remember { mutableStateOf("") }
+        var jobType by remember { mutableStateOf("") }
 
 
     val datePickerDialog = DatePickerDialog(
@@ -830,6 +836,22 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
     ).apply {
         datePicker.minDate = System.currentTimeMillis() // Set minimum selectable date to today
     }
+
+    when (postJobState) {
+        is PostJobViewModel.PostJobState.Success -> {
+            val message = postJobState as PostJobViewModel.PostJobState.Success
+            Toast.makeText(context, message.message.message, Toast.LENGTH_SHORT).show()
+        }
+
+        is PostJobViewModel.PostJobState.Error -> {
+            val message = postJobState as PostJobViewModel.PostJobState.Error
+            Toast.makeText(context, message.message, Toast.LENGTH_SHORT).show()
+        }
+        is PostJobViewModel.PostJobState.Loading -> {}
+        is PostJobViewModel.PostJobState.Idle -> {}
+        else -> {}
+    }
+
         FloatingActionButton(
             onClick = { isDialogVisible = true },
             containerColor = Color.Gray,
@@ -868,9 +890,9 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 
                         // Title TextField
                         OutlinedTextField(
-                            value = title,
-                            onValueChange = { title = it },
-                            label = { Text("Title") },
+                            value = applicantCount,
+                            onValueChange = { applicantCount = it },
+                            label = { Text("Applicants Count") },
                             shape = RoundedCornerShape(16.dp),
                             singleLine = true,
                             modifier = Modifier
@@ -987,11 +1009,11 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 val categories = listOf(
-                                    "Carpentry",
-                                    "Painting",
-                                    "Welding",
+                                    "Carpenter",
+                                    "Painter",
+                                    "Welder",
                                     "Electrician",
-                                    "Plumbing",
+                                    "Plumber",
                                     "Masonry",
                                     "Roofing",
                                     "AC Repair",
@@ -1006,8 +1028,10 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                             .clickable {
                                                 if (isSelected) {
                                                     selectedCategories.remove(category) // Remove if already selected
-                                                } else if (selectedCategories.size < 3) {
-                                                    selectedCategories.add(category) // Add only if less than 3
+                                                    jobType = ""
+                                                } else if (selectedCategories.size < 1) {
+                                                    selectedCategories.add(category)
+                                                    jobType = category// Add only if less than 3
                                                 }
                                             }
                                             .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
@@ -1034,19 +1058,12 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(onClick = {
-                                val newPost = ServicePosting(
-                                    title = title,
-                                    description = description,
-                                    location = location,
-                                    rate = rate.toString(),
-                                    deadline = deadline,
-                                    postedDate = currentDate.toString(),
-                                    isActive = true,
-                                    category = if (selectedCategories.isNotEmpty()) selectedCategories.joinToString(", ") else "Uncategorized",
-                                    applicantsCount = 0
-                                )
+                                val rateInt = rate.toDouble()
+                                val applicantCountInt = applicantCount.toInt()
+                                postJobViewModel.postJob(salary = rateInt, applicantLimitCount = applicantCountInt, jobType = jobType, jobDescription = description, location = location, status = "available", deadline = deadline )
+
                                 isDialogVisible = false
-                                onPostNewService(newPost) // Send the new post to the parent Composable
+                                //onPostNewService(newPost) // Send the new post to the parent Composable
 
                             },colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
                             ) {

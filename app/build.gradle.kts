@@ -61,7 +61,7 @@ dependencies {
     implementation ("androidx.paging:paging-runtime-ktx:3.2.1")
     implementation ("androidx.paging:paging-compose:3.2.1")
 
-    implementation("io.coil-kt:coil-compose:2.0.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
     //livedata
     implementation("androidx.compose.runtime:runtime-livedata:1.5.3")
     implementation("org.osmdroid:osmdroid-android:6.1.20")
