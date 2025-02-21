@@ -20,9 +20,7 @@ class BooktradesmanViewModel (private val apiService: ApiService): ViewModel(){
         viewModelScope.launch {
             _BookTradesmanState.value = BookTradesmanState.Loading
             try {
-                val token = TokenManager.getToken()
                 val response = apiService.booktradesman(
-                    "Bearer $token",
                     BookTradesmanRequest(address, booking_date, phone_number, taskdescription, tasktype),
                     tradesmanId
                 )

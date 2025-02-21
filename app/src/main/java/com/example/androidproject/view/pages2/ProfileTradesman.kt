@@ -407,7 +407,7 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
             onClick = {
                 val token = TokenManager.getToken()
                 if (token != null) {
-                    logoutViewModel.logout("Bearer $token")
+                    logoutViewModel.logout()
                 } else {
                     // Handle case where token is null
                     TokenManager.clearToken()

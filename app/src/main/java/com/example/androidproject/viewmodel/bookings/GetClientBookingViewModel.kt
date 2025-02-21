@@ -19,7 +19,7 @@ class GetClientBookingViewModel(private val apiService: ApiService, private val 
             _clientbookingState.value = GetClientBookings.Loading
             try {
                 val token = TokenManager.getToken()
-                val response = apiService.getClientBooking("Bearer $token")
+                val response = apiService.getClientBooking()
                 val body = response.body()
                 if (response.isSuccessful) {
                     if (body != null) {
