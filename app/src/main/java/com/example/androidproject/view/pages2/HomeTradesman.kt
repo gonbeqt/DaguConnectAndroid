@@ -17,35 +17,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,7 +52,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
-import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
@@ -86,7 +74,8 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFECECEC))
+            .height(50.dp)
+        .background(Color(0xFFECECEC))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -113,8 +102,9 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                                     text = {
                                         Text(
                                             text = title,
-                                            fontSize = textSize,
-                                            modifier = Modifier.fillMaxWidth(), // Fills the width inside each Tab
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.fillMaxWidth().padding(4.dp), // Fills the width inside each Tab
                                             color = if (selectedTabIndex == index) Color.Black else Color.Gray
                                         )
                                     },
@@ -126,7 +116,6 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(4.dp)
                                 .background(Color(0xFFD9D9D9))
                         ) {
                             when (selectedTabIndex) {
@@ -148,34 +137,40 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             .fillMaxWidth()
             .shadow(1.dp)
             .background(Color.White)
-            .padding(top = 10.dp)
     ) {
         Row(
-            modifier = Modifier
+            modifier = Modifier //top nav
+                .padding(top = 8.dp, start = 25.dp, end = 25.dp, bottom = 8.dp)
                 .fillMaxWidth()
-                .height(70.dp)
-                .padding(horizontal = 25.dp), // Added padding inside for spacing
+                .height(60.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Left-aligned text
             Text(
                 text = "Home",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Medium
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Normal
             )
-
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications Icon",
-                tint = Color.Black,
-                modifier = Modifier.size(35.dp)
-                    .clickable { navController.navigate("notification") }
-            )
-
-
+            // Right-aligned icons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color(0xFF3CC0B0),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
         }
     }
+    Divider(
+        color = Color.Black,
+        thickness = 0.3.dp,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -184,7 +179,7 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFE9E9E9))) {
         LazyColumn(
-            modifier = Modifier.padding(bottom = 70.dp, top = 2.dp),
+            modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(jobsList.itemCount) { index ->
@@ -211,7 +206,7 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
 
 
 @Composable
-fun TopMatchesItem(getJobs: GetJobs, navController: NavController){
+fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
     Card(
         modifier = Modifier
@@ -232,41 +227,55 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController){
                         .size(40.dp)
                         .clip(CircleShape)
                 )
-                Text(text = getJobs.clientFullname,
+                Text(
+                    text = getJobs.clientFullname,
                     fontSize = 16.sp,
                     color = Color.Black,
                     fontWeight = FontWeight(500),
-                    modifier = Modifier.padding(start = 20.dp))
+                    modifier = Modifier.padding(start = 20.dp)
+                )
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row {
                 Column {
-                    Text(text = "Looking for ${getJobs.jobType}", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
+                    Text(
+                        text = "Looking for ${getJobs.jobType}",
+                        fontSize = 24.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight(500)
+                    )
                     Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Card(modifier = Modifier.fillMaxWidth(),
+            Card(
+                modifier = Modifier.fillMaxWidth(),
                 border = BorderStroke(1.dp, Color.Gray),
                 colors = CardDefaults.cardColors(Color.White)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = getJobs.jobDescription, fontSize = 12.sp)
-                    Text(text = "Est. Budget: ${getJobs.salary} pesos", fontSize = 12.sp)
-                    Text(text = "Location: ${getJobs.location}", fontSize = 12.sp)
-                    TextButton(onClick = {
-                    }) {
-                        Text(text = "5 Applicant",fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight(500),
+                Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
+                    Text(text = getJobs.jobDescription, fontSize = 14.sp)
+                    Text(text = "Est. Budget: ${getJobs.salary} pesos", fontSize = 14.sp)
+                    Text(text = "Location: ${getJobs.location}", fontSize = 14.sp)
+                }
+                Row(modifier = Modifier.padding(start = 5.dp)) {
+                    TextButton(onClick = {}) {
+                        Text(
+                            text = "5 Applicant",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
                             style = TextStyle(textDecoration = TextDecoration.Underline),
-                            modifier = Modifier.padding(8.dp))
+                        )
                     }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun RecentJobs(navController: NavController){
@@ -282,14 +291,9 @@ fun RecentJobs(navController: NavController){
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
     )
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFD9D9D9))
-            .padding(bottom = 100.dp)
+        modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
 
-
-        ,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
