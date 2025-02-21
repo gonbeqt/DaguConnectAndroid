@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -82,7 +83,6 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
                 ) {
 
                     Column(
@@ -118,6 +118,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                 }
                 Card(
                     modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp), // Apply top corner radius
                     colors = CardDefaults.cardColors(Color.White) // Set background color inside Card
@@ -284,34 +285,51 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                             }
                         }
                         Spacer(Modifier.height(20.dp))
-                        Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
-                            Text(text = "Other services needed by this client (0)", fontSize = 18.sp, fontWeight = FontWeight(500))
+                        Column(modifier = Modifier.fillMaxWidth()){
+                            Row (Modifier.fillMaxWidth().padding(start = 20.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically){
+                                Text(text = "Other services needed by this client (0)",
+                                    fontSize = 18.sp, fontWeight = FontWeight(500))
 
-                        }
-                        Box(
-                            modifier = Modifier
-                                .background(myGradient3)
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Button(
-                                onClick = {navController.navigate("hiringdetails")},
-                                modifier = Modifier.width(200.dp),
-                                colors = ButtonDefaults.buttonColors(Color.White),
-                                border = BorderStroke(1.dp, Color.Black)
-                            ) {
-                                Text(
-                                    text = "Apply Now",
+                            }
+                            Row (Modifier.fillMaxWidth().padding(50.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically){
+                                Text(text = "No other services offered by this client yet",
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight(500),
-                                    color = Color.Black
+                                    fontStyle = FontStyle.Normal,
+                                    color = Color.Gray
                                 )
+
                             }
                         }
+
 
                     }
 
                 }
+                Column(
+                    modifier = Modifier
+                        .background(Color.Black)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {navController.navigate("hiringdetails")},
+                        modifier = Modifier.width(200.dp),
+                        colors = ButtonDefaults.buttonColors(Color.White),
+                        border = BorderStroke(1.dp, Color.Black),
+                    ) {
+                        Text(
+                            text = "Apply Now",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight(500),
+                            color = Color.Black
+                        )
+                    }
+                }
+
             }
         }
 
