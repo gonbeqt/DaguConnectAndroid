@@ -29,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -81,10 +82,10 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
             .background(Color.White)
     ) {
         Row(
-            modifier = Modifier
+            modifier = Modifier //top nav
                 .padding(top = 8.dp, start = 25.dp, end = 25.dp, bottom = 8.dp)
                 .fillMaxWidth()
-                .height(50.dp),
+                .height(60.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -107,6 +108,12 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                 )
             }
         }
+        // Add this Divider **outside** the Box to create a visible separator
+        Divider(
+            color = Color.Black, // Change color if needed
+            thickness = 0.3.dp, // Adjust thickness for better visibility
+            modifier = Modifier.fillMaxWidth()
+        )
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -172,9 +179,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-
-        ,
+            .height(50.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -182,7 +187,8 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
         Box(
             modifier = Modifier
                 .background(if (selectedSection == "My Jobs") myGradient3 else SolidColor(Color.Transparent))
-                .weight(1f),
+                .weight(1f)
+                .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
             TextButton(
@@ -221,7 +227,13 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
                 )
             }
         }
+
     }
+    Divider(
+        color = Color.Black, // Change color if needed
+        thickness = 0.3.dp, // Adjust thickness for better visibility
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable

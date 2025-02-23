@@ -21,9 +21,7 @@ class ReportViewModel (private val apiService: ApiService): ViewModel() {
         viewModelScope.launch {
             _reportState.value = ReportState.Loading
             try{
-                val token = TokenManager.getToken()
                 val response = apiService.report(
-                    "Bearer $token",
                     ReportRequest(report_reason, report_details),
                     tradesmanId
                 )
