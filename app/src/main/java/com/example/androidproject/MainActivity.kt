@@ -52,6 +52,7 @@ import com.example.androidproject.view.pages2.HiringDetails
 import com.example.androidproject.view.pages2.HomeTradesman
 import com.example.androidproject.view.pages2.ManageProfile
 import com.example.androidproject.view.pages2.ProfileTradesman
+import com.example.androidproject.view.pages2.ProfileVerification
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.view.pages2.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
@@ -77,7 +78,6 @@ import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewMode
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -262,6 +262,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("availabilitystatus") {
                         AvailabilityStatus(modifier = Modifier, navController)
+                    }
+                    composable("profileverification") {
+                        ProfileVerification(modifier = Modifier, navController)
                     }
 
 

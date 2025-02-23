@@ -2,6 +2,11 @@ package com.example.androidproject.view.pages2
 
 import LogoutViewModel
 import android.widget.Toast
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,12 +55,14 @@ import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
 fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController,logoutViewModel: LogoutViewModel) {
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabNames = listOf("My Resume", "General")
+    val tabNames = listOf("Job Profile", "General")
 
     Column(
         modifier = modifier
@@ -172,7 +180,7 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
                     .padding(10.dp)
             ) {
                 when (selectedTabIndex) {
-                    0 -> MyResume(navController)
+                    0 -> JobProfile(navController)
                     1 -> SettingsTradesmanScreen(navController,logoutViewModel)
                 }
             }
@@ -181,7 +189,27 @@ fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController
 }
 
 @Composable
-fun MyResume(navController: NavController){
+fun JobProfile(navController: NavController){
+
+    var scale by remember { mutableStateOf(1f) }
+
+    val animatedScale by animateFloatAsState(
+        targetValue = if (scale == 1f) 1.1f else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = ""
+    )
+
+    // Automatically trigger animation on composition
+    LaunchedEffect(Unit) {
+        while (true) {
+            scale = if (scale == 1f) 1.1f else 1f
+            delay(800.milliseconds) // Match with animation duration
+        }
+    }
+
     // Additional Layout from Image
     Column(modifier = Modifier.padding(8.dp)) {
         Box(modifier = Modifier
@@ -190,26 +218,19 @@ fun MyResume(navController: NavController){
                 .padding(10.dp)) {
                 Box(modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.Black, RoundedCornerShape(10.dp))
-                    .clickable {navController.navigate("manageprofile")  },
+                    .padding(10.dp)
+                    .scale(animatedScale)
+                    .background(Color(0xFF3E5CE1), RoundedCornerShape(10.dp))
+                    .clickable {
+                        navController.navigate("profileverification")
+                        scale = 1.1f  },
                     contentAlignment = Alignment.Center){
                     Row(modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                         ){
-                        Box(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .size(30.dp)
-                                .background(Color.Black, RoundedCornerShape(10.dp))
-                                .border(2.dp, Color.White, RoundedCornerShape(10.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Edit profile and skills",
-                                tint = Color.White
-                            )
-                        }
+
+                        Text(modifier = Modifier.padding(8.dp), text = "Verify Profile", color = Color.White, fontSize = 14.sp)
+
 
                     }
                 }
@@ -220,8 +241,45 @@ fun MyResume(navController: NavController){
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Status : Available",
-                        fontSize = 18.sp,
+                        text = "Job Title : ",
+                        color = Color.Gray,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "About Me:",
+                            fontSize = 16.sp,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold)
+
+                    }
+                    Text(
+                        text = "Descripton about yourself",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Normal
+                    )
+
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Preferred Location : ",
+                        color = Color.Gray,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
 
@@ -233,59 +291,32 @@ fun MyResume(navController: NavController){
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Est. Rate : ₱500", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Est. Rate :",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold)
 
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "About Me", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-
-                    }
-                    Text(
-                        text = "Descripton about yourself",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Normal
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Trade Credential :",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold)
 
                 }
-                Spacer(modifier = Modifier.height(10.dp))
 
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Specialties", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        repeat(3) {
-                            Box(
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(40.dp)
-                                    .background(
-                                        Color.LightGray,
-                                        RoundedCornerShape(50.dp)
-                                    )
-                            )
-                        }
-                    }
-                }
+
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Ratings and Testimonials", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Ratings and Testimonials", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(text = "Feedback from satisfied clients", fontSize = 14.sp, color = Color.Gray)
             Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally){
