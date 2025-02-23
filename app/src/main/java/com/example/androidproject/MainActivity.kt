@@ -78,6 +78,7 @@ import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewMode
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
