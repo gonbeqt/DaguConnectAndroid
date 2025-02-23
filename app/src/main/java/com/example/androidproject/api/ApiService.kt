@@ -39,6 +39,12 @@ interface ApiService {
     @GET("/user/jobs")
     suspend fun getJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<JobsResponse>
 
+    @GET("/user/jobs/recent")
+    suspend fun getRecentJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<JobsResponse>
+
+    @GET("/client/jobs/view/{userId}")
+    suspend fun getJobsByUserId(@Path("userId") userId: Int): Response<JobsResponse>
+
     @GET("/user/job/view/{id}")
     suspend fun getJobById(@Path("id") id: Int): Response<Job>
 

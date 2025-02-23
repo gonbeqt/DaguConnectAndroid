@@ -802,7 +802,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
         postJobViewModel: PostJobViewModel
     ) {
         val postJobState by postJobViewModel.postJobState.collectAsState()
-
+        var isSubmitting by remember { mutableStateOf(false) }
         var isDialogVisible by remember { mutableStateOf(false) }
         var applicantCount by remember { mutableStateOf("") } // Use simple variables for input
         var description by remember { mutableStateOf("") }
@@ -839,13 +839,19 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 
     when (postJobState) {
         is PostJobViewModel.PostJobState.Success -> {
-            val message = postJobState as PostJobViewModel.PostJobState.Success
-            Toast.makeText(context, message.message.message, Toast.LENGTH_SHORT).show()
+            if (isSubmitting) { // Only show toast if post was triggered by user
+                val message = postJobState as PostJobViewModel.PostJobState.Success
+                Toast.makeText(context, message.message.message, Toast.LENGTH_SHORT).show()
+                isSubmitting = false // Reset after showing toast
+            }
         }
 
         is PostJobViewModel.PostJobState.Error -> {
-            val message = postJobState as PostJobViewModel.PostJobState.Error
-            Toast.makeText(context, message.message, Toast.LENGTH_SHORT).show()
+            if (isSubmitting) {
+                val message = postJobState as PostJobViewModel.PostJobState.Error
+                Toast.makeText(context, message.message, Toast.LENGTH_SHORT).show()
+                isSubmitting = false
+            }
         }
         is PostJobViewModel.PostJobState.Loading -> {}
         is PostJobViewModel.PostJobState.Idle -> {}
@@ -853,7 +859,16 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
     }
 
         FloatingActionButton(
-            onClick = { isDialogVisible = true },
+            onClick = {
+                applicantCount = ""
+                description = ""
+                location = ""
+                rate = ""
+                selectedCategories.clear()
+                selectedDate = null
+                deadline = ""
+                jobType = ""
+                isDialogVisible = true },
             containerColor = Color.Gray,
             contentColor = Color.White,
             shape = CircleShape
@@ -948,7 +963,6 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             )
                         )
 
-
                         // Rate TextField
                         OutlinedTextField(
                             value = rate,
@@ -1014,11 +1028,11 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                     "Welder",
                                     "Electrician",
                                     "Plumber",
-                                    "Masonry",
-                                    "Roofing",
-                                    "AC Repair",
-                                    "Mechanics",
-                                    "Cleaning"
+                                    "Mason",
+                                    "Roofer",
+                                    "AC Technician",
+                                    "Mechanic",
+                                    "Cleaner"
                                 )
 
                                 categories.forEach { category ->
@@ -1058,9 +1072,45 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(onClick = {
-                                val rateInt = rate.toDouble()
-                                val applicantCountInt = applicantCount.toInt()
-                                postJobViewModel.postJob(salary = rateInt, applicantLimitCount = applicantCountInt, jobType = jobType, jobDescription = description, location = location, status = "available", deadline = deadline )
+                                isSubmitting = true
+
+                                // Validate empty fields first
+                                if (rate.isEmpty() || applicantCount.isEmpty() || jobType.isEmpty() || description.isEmpty() || location.isEmpty() || deadline.isEmpty()) {
+                                    Toast.makeText(context, "Please fill in all fields.", Toast.LENGTH_SHORT).show()
+                                    isSubmitting = false
+                                    return@Button
+                                }
+
+                                // Validate if rate and applicantCount are numbers
+                                val rateInt = rate.toDoubleOrNull()
+                                val applicantCountInt = applicantCount.toIntOrNull()
+
+
+
+                                if (applicantCountInt == null) {
+                                    Toast.makeText(context, "Invalid Applicant Count!", Toast.LENGTH_SHORT).show()
+                                    isSubmitting = false
+                                    return@Button
+                                }
+
+                                if (rateInt == null) {
+                                    Toast.makeText(context, "Invalid Budget!", Toast.LENGTH_SHORT).show()
+                                    isSubmitting = false
+                                    return@Button
+                                }
+
+                                if (jobType == "AC Technician") jobType = "Ac_technician"
+
+                                // Post job only if all inputs are valid
+                                postJobViewModel.postJob(
+                                    salary = rateInt,
+                                    applicantLimitCount = applicantCountInt,
+                                    jobType = jobType,
+                                    jobDescription = description,
+                                    location = location,
+                                    status = "available",
+                                    deadline = deadline
+                                )
 
                                 isDialogVisible = false
                                 //onPostNewService(newPost) // Send the new post to the parent Composable
