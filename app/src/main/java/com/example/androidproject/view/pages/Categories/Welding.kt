@@ -202,7 +202,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = weldingList.itemSnapshotList.items.filter {it.specialties.contains("Welding") && it.id !in dismissedResumes }
+                            val filteredList = weldingList.itemSnapshotList.items.filter {it.specialty.contains("Welding") && it.id !in dismissedResumes }
 
                             if (filteredList.isEmpty()) {
                                 item {

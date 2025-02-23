@@ -202,7 +202,7 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = roofingList.itemSnapshotList.items.filter {it.specialties.contains("Roofing") && it.id !in dismissedResumes  }
+                            val filteredList = roofingList.itemSnapshotList.items.filter {it.specialty.contains("Roofing") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {

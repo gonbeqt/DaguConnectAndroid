@@ -542,6 +542,15 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
     }
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(showReportDialog) {
+        if(showReportDialog){
+            selectedIndex = -1
+            otherReason = ""
+            reasonDescription = ""
+        }
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -612,9 +621,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         }
                     }
                     Text(
-                        text = "${resumes.specialties}"
-                            .replace("[", "")  // Remove opening bracket
-                            .replace("]", ""),  // Remove closing bracket ,
+                        text = resumes.specialty,
                         color = Color.Black,
                         fontSize = taskTextSize,
                         )

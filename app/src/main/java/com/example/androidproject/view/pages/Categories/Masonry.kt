@@ -199,7 +199,7 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = masonryList.itemSnapshotList.items.filter {it.specialties.contains("Masonry") && it.id !in dismissedResumes  }
+                            val filteredList = masonryList.itemSnapshotList.items.filter {it.specialty.contains("Masonry") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {

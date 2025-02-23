@@ -197,7 +197,7 @@ fun Electrician(navController: NavController,getResumesViewModel: GetResumesView
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = electricianList.itemSnapshotList.items.filter {it.specialties.contains("Electrician") && it.id !in dismissedResumes  }
+                            val filteredList = electricianList.itemSnapshotList.items.filter {it.specialty.contains("Electrician") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {

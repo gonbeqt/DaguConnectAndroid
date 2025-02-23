@@ -199,7 +199,7 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = plumberList.itemSnapshotList.items.filter {it.specialties.contains("Plumbing") && it.id !in dismissedResumes  }
+                            val filteredList = plumberList.itemSnapshotList.items.filter {it.specialty.contains("Plumbing") && it.id !in dismissedResumes  }
 
                             items(filteredList.size) { index ->
                                 val plumberList = filteredList[index]
