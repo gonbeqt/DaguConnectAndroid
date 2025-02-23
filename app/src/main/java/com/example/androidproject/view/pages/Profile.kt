@@ -1085,8 +1085,6 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 val rateInt = rate.toDoubleOrNull()
                                 val applicantCountInt = applicantCount.toIntOrNull()
 
-
-
                                 if (applicantCountInt == null) {
                                     Toast.makeText(context, "Invalid Applicant Count!", Toast.LENGTH_SHORT).show()
                                     isSubmitting = false
