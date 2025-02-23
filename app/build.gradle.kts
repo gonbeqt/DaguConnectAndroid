@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.foundation.android)
+    implementation(libs.androidx.storage)
     //navigation
     val nav_version = "2.8.4"
     implementation("androidx.navigation:navigation-compose:$nav_version")

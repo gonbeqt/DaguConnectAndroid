@@ -52,6 +52,7 @@ import com.example.androidproject.view.pages2.HiringDetails
 import com.example.androidproject.view.pages2.HomeTradesman
 import com.example.androidproject.view.pages2.ManageProfile
 import com.example.androidproject.view.pages2.ProfileTradesman
+import com.example.androidproject.view.pages2.ProfileVerification
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.view.pages2.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
@@ -268,6 +269,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("availabilitystatus") {
                         AvailabilityStatus(modifier = Modifier, navController)
+                    }
+                    composable("profileverification") {
+                        ProfileVerification(modifier = Modifier, navController)
                     }
 
 
