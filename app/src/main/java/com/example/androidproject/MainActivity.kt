@@ -8,11 +8,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
 import com.example.androidproject.view.pages.AllTradesman
@@ -85,7 +87,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val isShown = sharedPreferences.getBoolean("isShown", false)
-        val startDestination = if (isShown) "login" else "landing_page"
+        // Initialize TokenManager
+        TokenManager.init(this)
+        AccountManager.init(this)
+
+        // Determine the start destination based on token and user role
+        val startDestination = when {
+            !isShown -> "landing_page"
+            TokenManager.isLoggedIn() -> {
+                val role = AccountManager.getAccount()?.isClient
+                if (role == true) "main_screen" else "main_screen"
+            }
+            else -> "login"
+        }
         val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
         val feedback = Feedback(R.drawable.pfp, "Ezekiel", 4)
         TokenManager.init(this)
@@ -275,4 +289,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
