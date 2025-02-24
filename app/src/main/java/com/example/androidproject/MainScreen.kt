@@ -76,13 +76,16 @@ fun MainScreen(navController: NavController, logoutViewModel: LogoutViewModel, g
     // Handle back press or swipe gesture
     BackHandler(enabled = true) {
         Log.d("BackHandler", "Selected Item: $selectedItem")
-        if (navigationStack.isNotEmpty()) {
+        if (selectedItem == 0) {
+            // Close the app if on the home screen (selectedItem == 0 corresponds to HomeScreen or HomeTradesman)
+            (context as? Activity)?.finishAffinity()
+        } else if (navigationStack.isNotEmpty()) {
             // Pop the last item from the stack to get the previous selected item
             val previousItem = navigationStack.removeAt(navigationStack.size - 1)
             selectedItem = previousItem
         } else {
-            // If the stack is empty, close the app
-            (context as? Activity)?.finishAffinity()
+            // If the stack is empty and not on the home screen, navigate back to the home screen
+            selectedItem = 0
         }
     }
 
