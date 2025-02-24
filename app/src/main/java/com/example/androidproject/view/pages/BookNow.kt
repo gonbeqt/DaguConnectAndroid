@@ -166,35 +166,21 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             fontSize = 20.sp,
                                             modifier = Modifier.padding(top = 10.dp)
                                         )
+                                        BoxRow(specialties = resume.specialty
+                                            .split(",").map { it.trim()
+                                                .replace("[", "")  // Remove opening bracket
+                                                .replace("]", "")
+                                                .replace("\"", "")  // Remove opening bracket
+                                            }
+
+                                        )
                                         Text(
                                             text = resume.preferedworklocation,
                                             color = Color.Black,
                                             fontSize = 16.sp
                                         )
-                                        Row(
-                                            modifier = Modifier.padding(top = 10.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                                                    .clickable { /* Add to Bookmark Action */ }
-                                            ) {
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Bookmark,
-                                                        contentDescription = "Bookmark Icon",
-                                                        modifier = Modifier.size(16.dp)
-                                                    )
-                                                    Spacer(modifier = Modifier.size(4.dp))
-                                                    Text(
-                                                        text = "Add to bookmark",
-                                                        fontSize = 14.sp
-                                                    )
-                                                }
-                                            }
-                                        }
+
+
                                     }
 
                                     Box(
@@ -236,29 +222,105 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     Text(
                                         text = resume.aboutme,
                                         modifier = Modifier.padding(horizontal = 8.dp),
-                                        fontWeight = FontWeight(500)
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Text(
-                                        text = "Specialties",
-                                        color = Color.Black,
-                                        fontSize = 18.sp,
                                         fontWeight = FontWeight(500),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
+                                        color = Color.Black,
                                     )
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Preferred Location",
+                                            color = Color.Black,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight(500))
+
+                                        Text(
+                                            text = resume.preferedworklocation,
+                                            color = Color.Black,
+                                            fontSize = 16.sp,
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Est. Rate",
+                                            color = Color.Black,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight(500))
+
+                                        Text(
+                                            text =  "₱${resume.workfee}",
+                                            color = Color.Black,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Trade Credential",
+                                            color = Color.Black,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight(500))
+
+                                        Text(
+                                            text =  "View File",
+                                            color = Color.Black,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "Contact Information",
+                                            color = Color.Black,
+                                            fontSize = 18.sp,
+                                            modifier = Modifier.padding(horizontal = 10.dp),
+                                            fontWeight = FontWeight(500))
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Phone Number",
+                                            color = Color.Black,
+                                            fontSize = 18.sp,
+                                        )
+
+                                        Text(
+                                            text = "63-94748-26132",
+                                            color = Color.Black,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Email",
+                                            color = Color.Black,
+                                            fontSize = 18.sp,
+                                        )
+
+                                        Text(
+                                            text = resume.email,
+                                            color = Color.Black,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+
+
                                     Spacer(modifier = Modifier.height(8.dp))
-
-                                    BoxRow(specialties = resume.specialty
-                                        .split(",").map { it.trim()
-                                            .replace("[", "")  // Remove opening bracket
-                                            .replace("]", "")
-                                            .replace("\"", "")  // Remove opening bracket
-                                            }
-
-                                    ) // Assuming this function exists
 
                                     Text(
                                         text = "Ratings And Testimonials",
@@ -374,30 +436,12 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 
 @Composable
 fun BoxRow(specialties: List<String>) {
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        specialties.forEach { specialties ->
-            Box(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(40.dp)
-                    .background(Color(0xFFF1F1F1), RoundedCornerShape(50.dp))
-
-            ) {
-                // Content for each Box
-                Text(
-                    text = specialties,
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                )
-            }
-        }
-    }
+    Text(
+        text = specialties.joinToString(", "),
+        color = Color.Black,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Medium,
+        )
 }
 
 @Composable

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,39 +44,22 @@ import java.util.Locale
 fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) {
     Log.i("Screen", "ScheduleScreen")
 
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var selectedClientDate by remember { mutableStateOf(LocalDate.now()) }
+    var selectedApplicantDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var selectedFilter by remember { mutableStateOf("My Clients") }
 
     val clients = listOf(
         Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
-        Tradesmandate(R.drawable.pfp, "John", "Electrician", "P600/hr", 4.2, R.drawable.bookmark, "2025-02-18"),
-        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
-        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
-        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
-
-        )
+        Tradesmandate(R.drawable.pfp, "John", "Electrician", "P600/hr", 4.2, R.drawable.bookmark, "2025-02-18")
+    )
 
     val applicants = listOf(
         Tradesmandate(R.drawable.pfp, "Sarah", "Carpenter", "P550/hr", 4.3, R.drawable.bookmark, "2025-02-19"),
-        Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20"),
-        Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20"),
-                Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20")
-
+        Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20")
     )
 
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    fun parseDate(dateStr: String): LocalDate? {
-        return try {
-            LocalDate.parse(dateStr, dateFormatter)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    val filteredList = (if (selectedFilter == "My Clients") clients else applicants).filter { trade ->
-        parseDate(trade.date)?.isEqual(selectedDate) ?: false
-    }
+    val selectedDate = if (selectedFilter == "My Clients") selectedClientDate else selectedApplicantDate
 
     Box(
         Modifier.fillMaxSize()
@@ -88,80 +72,280 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
                 .background(Color.White)
         ) {
             ScheduleTopSection(navController)
+
             CalendarSection(
                 currentMonth = currentMonth,
                 selectedDate = selectedDate,
-                onDateSelected = { date -> selectedDate = date },
+                onDateSelected = { date ->
+                    if (selectedFilter == "My Clients") {
+                        selectedClientDate = date
+                    } else {
+                        selectedApplicantDate = date
+                    }
+                },
                 onMonthChange = { month -> currentMonth = month },
-                tradesmen = clients + applicants
+                tradesmen = if (selectedFilter == "My Clients") clients else applicants
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            FilterSection(selectedDate, selectedFilter) { selectedFilter = it }
+
+            if (selectedFilter == "My Clients") {
+                MyClientsList(clients, selectedClientDate)
+            } else {
+                MyApplicantsList(applicants, selectedApplicantDate)
+            }
+        }
+    }
+}
+
+@Composable
+fun FilterSection(
+    selectedDate: LocalDate,
+    selectedFilter: String,
+    onFilterChange: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                color = Color.Black
+            )
+
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.wrapContentSize(Alignment.Center)) {
+                TextButton(onClick = { expanded = true }) {
+                    Text(text = selectedFilter, color = Color(0xFF3CC0B0))
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF3CC0B0))
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    DropdownMenuItem(
+                        colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
+                        text = { Text("My Clients") },
+                        onClick = {
+                            onFilterChange("My Clients")
+                            expanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
+                        text = { Text("My Applicants") },
+                        onClick = {
+                            onFilterChange("My Applicants")
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+fun MyClientsList(clients: List<Tradesmandate>, selectedDate: LocalDate) {
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val filteredClients = clients.filter {
+        LocalDate.parse(it.date, dateFormatter).isEqual(selectedDate)
+    }
+    if (filteredClients.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No Bookings Available",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Gray
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxHeight().background(Color.White).padding(bottom = 70.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(filteredClients) { client ->
+                MyClientsItem(client)
+            }
+        }
+    }
+}
+
+@Composable
+fun MyApplicantsList(applicants: List<Tradesmandate>, selectedDate: LocalDate) {
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val filteredApplicants = applicants.filter {
+        LocalDate.parse(it.date, dateFormatter).isEqual(selectedDate)
+    }
+    if (filteredApplicants.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No Job Applicant Available",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Gray
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxHeight().background(Color.White).padding(bottom = 70.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(filteredApplicants) { applicant ->
+                MyApplicantItem(applicant)
+            }
+        }
+    }
+}
+
+@Composable
+fun CalendarSection(
+    currentMonth: YearMonth,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    onMonthChange: (YearMonth) -> Unit,
+    tradesmen: List<Tradesmandate> // Pass the list of tradesmen
+) {
+    // Extract dates with data
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val datesWithData = tradesmen.mapNotNull { trade ->
+        try {
+            LocalDate.parse(trade.date, dateFormatter)
+        } catch (e: Exception) {
+            null
+        }
+    }.toSet() // Convert to a Set for quick lookup
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp), // Set rounded corners
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+                .background(brush = myGradient4) // Apply gradient
+                .padding(8.dp) // Padding inside the card
+        ) {
             Column(
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
 
             ) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically) {
+                // Navigation for month (e.g., Jan to Feb)
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
 
+                ) {
+                    IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
+                        Icon(
+                            Icons.Default.ArrowBackIos,
+                            contentDescription = "Previous Month",
+                            tint = Color.White
+                        )
+                    }
                     Text(
-                        text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
+                        text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        color = Color.Black
+                        color = Color.White
                     )
-                    // Dropdown for filtering
-                    var expanded by remember { mutableStateOf(false) }
-                    Box(contentAlignment = Alignment.Center,
-                        modifier = Modifier.wrapContentSize(Alignment.Center)
-                    ) {
-                        TextButton(onClick = { expanded = true }) {
-                            Text(text = selectedFilter, color = Color(0xFF3CC0B0))
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF3CC0B0))
-                        }
-                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                            DropdownMenuItem(
-                                colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                                text = { Text("My Clients") },
-                                onClick = {
-                                    selectedFilter = "My Clients"
-                                    expanded = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                                text = { Text("My Applicants") },
-                                onClick = {
-                                    selectedFilter = "My Applicants"
-                                    expanded = false
-                                }
-                            )
-                        }
+                    IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
+                        Icon(
+                            Icons.Default.ArrowForwardIos,
+                            contentDescription = "Next Month",
+                            tint = Color.White
+                        )
                     }
                 }
 
-                Text(
-                    text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Gray
-                )
+                // Days of the week header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN").forEach { day ->
+                        Text(
+                            text = day,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
 
-            }
+                // Display days of the current month
+                val daysInMonth = currentMonth.lengthOfMonth()
+                val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value % 7 // Adjust for Monday start
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color.White)
-                    .padding(bottom = 100.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(filteredList.size) { index ->
-                    val trade = filteredList[index]
-                    PlumbingRepairCard(trade)
+                Column {
+                    var day = 1 - firstDayOfWeek // Start rendering from the correct position
+                    while (day <= daysInMonth) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            for (i in 0..6) {
+                                if (day in 1..daysInMonth) {
+                                    val date = currentMonth.atDay(day)
+                                    val hasData = datesWithData.contains(date)
+
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .background(
+                                                if (date == selectedDate) Color.Black else Color.Transparent,
+                                                shape = MaterialTheme.shapes.small
+                                            )
+                                            .clickable { onDateSelected(date) },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = day.toString(),
+                                            color = when {
+                                                date == selectedDate -> Color.White
+                                                hasData -> Color.Yellow // Highlight days with data
+                                                else -> Color.White
+                                            },
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                } else {
+                                    Spacer(modifier = Modifier.size(30.dp)) // Empty spaces for alignment
+                                }
+                                day++
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -199,136 +383,10 @@ fun ScheduleTopSection(navController: NavController){
 
     }
 }
-@Composable
-fun CalendarSection(
-    currentMonth: YearMonth,
-    selectedDate: LocalDate,
-    onDateSelected: (LocalDate) -> Unit,
-    onMonthChange: (YearMonth) -> Unit,
-    tradesmen: List<Tradesmandate> // Pass the list of tradesmen
-) {
-    // Extract dates with data
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val datesWithData = tradesmen.mapNotNull { trade ->
-        try {
-            LocalDate.parse(trade.date, dateFormatter)
-        } catch (e: Exception) {
-            null
-        }
-    }.toSet() // Convert to a Set for quick lookup
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(16.dp), // Set rounded corners
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(brush = myGradient4) // Apply gradient
-                .padding(16.dp) // Padding inside the card
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                // Navigation for month (e.g., Jan to Feb)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
-                        Icon(
-                            Icons.Default.ArrowBackIos,
-                            contentDescription = "Previous Month",
-                            tint = Color.White
-                        )
-                    }
-                    Text(
-                        text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    IconButton(onClick = { onMonthChange(currentMonth.plusMonths(1)) }) {
-                        Icon(
-                            Icons.Default.ArrowForwardIos,
-                            contentDescription = "Next Month",
-                            tint = Color.White
-                        )
-                    }
-                }
-
-                // Days of the week header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN").forEach { day ->
-                        Text(
-                            text = day,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-                }
-
-                // Display days of the current month
-                val daysInMonth = currentMonth.lengthOfMonth()
-                val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value % 7 // Adjust for Monday start
-
-                Column {
-                    var day = 1 - firstDayOfWeek // Start rendering from the correct position
-                    while (day <= daysInMonth) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            for (i in 0..6) {
-                                if (day in 1..daysInMonth) {
-                                    val date = currentMonth.atDay(day)
-                                    val hasData = datesWithData.contains(date)
-
-                                    Box(
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .background(
-                                                if (date == selectedDate) Color.Black else Color.Transparent,
-                                                shape = MaterialTheme.shapes.small
-                                            )
-                                            .clickable { onDateSelected(date) },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = day.toString(),
-                                            color = when {
-                                                date == selectedDate -> Color.White
-                                                hasData -> Color.Yellow // Highlight days with data
-                                                else -> Color.White
-                                            },
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                } else {
-                                    Spacer(modifier = Modifier.size(40.dp)) // Empty spaces for alignment
-                                }
-                                day++
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 
 @Composable
-fun PlumbingRepairCard(trade: Tradesmandate) {
+fun MyClientsItem(trade: Tradesmandate) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -475,3 +533,148 @@ fun PlumbingRepairCard(trade: Tradesmandate) {
 
 
 
+@Composable
+fun MyApplicantItem(trade: Tradesmandate) {
+
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Image( painterResource(trade.imageResId),
+                contentDescription = "Tradesman Image",
+                modifier = Modifier.size(120.dp,120.dp)
+                    .padding(end = 10.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+                    .padding(top = 7.dp, start = 8.dp)
+
+            ) {
+                Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                    Text(
+                        modifier = Modifier.padding( top = 5.dp),
+                        text = trade.username,
+                        color = Color.Black,
+                        fontSize = nameTextSize
+                    )
+                    Text(
+                        modifier = Modifier.padding( top = 5.dp, end = 15.dp),
+                        text = "Pending",
+                        color = Color.Black,
+                        fontSize = smallTextSize
+                    )
+                }
+
+                Text(
+                    text = trade.category,
+                    color = Color.Gray,
+                    fontSize = taskTextSize
+                )
+                Row(
+                    modifier = Modifier.padding(top = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.padding(end = 5.dp)
+                        .background(
+                            color = Color(0xFFFFF2DD),
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                    ) {
+                        Row()
+                        {
+                            Text(
+                                modifier = Modifier.padding(5.dp),
+                                text = trade.rate,
+                                fontSize = smallTextSize
+                            )
+                        }
+                    }
+
+                    Box(modifier = Modifier
+                        .background(
+                            color = Color(0xFFFFF2DD),
+                            shape = RoundedCornerShape(5.dp),
+                        ),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(5.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(16.dp).padding(top = 5.dp),
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Rating",
+
+                                tint = Color.Yellow,
+
+                                )
+                            Text(
+                                text = trade.reviews.toString(),
+                                fontSize = smallTextSize
+
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.padding(top = 5.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+
+                ) {
+                    Column {
+                        Text(
+                            text = "Date",
+                            fontSize = taskTextSize
+
+                        )
+                        Text(
+                            text = trade.date,
+                            fontSize = smallTextSize
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Time",
+                            fontSize = taskTextSize
+
+                        )
+                        Text(
+                            text = "8:00 AM",
+                            fontSize = smallTextSize
+
+                        )
+                    }
+                }
+            }
+
+        }
+    }
+}

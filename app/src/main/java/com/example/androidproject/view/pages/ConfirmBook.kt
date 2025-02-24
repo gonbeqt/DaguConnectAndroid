@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -250,6 +251,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .padding(8.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color.White)
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                             ) {
                                 TextField(
                                     value = address,
@@ -290,6 +292,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .fillMaxWidth()
                                     .padding(8.dp)
                                     .clip(RoundedCornerShape(12.dp))
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                                     .background(Color(0xFFF5F5F5))
                             ) {
                                 Column {
@@ -361,6 +364,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .padding(8.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color(0xFFF5F5F5))
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                             ) {
                                 TextField(
                                     value = taskDescription,
@@ -463,11 +467,12 @@ fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) ->
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            shape = RoundedCornerShape(16.dp),
+
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White
             ),
-            border = BorderStroke(1.dp, Color.White)
+            border = BorderStroke(1.dp, Color.Gray)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
