@@ -92,7 +92,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
         }
         is ViewResumeViewModel.ViewResumeState.Success -> {
             val resume = resumestate.data
-            val specialtiesJsonString = resume.specialties // Assuming this is the JSON string
+            val specialtiesJsonString = resume.specialty // Assuming this is the JSON string
             val values = try {
                 JSONArray(specialtiesJsonString).let { jsonArray ->
                     List(jsonArray.length()) { index -> jsonArray.getString(index) }

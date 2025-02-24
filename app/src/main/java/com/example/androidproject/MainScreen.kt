@@ -1,7 +1,10 @@
 package com.example.androidproject
 
 import LogoutViewModel
+import android.app.Activity
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,6 +43,7 @@ import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import androidx.compose.ui.platform.LocalContext
+import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
@@ -63,28 +68,55 @@ fun MainScreen(
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel
     ) {
+    val context = LocalContext.current
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
         NavigationItem("Message", Icons.Default.Message),
         NavigationItem("Profile", Icons.Default.Person)
-
     )
-    var selectedItem by remember {
-        mutableStateOf(0)
-    }
+
+    // Track the selected item
+    var selectedItem by remember { mutableStateOf(0) }
+
+    // Track the navigation history using a stack
+    val navigationStack = remember { mutableStateListOf<Int>() }
+
     val activity = LocalContext.current as ComponentActivity
     val getJobsViewModel = remember { ViewModelSetups.setupGetJobsViewModel(activity) }
+
+    // Handle back press or swipe gesture
+    BackHandler(enabled = true) {
+        Log.d("BackHandler", "Selected Item: $selectedItem")
+        if (selectedItem == 0) {
+            // Close the app if on the home screen (selectedItem == 0 corresponds to HomeScreen or HomeTradesman)
+            (context as? Activity)?.finishAffinity()
+        } else if (navigationStack.isNotEmpty()) {
+            // Pop the last item from the stack to get the previous selected item
+            val previousItem = navigationStack.removeAt(navigationStack.size - 1)
+            selectedItem = previousItem
+        } else {
+            // If the stack is empty and not on the home screen, navigate back to the home screen
+            selectedItem = 0
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar (containerColor = Color.White) {
+            NavigationBar(containerColor = Color.White) {
                 navItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         selected = selectedItem == index,
                         onClick = {
+                            // Remove the old entry of the clicked item from the stack (if it exists)
+                            navigationStack.removeAll { it == index }
+                            // Add the current selected item to the stack before updating it
+                            if (selectedItem != index) {
+                                navigationStack.add(selectedItem)
+                            }
+                            // Update the selected item
                             selectedItem = index
                         },
                         icon = {
@@ -94,13 +126,12 @@ fun MainScreen(
                             (Text(text = item.nav_label, fontSize = 10.sp))
                         },
                         colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White, // Green when selected
-                            unselectedIconColor = Color.Black, // Gray when not selected
-                            selectedTextColor = Color.Black, // Green text when selected
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.Black,
+                            selectedTextColor = Color.Black,
                             unselectedTextColor = Color.Black,
                             indicatorColor = Color(0xFF3CC0B0)
                         )
-
                     )
                 }
             }
@@ -122,7 +153,6 @@ fun MainScreen(
             )
     }
 }
-
 @Composable
 fun ContentScreen(
     modifier: Modifier = Modifier,
@@ -138,7 +168,6 @@ fun ContentScreen(
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel
 ) {
-
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
@@ -153,11 +182,12 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier,navController)
-            2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp),navController)
-            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController,logoutViewModel)
+            1 -> BookingsTradesman(modifier = Modifier, navController)
+            2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
+            3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel)
         }
     }
 }
+
 

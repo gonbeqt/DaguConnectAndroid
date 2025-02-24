@@ -200,7 +200,7 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = carpentryList.itemSnapshotList.items.filter {it.specialties.contains("Carpentry") && it.id !in dismissedResumes  }
+                            val filteredList = carpentryList.itemSnapshotList.items.filter {it.specialty.contains("Carpentry") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {

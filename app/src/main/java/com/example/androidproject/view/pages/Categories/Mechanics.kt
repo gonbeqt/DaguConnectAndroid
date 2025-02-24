@@ -198,7 +198,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = mechanicsList.itemSnapshotList.items.filter {it.specialties.contains("Mechanics") && it.id !in dismissedResumes  }
+                            val filteredList = mechanicsList.itemSnapshotList.items.filter {it.specialty.contains("Mechanics") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {

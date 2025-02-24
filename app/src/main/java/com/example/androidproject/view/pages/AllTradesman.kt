@@ -307,9 +307,7 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                         }
                     }
                     Text(
-                        text = "${resumes.specialties}"
-                            .replace("[", "")  // Remove opening bracket
-                            .replace("]", ""),  // Remove closing bracket ,
+                        text = resumes.specialty,  // Remove closing bracket ,
                         color = Color.Black,
                         fontSize = taskTextSize,
                     )

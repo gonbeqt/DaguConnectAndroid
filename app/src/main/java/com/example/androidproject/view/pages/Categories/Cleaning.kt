@@ -194,7 +194,7 @@ fun Cleaning(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = cleaningList.itemSnapshotList.items.filter {it.specialties.contains("Cleaning") && it.id !in dismissedResumes  }
+                            val filteredList = cleaningList.itemSnapshotList.items.filter {it.specialty.contains("Cleaning") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {
