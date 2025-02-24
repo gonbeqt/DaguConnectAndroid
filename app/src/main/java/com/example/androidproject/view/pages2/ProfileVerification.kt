@@ -45,6 +45,7 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
     var currentStep by remember { mutableStateOf(1) }
     var progressPercentage by remember { mutableStateOf(0) }
     var estimatedRate by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     val isTyping = estimatedRate.isNotEmpty()
     var selectedJob by remember { mutableStateOf("Select job category") }
     var selectedLocation by remember { mutableStateOf("Select location") }
@@ -66,7 +67,22 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                 .padding(20.dp)
         ) {
             Icon(
-                modifier = Modifier.padding(end = 10.dp),
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .clickable {
+                        if (currentStep > 1) {
+                            if (currentStep == 5) {
+                                navController.navigate("main_screen")
+                                currentStep++
+                                progressPercentage +=25
+
+                            }
+                            currentStep--
+                            progressPercentage -= 25
+                        } else if (currentStep == 1) {
+                            navController.navigate("main_screen")
+                        }
+                    },
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Arrow Back",
                 tint = Color.White
@@ -76,11 +92,11 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Column(modifier = Modifier.weight(1f)) { // allow this section to take remaining space
+        Column(Modifier.weight(1f)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp, start = 20.dp),
+                    .padding(top = 10.dp, start = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -97,10 +113,10 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                     fontSize = 14.sp
                 )
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
                     modifier = Modifier.padding(start = 20.dp),
@@ -116,12 +132,12 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             StepProgressIndicator(currentStep = currentStep, totalSteps = 5)
 
             Card(
                 modifier = Modifier
-                    .padding(top = 14.dp)
+                    .padding(top = 7.dp)
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                 colors = CardDefaults.cardColors(Color.White)
@@ -237,6 +253,65 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                 }
 
 
+
+                            }
+
+                            }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Column(modifier = Modifier.padding(horizontal = 14.dp)) {
+                            Text(
+                                modifier = Modifier.padding(bottom = 8.dp),
+                                text = "Phone Number:",
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 14.sp,
+                                color = Color.DarkGray
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 14.dp, vertical = 18.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "+63",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        style = TextStyle(fontSize = 14.sp),
+                                        color = if (isTyping) Color.Black else Color.Gray
+                                    )
+
+                                    BasicTextField(
+                                        value = phoneNumber,
+                                        onValueChange = { newText ->
+                                            phoneNumber = if (newText.startsWith("+63")) {
+                                                newText.substring(1) // remove extra peso signs
+                                            } else newText
+                                        },
+                                        textStyle = TextStyle(
+                                            fontSize = 14.sp,
+                                            color = Color.Black
+                                        ),
+                                        keyboardOptions = KeyboardOptions(
+                                            keyboardType = KeyboardType.Number
+                                        ),
+                                        modifier = Modifier
+                                            .padding(start = 4.dp)
+                                            .fillMaxWidth(),
+                                        decorationBox = { innerTextField ->
+                                            if (phoneNumber.isEmpty()) {
+                                                Text(
+                                                    text = "Enter Your Number",
+                                                    color = Color.Gray,
+                                                    style = TextStyle(fontSize = 14.sp),
+                                                    fontSize = 14.sp,
+                                                )
+                                            }
+                                            innerTextField()
+                                        }
+                                    )
+                                }
                             }
                         }
                     }else if (currentStep == 2){ //second page
@@ -307,216 +382,219 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
 
                     }
                     else if (currentStep == 3) { // Third page
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 14.dp),
-                            text = "Please upload a valid ID and certifications to verify your legitimacy as a tradesman.",
-                            fontSize = 14.sp
-                        )
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp),
-                            text = "Valid ID",
-                            fontSize = 14.sp,
-                            color = Color.DarkGray
-                        )
-
-                        Box(
-                            modifier = Modifier.padding(start = 14.dp, end = 14.dp)
-                        ) {
-                            JobSelectionDropdown(
-                                label = "",
-                                options = listOf(
-                                    "Passport",
-                                    "Driver’s License",
-                                    "National ID (PhilSys ID)",
-                                    "Social Security System (SSS) ID",
-                                    "Government Service Insurance System (GSIS) ID",
-                                    "Professional Regulation Commission (PRC) ID",
-                                    "Unified Multi-Purpose ID (UMID)",
-                                    "Postal ID",
-                                    "Voter’s ID",
-                                    "Taxpayer Identification Number (TIN) ID",
-                                    "Senior Citizen ID",
-                                    "Person with Disability (PWD) ID",
-                                    "Barangay Clearance with photo",
-                                    "Indigenous People’s (IP) ID",
-                                    "Other Valid ID with photo"
-                                ),
-                                selectedOption = selectedID,
-                                onOptionSelected = { selectedID = it }
-                            )
-                        }
-
-                        Row(
-                            Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
                             Text(
-                                text = "Front ID: No file uploaded",
-                                fontSize = 14.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 10.dp),
+                                text = "Please upload a valid ID and certifications to verify your legitimacy as a tradesman.",
+                                fontSize = 12.sp
                             )
+
+                            Spacer(modifier = Modifier.height(5.dp))
+
+                            Text(
+                                modifier = Modifier.padding(start = 14.dp),
+                                text = "Valid ID",
+                                fontSize = 14.sp,
+                                color = Color.DarkGray
+                            )
+
                             Box(
-                                modifier = Modifier.clickable { }
-                                    .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
-                                contentAlignment = Alignment.Center
+                                modifier = Modifier.padding(start = 14.dp, end = 14.dp)
                             ) {
-                                Row(
-                                    Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                JobSelectionDropdown(
+                                    label = "",
+                                    options = listOf(
+                                        "Passport",
+                                        "Driver’s License",
+                                        "National ID (PhilSys ID)",
+                                        "Social Security System (SSS) ID",
+                                        "Government Service Insurance System (GSIS) ID",
+                                        "Professional Regulation Commission (PRC) ID",
+                                        "Unified Multi-Purpose ID (UMID)",
+                                        "Postal ID",
+                                        "Voter’s ID",
+                                        "Taxpayer Identification Number (TIN) ID",
+                                        "Senior Citizen ID",
+                                        "Person with Disability (PWD) ID",
+                                        "Barangay Clearance with photo",
+                                        "Indigenous People’s (IP) ID",
+                                        "Other Valid ID with photo"
+                                    ),
+                                    selectedOption = selectedID,
+                                    onOptionSelected = { selectedID = it }
+                                )
+                            }
+
+                            Row(
+                                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 7.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Front ID: No file uploaded",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(4.dp)
+                                )
+                                Box(
+                                    modifier = Modifier.clickable { }
+                                        .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.upload_ic),
-                                        contentDescription = "Add File",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Add File",
-                                        fontSize = 12.sp,
-                                        color = Color.White
-                                    )
+                                    Row(
+                                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.upload_ic),
+                                            contentDescription = "Add File",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Add File",
+                                            fontSize = 12.sp,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        Text(
-                            modifier = Modifier.padding(start = 18.dp, top = 4.dp),
-                            text = "Accepted file types: .jpg, .jpeg, .png",
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 10.sp,
-                            color = Color.Gray
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Row(
-                            Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
                             Text(
-                                text = "Back ID: No file uploaded",
-                                fontSize = 14.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.padding(start = 18.dp, top = 4.dp),
+                                text = "Accepted file types: .jpg, .jpeg, .png",
+                                fontStyle = FontStyle.Italic,
+                                fontSize = 10.sp,
+                                color = Color.Gray
                             )
-                            Box(
-                                modifier = Modifier.clickable { }
-                                    .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
-                                contentAlignment = Alignment.Center
+
+                            Spacer(modifier = Modifier.height(5.dp))
+
+                            Row(
+                                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                Text(
+                                    text = "Back ID: No file uploaded",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(4.dp)
+                                )
+                                Box(
+                                    modifier = Modifier.clickable { }
+                                        .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.upload_ic),
-                                        contentDescription = "Add File",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Add File",
-                                        fontSize = 12.sp,
-                                        color = Color.White
-                                    )
+                                    Row(
+                                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.upload_ic),
+                                            contentDescription = "Add File",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Add File",
+                                            fontSize = 12.sp,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        Text(
-                            modifier = Modifier.padding(start = 18.dp, top = 4.dp),
-                            text = "Accepted file types: .jpg, .jpeg, .png",
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 10.sp,
-                            color = Color.Gray
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp),
-                            text = "Trade Credential",
-                            fontSize = 14.sp,
-                            color = Color.DarkGray
-                        )
-
-                        Box(
-                            modifier = Modifier.padding(start = 14.dp, end = 14.dp)
-                        ) {
-                            JobSelectionDropdown(
-                                label = "",
-                                options = listOf(
-                                    "Trade Certification",
-                                    "License/Registration from a Trade Authority",
-                                    "Apprenticeship Completion Certificate",
-                                    "Union Membership Card",
-                                    "Training Course Certificate",
-                                    "Contractor/Business License",
-                                    "Work Experience Letter from Employers",
-                                    "Professional Association Membership",
-                                    "Compliance Certifications",
-                                    "Government-Issued Skill Assessment",
-                                    "Other Valid Document with Photo"
-                                ),
-                                selectedOption = selectedDocument,
-                                onOptionSelected = { selectedDocument = it }
-                            )
-                        }
-
-                        Row(
-                            Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
                             Text(
-                                text = "File: No file uploaded",
-                                fontSize = 14.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.padding(start = 18.dp, top = 4.dp),
+                                text = "Accepted file types: .jpg, .jpeg, .png",
+                                fontStyle = FontStyle.Italic,
+                                fontSize = 10.sp,
+                                color = Color.Gray
                             )
+
+                            Spacer(modifier = Modifier.height(5.dp))
+
+                            Text(
+                                modifier = Modifier.padding(start = 14.dp),
+                                text = "Trade Credential",
+                                fontSize = 14.sp,
+                                color = Color.DarkGray
+                            )
+
                             Box(
-                                modifier = Modifier.clickable { }
-                                    .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
-                                contentAlignment = Alignment.Center
+                                modifier = Modifier.padding(start = 14.dp, end = 14.dp)
                             ) {
-                                Row(
-                                    Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                JobSelectionDropdown(
+                                    label = "",
+                                    options = listOf(
+                                        "Trade Certification",
+                                        "License/Registration from a Trade Authority",
+                                        "Apprenticeship Completion Certificate",
+                                        "Union Membership Card",
+                                        "Training Course Certificate",
+                                        "Contractor/Business License",
+                                        "Work Experience Letter from Employers",
+                                        "Professional Association Membership",
+                                        "Compliance Certifications",
+                                        "Government-Issued Skill Assessment",
+                                        "Other Valid Document with Photo"
+                                    ),
+                                    selectedOption = selectedDocument,
+                                    onOptionSelected = { selectedDocument = it }
+                                )
+                            }
+
+                            Row(
+                                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 5.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "File: No file uploaded",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(4.dp)
+                                )
+                                Box(
+                                    modifier = Modifier.clickable { }
+                                        .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.upload_ic),
-                                        contentDescription = "Add File",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Add File",
-                                        fontSize = 12.sp,
-                                        color = Color.White
-                                    )
+                                    Row(
+                                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.upload_ic),
+                                            contentDescription = "Add File",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Add File",
+                                            fontSize = 12.sp,
+                                            color = Color.White
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        Text(
-                            modifier = Modifier.padding(start = 18.dp, top = 4.dp),
-                            text = "Accepted file type: .pdf",
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 10.sp,
-                            color = Color.Gray
-                        )
+                            Text(
+                                modifier = Modifier.padding(start = 18.dp, top = 4.dp),
+                                text = "Accepted file type: .pdf",
+                                fontStyle = FontStyle.Italic,
+                                fontSize = 10.sp,
+                                color = Color.Gray
+                            )
+
+
                     }
 
                     else if (currentStep == 4) { //fourth page

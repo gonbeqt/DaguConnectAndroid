@@ -63,9 +63,9 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
 
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
     }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -102,7 +102,7 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                                     text = {
                                         Text(
                                             text = title,
-                                            fontSize = 20.sp,
+                                            fontSize = textSize,
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.fillMaxWidth().padding(4.dp), // Fills the width inside each Tab
                                             color = if (selectedTabIndex == index) Color.Black else Color.Gray
@@ -142,7 +142,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             modifier = Modifier //top nav
                 .padding(top = 8.dp, start = 25.dp, end = 25.dp, bottom = 8.dp)
                 .fillMaxWidth()
-                .height(60.dp),
+                .height(50.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
