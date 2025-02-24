@@ -18,7 +18,6 @@ class GetClientBookingViewModel(private val apiService: ApiService, private val 
         viewModelScope.launch {
             _clientbookingState.value = GetClientBookings.Loading
             try {
-                val token = TokenManager.getToken()
                 val response = apiService.getClientBooking()
                 val body = response.body()
                 if (response.isSuccessful) {
@@ -39,6 +38,5 @@ class GetClientBookingViewModel(private val apiService: ApiService, private val 
         object Loading : GetClientBookings()
         data class Success(val data: List<GetClientsBooking>) : GetClientBookings()
         data class Error(val message: String) : GetClientBookings()
-
     }
 }

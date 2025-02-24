@@ -16,6 +16,7 @@ import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.ViewClientBooking
+import com.example.androidproject.model.client.ratingsItem
 import com.example.androidproject.model.client.resumesItem
 
 
@@ -67,4 +68,7 @@ interface ApiService {
 
     @POST("/user/client/reporttradesman/{tradesmanId}")
     suspend fun report( @Body request: ReportRequest, @Path("tradesmanId") tradesmanId: Int): Response<ReportResponse>
+
+    @GET("/user/client/view/tradesman/rating/{tradesmanId}")
+    suspend fun getRatingsById(@Path("tradesmanId") resumeId: Int): Response<List<ratingsItem>>
 }
