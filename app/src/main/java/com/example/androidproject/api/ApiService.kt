@@ -1,6 +1,8 @@
 package com.example.androidproject.api
 
+import com.example.androidproject.model.ClientProfile
 import com.example.androidproject.model.GetChats
+import com.example.androidproject.model.GetMyJobs
 import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.model.LoginRequest
@@ -42,8 +44,11 @@ interface ApiService {
     @GET("/user/jobs/recent")
     suspend fun getRecentJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<JobsResponse>
 
-    @GET("/client/jobs/view/{userId}")
-    suspend fun getJobsByUserId(@Path("userId") userId: Int): Response<JobsResponse>
+    @GET("/client/jobs/view/my_jobs")
+    suspend fun getJobsByUserId(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetMyJobs>
+
+    @GET("client/profile")
+    suspend fun getClientProfile(): Response<ClientProfile>
 
     @GET("/user/job/view/{id}")
     suspend fun getJobById(@Path("id") id: Int): Response<Job>

@@ -64,6 +64,7 @@ import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
+import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
@@ -71,13 +72,16 @@ import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanView
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.ViewClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
+import com.example.androidproject.viewmodel.factories.client_profile.GetClientProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
+import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
@@ -133,6 +137,12 @@ class MainActivity : ComponentActivity() {
         val postJobViewModelFactory = PostJobViewModelFactory(apiService, this)
         val postJobsViewModel = ViewModelProvider(this, postJobViewModelFactory)[PostJobViewModel::class.java]
 
+        val getMyJobsViewModelFactory = GetMyJobsViewModelFactory(apiService, this)
+        val getMyJobsViewModel = ViewModelProvider(this, getMyJobsViewModelFactory)[GetMyJobsViewModel::class.java]
+
+        val getClientProfileViewModelFactory = GetClientProfileViewModelFactory(apiService, this)
+        val getClientProfileViewModel = ViewModelProvider(this, getClientProfileViewModelFactory)[GetClientProfileViewModel::class.java]
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -151,7 +161,17 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel,reportViewModel, postJobsViewModel)
+                        MainScreen(
+                            navController,
+                            logoutViewModel,
+                            getClientBookingViewModel,
+                            getResumesViewModel,
+                            modifier = Modifier,
+                            getChatsViewModel,
+                            reportViewModel,
+                            postJobsViewModel,
+                            getMyJobsViewModel,
+                            getClientProfileViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -273,9 +293,6 @@ class MainActivity : ComponentActivity() {
                     composable("profileverification") {
                         ProfileVerification(modifier = Modifier, navController)
                     }
-
-
-
                 }
             }
         }

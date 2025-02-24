@@ -80,3 +80,11 @@ data class ViewJob(
     @SerializedName("created_at")
     val createdAt: String
 )
+
+data class GetMyJobs(
+    val jobs: List<GetJobs>,
+    @SerializedName("current_page")
+    val currentPage: Int,
+    @SerializedName("total_pages")
+    val totalPages: Int
+)

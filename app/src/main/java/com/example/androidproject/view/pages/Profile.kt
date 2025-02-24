@@ -50,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role.Companion.RadioButton
@@ -73,10 +75,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.ServicePosting
+import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -85,11 +92,22 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logoutViewModel:LogoutViewModel, postJobViewModel: PostJobViewModel) {
+fun ProfileScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    logoutViewModel: LogoutViewModel,
+    postJobViewModel: PostJobViewModel,
+    getMyJobsViewModel: GetMyJobsViewModel,
+    getClientProfileViewModel: GetClientProfileViewModel
+) {
+    val profileState by getClientProfileViewModel.getProfileState.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
     var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
 
+    LaunchedEffect(Unit) {
+        getClientProfileViewModel.getClientProfile()
+    }
 
     Column(
         modifier = modifier
@@ -112,150 +130,167 @@ fun ProfileScreen(modifier: Modifier = Modifier,navController:NavController,logo
             )
 
             // Right-aligned icons
-
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color.Black,
-                    modifier = Modifier.size(35.dp)
-                        .clickable { navController.navigate("notification") }
-
-                )
-
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Notifications Icon",
+                tint = Color.Black,
+                modifier = Modifier
+                    .size(35.dp)
+                    .clickable { navController.navigate("notification") }
+            )
         }
 
-
-
-        // for profile info
+        // Profile Info Section
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
         ) {
             Box(modifier = Modifier.padding(10.dp)) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
-                                start = Offset(0f, 1f),
-                                end = Offset(1f, 1f)
-                            ), shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(16.dp),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .background(Color.White, RoundedCornerShape(30.dp))
-                    ) {
-                        // Placeholder for profile image
-                        Text(
-                            text = "👤",
-                            modifier = Modifier.align(Alignment.Center),
-                            fontSize = 30.sp
-                        )
+                when (val state = profileState) {
+                    is GetClientProfileViewModel.ClientProfileState.Success -> {
+                        val profile = state.data
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
+                                        start = Offset(0f, 1f),
+                                        end = Offset(1f, 1f)
+                                    ), shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .background(Color.White, RoundedCornerShape(30.dp))
+                            ) {
+                                // Profile Icon
+                                AsyncImage(
+                                    model = profile.profilePicture, // Use URL here
+                                    contentDescription = "Profile Image",
+                                    modifier = Modifier
+                                        .size(62.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    text = profile.fullname,
+                                    color = Color.Black,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(text = profile.email, color = Color.Gray)
+                                Text(text = profile.address, color = Color.Gray)
+                            }
+                        }
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.padding(top = 5.dp)) {
-                        Text(
-                            text = "Client’s Name",
-                            color = Color.White,
-                            style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            text = "Lorem@gmail.com",
-                            color = Color.White,
-                            style = TextStyle(fontSize = 14.sp)
-                        )
-                        Text(
-                            text = "Dagupan, Philippines",
-                            color = Color.White,
-                            style = TextStyle(fontSize = 14.sp)
-                        )
+
+                    is GetClientProfileViewModel.ClientProfileState.Loading -> {
+                        Text(text = "Loading...", color = Color.Gray)
+                    }
+
+                    is GetClientProfileViewModel.ClientProfileState.Error -> {
+                        Text(text = "Error: ${state.message}", color = Color.Red)
+                    }
+
+                    else -> {
+                        Text(text = "No profile data available")
                     }
                 }
             }
-
-            // tab selection
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier = Modifier.fillMaxWidth(),
-                indicator = { tabPositions ->
-                    TabRowDefaults.Indicator(
-                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                        color = Color(0xFF3CC0B0)
-                    )
-                }
-            ) {
-                tabNames.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(title, fontSize = 14.sp,
-                            color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else  Color.Black) },
-
-                    )
-                }
-            }
-
         }
 
-// Cards Section (Placed Outside the White Background)
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            modifier = Modifier.fillMaxWidth(),
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    color = Color(0xFF3CC0B0)
+                )
+            }
+        ) {
+            tabNames.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = {
+                        Text(
+                            title, fontSize = 14.sp,
+                            color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else Color.Black
+                        )
+                    },
+                )
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 2.dp) // Separation from the white background
         ) {
             when (selectedTabIndex) {
-                0 -> MyPostsTab(servicePostings = postsList) // Pass postsList
+                0 -> MyPostsTab(getMyJobsViewModel) // Pass postsList
                 1 -> SettingsScreen(navController, logoutViewModel)
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomEnd // Ensures FAB stays at bottom-end
-            ) {
-                // Pass the callback function to update the postsList
-                FabPosting(
-                    onPostNewService = { newPost ->
-                        postsList = postsList + newPost
-                    },
-                    onDeadlineChange = { deadline ->
-                        println("Selected Deadline: $deadline") // Handle deadline change if needed
-                    },
-                    postJobViewModel
-                )
             }
         }
 
-
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.BottomEnd // Ensures FAB stays at bottom-end
+        ) {
+            FabPosting(
+                onPostNewService = { newPost ->
+                    postsList = postsList + newPost
+                },
+                onDeadlineChange = { deadline ->
+                    println("Selected Deadline: $deadline") // Handle deadline change if needed
+                },
+                postJobViewModel
+            )
+        }
     }
-
 }
 
 
 
 
+
 @Composable
-fun MyPostsTab(servicePostings: List<ServicePosting>) {
+fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel) {
+    val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+
+    // Refresh when entering this screen again
+    LaunchedEffect(Unit) {
+        getMyJobsViewModel.refreshJobs()
+    }
+
     LazyColumn( // Make it scrollable
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(servicePostings) { posting ->
-            PostsCard(
-                servicePosting = posting,
-                onEditClick = { title, description, rate, deadline ->
-                    // Handle edit functionality here if needed
-                },
-                onApplicantsClick = { /* Handle applicants click */ }
+        items(jobsList.itemCount) { index ->
+            val job = jobsList[index]
+            if (job != null) {
+                PostsCard(
+                    onEditClick = { title, description, rate, deadline ->
+                        // Handle edit functionality here if needed
+                    },
+                    onApplicantsClick = { /* Handle applicants click */ },
+                    job
 
-            )
+                )
+            }
         }
     }
 }
@@ -263,25 +298,24 @@ fun MyPostsTab(servicePostings: List<ServicePosting>) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PostsCard(
-    servicePosting: ServicePosting,
     onEditClick: (String, String, String,String) -> Unit,
     onApplicantsClick: () -> Unit,
+    getJobs: GetJobs
 ) {
+
     var isDialogVisible by remember { mutableStateOf(false) }
-    var editableTitle by remember { mutableStateOf(servicePosting.title) }
-    var editableDescription by remember { mutableStateOf(servicePosting.description) }
-    var editableLocation by remember { mutableStateOf(servicePosting.location) }
-    var editableDeadline by remember { mutableStateOf(servicePosting.deadline ?: "Select Deadline") } // Added deadline
-    var editableRate by remember { mutableStateOf(servicePosting.rate) }
+    var editableTitle by remember { mutableStateOf(getJobs.jobType) }
+    var editableDescription by remember { mutableStateOf(getJobs.jobDescription) }
+    var editableLocation by remember { mutableStateOf(getJobs.address) }
+    var editableDeadline by remember { mutableStateOf(getJobs.deadline) } // Added deadline
+    var editableRate by remember { mutableDoubleStateOf(getJobs.salary) }
 
-    val originalTitle = remember { servicePosting.title }
-    val originalDescription = remember { servicePosting.description }
-    val originalRate = remember { servicePosting.rate }
-    val originalDeadline = remember { servicePosting.deadline ?: "Select Deadline" }
+    val originalTitle = remember { mutableStateOf("") }
+    val originalDescription = remember { mutableStateOf("") }
+    val originalRate = remember { mutableDoubleStateOf(0.0) }
+    val originalDeadline = remember { mutableStateOf("") }
 
-    val selectedCategories = remember { mutableStateListOf<String>().apply {
-        addAll(servicePosting.category.split(", ").filter { it.isNotBlank() })
-    } }
+    var selectedCategories = remember { mutableStateListOf<String>() }
 
     Card(
         modifier = Modifier
@@ -302,7 +336,7 @@ fun PostsCard(
                 ) {
 
                     Text(
-                        text = editableTitle,
+                        text = "Looking for ${editableTitle}",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -343,19 +377,17 @@ fun PostsCard(
                 Text(text = "Location: $editableLocation", fontSize = 16.sp)
 
                 Text(
-                    text = "Est. Budget: ${editableRate}",
+                    text = "Est. Budget: $editableRate",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal
                 )
                 Text(
-                    text = "Category: ${
-                        if (servicePosting.category.isNotEmpty()) servicePosting.category else "Uncategorized"
-                    }",
+                    text = "Category: ${getJobs.jobType}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
                 )
                 Text(
-                    text = "${servicePosting.applicantsCount} Applicants",
+                    text = "${getJobs.totalApplicants} Applicants",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary,
@@ -365,7 +397,7 @@ fun PostsCard(
 
                 // Other card content
                 Text(
-                    text = "Posted on ${servicePosting.postedDate} - ${if (servicePosting.isActive) "Active" else "Inactive"}",
+                    text = "Posted on ${getJobs.createdAt} - ${getJobs.status}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
@@ -463,13 +495,11 @@ fun PostsCard(
                             )
                         )
 
-
-
                     // Rate TextField with Border
 
                         OutlinedTextField(
-                            value = editableRate,
-                            onValueChange = { editableRate = it },
+                            value = editableRate.toString(),
+                            onValueChange = { editableRate = it.toDoubleOrNull() ?: 0.0 },
                             label = { Text("Estimated Budget") },
                             shape = RoundedCornerShape(16.dp),
                             singleLine = true,
@@ -525,16 +555,16 @@ fun PostsCard(
 
                         ) {
                             val categories = listOf(
-                                "Carpentry",
-                                "Painting",
-                                "Welding",
+                                "Carpenter",
+                                "Painter",
+                                "Welder",
                                 "Electrician",
-                                "Plumbing",
-                                "Masonry",
-                                "Roofing",
-                                "AC Repair",
-                                "Mechanics",
-                                "Cleaning"
+                                "Plumber",
+                                "Mason",
+                                "Roofer",
+                                "AC Technician",
+                                "Mechanic",
+                                "Cleaner"
                             )
 
                             categories.forEach { category ->
@@ -563,10 +593,10 @@ fun PostsCard(
                     ) {
                         Button(onClick = {
                             // Restore the original values if cancel is clicked
-                            editableTitle = originalTitle
-                            editableDescription = originalDescription
-                            editableRate = originalRate
-                            editableDeadline = originalDeadline
+                            editableTitle = originalTitle.value
+                            editableDescription = originalDescription.value
+                            editableRate = originalRate.doubleValue
+                            editableDeadline = originalDeadline.value
                             isDialogVisible = false
                         }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
                             ) {
@@ -576,7 +606,8 @@ fun PostsCard(
                         Button(onClick = {
                             // Save the new values
                             isDialogVisible = false
-                            onEditClick(editableTitle, editableDescription, editableRate,editableDeadline)
+                            onEditClick(editableTitle, editableDescription,
+                                editableRate.toString(),editableDeadline)
                         }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))) {
                             Text("Save")
                         }
@@ -799,7 +830,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
     fun FabPosting(
         onPostNewService: (ServicePosting) -> Unit,
         onDeadlineChange:(String) ->Unit,
-        postJobViewModel: PostJobViewModel
+        postJobViewModel: PostJobViewModel,
     ) {
         val postJobState by postJobViewModel.postJobState.collectAsState()
         var isSubmitting by remember { mutableStateOf(false) }

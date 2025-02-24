@@ -44,12 +44,25 @@ import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
+import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
 
 @Composable
-fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, getClientsBooking: GetClientBookingViewModel,getResumesViewModel: GetResumesViewModel,modifier: Modifier = Modifier,viewModel:GetChatViewModel,reportViewModel: ReportViewModel, postJobsViewModel: PostJobViewModel) {
+fun MainScreen(
+    navController: NavController,
+    logoutViewModel: LogoutViewModel,
+    getClientsBooking: GetClientBookingViewModel,
+    getResumesViewModel: GetResumesViewModel,
+    modifier: Modifier = Modifier,
+    viewModel:GetChatViewModel,
+    reportViewModel: ReportViewModel,
+    postJobsViewModel: PostJobViewModel,
+    getMyJobsViewModel: GetMyJobsViewModel,
+    getClientProfileViewModel: GetClientProfileViewModel
+    ) {
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
         NavigationItem("Bookings", Icons.Default.ListAlt),
@@ -103,7 +116,9 @@ fun MainScreen(navController: NavController,logoutViewModel: LogoutViewModel, ge
             getResumesViewModel,
             viewModel,
             reportViewModel,
-            postJobsViewModel
+            postJobsViewModel,
+            getMyJobsViewModel,
+            getClientProfileViewModel
             )
     }
 }
@@ -119,7 +134,9 @@ fun ContentScreen(
     getResumesViewModel: GetResumesViewModel,
     viewModel: GetChatViewModel,
     reportViewModel: ReportViewModel,
-    postJobsViewModel: PostJobViewModel
+    postJobsViewModel: PostJobViewModel,
+    getMyJobsViewModel: GetMyJobsViewModel,
+    getClientProfileViewModel: GetClientProfileViewModel
 ) {
 
     val role = AccountManager.getAccount()?.isClient
@@ -130,7 +147,7 @@ fun ContentScreen(
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileScreen(
-                modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel
+                modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel
             )
         }
     } else {
