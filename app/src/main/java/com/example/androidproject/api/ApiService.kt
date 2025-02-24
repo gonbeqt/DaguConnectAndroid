@@ -1,13 +1,16 @@
 package com.example.androidproject.api
 
+import com.example.androidproject.model.ClientProfile
 import com.example.androidproject.model.GetChats
-import com.example.androidproject.model.GetJobs
+import com.example.androidproject.model.GetMyJobs
 import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.model.LoginRequest
 import com.example.androidproject.model.LoginResponse
+import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
+import com.example.androidproject.model.PostJobs
 import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
 
@@ -25,7 +28,6 @@ import retrofit2.http.POST
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 import viewResume
@@ -41,8 +43,20 @@ interface ApiService {
     @GET("/user/jobs")
     suspend fun getJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<JobsResponse>
 
+    @GET("/user/jobs/recent")
+    suspend fun getRecentJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<JobsResponse>
+
+    @GET("/client/jobs/view/my_jobs")
+    suspend fun getJobsByUserId(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetMyJobs>
+
+    @GET("client/profile")
+    suspend fun getClientProfile(): Response<ClientProfile>
+
     @GET("/user/job/view/{id}")
     suspend fun getJobById(@Path("id") id: Int): Response<Job>
+
+    @POST("/user/client/create-job")
+    suspend fun postJob(@Body request: PostJobs): Response<PostJobResponse>
 
     @DELETE("/user/logout")
     suspend fun logout(): Response<Unit>

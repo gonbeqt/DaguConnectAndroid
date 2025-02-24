@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -37,11 +38,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.Chats
 import com.example.androidproject.view.WindowSize
@@ -146,13 +150,13 @@ fun ChatListItem(chats: Chats,navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Profile Icon
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
+            AsyncImage(
+                model = chats.profilePicture, // Use URL here
                 contentDescription = "Profile Image",
                 modifier = Modifier
                     .size(62.dp)
-                    .padding(8.dp),
-                tint = Color.Gray
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.width(8.dp))
