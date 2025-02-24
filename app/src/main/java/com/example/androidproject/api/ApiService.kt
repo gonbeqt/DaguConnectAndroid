@@ -19,6 +19,8 @@ import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.ViewClientBooking
+import com.example.androidproject.model.client.ratingsItem
+import com.example.androidproject.model.client.resumesItem
 
 
 import retrofit2.http.Body
@@ -59,6 +61,7 @@ interface ApiService {
     @DELETE("/user/logout")
     suspend fun logout(): Response<Unit>
 
+
     @GET("/user/getresumes")
     suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
 
@@ -79,4 +82,7 @@ interface ApiService {
 
     @POST("/user/client/reporttradesman/{tradesmanId}")
     suspend fun report( @Body request: ReportRequest, @Path("tradesmanId") tradesmanId: Int): Response<ReportResponse>
+
+    @GET("/user/client/view/tradesman/rating/{tradesmanId}")
+    suspend fun getRatingsById(@Path("tradesmanId") resumeId: Int): Response<List<ratingsItem>>
 }

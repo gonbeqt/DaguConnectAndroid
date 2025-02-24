@@ -194,10 +194,12 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     modifier = Modifier.padding(top = 10.dp)
                                 )
                                 Text(
-                                    text = resume.preferedworklocation
-                                        .replace("[","")
-                                        .replace("]","")
-                                        .replace("\"",""),
+                                    text = resume.preferedworklocation,
+                                    color = Color.Black,
+                                    fontSize = 16.sp,
+                                )
+                                Text(
+                                    text = resume.specialty,
                                     color = Color.Black,
                                     fontSize = 16.sp,
                                 )
@@ -242,7 +244,6 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .fillMaxWidth()
                                     .padding(10.dp)
                             )
-
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -250,7 +251,6 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color.White)
                             ) {
-
                                 TextField(
                                     value = address,
                                     onValueChange = { address = it },
@@ -268,9 +268,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                         focusedTextColor = Color.Black,
                                         unfocusedTextColor = Color.Black,
                                         cursorColor = Color.Black
-
                                     ),
-
                                     )
                             }
 
@@ -327,46 +325,6 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                             style = TextStyle(fontSize = 12.sp),
                                             modifier = Modifier.padding(top = 4.dp, start = 4.dp ) // Adding some space between the text and TextField
                                         )
-                                    }
-                                }
-                            }
-                            Text(
-                                text = "Specialties",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    values.forEach { value ->
-                                        Box(
-                                            modifier = Modifier
-                                                .width(100.dp)
-                                                .height(40.dp)
-                                                .background(
-                                                    if (selectedTaskType == value) Color(0xFF122826) else Color.LightGray, // Change color if selected
-                                                    RoundedCornerShape(50.dp)
-                                                )
-                                                .clickable { selectedTaskType = value }, // Update selected value
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = value,
-                                                fontSize = 14.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = if (selectedTaskType == value) Color.White else Color.Black // Change text color when selected
-                                            )
-                                        }
                                     }
                                 }
                             }
@@ -432,10 +390,9 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                             ) {
                                 Button(
                                     onClick = {
-                                        selectedTaskType?.let {
+
                                             bookingTradesmanViewModel.BookTradesman(phoneNumber,address,
-                                                it,taskDescription,selectedDate,TradesmanId)
-                                        }
+                                                resume.specialty,taskDescription,selectedDate,TradesmanId)
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonColors(

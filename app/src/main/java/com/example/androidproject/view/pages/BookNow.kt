@@ -51,20 +51,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.model.client.ratingsItem
 import com.example.androidproject.view.Feedback
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavController, resumeId : String) {
+fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavController, resumeId : String,viewRatingsViewModel: ViewRatingsViewModel) {
     val viewResumeState by viewResumeViewModel.viewResumeState.collectAsState()
     val ResumeId = resumeId.toIntOrNull() ?: return
 
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
+
+
 
     when(val state = viewResumeState){
         is ViewResumeViewModel.ViewResumeState.Loading -> {
@@ -73,14 +77,6 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
         is ViewResumeViewModel.ViewResumeState.Success -> {
             val resume = state.data
             if (resume!= null) {
-                val feedbackList = listOf(
-                    Feedback(R.drawable.pfp, "Ezekiel", 4),
-                    Feedback(R.drawable.pfp, "Ezekiel", 4),
-                    Feedback(R.drawable.pfp, "Ezekiel", 4),
-                    Feedback(R.drawable.pfp, "Ezekiel", 4)
-                )
-
-
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -261,6 +257,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             .replace("]", "")
                                             .replace("\"", "")  // Remove opening bracket
                                             }
+
                                     ) // Assuming this function exists
 
                                     Text(
@@ -287,9 +284,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             .background(Color(0xFFF9F9F9)),
                                         verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        feedbackList.forEach { feedback ->
-                                            FeedbackItem(feedback) // Assuming this function exists
-                                        }
+                                        FeedbackItem(viewRatingsViewModel,resume.userid)
                                     }
                                 }
                             }
@@ -406,47 +401,100 @@ fun BoxRow(specialties: List<String>) {
 }
 
 @Composable
-fun FeedbackItem(feedback: Feedback) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .padding(8.dp)
-            ,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White // Set the background color of the card
-        ),
-        shape = RoundedCornerShape(8.dp),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Profile Picture
-            Image(
-                painter = painterResource(feedback.ImageRes),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.Gray, CircleShape)
-            )
+fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
+    val viewRatingState by viewRatingsViewModel.viewRatingsState.collectAsState()
 
-             Text(
-                    text = feedback.username,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                 fontSize = 16.sp
-                )
-                Text(
-                    text = "${feedback.ratingstarsInt} stars",
-                    color = Color.Gray
-                )
+    LaunchedEffect(tradesmanId) {  // Use tradesmanId as key to re-fetch when it changes
+        viewRatingsViewModel.viewRatings(tradesmanId)
+    }
 
+    when (val viewratings = viewRatingState) {
+        is ViewRatingsViewModel.ViewRatingsState.Loading -> {
+            // Loading state (Optional: Show a progress indicator)
         }
+        is ViewRatingsViewModel.ViewRatingsState.Success -> {
+            val ratingsList = viewratings.data
+            if (ratingsList.isEmpty()) {
+                // Ensure the text is properly centered
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp), // Add some padding for better appearance
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No ratings",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray
+                    )
+                }
+            } else {
+                Column {
+                    ratingsList.forEach { ratings ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .padding(8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Profile Picture
+                                AsyncImage(
+                                    model = ratings.client_profile,
+                                    contentDescription = "Profile Picture",
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(CircleShape)
+                                        .border(2.dp, Color.Gray, CircleShape)
+                                )
+
+                                Text(
+                                    text = ratings.client_name,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = "${ratings.ratings} stars",
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        is ViewRatingsViewModel.ViewRatingsState.Error -> {
+            // Show error message
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = viewratings.message,
+                    color = Color.Gray,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        else -> Unit
     }
 }
+
+
+
 
