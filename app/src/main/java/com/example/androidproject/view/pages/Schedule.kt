@@ -175,7 +175,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
 fun ScheduleTopSection(navController: NavController){
     Row(
         modifier = Modifier
-            .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+            .padding(horizontal = 25.dp)
             .fillMaxWidth()
             .height(70.dp),
         horizontalArrangement = Arrangement.SpaceBetween,

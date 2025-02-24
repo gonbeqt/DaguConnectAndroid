@@ -73,10 +73,12 @@ import com.example.androidproject.viewmodel.factories.bookings.ViewClientBooking
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
+import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,6 +92,8 @@ class MainActivity : ComponentActivity() {
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 
+        val reportVMFactory = ReportViewModelFactory(apiService,this)
+        val reportViewModel = ViewModelProvider(this, reportVMFactory)[ReportViewModel::class.java]
 
         val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService,this)
         val getClientBookingViewModel = ViewModelProvider(this,getClientsBookingVMFactory)[GetClientBookingViewModel::class.java]
@@ -126,7 +130,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "profiletradesman" ) {
+                NavHost(navController = navController, startDestination = startDestination ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -141,7 +145,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel,reportViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -178,37 +182,37 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("acrepair"){
-                        ACRepair(navController,getResumesViewModel)
+                        ACRepair(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("plumbing") {
-                        Plumbing(navController,getResumesViewModel)
+                        Plumbing(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("carpentry") {
-                        Carpentry(navController,getResumesViewModel)
+                        Carpentry(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("electrician") {
-                        Electrician(navController,getResumesViewModel)
+                        Electrician(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("masonry"){
-                        Masonry(navController,getResumesViewModel)
+                        Masonry(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("cleaning") {
-                        Cleaning(navController,getResumesViewModel)
+                        Cleaning(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("mechanics"){
-                        Mechanics(navController,getResumesViewModel)
+                        Mechanics(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("painting"){
-                        Painting(navController,getResumesViewModel)
+                        Painting(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("roofing"){
-                        Roofing(navController,getResumesViewModel)
+                        Roofing(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("welding"){
-                        Welding(navController,getResumesViewModel)
+                        Welding(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("alltradesman"){
-                        AllTradesman(navController,getResumesViewModel)
+                        AllTradesman(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("emailverification"){
                         EmailVerification(navController)

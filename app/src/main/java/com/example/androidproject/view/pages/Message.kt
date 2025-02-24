@@ -188,7 +188,6 @@ fun MessageTopSection(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(top = 10.dp)
     ) {
         Row(
             modifier = Modifier

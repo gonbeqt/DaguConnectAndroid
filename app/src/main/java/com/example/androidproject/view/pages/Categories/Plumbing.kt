@@ -1,8 +1,10 @@
 package com.example.androidproject.view.pages.Categories
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -26,8 +29,12 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,8 +42,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,11 +56,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -60,9 +72,10 @@ import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 @Composable
-fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewModel) {
+fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel) {
     val plumberList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
@@ -186,12 +199,12 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = plumberList.itemSnapshotList.items.filter {it.specialties.contains("Plumbing") && it.id !in dismissedResumes  }
+                            val filteredList = plumberList.itemSnapshotList.items.filter {it.specialty.contains("Plumbing") && it.id !in dismissedResumes  }
 
                             items(filteredList.size) { index ->
                                 val plumberList = filteredList[index]
                                 if (plumberList != null && plumberList.id !in dismissedResumes) {
-                                    PlumbingItem(plumberList, navController){
+                                    PlumbingItem(plumberList, navController,reportViewModel){
                                         getResumesViewModel.dismissResume(plumberList.id)
                                     }
                                 }
@@ -246,10 +259,23 @@ fun Plumbing(navController: NavController,getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun PlumbingItem(plumber: resumesItem, navController: NavController,onUninterested: () -> Unit) {
-     var showMenu by remember { mutableStateOf(false) }
+fun PlumbingItem(plumber: resumesItem, navController: NavController,reportViewModel:ReportViewModel,onUninterested: () -> Unit) {
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var reasonDescription by remember { mutableStateOf("") }
+    var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
-    var reportText by remember { mutableStateOf("") }
+    val reasons = listOf(
+        "Abusive or Harassing Behavior",
+        "Inappropriate Content or Language",
+        "Fraudulent Activity or Scam",
+        "Poor Quality of Service",
+        "Unprofessional Conduct",
+        "Safety Concerns",
+        "Others"
+    )
+    val reportState by reportViewModel.reportState.collectAsState()
+    val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 25.dp
@@ -378,38 +404,188 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController,onUninterest
         }
     }
     if (showReportDialog) {
-        AlertDialog(
-            onDismissRequest = { showReportDialog = false },
-            title = { Text("Report Tradesman") },
-            text = {
-                Column {
-                    Text("Please enter a reason for reporting this tradesman:")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = reportText,
-                        onValueChange = { reportText = it },
-                        placeholder = { Text("Enter report reason...") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (reportText.isNotBlank()) {
-                            println("Report submitted: $reportText")
-                            showReportDialog = false
+        Dialog(onDismissRequest = { showReportDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Reason for Cancellation",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Column(modifier = Modifier.padding(top = 16.dp)) {
+                            reasons.forEachIndexed { index, reason ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                                ) {
+                                    Checkbox(
+                                        checked = selectedIndex == index,
+                                        onCheckedChange = {
+                                            selectedIndex =
+                                                if (selectedIndex == index) -1 else index
+                                        },
+                                        colors = CheckboxDefaults.colors(
+                                            uncheckedColor = Color.Black,
+                                            checkedColor = Color(0xFF42C2AE)
+                                        )
+                                    )
+
+                                    if (reason == "Others") {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = reason,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color.Black
+                                            )
+
+                                            if (selectedIndex == index) {
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                TextField(
+                                                    value = otherReason,
+                                                    onValueChange = { otherReason = it },
+                                                    placeholder = { Text("Enter other reason") },
+                                                    singleLine = true,
+                                                    modifier = Modifier
+                                                        .weight(1f) // Pushes the field to the right
+                                                        .heightIn(min = 40.dp),
+                                                    colors = TextFieldDefaults.colors(
+                                                        focusedContainerColor = Color.Transparent,
+                                                        unfocusedContainerColor = Color.Transparent,
+                                                        focusedIndicatorColor = Color.Blue,
+                                                        unfocusedIndicatorColor = Color.Gray,
+                                                        cursorColor = Color.Black
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Text(
+                                            text = reason,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            OutlinedTextField(
+                                value = reasonDescription,
+                                onValueChange = { reasonDescription = it },
+                                placeholder = { Text("Enter Your Explanation") },
+                                shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Blue,
+                                    unfocusedIndicatorColor = Color.Gray,
+                                    focusedLabelColor = Color.Blue,
+                                    unfocusedLabelColor = Color.Gray,
+                                    cursorColor = Color.Black
+                                )
+                            )
+
+                        }
+
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Button(
+                                onClick = { showReportDialog = false },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Cancel", color = Color.White)
+                            }
+                            Button(
+                                onClick = {
+                                    if (selectedIndex == -1) {
+                                        // Show a message to the user indicating that they need to select a reason
+                                        Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                            // If "Others" is selected, use the value from the otherReason field
+                                            otherReason
+                                        } else {
+                                            // Otherwise, use the selected reason from the list
+                                            reasons[selectedIndex]
+                                        }
+                                        reportViewModel.report(selectedReason, reasonDescription, plumber.userid)
+                                    }
+                                          },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Submit", color = Color.White)
+                            }
+                            LaunchedEffect(reportState) {
+                                when(val report = reportState){
+                                    is ReportViewModel.ReportState.Loading -> {
+                                        //do nothing
+                                    }
+                                    is ReportViewModel.ReportState.Success -> {
+                                        val responsereport = report.data?.message
+                                        Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
+
+                                        reportViewModel.resetState()
+                                        // Close the dialog
+                                        showReportDialog = false
+                                    }
+                                    is ReportViewModel.ReportState.Error -> {
+                                        val errorMessage = report.message
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                        showReportDialog = true
+                                        reportViewModel.resetState()
+                                    }
+                                    else -> Unit
+                                }
+                            }
                         }
                     }
-                ) {
-                    Text("Submit")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showReportDialog = false }) {
-                    Text("Cancel")
                 }
             }
-        )
+        }
     }
 }
