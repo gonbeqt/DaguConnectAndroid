@@ -10,7 +10,7 @@ data class viewResume(
     val preferedworklocation: String,
     @SerializedName("profile_pic")
     val profilepic: String,
-    val specialties: String,
+    val specialty: String,
     @SerializedName("tradesman_full_name")
     val tradesmanfullname: String,
     @SerializedName("updated_at")

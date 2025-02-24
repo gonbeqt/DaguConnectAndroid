@@ -19,7 +19,7 @@ data class resumesItem(
     val preferedworklocation: String,
     @SerializedName("profile_pic")
     val profilepic: String,
-    val specialties: List<String>,
+    val specialty:  String,
     @SerializedName("tradesman_full_name")
     val tradesmanfullname: String,
     @SerializedName("updated_at")

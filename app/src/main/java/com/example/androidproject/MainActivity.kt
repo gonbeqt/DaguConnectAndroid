@@ -8,11 +8,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
 import com.example.androidproject.view.pages.AllTradesman
@@ -73,23 +75,39 @@ import com.example.androidproject.viewmodel.factories.bookings.ViewClientBooking
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
+import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val isShown = sharedPreferences.getBoolean("isShown", false)
-        val startDestination = if (isShown) "login" else "landing_page"
+        // Initialize TokenManager
+        TokenManager.init(this)
+        AccountManager.init(this)
+
+        // Determine the start destination based on token and user role
+        val startDestination = when {
+            !isShown -> "landing_page"
+            TokenManager.isLoggedIn() -> {
+                val role = AccountManager.getAccount()?.isClient
+                if (role == true) "main_screen" else "main_screen"
+            }
+            else -> "login"
+        }
         val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
         val feedback = Feedback(R.drawable.pfp, "Ezekiel", 4)
         TokenManager.init(this)
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 
+        val reportVMFactory = ReportViewModelFactory(apiService,this)
+        val reportViewModel = ViewModelProvider(this, reportVMFactory)[ReportViewModel::class.java]
 
         val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService,this)
         val getClientBookingViewModel = ViewModelProvider(this,getClientsBookingVMFactory)[GetClientBookingViewModel::class.java]
@@ -126,7 +144,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "profiletradesman" ) {
+                NavHost(navController = navController, startDestination = startDestination ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -141,7 +159,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     composable("main_screen"){
-                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel)
+                        MainScreen(navController,logoutViewModel,getClientBookingViewModel,getResumesViewModel,modifier = Modifier, getChatsViewModel,reportViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -178,37 +196,37 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("acrepair"){
-                        ACRepair(navController,getResumesViewModel)
+                        ACRepair(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("plumbing") {
-                        Plumbing(navController,getResumesViewModel)
+                        Plumbing(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("carpentry") {
-                        Carpentry(navController,getResumesViewModel)
+                        Carpentry(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("electrician") {
-                        Electrician(navController,getResumesViewModel)
+                        Electrician(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("masonry"){
-                        Masonry(navController,getResumesViewModel)
+                        Masonry(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("cleaning") {
-                        Cleaning(navController,getResumesViewModel)
+                        Cleaning(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("mechanics"){
-                        Mechanics(navController,getResumesViewModel)
+                        Mechanics(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("painting"){
-                        Painting(navController,getResumesViewModel)
+                        Painting(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("roofing"){
-                        Roofing(navController,getResumesViewModel)
+                        Roofing(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("welding"){
-                        Welding(navController,getResumesViewModel)
+                        Welding(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("alltradesman"){
-                        AllTradesman(navController,getResumesViewModel)
+                        AllTradesman(navController,getResumesViewModel,reportViewModel)
                     }
                     composable("emailverification"){
                         EmailVerification(navController)
@@ -271,4 +289,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 

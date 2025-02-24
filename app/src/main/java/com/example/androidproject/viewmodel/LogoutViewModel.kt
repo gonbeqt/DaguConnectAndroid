@@ -11,10 +11,10 @@ class LogoutViewModel(private val apiService: ApiService) : ViewModel() {
     private val _logoutResult = MutableStateFlow<Boolean?>(null)
     val logoutResult: StateFlow<Boolean?> = _logoutResult.asStateFlow()
 
-    fun logout(token: String) {
+    fun logout() {
         viewModelScope.launch {
             try {
-                val response = apiService.logout(token)
+                val response = apiService.logout()
                 _logoutResult.value = response.isSuccessful
             } catch (e: Exception) {
                 _logoutResult.value = false

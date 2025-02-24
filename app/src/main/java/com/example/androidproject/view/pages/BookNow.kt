@@ -255,7 +255,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
 
-                                    BoxRow(specialties = resume.specialties
+                                    BoxRow(specialties = resume.specialty
                                         .split(",").map { it.trim()
                                             .replace("[", "")  // Remove opening bracket
                                             .replace("]", "")
