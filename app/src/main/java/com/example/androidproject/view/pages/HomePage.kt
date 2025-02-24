@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -68,6 +71,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -75,7 +79,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -180,6 +186,56 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
         }
     }
 }
+@SuppressLint("UseOfNonLambdaOffsetOverload")
+@Composable
+fun CategoryScrollIndicator(scrollState: LazyListState, itemCount: Int, visibleItems: Int) {
+    val progress by remember {
+        derivedStateOf {
+            val lastIndex = (itemCount - visibleItems).coerceAtLeast(0)
+
+            val totalItems = scrollState.layoutInfo.totalItemsCount
+            val lastVisibleIndex = scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val isAtEnd = lastVisibleIndex == totalItems - 1
+
+            val itemOffsetFraction = scrollState.firstVisibleItemScrollOffset /
+                    (scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.size?.toFloat() ?: 1f)
+
+            val rawProgress = (scrollState.firstVisibleItemIndex.toFloat() + itemOffsetFraction) / lastIndex.toFloat()
+
+            if (isAtEnd) 1f else rawProgress.coerceIn(0f, 1f)
+        }
+    }
+
+    val trackWidth = 150.dp
+    val handleWidth = 30.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .width(trackWidth)
+                .height(8.dp)
+                .background(Color.Gray, shape = RoundedCornerShape(50))
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(handleWidth)
+                    .height(8.dp)
+                    .offset(x = progress * (trackWidth - handleWidth))
+                    .background(Color(0xFF3CC0B0), shape = RoundedCornerShape(50))
+            )
+        }
+    }
+}
+
+
+
+
+
 @Composable
 fun CategoryRow(categories: List<Categories>, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
@@ -192,10 +248,6 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
     val scrollState = rememberLazyListState()
     val itemCount = categories.size
     val visibleItems = 3
-    val totalDots = (itemCount - visibleItems).coerceAtLeast(1)
-    val currentIndex by remember {
-        derivedStateOf { scrollState.firstVisibleItemIndex }
-    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -240,32 +292,10 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            repeat(totalDots) { index ->
-                val animatedSize by animateDpAsState(
-                    targetValue = if (index == currentIndex) 20.dp else 8.dp,
-                    animationSpec = tween(durationMillis = 300)
-                )
-                val animatedColor by animateColorAsState(
-                    targetValue = if (index == currentIndex) Color(0xFF3CC0B0) else Color(0xFFBBF7D0),
-                    animationSpec = tween(durationMillis = 300)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(animatedSize)
-                        .background(animatedColor, shape = CircleShape)
-                )
-            }
-        }
+        CategoryScrollIndicator(scrollState, itemCount, visibleItems)
     }
 }
+
 
 
 
@@ -452,12 +482,16 @@ fun ExploreNow(windowSize: WindowSize) {
 }
 
 @Composable
-fun CategoryItem(category: Categories,onClick: () -> Unit) {
+fun CategoryItem(category: Categories, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() } // Prevent ripple effect
+
     Card(
         modifier = Modifier
             .size(120.dp, 100.dp)
-
-            .clickable { onClick() }, //implementation here
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null // Removes the default ripple effect
+            ) { onClick() },
         shape = CircleShape
     ) {
         Box(
@@ -474,13 +508,10 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
                     modifier = Modifier
                         .size(50.dp)
                         .shadow(3.dp, shape = CircleShape)
-
                         .background(
-                            color = (Color.White),
+                            color = Color.White,
                             shape = CircleShape
-                        )
-                        ,
-
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -498,7 +529,6 @@ fun CategoryItem(category: Categories,onClick: () -> Unit) {
             }
         }
     }
-
 }
 
 @Composable
