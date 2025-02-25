@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,15 +58,20 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 
 @Composable
-fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navController: NavController,resumeId: String) {
+fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBookingViewModel: ViewClientBookingViewModel,navController: NavController,resumeId: String,bookingstatus: String, bookingId: String) {
     var Cancel by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
+    val workStatusstate by updateWorkStatusViewModel.workStatusState.collectAsState()
+    val context = LocalContext.current
+
 
     val reasons = listOf(
         "Change of Mind",
@@ -74,11 +81,41 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
         "Personal Reasons",
         "Others"
     )
-    val resumeId = resumeId.toIntOrNull()?: return
+    val resumeId = resumeId.toIntOrNull() ?: return
+    val bookingId = bookingId.toIntOrNull() ?: return
     val viewClientBookingstate by viewClientBookingViewModel.viewClientBookingState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewClientBookingViewModel.viewClientBooking(resumeId)
+    }
+
+    LaunchedEffect(workStatusstate) {
+        when (val workState = workStatusstate) {
+            is UpdateWorkStatusViewModel.UpdateWorkStatus.Loading -> {
+                // Do nothing
+            }
+            is UpdateWorkStatusViewModel.UpdateWorkStatus.Success -> {
+                Toast.makeText(
+                    context,
+                    "Appointment Cancelled successfully",
+                    Toast.LENGTH_SHORT
+                ).show()
+                updateWorkStatusViewModel.resetState()
+                // Pass result to MainScreen to switch to Bookings tab with Cancelled selected
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedTab", 5)
+                navController.popBackStack("main_screen", inclusive = false)
+            }
+            is UpdateWorkStatusViewModel.UpdateWorkStatus.Error -> {
+                val errorMessage = workState.message
+                Toast.makeText(
+                    context,
+                    "Error: $errorMessage",
+                    Toast.LENGTH_SHORT
+                ).show()
+                updateWorkStatusViewModel.resetState()
+            }
+            else -> Unit
+        }
     }
 
 
@@ -86,6 +123,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
         is ViewClientBookingViewModel.ViewClientBookings.Loading -> {
             //do nothing
         }
+
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
             val viewclientbooking = viewClientBooking.data
             val getbookdate = ViewModelSetups.formatDateTime(viewclientbooking.bookingdate)
@@ -105,25 +143,25 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
                 ) {
 
-            Column(
-                modifier = Modifier
-                    .background(Color.White)
-                    .fillMaxWidth()
-                    .size(100.dp)
-                    .padding(top = 20.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Arrow Back",
-                        Modifier
-                            .clickable { navController.popBackStack() }
-                            .padding(16.dp),
-                        tint = Color(0xFF81D796)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .background(Color.White)
+                            .fillMaxWidth()
+                            .size(100.dp)
+                            .padding(top = 20.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Arrow Back",
+                                Modifier
+                                    .clickable { navController.popBackStack() }
+                                    .padding(16.dp),
+                                tint = Color(0xFF81D796)
+                            )
 
 
                             Text(
@@ -160,7 +198,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                             contentAlignment = Alignment.Center // Ensure padding is inside the gradient box
                         ) {
                             Text(
-                                text = "Your appointment is Pending Approval",
+                                text = "Your appointment is ${bookingstatus}",
                                 fontSize = 20.sp,
                                 color = Color.White,
                             )
@@ -335,7 +373,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                                                 modifier = Modifier.padding(top = 10.dp)
                                             )
                                             Text(
-                                                text =viewclientbooking.phonenumber,
+                                                text = viewclientbooking.phonenumber,
                                                 color = Color.Gray,
                                                 fontWeight = FontWeight(500),
                                                 fontSize = 12.sp,
@@ -478,9 +516,11 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
 
             }
         }
+
         is ViewClientBookingViewModel.ViewClientBookings.Error -> {
 
         }
+
         else -> Unit
     }
 
@@ -488,8 +528,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
         Dialog(onDismissRequest = { Cancel = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                     ,
+                    .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -523,7 +562,8 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                                     Checkbox(
                                         checked = selectedIndex == index,
                                         onCheckedChange = {
-                                            selectedIndex = if (selectedIndex == index) -1 else index
+                                            selectedIndex =
+                                                if (selectedIndex == index) -1 else index
                                         },
                                         colors = CheckboxDefaults.colors(
                                             uncheckedColor = Color.Black,
@@ -581,12 +621,41 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                                 Text("Cancel", color = Color.White)
                             }
                             Button(
-                                onClick = { Cancel = false },
+                                onClick = {
+                                    if (selectedIndex == -1) {
+                                        // Show a message to the user indicating that they need to select a reason
+                                        Toast.makeText(
+                                            context,
+                                            "Please select a reason for cancellation",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else if (selectedIndex == reasons.lastIndex && otherReason.isEmpty()) {
+                                        // Show a message if "Others" is selected but no reason is provided
+                                        Toast.makeText(
+                                            context,
+                                            "Please type a reason for cancellation",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                            // If "Others" is selected, use the value from the otherReason field
+                                            otherReason
+                                        } else {
+                                            // Otherwise, use the selected reason from the list
+                                            reasons[selectedIndex]
+                                        }
+                                        updateWorkStatusViewModel.updateWorkStatus(
+                                            "Cancelled",
+                                            selectedReason,
+                                            bookingId
+                                        )
+                                        Cancel = false
+
+                                    }
+                                },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                    containerColor = Color(0xFF42C2AE)
                                 )
                             ) {
                                 Text("Submit", color = Color.White)
@@ -596,7 +665,7 @@ fun CancelNow(viewClientBookingViewModel: ViewClientBookingViewModel,navControll
                 }
             }
         }
-    }
 
+    }
 }
 

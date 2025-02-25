@@ -12,7 +12,7 @@ data class ResumesResponse(
 
 data class resumesItem(
     @SerializedName("created_at")
-    val createdat: String,
+    val createdAt: String? = null, // Nullable with default
     val email: String,
     val id: Int,
     @SerializedName("prefered_work_location")

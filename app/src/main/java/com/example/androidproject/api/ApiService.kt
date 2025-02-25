@@ -19,8 +19,11 @@ import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.ViewClientBooking
+import com.example.androidproject.model.client.rateTradesmanRequest
+import com.example.androidproject.model.client.rateTradesmanResponse
 import com.example.androidproject.model.client.ratingsItem
-import com.example.androidproject.model.client.resumesItem
+import com.example.androidproject.model.client.workstatusRequest
+import com.example.androidproject.model.client.workstatusResponse
 
 
 import retrofit2.http.Body
@@ -28,6 +31,7 @@ import retrofit2.http.POST
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 import viewResume
@@ -85,4 +89,11 @@ interface ApiService {
 
     @GET("/user/client/view/tradesman/rating/{tradesmanId}")
     suspend fun getRatingsById(@Path("tradesmanId") resumeId: Int): Response<List<ratingsItem>>
+
+    @PUT("/user/client/work/status/{booking_id}")
+    suspend fun updateworkStatus(@Body request : workstatusRequest, @Path("booking_id") bookingId: Int): Response<workstatusResponse>
+
+    @POST("/user/client/rate/tradesman/{tradesman_id}")
+    suspend fun ratetradesman(@Body request : rateTradesmanRequest, @Path("tradesman_id") bookingId: Int): Response<rateTradesmanResponse>
+
 }

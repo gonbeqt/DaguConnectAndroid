@@ -312,9 +312,9 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
 
     LaunchedEffect(resumeList.itemSnapshotList) {
         displayedResumes = resumeList.itemSnapshotList.items
-            .filter { it.ratings != null } // Ensure ratings are not null
-            .sortedByDescending { it.ratings } // Sort in descending order
-            .take(5) // Take the top 5
+            .filter { it.ratings != null && it.id != null } // Add more validation
+            .sortedByDescending { it.ratings }
+            .take(5)
     }
 
     val cardHeight = when (windowSize.width) {

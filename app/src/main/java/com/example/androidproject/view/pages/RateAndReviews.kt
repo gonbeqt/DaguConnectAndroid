@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -49,17 +51,42 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
+import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 
 @Composable
-fun RateAndReviews(viewClientBookingViewModel: ViewClientBookingViewModel, navController: NavController, resumeId: String) {
+fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBookingViewModel: ViewClientBookingViewModel, navController: NavController, resumeId: String,tradesmanId :String) {
     val reviewText = remember { mutableStateOf("") }
     val rating = remember { mutableStateOf(0) }
     val ResumeId = resumeId.toIntOrNull() ?: return
+    val tradesman_Id = tradesmanId.toIntOrNull()?: return
+    val ratetradesmanState by rateTradesmanViewModel.rateTradesmanState.collectAsState()
+    val context = LocalContext.current
 
     val viewBookingState by viewClientBookingViewModel.viewClientBookingState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewClientBookingViewModel.viewClientBooking(ResumeId)
+    }
+
+    LaunchedEffect(ratetradesmanState) {
+        when(val ratetradesman = ratetradesmanState){
+            is RateTradesmanViewModel.RateTradesman.Loading -> {
+                // do nothing
+            }
+            is RateTradesmanViewModel.RateTradesman.Success -> {
+                val successMessage = ratetradesman.data?.message
+                Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
+                // Pass result to MainScreen to switch to Bookings tab with Cancelled selected
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedTab", 4)
+                navController.popBackStack("main_screen", inclusive = false)
+                rateTradesmanViewModel.resetState()
+            }
+            is RateTradesmanViewModel.RateTradesman.Error -> {
+               val errormessage = ratetradesman.message
+                Toast.makeText(context, errormessage, Toast.LENGTH_SHORT).show()
+            }
+            else -> Unit
+        }
     }
 
     when(viewBookingState){
@@ -197,8 +224,7 @@ fun RateAndReviews(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                         // Submit Button
                         Button(
                             onClick = {
-                                // Handle submit action here
-                                println("Rating: ${rating.value}, Review: ${reviewText.value}")
+                                rateTradesmanViewModel.rateTradesman(reviewText.value, rating.value, tradesman_Id)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
