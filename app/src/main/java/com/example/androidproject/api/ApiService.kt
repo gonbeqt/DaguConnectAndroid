@@ -73,7 +73,6 @@ interface ApiService {
     @DELETE("/user/logout")
     suspend fun logout(): Response<Unit>
 
-
     @GET("/user/getresumes")
     suspend fun getResumes(
         @Query("page") page: Int = 1,

@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -75,16 +74,20 @@ import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingV
 import com.example.androidproject.viewmodel.factories.bookings.ViewClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.client_profile.GetClientProfileViewModelFactory
+import com.example.androidproject.viewmodel.factories.job_application.PostJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.GetRecentJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
 import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
+import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
+import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
@@ -109,7 +112,6 @@ class MainActivity : ComponentActivity() {
             else -> "login"
         }
         val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
-        val feedback = Feedback(R.drawable.pfp, "Ezekiel", 4)
         TokenManager.init(this)
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
@@ -162,6 +164,12 @@ class MainActivity : ComponentActivity() {
         val getClientProfileViewModelFactory = GetClientProfileViewModelFactory(apiService, this)
         val getClientProfileViewModel = ViewModelProvider(this, getClientProfileViewModelFactory)[GetClientProfileViewModel::class.java]
 
+        val postJobApplicationViewModelFactory = PostJobApplicationViewModelFactory(apiService, this)
+        val postJobApplicationViewModel = ViewModelProvider(this, postJobApplicationViewModelFactory)[PostJobApplicationViewModel::class.java]
+
+        val getRecentJobsViewModelFactory = GetRecentJobsViewModelFactory(apiService, this)
+        val getRecentJobsViewModel = ViewModelProvider(this, getRecentJobsViewModelFactory)[GetRecentJobsViewModel::class.java]
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -190,7 +198,8 @@ class MainActivity : ComponentActivity() {
                             reportViewModel,
                             postJobsViewModel,
                             getMyJobsViewModel,
-                            getClientProfileViewModel)
+                            getClientProfileViewModel,
+                            getRecentJobsViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -281,15 +290,16 @@ class MainActivity : ComponentActivity() {
 
                     //Tradesman Routes
                     composable("hometradesman") {
-                        HomeTradesman(modifier = Modifier,navController, getJobsViewModel)
+                        HomeTradesman(modifier = Modifier,navController, getJobsViewModel, getRecentJobsViewModel)
                     }
                     composable("tradesmanapply/{jobId}") { backStackEntry ->
                         val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                         Log.e("Job ID" , jobId)
                         TradesmanApply(jobId, navController, viewJobViewModel)
                     }
-                    composable("hiringdetails") {
-                        HiringDetails(modifier = Modifier, navController)
+                    composable("hiringdetails/{jobId}") { backStackEntry ->
+                        val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                        HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController)

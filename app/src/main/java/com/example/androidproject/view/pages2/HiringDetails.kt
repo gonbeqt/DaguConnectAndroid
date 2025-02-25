@@ -1,7 +1,7 @@
 package com.example.androidproject.view.pages2
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,48 +21,70 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.example.androidproject.R
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 
 @Composable
 
-fun HiringDetails(modifier: Modifier, navController: NavController) {
-    var responseText by remember { mutableStateOf("") }
+fun HiringDetails(jobId: String, modifier: Modifier, navController: NavController, postJobApplicationViewModel: PostJobApplicationViewModel) {
+    val postJobApplicationState by postJobApplicationViewModel.postJobApplicationState.collectAsState()
+    var qualificationSummary by remember { mutableStateOf("") }
+    val currentJobId = jobId.toIntOrNull()
+    val context = LocalContext.current
+    var isSubmitClicked by remember { mutableStateOf(false) }
+    val characterCount by remember(qualificationSummary) { mutableStateOf(qualificationSummary.length) }
+
+    LaunchedEffect(postJobApplicationState) {
+        if (isSubmitClicked) { // Show messages only after submit is clicked
+            when (postJobApplicationState) {
+                is PostJobApplicationViewModel.PostJobApplicationState.Success -> {
+                    val message = "Application successful!" // Default message
+                    Log.d("PostJobApplication", "Success: $message")
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
+                    postJobApplicationViewModel.resetState()
+                    isSubmitClicked = false
+                }
+                is PostJobApplicationViewModel.PostJobApplicationState.Error -> {
+                    val errorState = postJobApplicationState as PostJobApplicationViewModel.PostJobApplicationState.Error
+                    Log.d("PostJobApplication", "Error: ${errorState.message}")
+                    Toast.makeText(context, errorState.message, Toast.LENGTH_SHORT).show()
+                    isSubmitClicked = false
+                }
+                else -> Unit
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(myGradient3)
     ) {
-
         // Top Header Card
         Card(
             modifier = Modifier
@@ -81,7 +103,7 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Arrow Back",
                         modifier = Modifier
                             .clickable { }
@@ -89,7 +111,7 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Why Should We Hire You?",
+                        text = "Why Should I Hire You?",
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Left,
@@ -126,7 +148,7 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Tell us why you're the best candidate:",
+                        "Tell me why you're the best candidate:",
                         textAlign = TextAlign.Center,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium
@@ -141,7 +163,7 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                             .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                             .padding(10.dp)
                     ) {
-                        if (responseText.isEmpty()) {
+                        if (qualificationSummary.isEmpty()) {
                             Text(
                                 "Enter response here...",
                                 color = Color.Gray,
@@ -150,8 +172,8 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                             )
                         }
                         BasicTextField(
-                            value = responseText,
-                            onValueChange = { responseText = it },
+                            value = qualificationSummary,
+                            onValueChange = { qualificationSummary = it },
                             textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -163,7 +185,7 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                         horizontalArrangement = Arrangement.End,
 
                     ) {
-                        Text("Words: 0/300", color = Color.Gray, fontSize = 12.sp)
+                        Text("Character: ${characterCount}/150", color = Color.Gray, fontSize = 12.sp)
                     }
 
                     Spacer(modifier = Modifier.weight(1f)) // pushes the buttons to the bottom
@@ -197,7 +219,17 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                                     color = Color(0xFF42C2AE),
                                     shape = RoundedCornerShape(12.dp)
                                 )
-                                .clickable { }
+                                .clickable {
+                                    if (currentJobId != null && qualificationSummary.isNotBlank()) {
+                                        isSubmitClicked = true
+                                        postJobApplicationViewModel.postJobApplication(
+                                            jobId = currentJobId,
+                                            qualificationSummary = qualificationSummary
+                                        )
+                                    } else {
+                                        Toast.makeText(context, "Please enter your qualifications", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -207,7 +239,6 @@ fun HiringDetails(modifier: Modifier, navController: NavController) {
                 }
             }
         }
-
     }
 }
 

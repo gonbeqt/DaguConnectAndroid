@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
@@ -58,9 +60,10 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
+import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 
 @Composable
-fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel){
+fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel, getRecentJobsViewModel: GetRecentJobsViewModel){
 
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
@@ -121,8 +124,7 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                         ) {
                             when (selectedTabIndex) {
                                 0 -> TopMatches(navController, getJobsViewModel)
-                                1 -> RecentJobs(navController)
-
+                                1 -> RecentJobs(navController, getRecentJobsViewModel)
                             }
                         }
                     }
@@ -222,12 +224,13 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
             modifier = Modifier.padding(16.dp).fillMaxWidth()
         ) {
             Row {
-                Image(
-                    painter = rememberAsyncImagePainter(model = profilePicture),
-                    contentDescription = "Profile Picture",
+                AsyncImage(
+                    model = getJobs.clientProfilePicture, // Use URL here
+                    contentDescription = "Profile Image",
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
+                        .size(62.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
                 Text(
                     text = getJobs.clientFullname,
@@ -280,38 +283,30 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
 
 
 @Composable
-fun RecentJobs(navController: NavController){
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun RecentJobs(navController: NavController, getRecentJobsViewModel: GetRecentJobsViewModel){
+    val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     LazyColumn(
         modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
 
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            RecentJobsItem(trade,navController)
+        items(jobList.itemCount) { index ->
+            val job = jobList[index]
+            if (job != null) {
+                RecentJobsItem(job, navController)
+            }
         }
     }
 }
 
 @Composable
-fun RecentJobsItem(trade: Tradesman, navController: NavController){
+fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                navController.navigate("tradesmanapply")
-
+                navController.navigate("tradesmanapply/${getJobs.id}")
             },
         colors = CardDefaults.cardColors(Color.White)
     ) {
@@ -319,14 +314,15 @@ fun RecentJobsItem(trade: Tradesman, navController: NavController){
             modifier = Modifier.padding(16.dp).fillMaxWidth()
         ) {
             Row {
-                Image(
-                    painter = painterResource(id = R.drawable.pfp),
-                    contentDescription = "Profile Picture",
+                AsyncImage(
+                    model = getJobs.clientProfilePicture, // Use URL here
+                    contentDescription = "Profile Image",
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
+                        .size(62.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
-                Text(text = trade.username,
+                Text(text = getJobs.clientFullname,
                     fontSize = 16.sp,
                     color = Color.Black,
                     fontWeight = FontWeight(500),
@@ -335,8 +331,8 @@ fun RecentJobsItem(trade: Tradesman, navController: NavController){
             Spacer(modifier = Modifier.height(16.dp))
             Row {
                 Column {
-                    Text(text = trade.category, fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
-                    Text(text = "Posted on 1 min ago - Active ")
+                    Text(text = getJobs.jobType, fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
+                    Text(text = "Posted on ${getJobs.createdAt} - ${getJobs.status} ")
 
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -348,9 +344,9 @@ fun RecentJobsItem(trade: Tradesman, navController: NavController){
                 colors = CardDefaults.cardColors(Color.White)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Description of the Plumbing Repair service", fontSize = 12.sp)
-                    Text(text = "Est. Budget: P200/hr", fontSize = 12.sp)
-                    Text(text = "Location: Lingayen, Pangasinan", fontSize = 16.sp)
+                    Text(text = getJobs.jobDescription, fontSize = 12.sp)
+                    Text(text = "Est. Budget: P${getJobs.salary}", fontSize = 12.sp)
+                    Text(text = "Location: ${getJobs.address}", fontSize = 16.sp)
 
 
                 }

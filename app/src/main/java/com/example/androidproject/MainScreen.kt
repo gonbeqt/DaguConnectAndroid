@@ -51,6 +51,7 @@ import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
+import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
@@ -66,7 +67,8 @@ fun MainScreen(
     reportViewModel: ReportViewModel,
     postJobsViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
-    getClientProfileViewModel: GetClientProfileViewModel
+    getClientProfileViewModel: GetClientProfileViewModel,
+    getRecentJobsViewModel: GetRecentJobsViewModel
     ) {
     val context = LocalContext.current
     val navItems = listOf(
@@ -149,7 +151,8 @@ fun MainScreen(
             reportViewModel,
             postJobsViewModel,
             getMyJobsViewModel,
-            getClientProfileViewModel
+            getClientProfileViewModel,
+            getRecentJobsViewModel
             )
     }
 }
@@ -166,7 +169,8 @@ fun ContentScreen(
     reportViewModel: ReportViewModel,
     postJobsViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
-    getClientProfileViewModel: GetClientProfileViewModel
+    getClientProfileViewModel: GetClientProfileViewModel,
+    getRecentJobsViewModel: GetRecentJobsViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -181,7 +185,7 @@ fun ContentScreen(
         }
     } else {
         when (selectedItem) {
-            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel)
+            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
             1 -> BookingsTradesman(modifier = Modifier, navController)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
@@ -61,8 +64,6 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
         viewModel.getJobById(jobID)
     }
 
-
-
     when (viewJobState) {
         is ViewJobViewModel.JobState.Loading -> {
 
@@ -74,18 +75,17 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
         is ViewJobViewModel.JobState.Success -> {
             val job = (viewJobState as ViewJobViewModel.JobState.Success).data
             val date = ViewModelSetups.formatDateTime(job.job.createdAt)
+            val deadline = ViewModelSetups.formatDateTime(job.job.deadline)
             val items = listOf(job.job.jobType) // Your list of items
             Column( // Change Box to Column
                 modifier = Modifier
                     .fillMaxSize()
                     .background(myGradient3)
             ) {
-
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-
                     Column(
                         modifier = Modifier
                             .background(myGradient3)
@@ -137,17 +137,13 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val imagePainter = if (job.job.clientProfile?.startsWith("http") == true) {
-                                rememberAsyncImagePainter(job.job.clientProfile)  // Handle URL
-                            } else {
-                                painterResource(id = job.job.clientProfile?.toIntOrNull() ?: R.drawable.pfp)  // Handle resource ID or fallback
-                            }
-                            Image(
-                                painter = painterResource(R.drawable.pfp),
-                                contentDescription = "Tradesman Image",
+                            AsyncImage(
+                                model = job.job.clientProfile, // Use URL here
+                                contentDescription = "Profile Image",
                                 modifier = Modifier
-                                    .size(100.dp)
-                                    .padding(start = 10.dp)
+                                    .size(62.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
                             )
                             Column(
                                 modifier = Modifier
@@ -171,7 +167,6 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                         .padding(vertical = 4.dp)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        // First section
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Icon(
                                                 imageVector = Icons.Default.LocationOn,
@@ -180,7 +175,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                             )
                                             Spacer(modifier = Modifier.size(4.dp))
                                             Text(
-                                                text = "Deadline: ${job.job.deadline}",
+                                                text = "Deadline: $deadline",
                                                 fontSize = 12.sp
                                             )
                                         }
@@ -302,13 +297,9 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                     fontStyle = FontStyle.Normal,
                                     color = Color.Gray
                                 )
-
                             }
                         }
-
-
                     }
-
                 }
                 Column(
                     modifier = Modifier
@@ -317,7 +308,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(
-                        onClick = {navController.navigate("hiringdetails")},
+                        onClick = {navController.navigate("hiringdetails/${job.job.id}")},
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(Color.White),
                         border = BorderStroke(1.dp, Color.Black),
