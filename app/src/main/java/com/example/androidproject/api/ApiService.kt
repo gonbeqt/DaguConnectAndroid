@@ -2,11 +2,14 @@ package com.example.androidproject.api
 
 import com.example.androidproject.model.ClientProfile
 import com.example.androidproject.model.GetChats
+import com.example.androidproject.model.GetMessages
 import com.example.androidproject.model.GetMyJobs
 import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.model.LoginRequest
 import com.example.androidproject.model.LoginResponse
+import com.example.androidproject.model.PostJobApplication
+import com.example.androidproject.model.PostJobApplicationResponse
 import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
@@ -41,13 +44,22 @@ interface ApiService {
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
     @GET("/user/jobs")
-    suspend fun getJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<JobsResponse>
+    suspend fun getJobs(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 10
+    ): Response<JobsResponse>
 
     @GET("/user/jobs/recent")
-    suspend fun getRecentJobs(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<JobsResponse>
+    suspend fun getRecentJobs(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 10
+    ): Response<JobsResponse>
 
-    @GET("/client/jobs/view/my_jobs")
-    suspend fun getJobsByUserId(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetMyJobs>
+    @GET("/user/jobs")
+    suspend fun getJobsByUserId(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 10
+    ): Response<GetMyJobs>
 
     @GET("client/profile")
     suspend fun getClientProfile(): Response<ClientProfile>
@@ -63,7 +75,10 @@ interface ApiService {
 
 
     @GET("/user/getresumes")
-    suspend fun getResumes(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<ResumesResponse>
+    suspend fun getResumes(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 10
+    ): Response<ResumesResponse>
 
     @GET("/user/getresume/{resumeId}")
     suspend fun getResumeById(@Path("resumeId") resumeId: Int): Response<viewResume>
@@ -75,14 +90,29 @@ interface ApiService {
     suspend fun getCleintBookingById(@Path("resumeId") resumeId: Int): Response<ViewClientBooking>
 
     @GET("/user/chat/get")
-    suspend fun getChat(): Response <GetChats>
+    suspend fun getChat(): Response<GetChats>
 
     @POST("/user/client/booktradesman/{tradesman_Id}")
-    suspend fun booktradesman( @Body request: BookTradesmanRequest, @Path("tradesman_Id") tradesman_Id: Int): Response<BookTradesmanResponse>
+    suspend fun booktradesman(
+        @Body request: BookTradesmanRequest,
+        @Path("tradesman_Id") tradesman_Id: Int
+    ): Response<BookTradesmanResponse>
 
     @POST("/user/client/reporttradesman/{tradesmanId}")
-    suspend fun report( @Body request: ReportRequest, @Path("tradesmanId") tradesmanId: Int): Response<ReportResponse>
+    suspend fun report(
+        @Body request: ReportRequest,
+        @Path("tradesmanId") tradesmanId: Int
+    ): Response<ReportResponse>
 
     @GET("/user/client/view/tradesman/rating/{tradesmanId}")
     suspend fun getRatingsById(@Path("tradesmanId") resumeId: Int): Response<List<ratingsItem>>
+
+    @POST("/user/client/job/apply/{jobId}")
+    suspend fun postJobApplication(
+        @Body request: PostJobApplication,
+        @Path("jobId") jobId: Int
+    ): Response<PostJobApplicationResponse>
+
+    @GET("/user/message/{chatId}")
+    suspend fun getConversation(@Path("chatId") chatId: Int): Response<List<GetMessages>>
 }

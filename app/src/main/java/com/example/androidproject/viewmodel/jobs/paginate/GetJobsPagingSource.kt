@@ -13,7 +13,7 @@ class GetJobsPagingSource(
         val page = params.key ?: 1 // Start from page 1 if key is null
 
         return try {
-            val response = apiService.getJobsByUserId()
+            val response = apiService.getJobs(page = page, limit = params.loadSize)
             if (response.isSuccessful) {
                 val jobs = response.body()?.jobs ?: emptyList()
                 LoadResult.Page(

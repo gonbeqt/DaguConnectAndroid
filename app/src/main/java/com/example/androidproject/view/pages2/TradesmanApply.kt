@@ -61,7 +61,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
         viewModel.getJobById(jobID)
     }
 
-    val items = listOf("Skill 1", "Skill 2", "Skill 3") // Your list of items
+
 
     when (viewJobState) {
         is ViewJobViewModel.JobState.Loading -> {
@@ -74,6 +74,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
         is ViewJobViewModel.JobState.Success -> {
             val job = (viewJobState as ViewJobViewModel.JobState.Success).data
             val date = ViewModelSetups.formatDateTime(job.job.createdAt)
+            val items = listOf(job.job.jobType) // Your list of items
             Column( // Change Box to Column
                 modifier = Modifier
                     .fillMaxSize()
@@ -105,7 +106,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                 tint = Color(0xFF81D796)
                             )
                             Text(
-                                text = "Bookings Details",
+                                text = "Job Details",
                                 fontSize = 20.sp,
                                 color = Color.White,
                                 textAlign = TextAlign.Left,
@@ -179,7 +180,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                             )
                                             Spacer(modifier = Modifier.size(4.dp))
                                             Text(
-                                                text = "Location",
+                                                text = "Deadline: ${job.job.deadline}",
                                                 fontSize = 12.sp
                                             )
                                         }
@@ -237,7 +238,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                             modifier = Modifier.size(16.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(text = job.job.location.orEmpty())
+                                        Text(text = job.job.address.orEmpty())
                                     }
                                 }
                             }
@@ -250,7 +251,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp), verticalArrangement = Arrangement.Center,
                             ) {
                                 Text(
-                                    text = "Specialties",
+                                    text = "Specialty Required",
                                     color = Color.Black,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight(500),
@@ -296,7 +297,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                             Row (Modifier.fillMaxWidth().padding(50.dp),
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically){
-                                Text(text = "No other services offered by this client yet",
+                                Text(text = "Status: ${job.job.status}",
                                     fontSize = 14.sp,
                                     fontStyle = FontStyle.Normal,
                                     color = Color.Gray

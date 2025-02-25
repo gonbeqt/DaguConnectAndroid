@@ -74,7 +74,7 @@ data class ViewJob(
     val jobType: String,
     @SerializedName("job_description")
     val jobDescription: String,
-    val location: String,
+    val address: String,
     val status: String,
     val deadline: String,
     @SerializedName("created_at")

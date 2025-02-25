@@ -12,19 +12,30 @@ import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.JobsResponse
 import com.example.androidproject.viewmodel.jobs.paginate.GetJobsPagingSource
+import com.example.androidproject.viewmodel.jobs.paginate.GetMyJobsPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 class GetJobsViewModel (private val apiService: ApiService, private val context: Context): ViewModel(){
-    val jobsPagingData: Flow<PagingData<GetJobs>> = Pager(
-        config = PagingConfig(
-            pageSize = 10, // Keep it consistent with API
-            initialLoadSize = 10, // Prevents large first requests
-            prefetchDistance = 2, // Reduces prefetching aggressiveness
-            enablePlaceholders = false // Helps prevent extra loads
-        ),
-        pagingSourceFactory = { GetJobsPagingSource(apiService) }
-    ).flow.cachedIn(viewModelScope)
+    private val refreshTrigger = MutableStateFlow(Unit)
+
+    val jobsPagingData: Flow<PagingData<GetJobs>> = refreshTrigger.flatMapLatest {
+        Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                initialLoadSize = 10,
+                prefetchDistance = 2,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { GetJobsPagingSource(apiService) }
+        ).flow.cachedIn(viewModelScope)
+    }
+
+    // Call this to force a refresh
+    fun refreshJobs() {
+        refreshTrigger.value = Unit
+    }
 }
