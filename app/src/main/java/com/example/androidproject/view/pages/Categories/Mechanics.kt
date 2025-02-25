@@ -382,7 +382,10 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                                 .padding(top = 7.dp, start = 2.dp)
                         )
                         Text(
-                            text = "4",
+                            when {
+                                mechanics.ratings == null || mechanics.ratings == 0f -> "0"
+                                else -> String.format("%.1f", mechanics.ratings)
+                            },
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                         )

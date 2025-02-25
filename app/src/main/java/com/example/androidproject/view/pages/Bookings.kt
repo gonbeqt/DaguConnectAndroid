@@ -556,6 +556,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
 //Design For Items
 @Composable
 fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
+    val bookingdate = ViewModelSetups.formatDateTime(allBooking.bookingdate)
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -667,7 +668,10 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
                                 )
                                 Spacer(modifier = Modifier.size(4.dp))
                                 Text(
-                                    text = "4.5",
+                                    text =  when {
+                                        allBooking.ratings == null || allBooking.ratings == 0f -> "0"
+                                        else -> String.format("%.1f", allBooking.ratings)
+                                    },
                                     fontSize = smallTextSize
                                 )
                             }
@@ -682,7 +686,7 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 
                         )
                     Text(
-                        text = allBooking.bookingdate,
+                        text = bookingdate,
                         color = Color.Gray,
                         fontSize = smallTextSize,
 
@@ -708,6 +712,7 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 //Design for activeItems
 @Composable
 fun ActiveItems(activeBooking: GetClientsBooking) {
+    val bookingdate = ViewModelSetups.formatDateTime(activeBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -824,7 +829,10 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "4",
+                                        text =  when {
+                                            activeBooking.ratings == null || activeBooking.ratings == 0f -> "0"
+                                            else -> String.format("%.1f", activeBooking.ratings)
+                                        },
                                         fontSize = smallTextSize
                                     )
                                 }
@@ -838,7 +846,7 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
 
                         )
                         Text(
-                            text = activeBooking.bookingdate,
+                            text = bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
 
@@ -895,7 +903,7 @@ fun ActiveItems(activeBooking: GetClientsBooking) {
 
 @Composable
 fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController) {
-
+    val bookingdate = ViewModelSetups.formatDateTime(pendingBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -1007,7 +1015,10 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "4",
+                                        text =  when {
+                                            pendingBooking.ratings == null || pendingBooking.ratings == 0f -> "0"
+                                            else -> String.format("%.1f", pendingBooking.ratings)
+                                        },
                                         fontSize = smallTextSize
                                     )
                                 }
@@ -1019,7 +1030,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = pendingBooking.bookingdate,
+                            text = bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )
@@ -1074,6 +1085,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
 }
 @Composable
 fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController) {
+    val bookingdate = ViewModelSetups.formatDateTime(declineBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -1188,7 +1200,10 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "4",
+                                        text =  when {
+                                            declineBooking.ratings == null || declineBooking.ratings == 0f -> "0"
+                                            else -> String.format("%.1f", declineBooking.ratings)
+                                        },
                                         fontSize = smallTextSize
                                     )
                                 }
@@ -1200,7 +1215,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = declineBooking.bookingdate,
+                            text = bookingdate,
                             color = Color.Gray,
                             fontSize =smallTextSize,
                         )
@@ -1234,7 +1249,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
 }
 @Composable
 fun CompletedItem(completedBooking: GetClientsBooking, navController:NavController) {
-
+    val bookingdate = ViewModelSetups.formatDateTime(completedBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -1346,7 +1361,10 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "4",
+                                        text = when {
+                                            completedBooking.ratings == null || completedBooking.ratings == 0f -> "0"
+                                            else -> String.format("%.1f", completedBooking.ratings)
+                                        },
                                         fontSize = smallTextSize
                                     )
                                 }
@@ -1358,7 +1376,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = completedBooking.bookingdate,
+                            text = bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize
                         )
@@ -1415,6 +1433,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
 
 @Composable
 fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavController) {
+    val bookingdate = ViewModelSetups.formatDateTime(cancelledBooking.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 240.dp
@@ -1525,7 +1544,10 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "4",
+                                        text =   when {
+                                            cancelledBooking.ratings == null || cancelledBooking.ratings == 0f -> "0"
+                                            else -> String.format("%.1f", cancelledBooking.ratings)
+                                        },
                                         fontSize = smallTextSize
                                     )
                                 }
@@ -1537,7 +1559,7 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = cancelledBooking.bookingdate,
+                            text = bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )

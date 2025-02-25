@@ -393,7 +393,10 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                                 .padding(top = 7.dp, start = 2.dp)
                         )
                         Text(
-                            text = "4",
+                            text =   when {
+                                ACRepair.ratings == null || ACRepair.ratings == 0f -> "0"
+                                else -> String.format("%.1f", ACRepair.ratings)
+                            },
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                         )

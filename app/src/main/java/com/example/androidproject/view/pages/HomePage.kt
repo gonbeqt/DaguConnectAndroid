@@ -300,12 +300,11 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 
 
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController,reportViewModel: ReportViewModel) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportViewModel: ReportViewModel) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
-
 
     LaunchedEffect(Unit) {
         getResumesViewModel.invalidatePagingSource()
@@ -313,7 +312,9 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
 
     LaunchedEffect(resumeList.itemSnapshotList) {
         displayedResumes = resumeList.itemSnapshotList.items
-            .take(5)
+            .filter { it.ratings != null } // Ensure ratings are not null
+            .sortedByDescending { it.ratings } // Sort in descending order
+            .take(5) // Take the top 5
     }
 
     val cardHeight = when (windowSize.width) {
@@ -374,6 +375,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
         }
     }
 }
+
 
 
 
@@ -687,7 +689,10 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                     .padding(top = 7.dp, start = 2.dp)
                             )
                             Text(
-                                text = "4",
+                                when {
+                                    resumes.ratings == null || resumes.ratings == 0f -> "0"
+                                    else -> String.format("%.1f", resumes.ratings)
+                                },
                                 fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 28.dp)
                             )
