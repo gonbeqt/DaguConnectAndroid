@@ -101,8 +101,6 @@ fun MyJobApplicationDetails(navController: NavController) {
                             .padding(16.dp),
                         tint = Color(0xFF81D796)
                     )
-
-
                     Text(
                         text = "Job Application Details",
                         fontSize = 24.sp,
@@ -172,7 +170,7 @@ fun MyJobApplicationDetails(navController: NavController) {
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = " POGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGIPOGI",
+                            text = " ASDSADASDASDSADASD",
                             color = Color.Black,
                             fontSize = 16.sp,
                         )

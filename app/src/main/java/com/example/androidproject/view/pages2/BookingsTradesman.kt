@@ -240,7 +240,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
 fun AllBookingsTradesmanContent() {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "333/hr", 4.5, R.drawable.bookmark) ,
 
     )
     LazyColumn(
@@ -497,7 +497,6 @@ fun AllTradesmanItem(trade: Tradesman) {
 @Composable
 fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
 
-
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 250.dp
@@ -553,9 +552,6 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-
-
-
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Service: Plumbing Repair",
