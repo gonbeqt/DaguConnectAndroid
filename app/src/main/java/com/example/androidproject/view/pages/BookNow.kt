@@ -171,14 +171,11 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             fontSize = 20.sp,
                                             modifier = Modifier.padding(top = 10.dp)
                                         )
-                                        BoxRow(specialties = resume.specialty
-                                            .split(",").map { it.trim()
-                                                .replace("[", "")  // Remove opening bracket
-                                                .replace("]", "")
-                                                .replace("\"", "")  // Remove opening bracket
-                                            }
+                                        resume.specialty?.let {
+                                            BoxRow(specialties = it
 
-                                        )
+                                            )
+                                        }
                                         Text(
                                             text = resume.preferedworklocation,
                                             color = Color.Black,
@@ -450,9 +447,9 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 }
 
 @Composable
-fun BoxRow(specialties: List<String>) {
+fun BoxRow(specialties: String) {
     Text(
-        text = specialties.joinToString(", "),
+        text = specialties,
         color = Color.Black,
         fontSize = 16.sp,
         fontWeight = FontWeight.Medium,

@@ -1,7 +1,13 @@
 
 package com.example.androidproject.view.pages2
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,11 +17,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,10 +40,12 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import com.example.androidproject.R
 
@@ -44,17 +54,23 @@ import com.example.androidproject.R
 fun ProfileVerification(modifier: Modifier = Modifier, navController: NavController) {
     var currentStep by remember { mutableStateOf(1) }
     var progressPercentage by remember { mutableStateOf(0) }
+
+
+
+    val context = LocalContext.current
+
+    //ETOOOO
     var estimatedRate by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
-    val isTyping = estimatedRate.isNotEmpty()
+    var aboutMe by remember { mutableStateOf("") }
     var selectedJob by remember { mutableStateOf("Select job category") }
     var selectedLocation by remember { mutableStateOf("Select location") }
-    var aboutMe by remember { mutableStateOf("") }
-    val context = LocalContext.current
-    var selectedID by remember { mutableStateOf("Select type of valid ID") }
-    var selectedDocument by remember { mutableStateOf("Select type of document") }
+    var frontIdUri by remember { mutableStateOf<Uri?>(null) }
+    var backIdUri by remember { mutableStateOf<Uri?>(null) }
+    var tradeCredentialUri by remember { mutableStateOf<Uri?>(null) }
 
 
+    val isTyping = estimatedRate.isNotEmpty()
 
     Column(
         modifier = Modifier
@@ -381,240 +397,65 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                         }
 
                     }
-                    else if (currentStep == 3) { // Third page
-
-                            Text(
-                                modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 10.dp),
-                                text = "Please upload a valid ID and certifications to verify your legitimacy as a tradesman.",
-                                fontSize = 12.sp
-                            )
-
-                            Spacer(modifier = Modifier.height(5.dp))
-
-                            Text(
-                                modifier = Modifier.padding(start = 14.dp),
-                                text = "Valid ID",
-                                fontSize = 14.sp,
-                                color = Color.DarkGray
-                            )
-
-                            Box(
-                                modifier = Modifier.padding(start = 14.dp, end = 14.dp)
-                            ) {
-                                JobSelectionDropdown(
-                                    label = "",
-                                    options = listOf(
-                                        "Passport",
-                                        "Driver’s License",
-                                        "National ID (PhilSys ID)",
-                                        "Social Security System (SSS) ID",
-                                        "Government Service Insurance System (GSIS) ID",
-                                        "Professional Regulation Commission (PRC) ID",
-                                        "Unified Multi-Purpose ID (UMID)",
-                                        "Postal ID",
-                                        "Voter’s ID",
-                                        "Taxpayer Identification Number (TIN) ID",
-                                        "Senior Citizen ID",
-                                        "Person with Disability (PWD) ID",
-                                        "Barangay Clearance with photo",
-                                        "Indigenous People’s (IP) ID",
-                                        "Other Valid ID with photo"
-                                    ),
-                                    selectedOption = selectedID,
-                                    onOptionSelected = { selectedID = it }
-                                )
-                            }
-
-                            Row(
-                                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 7.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Front ID: No file uploaded",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray,
-                                    modifier = Modifier.padding(4.dp)
-                                )
-                                Box(
-                                    modifier = Modifier.clickable { }
-                                        .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.upload_ic),
-                                            contentDescription = "Add File",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = "Add File",
-                                            fontSize = 12.sp,
-                                            color = Color.White
-                                        )
-                                    }
-                                }
-                            }
-
-                            Text(
-                                modifier = Modifier.padding(start = 18.dp, top = 4.dp),
-                                text = "Accepted file types: .jpg, .jpeg, .png",
-                                fontStyle = FontStyle.Italic,
-                                fontSize = 10.sp,
-                                color = Color.Gray
-                            )
-
-                            Spacer(modifier = Modifier.height(5.dp))
-
-                            Row(
-                                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Back ID: No file uploaded",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray,
-                                    modifier = Modifier.padding(4.dp)
-                                )
-                                Box(
-                                    modifier = Modifier.clickable { }
-                                        .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.upload_ic),
-                                            contentDescription = "Add File",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = "Add File",
-                                            fontSize = 12.sp,
-                                            color = Color.White
-                                        )
-                                    }
-                                }
-                            }
-
-                            Text(
-                                modifier = Modifier.padding(start = 18.dp, top = 4.dp),
-                                text = "Accepted file types: .jpg, .jpeg, .png",
-                                fontStyle = FontStyle.Italic,
-                                fontSize = 10.sp,
-                                color = Color.Gray
-                            )
-
-                            Spacer(modifier = Modifier.height(5.dp))
-
-                            Text(
-                                modifier = Modifier.padding(start = 14.dp),
-                                text = "Trade Credential",
-                                fontSize = 14.sp,
-                                color = Color.DarkGray
-                            )
-
-                            Box(
-                                modifier = Modifier.padding(start = 14.dp, end = 14.dp)
-                            ) {
-                                JobSelectionDropdown(
-                                    label = "",
-                                    options = listOf(
-                                        "Trade Certification",
-                                        "License/Registration from a Trade Authority",
-                                        "Apprenticeship Completion Certificate",
-                                        "Union Membership Card",
-                                        "Training Course Certificate",
-                                        "Contractor/Business License",
-                                        "Work Experience Letter from Employers",
-                                        "Professional Association Membership",
-                                        "Compliance Certifications",
-                                        "Government-Issued Skill Assessment",
-                                        "Other Valid Document with Photo"
-                                    ),
-                                    selectedOption = selectedDocument,
-                                    onOptionSelected = { selectedDocument = it }
-                                )
-                            }
-
-                            Row(
-                                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 5.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "File: No file uploaded",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray,
-                                    modifier = Modifier.padding(4.dp)
-                                )
-                                Box(
-                                    modifier = Modifier.clickable { }
-                                        .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.upload_ic),
-                                            contentDescription = "Add File",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = "Add File",
-                                            fontSize = 12.sp,
-                                            color = Color.White
-                                        )
-                                    }
-                                }
-                            }
-
-                            Text(
-                                modifier = Modifier.padding(start = 18.dp, top = 4.dp),
-                                text = "Accepted file type: .pdf",
-                                fontStyle = FontStyle.Italic,
-                                fontSize = 10.sp,
-                                color = Color.Gray
-                            )
-
-
+                    else if (currentStep == 3) {
+                           UploadDocumentsScreen(  context = context,
+                               frontIdUri = frontIdUri,
+                               backIdUri = backIdUri,
+                               tradeCredentialUri = tradeCredentialUri,
+                               onFrontIdSelected = { frontIdUri = it },
+                               onBackIdSelected = { backIdUri = it },
+                               onTradeCredentialSelected = { tradeCredentialUri = it })
                     }
 
-                    else if (currentStep == 4) { //fourth page
+                    else if (currentStep == 4) { // Fourth page
                         Text(
                             modifier = Modifier.padding(start = 14.dp, top = 14.dp),
-                            text = "Your're almost done! Kindly review your details and submit when ready.",
+                            text = "You're almost done! Kindly review your details and submit when ready.",
                             fontSize = 14.sp
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
+
                         Column(modifier = Modifier.padding(start = 14.dp, end = 14.dp)) {
-                            Text("Job:")
-                            Text("Preferred Location:")
-                            Text("Estimated Rate:")
-                            Text("Phone Number:")
-                            Text("About Me:")
-                            Text("Valid ID:")
+                            Text("Job: $selectedJob")
+                            Text("Preferred Location: $selectedLocation")
+                            Text("Estimated Rate: $estimatedRate")
+                            Text("Phone Number: $phoneNumber")
+                            Text("About Me: $aboutMe")
+
+                            // Clickable Front ID
+                            frontIdUri?.let {
+                                Text(
+                                    text = "Front ID: ${it.lastPathSegment}",
+                                    color = Color.Blue,
+                                    textDecoration = TextDecoration.Underline,
+                                    modifier = Modifier.clickable { openFile(context, it) }
+                                )
+                            } ?: Text("Front ID: No file uploaded")
+
+                            // Clickable Back ID
+                            backIdUri?.let {
+                                Text(
+                                    text = "Back ID: ${it.lastPathSegment}",
+                                    color = Color.Blue,
+                                    textDecoration = TextDecoration.Underline,
+                                    modifier = Modifier.clickable { openFile(context, it) }
+                                )
+                            } ?: Text("Back ID: No file uploaded")
+
                             Text("Trade Credential:")
+
+                            tradeCredentialUri?.let {
+                                Text(
+                                    text = "File PDF: ${it.lastPathSegment}",
+                                    color = Color.Blue,
+                                    textDecoration = TextDecoration.Underline,
+                                    modifier = Modifier.clickable { openFile(context, it) }
+                                )
+                            } ?: Text("File PDF: No file uploaded")
                         }
-                    } else if (currentStep == 5) {//fifth page
+
+                } else if (currentStep == 5) {//fifth page
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -776,5 +617,151 @@ fun JobSelectionDropdown(
                 )
             }
         }
+    }
+}
+@Composable
+fun UploadDocumentsScreen(
+    context: Context,
+    frontIdUri: Uri?,
+    backIdUri: Uri?,
+    tradeCredentialUri: Uri?,
+    onFrontIdSelected: (Uri) -> Unit,
+    onBackIdSelected: (Uri) -> Unit,
+    onTradeCredentialSelected: (Uri) -> Unit
+) {
+    var selectedID by remember { mutableStateOf("") }
+    var selectedDocument by remember { mutableStateOf("") }
+
+    val frontIdPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { onFrontIdSelected(it) } }
+
+    val backIdPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { onBackIdSelected(it) } }
+
+    val pdfPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { onTradeCredentialSelected(it) } }
+
+    Column(modifier = Modifier.padding(14.dp)) {
+        Text(
+            text = "Please upload a valid ID and certifications to verify your legitimacy as a tradesman.",
+            fontSize = 12.sp,
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+
+        Text(text = "Valid ID", fontSize = 14.sp, color = Color.DarkGray)
+        JobSelectionDropdown(
+            label = "",
+            options = listOf(
+                "Passport", "Driver’s License", "National ID (PhilSys ID)",
+                "SSS ID", "GSIS ID", "PRC ID", "UMID", "Postal ID",
+                "Voter’s ID", "TIN ID", "Senior Citizen ID", "PWD ID",
+                "Barangay Clearance with photo", "IP ID", "Other Valid ID with photo"
+            ),
+            selectedOption = selectedID,
+            onOptionSelected = { selectedID = it }
+        )
+
+        UploadField(label = "Front ID", uri = frontIdUri, onUploadClick = {
+            frontIdPickerLauncher.launch("image/*")
+        }) {
+            frontIdUri?.let { openFile(context, it) }
+        }
+
+        UploadField(label = "Back ID", uri = backIdUri, onUploadClick = {
+            backIdPickerLauncher.launch("image/*")
+        }) {
+            backIdUri?.let { openFile(context, it) }
+        }
+
+        Text(text = "Trade Credential", fontSize = 14.sp, color = Color.DarkGray)
+        JobSelectionDropdown(
+            label = "",
+            options = listOf(
+                "Trade Certification", "License/Registration from a Trade Authority",
+                "Apprenticeship Completion Certificate", "Union Membership Card",
+                "Training Course Certificate", "Contractor/Business License",
+                "Work Experience Letter from Employers", "Professional Association Membership",
+                "Compliance Certifications", "Government-Issued Skill Assessment",
+                "Other Valid Document with Photo"
+            ),
+            selectedOption = selectedDocument,
+            onOptionSelected = { selectedDocument = it }
+        )
+
+        UploadField(label = "Trade Credential", uri = tradeCredentialUri, fileType = "pdf", onUploadClick = {
+            pdfPickerLauncher.launch("application/pdf")
+        }) {
+            tradeCredentialUri?.let { openFile(context, it) }
+        }
+    }
+}
+@Composable
+fun UploadField(label: String, uri: Uri?, fileType: String = "image", onUploadClick: () -> Unit, onViewClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 5.dp).padding(top = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            Modifier.clickable { if (uri != null) onViewClick() }
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "$label: ${uri?.lastPathSegment ?: "No file uploaded"}",
+                fontSize = 14.sp,
+                color = if (uri != null) Color.Blue else Color.Gray
+            )
+            if (uri != null) {
+                Icon(
+                    imageVector = Icons.Default.OpenInNew,
+                    contentDescription = "View File",
+                    tint = Color.Blue,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        Box(
+            modifier = Modifier.clickable { onUploadClick() }
+                .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.upload_ic),
+                    contentDescription = "Add File",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Add File", fontSize = 12.sp, color = Color.White)
+            }
+        }
+    }
+    Text(
+        text = "Accepted file types: ${if (fileType == "image") ".jpg, .jpeg, .png" else ".pdf"}",
+        fontStyle = FontStyle.Italic,
+        fontSize = 10.sp,
+        color = Color.Gray,
+        modifier = Modifier.padding(start = 18.dp)
+    )
+}
+
+fun openFile(context: Context, uri: Uri) {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, context.contentResolver.getType(uri))
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    try {
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(context, "No app available to open this file", Toast.LENGTH_SHORT).show()
     }
 }

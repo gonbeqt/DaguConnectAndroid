@@ -12,7 +12,7 @@ data class viewResume(
     val profilepic: String,
     @SerializedName("phone_number")
     val phonenumber : String,
-    val specialty: String,
+    val specialty: String?,
     @SerializedName("tradesman_full_name")
     val tradesmanfullname: String,
     @SerializedName("updated_at")
@@ -24,5 +24,7 @@ data class viewResume(
     val ratings: Float,
     val documents : String,
     @SerializedName("about_me")
-    val aboutme: String
+    val aboutme: String,
+    @SerializedName("is_approve")
+    val isapprove: Int
 )

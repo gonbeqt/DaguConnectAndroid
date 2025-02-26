@@ -154,7 +154,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                 0 -> AllBookingsTradesmanContent()
                                 1 -> PendingBookingsTradesmanContent(navController)
                                 2 -> DeclinedBookingsTradesmanContent(navController)
-                                3 -> ActiveBookingsTradesmanContent()
+                                3 -> ActiveBookingsTradesmanContent(navController)
                                 4 -> CompletedBookingsTradesmanContent(navController)
                                 5 -> CancelledBookingsTradesmanContent(navController)
                             }
@@ -318,7 +318,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController) {
 }
 
 @Composable
-fun ActiveBookingsTradesmanContent() {
+fun ActiveBookingsTradesmanContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -343,7 +343,7 @@ fun ActiveBookingsTradesmanContent() {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllTradesmanItem(trade)
+            ActiveTradesmanItem(trade, navController)
         }
     }
 }
@@ -454,12 +454,16 @@ fun AllTradesmanItem(trade: Tradesman) {
                         .padding(start = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+                    Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(text = "Pending", fontSize = 14.sp)
+                    }
+
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Service: Plumbing Repair",
@@ -492,10 +496,7 @@ fun AllTradesmanItem(trade: Tradesman) {
 
 @Composable
 fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
-    var showApproveDialog by remember { mutableStateOf(false) }
-    var showDeclineDialog by remember { mutableStateOf(false) }
-    var showJobApproveDialog by remember { mutableStateOf(false) }
-    var showDeclineReasons by remember { mutableStateOf(false) }
+
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -583,222 +584,228 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { showDeclineDialog = true }
+                            .clickable {navController.navigate("canceltradesmannow") }
                             .background(
-                                color = Color(0xFFC51B1B),
+                                color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
 
 
-                        Text(text = "Decline", fontSize = 14.sp, color = Color.White)
+                        Text(text = "Cancel Job Application", fontSize = 16.sp)
 
                     }
 
                     Box(
                         modifier = Modifier
-                            .clickable { showApproveDialog = true }
+                            .clickable {navController.navigate("myjobapplicationdetails") }
                             .background(
-                                color = Color(0xFF42C2AE),
+                                color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
 
-                        Text(text = "Approve", fontSize = 14.sp, color = Color.White)
+                        Text(text = "Job Application", color = Color(0xFFECAB1E), fontSize = 16.sp)
                     }
                 }
             }
 
         }
     }
-    // Approve Dialog
-    if (showApproveDialog) {
-        AlertDialog(
-            onDismissRequest = { showApproveDialog = false },
-            title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_approve_decline),
-                        contentDescription = "Approval Icon",
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Approve Job",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.weight(1f) // Makes text take remaining space
-                    )
-                }
-            },
-            text = { Text("Once approved, this job will be marked as active. Proceed?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showApproveDialog = false
-                        showJobApproveDialog = true
+//    var showApproveDialog by remember { mutableStateOf(false) }
+//    var showDeclineDialog by remember { mutableStateOf(false) }
+//    var showJobApproveDialog by remember { mutableStateOf(false) }
+//    var showDeclineReasons by remember { mutableStateOf(false) }
+//    // Approve Dialog
+//    if (showApproveDialog) {
+//        AlertDialog(
+//            onDismissRequest = { showApproveDialog = false },
+//            title = {
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.ic_approve_decline),
+//                        contentDescription = "Approval Icon",
+//                        modifier = Modifier.size(24.dp)
+//                    )
+//                    Spacer(modifier = Modifier.width(8.dp))
+//                    Text(
+//                        text = "Approve Job",
+//                        fontSize = 20.sp,
+//                        textAlign = TextAlign.Start,
+//                        modifier = Modifier.weight(1f) // Makes text take remaining space
+//                    )
+//                }
+//            },
+//            text = { Text("Once approved, this job will be marked as active. Proceed?") },
+//            confirmButton = {
+//                Button(
+//                    onClick = {
+//                        showApproveDialog = false
+//                        showJobApproveDialog = true
+//
+//                    },
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+//                ) {
+//                    Text("Confirm", color = Color.White)
+//                }
+//            },
+//            dismissButton = {
+//                Button(
+//                    onClick = { showApproveDialog = false },
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+//                ) {
+//                    Text("Cancel", color = Color.White)
+//                }
+//            }
+//        )
+//    }
 
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
-                ) {
-                    Text("Confirm", color = Color.White)
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { showApproveDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) {
-                    Text("Cancel", color = Color.White)
-                }
-            }
-        )
-    }
-
-    // Decline Dialog
-    if (showDeclineDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeclineDialog = false },
-            title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_approve_decline),
-                        contentDescription = "Approval Icon",
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Decline Job",
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.weight(1f) // Makes text take remaining space
-                    )
-                }
-            },
-            text = { Text("Once declined, this job may not be available again. Proceed?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDeclineDialog = false
-                        showDeclineReasons = true
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Text("Confirm", color = Color.White)
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { showDeclineDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) {
-                    Text("Cancel", color = Color.White)
-                }
-            }
-        )
-    }
-    if (showJobApproveDialog) {
-        AlertDialog(
-            onDismissRequest = { showJobApproveDialog = false },
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_jobapproved_checked), // Use your drawable here
-                    contentDescription = "Jon Approve Icon",
-                    modifier = Modifier.size(60.dp) // Adjust size as needed
-                )
-            },
-            title = { Text("Job Approved!") },
-            text = { Text("Reach out to the client for more project details.") },
-            confirmButton = {
-                Button(
-                    onClick = { showJobApproveDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("OK", color = Color.White)
-                }
-            }
-        )
-    }
-    // decline Reasons Dialog
-    // Decline Reasons Dialog
-    if (showDeclineReasons) {
-        var selectedReason by remember { mutableStateOf<String?>(null) }
-
-        val reasons = listOf(
-            "Workload concerns",
-            "Schedule conflicts",
-            "Relocation issues",
-            "Committed to a contract project",
-            "Short notice start date",
-            "Personal Reasons",
-            "Other"
-        )
-
-        AlertDialog(
-            onDismissRequest = { showDeclineReasons = false },
-            title = {
-                Text(
-                    text = "Reason for Declination",
-                    fontSize = 18.sp,
-                    color = Color(0xFF42C2AE) // Matches UI color
-                )
-            },
-            text = {
-                Column {
-                    reasons.forEach { reason ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { selectedReason = reason },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = selectedReason == reason,
-                                onCheckedChange = { isChecked ->
-                                    if (isChecked) {
-                                        selectedReason = reason
-                                    }
-                                }
-                            )
-                            Text(reason, fontSize = 14.sp)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDeclineReasons = false
-                        // Handle selected reason here
-                    },
-                    enabled = selectedReason != null, // Enables only if an option is chosen
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)), // Matches UI color
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Submit", color = Color.White)
-                }
-            }
-        )
-    }
+//    // Decline Dialog
+//    if (showDeclineDialog) {
+//        AlertDialog(
+//            onDismissRequest = { showDeclineDialog = false },
+//            title = {
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.ic_approve_decline),
+//                        contentDescription = "Approval Icon",
+//                        modifier = Modifier.size(24.dp)
+//                    )
+//                    Spacer(modifier = Modifier.width(8.dp))
+//                    Text(
+//                        text = "Decline Job",
+//                        fontSize = 20.sp,
+//                        textAlign = TextAlign.Start,
+//                        modifier = Modifier.weight(1f) // Makes text take remaining space
+//                    )
+//                }
+//            },
+//            text = { Text("Once declined, this job may not be available again. Proceed?") },
+//            confirmButton = {
+//                Button(
+//                    onClick = {
+//                        showDeclineDialog = false
+//                        showDeclineReasons = true
+//                    },
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+//                ) {
+//                    Text("Confirm", color = Color.White)
+//                }
+//            },
+//            dismissButton = {
+//                Button(
+//                    onClick = { showDeclineDialog = false },
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+//                ) {
+//                    Text("Cancel", color = Color.White)
+//                }
+//            }
+//        )
+//    }
+//    if (showJobApproveDialog) {
+//        AlertDialog(
+//            onDismissRequest = { showJobApproveDialog = false },
+//            icon = {
+//                Image(
+//                    painter = painterResource(id = R.drawable.ic_jobapproved_checked), // Use your drawable here
+//                    contentDescription = "Jon Approve Icon",
+//                    modifier = Modifier.size(60.dp) // Adjust size as needed
+//                )
+//            },
+//            title = { Text("Job Approved!") },
+//            text = { Text("Reach out to the client for more project details.") },
+//            confirmButton = {
+//                Button(
+//                    onClick = { showJobApproveDialog = false },
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+//                    shape = RoundedCornerShape(12.dp),
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text("OK", color = Color.White)
+//                }
+//            }
+//        )
+//    }
+//    // decline Reasons Dialog
+//    // Decline Reasons Dialog
+//    if (showDeclineReasons) {
+//        var selectedReason by remember { mutableStateOf<String?>(null) }
+//
+//        val reasons = listOf(
+//            "Workload concerns",
+//            "Schedule conflicts",
+//            "Relocation issues",
+//            "Committed to a contract project",
+//            "Short notice start date",
+//            "Personal Reasons",
+//            "Other"
+//        )
+//
+//        AlertDialog(
+//            onDismissRequest = { showDeclineReasons = false },
+//            title = {
+//                Text(
+//                    text = "Reason for Declination",
+//                    fontSize = 18.sp,
+//                    color = Color(0xFF42C2AE) // Matches UI color
+//                )
+//            },
+//            text = {
+//                Column {
+//                    reasons.forEach { reason ->
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .clickable { selectedReason = reason },
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+//                            Checkbox(
+//                                checked = selectedReason == reason,
+//                                onCheckedChange = { isChecked ->
+//                                    if (isChecked) {
+//                                        selectedReason = reason
+//                                    }
+//                                }
+//                            )
+//                            Text(reason, fontSize = 14.sp)
+//                        }
+//                    }
+//                }
+//            },
+//            confirmButton = {
+//                Button(
+//                    onClick = {
+//                        showDeclineReasons = false
+//                        // Handle selected reason here
+//                    },
+//                    enabled = selectedReason != null, // Enables only if an option is chosen
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)), // Matches UI color
+//                    shape = RoundedCornerShape(8.dp),
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text("Submit", color = Color.White)
+//                }
+//            }
+//        )
+//    }
 
 }
 
@@ -809,9 +816,9 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
 fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 180.dp
-        WindowType.MEDIUM -> 410.dp to 190.dp
-        WindowType.LARGE -> 420.dp to 200.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
 
     Card(
@@ -825,62 +832,224 @@ fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
 
-                // Tradesman details
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Service: Plumbing Repair",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
 
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+
+                Box(
+                    modifier = Modifier
+                        .clickable {}
+                        .background(
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .weight(1f)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Text(text = "Apply Again", fontSize = 16.sp)
                 }
 
             }
+        }
+    }
+}
+
+@Composable
+fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
+
+
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
+    }
+
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("canceltradesmannow") }
+                            .background(
+                                color = Color(0xFFC51B1B),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Cancel", fontSize = 14.sp, color = Color.White)
+
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+
+                            }
+                            .background(
+                                color = Color(0xFF42C2AE),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Completed",
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+
         }
     }
 }
@@ -888,9 +1057,9 @@ fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
 fun CompletedItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 180.dp
-        WindowType.MEDIUM -> 410.dp to 190.dp
-        WindowType.LARGE -> 420.dp to 200.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
 
     Card(
@@ -904,63 +1073,114 @@ fun CompletedItem(trade: Tradesman, navController: NavController) {
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
 
-                // Tradesman details
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Service: Plumbing Repair",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
 
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("canceltradesmannow") }
+                            .background(
+                                color = Color(0xFFC51B1B),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
 
+
+                        Text(text = "Book Again", fontSize = 14.sp, color = Color.White)
+
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+
+                            }
+                            .background(
+                                color = Color(0xFF42C2AE),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Rate",
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
             }
+
         }
     }
 }
@@ -970,9 +1190,9 @@ fun CompletedItem(trade: Tradesman, navController: NavController) {
 fun CancelledItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 190.dp
-        WindowType.MEDIUM -> 400.dp to 200.dp
-        WindowType.LARGE -> 410.dp to 210.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
 
     Card(
@@ -986,59 +1206,89 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
 
-                // Tradesman details
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Service: Plumbing Repair",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
+
+
+                Box(
+                    modifier = Modifier
+                        .clickable {}
+                        .background(
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .weight(1f)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Text(text = "Apply Again", fontSize = 16.sp)
+                }
+
             }
         }
     }

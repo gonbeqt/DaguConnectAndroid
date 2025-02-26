@@ -21,13 +21,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -49,147 +59,183 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.view.pages.GeneralSettings
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import kotlinx.coroutines.delay
+import viewResume
 import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
-fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController,logoutViewModel: LogoutViewModel) {
+fun ProfileTradesman(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    logoutViewModel: LogoutViewModel,
+    viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel
+) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("Job Profile", "General")
+    val viewTradesmanProfilestate by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewTradesmanProfileViewModel.viewTradesmanProfile()
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(top = 10.dp, start = 25.dp, end = 25.dp)
-                .fillMaxWidth()
-                .height(70.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left-aligned text
-            Text(
-                text = "Profile",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Medium
-            )
-
-            // Right-aligned icons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "User Account",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
-                )
+        when (val trademanProf = viewTradesmanProfilestate) {
+            is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
+                // Show loading indicator
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
-        }
-
-
-        // Profile Info
-        Column(
-            modifier = Modifier.fillMaxWidth().background(Color.White)
-        ) {
-            Box(modifier = Modifier.padding(10.dp)) {
+            is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success -> {
+                // Handle success state
+                val tradesmanDetails = trademanProf.data
                 Row(
                     modifier = Modifier
+                        .padding(top = 10.dp, start = 25.dp, end = 25.dp)
                         .fillMaxWidth()
-                        .height(130.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1))
-                            ), shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(16.dp),
+                        .height(70.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(Color.White, RoundedCornerShape(50.dp))
+                    // Left-aligned text
+                    Text(
+                        text = "Profile",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    // Right-aligned icons
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "👤", modifier = Modifier.align(Alignment.Center), fontSize = 50.sp)
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notifications Icon",
+                            tint = Color(0xFF3CC0B0),
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "User Account",
+                            tint = Color(0xFF3CC0B0),
+                            modifier = Modifier.size(32.dp)
+                        )
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.padding(top = 5.dp)) {
-                        Text(text = "Tradesman’s Name", color = Color.White, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
-                        Text(text = "Lorem@gmail.com", color = Color.White, style = TextStyle(fontSize = 14.sp))
-                        Text(text = "Dagupan, Philippines", color = Color.White, style = TextStyle(fontSize = 14.sp))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Box(
+                }
+
+                // Profile Info
+                Column(
+                    modifier = Modifier.fillMaxWidth().background(Color.White)
+                ) {
+                    Box(modifier = Modifier.padding(10.dp)) {
+                        Row(
                             modifier = Modifier
-                                .width(100.dp)
-                                .height(30.dp)
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(Color.White),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1))
+                                    ), shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(16.dp),
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(Icons.Default.Circle, contentDescription = "Active", tint = Color.Yellow, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "Available", color = Color.Black, style = TextStyle(fontSize = 14.sp))
+                            // Tradesman image
+                            AsyncImage(
+                                model = tradesmanDetails.profilepic?: "N/A",
+                                contentDescription = "Tradesman Image",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .padding(start = 10.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.padding(top = 5.dp)) {
+                                Text(text = tradesmanDetails.tradesmanfullname?: "N/A", color = Color.White, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
+                                Text(text = tradesmanDetails.email?: "N/A", color = Color.White, style = TextStyle(fontSize = 14.sp))
+                                Text(text = tradesmanDetails.preferedworklocation?: "N/A", color = Color.White, style = TextStyle(fontSize = 14.sp))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .width(100.dp)
+                                        .height(30.dp)
+                                        .clip(RoundedCornerShape(50.dp))
+                                        .background(Color.White),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(Icons.Default.Circle, contentDescription = "Active", tint = Color.Yellow, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = "Available", color = Color.Black, style = TextStyle(fontSize = 14.sp))
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
 
+                // Tab Selection
+                Column {
+                    TabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        tabNames.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = { selectedTabIndex = index },
+                                text = { Text(title, fontSize = 14.sp) },
+                            )
+                        }
+                    }
 
-        // Tab Selection
-        Column {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                tabNames.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(title, fontSize = 14.sp) },
-                    )
+                    // Tab Content
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
+                            .padding(10.dp)
+                    ) {
+                        when (selectedTabIndex) {
+                            0 -> JobProfile(navController,tradesmanDetails)
+                            1 -> SettingsTradesmanScreen(navController, logoutViewModel)
+                        }
+                    }
                 }
             }
-
-            // Tab Content
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(10.dp)
-            ) {
-                when (selectedTabIndex) {
-                    0 -> JobProfile(navController)
-                    1 -> SettingsTradesmanScreen(navController,logoutViewModel)
+            is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Error -> {
+                // Handle error state
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "Error: ${trademanProf.message}", color = Color.Red)
                 }
             }
+            else -> Unit
         }
     }
 }
 
 @Composable
-fun JobProfile(navController: NavController){
+fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
 
     var scale by remember { mutableStateOf(1f) }
 
@@ -211,37 +257,41 @@ fun JobProfile(navController: NavController){
     }
 
     // Additional Layout from Image
-    Column(modifier = Modifier.padding(8.dp)) {
+    Column(modifier = Modifier.padding(8.dp).verticalScroll(rememberScrollState())) {
         Box(modifier = Modifier
             .border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier
-                .padding(10.dp)) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .scale(animatedScale)
-                    .background(Color(0xFF3E5CE1), RoundedCornerShape(10.dp))
-                    .clickable {
-                        navController.navigate("profileverification")
-                        scale = 1.1f  },
-                    contentAlignment = Alignment.Center){
-                    Row(modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                .padding(10.dp))
+            {
+                if(tradesmanDetails.isapprove == 0 ){
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .scale(animatedScale)
+                        .background(Color(0xFF3E5CE1), RoundedCornerShape(10.dp))
+                        .clickable {
+                            navController.navigate("profileverification")
+                            scale = 1.1f  },
+                        contentAlignment = Alignment.Center){
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
                         ){
 
-                        Text(modifier = Modifier.padding(8.dp), text = "Verify Profile", color = Color.White, fontSize = 14.sp)
+                            Text(modifier = Modifier.padding(8.dp), text = "Verify Profile", color = Color.White, fontSize = 14.sp)
 
 
+                        }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Job Title : ",
+                        text = "Specialty : ${tradesmanDetails.specialty?.takeIf { it != "null" } ?: "N/A"}",
                         color = Color.Gray,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -263,7 +313,7 @@ fun JobProfile(navController: NavController){
 
                     }
                     Text(
-                        text = "Descripton about yourself",
+                        text = tradesmanDetails.aboutme?: "N/A",
                         fontSize = 16.sp,
                         color = Color.Gray,
                         fontWeight = FontWeight.Normal
@@ -277,7 +327,7 @@ fun JobProfile(navController: NavController){
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Preferred Location : ",
+                        text = "Preferred Location : ${tradesmanDetails.preferedworklocation?: "N/A"} ",
                         color = Color.Gray,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -291,7 +341,7 @@ fun JobProfile(navController: NavController){
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Est. Rate :",
+                    Text(   text = "Est. Rate : ${tradesmanDetails.workfee?.takeIf { it != 0 }?.toString() ?: "N/A"}",
                         fontSize = 16.sp,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold)
@@ -338,51 +388,63 @@ fun GeneralTradesmanSettings(
     icon: ImageVector,
     title: String,
     description: String,
+    trailingIcon: ImageVector?,
     onClick: () -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
-            .background(Color.White)
-            .padding(8.dp)
-            .clickable { onClick() }
-    ) {
-        Box(modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF9F9F9),
-                shape = RoundedCornerShape(8.dp))) {
-
-            Column(modifier = Modifier.padding(10.dp)) {
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 10.dp)
-                    )
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                    , tint = Color.Black
+                )
+                Column(modifier = Modifier.padding(start = 14.dp)) {
                     Text(
                         text = title,
-                        modifier = Modifier.padding(start = 14.dp)
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
-
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                 }
-                Text(
-                    text = description,
-                    modifier = Modifier.padding(top = 5.dp, start = 10.dp)
-                )
-
             }
+            trailingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
 
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                        .clickable { onClick() }
+
+                )
+            }
         }
     }
-
 }
-
 
 @Composable
 fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel) {
-
+    var isChecked by remember { mutableStateOf(true) }
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
     LaunchedEffect(logoutResult) {
@@ -397,57 +459,131 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
             logoutViewModel.resetLogoutResult()
         }
     }
-    Column {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxSize().padding(bottom = 100.dp)) {
 
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_notification),
-            title = "Notification",
-            description = "Manage alerts and updates.",
-            onClick = { /* Handle Notification click */ }
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
-            title = "Privacy",
-            description = "Change your password.",
-            onClick = {navController.navigate("changepassword")}
-        )
-        Text(
-            text = "Help and Support", fontWeight = FontWeight(500),
-            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_about),
-            title = "About Us",
-            description = "Know more about our team.",
-            onClick = {navController.navigate("aboutus")}
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_report),
-            title = "Report a Problem",
-            description = "Report a problem.",
-            onClick = { /* Handle Report a Problem click */ }
-        )
-        Text(
-            text = "Log Out", fontWeight = FontWeight(500),
-            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
-            title = "Log Out",
-            description = "",
-            onClick = {
-                val token = TokenManager.getToken()
-                if (token != null) {
-                    logoutViewModel.logout()
-                } else {
-                    // Handle case where token is null
-                    TokenManager.clearToken()
-                    AccountManager.clearAccountData()
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .clickable { },
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector =Icons.Default.NotificationsNone,
+                            contentDescription = "Notification Icon",
+                            modifier = Modifier.size(24.dp),
+                            tint = Color.Black
+                        )
+                        Column(modifier = Modifier.padding(start = 14.dp)) {
+                            Text(
+                                text = "Notification",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                            Text(
+                                text = "Manage alerts update",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
                     }
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = { isChecked = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF3CC0B0),
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = Color.Gray
+                        )
+                    )
                 }
             }
+        GeneralTradesmanSettings(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
+                title = "Privacy",
+                description = "Change your password.",
+                trailingIcon = Icons.Default.ArrowForwardIos,
+                onClick = { navController.navigate("changepassword") }
+            )
+            Text(
+                text = "Help and Support", fontWeight = FontWeight(500),
+                fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
+            )
+        GeneralTradesmanSettings(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_about),
+                title = "About Us",
+                description = "Know more about our team.",
+                trailingIcon = Icons.Default.ArrowForwardIos,
+                onClick = { navController.navigate("aboutus") }
+            )
+        GeneralTradesmanSettings(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_report),
+                title = "Report a Problem",
+                description = "Report a problem.",
+                trailingIcon = Icons.Default.ArrowForwardIos,
+                onClick = { navController.navigate("reportproblem") }
+            )
+        Text(
+            text = "Log Out", fontWeight = FontWeight(500), color = Color.Black,
+            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
         )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 5.dp)
+                .clickable {
+                    val token = TokenManager.getToken()
+                    if (token != null) {
+                        logoutViewModel.logout()
+                    } else {
+                        // Handle case where token is null
+                        TokenManager.clearToken()
+                        AccountManager.clearAccountData()
+                        navController.navigate("login") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        }
+                    }
+                },
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) // Added elevation
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Row(
+                    modifier = Modifier.align(Alignment.CenterStart).padding(16.dp), // Aligns Row to center-start
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_logout),
+                        contentDescription = "Logout Icon",
+                        modifier = Modifier.padding(start = 5.dp),
+                        tint = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Log Out",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Start,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
     }
 }

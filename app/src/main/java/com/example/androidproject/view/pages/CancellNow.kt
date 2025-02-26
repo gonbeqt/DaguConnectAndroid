@@ -183,7 +183,8 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp) // Padding to separate it from the top content
+                        .padding(10.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     Card(
                         modifier = Modifier
@@ -479,40 +480,38 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
 
 
                     }
-
-                }
-                Spacer(Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(80.dp)
-                        .background(Color.White),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-
-                    Box(
+                    Spacer(Modifier.height(10.dp))
+                    Row(
                         modifier = Modifier
-                            .clickable { Cancel = true }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp))
-                            .padding(8.dp)
-                            .size(300.dp, 30.dp),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .size(80.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
 
-                        Text(
-                            text = "Cancel Appointment",
-                            color = Color.Black,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight(500)
-                        )
-                    }
-                }
+                        Box(
+                            modifier = Modifier
+                                .clickable { Cancel = true }
+                                .background(
+                                    color = Color.White,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp)
+                                .size(300.dp, 30.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
 
+                            Text(
+                                text = "Cancel Appointment",
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight(500)
+                            )
+                        }
+                    }
+
+                }
 
             }
         }
