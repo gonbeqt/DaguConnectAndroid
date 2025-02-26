@@ -49,7 +49,6 @@ class LoginViewModel(private val apiService: ApiService, private val context: Co
             }
         }
 
-
     }
     sealed class LoginState {
         object Idle : LoginState()

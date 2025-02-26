@@ -2,6 +2,7 @@ package com.example.androidproject.api
 
 import com.example.androidproject.model.ClientProfile
 import com.example.androidproject.model.GetChats
+import com.example.androidproject.model.GetJobApplicationData
 import com.example.androidproject.model.GetMessages
 import com.example.androidproject.model.GetMyJobs
 import com.example.androidproject.model.Job
@@ -114,12 +115,14 @@ interface ApiService {
     @POST("/user/client/rate/tradesman/{tradesman_id}")
     suspend fun ratetradesman(@Body request : rateTradesmanRequest, @Path("tradesman_id") bookingId: Int): Response<rateTradesmanResponse>
 
-
     @POST("/user/client/job/apply/{jobId}")
     suspend fun postJobApplication(
         @Body request: PostJobApplication,
         @Path("jobId") jobId: Int
     ): Response<PostJobApplicationResponse>
+
+    @GET("/user/tradesman/job-applications")
+    suspend fun getMyJobApplications(): Response<List<GetJobApplicationData>>
 
     @GET("/user/message/{chatId}")
     suspend fun getConversation(@Path("chatId") chatId: Int): Response<List<GetMessages>>
