@@ -25,6 +25,7 @@ import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.rateTradesmanRequest
 import com.example.androidproject.model.client.rateTradesmanResponse
 import com.example.androidproject.model.client.ratingsItem
+import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.model.client.workstatusRequest
 import com.example.androidproject.model.client.workstatusResponse
 
@@ -123,4 +124,7 @@ interface ApiService {
 
     @GET("/user/message/{chatId}")
     suspend fun getConversation(@Path("chatId") chatId: Int): Response<List<GetMessages>>
+
+    @GET("/user/tradesman/getResume/Details")
+    suspend fun getTradesmanResume(): Response<viewResume>
 }

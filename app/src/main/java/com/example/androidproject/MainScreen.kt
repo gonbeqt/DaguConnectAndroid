@@ -49,6 +49,8 @@ import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
@@ -72,7 +74,8 @@ fun MainScreen(
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
     updateWorkStatusViewModel : UpdateWorkStatusViewModel,
-    getRecentJobsViewModel: GetRecentJobsViewModel
+    getRecentJobsViewModel: GetRecentJobsViewModel,
+    viewTradesmanProfileViewModel : ViewTradesmanProfileViewModel
     ) {
     val context = LocalContext.current
     val navItems = listOf(
@@ -177,7 +180,8 @@ fun MainScreen(
             getMyJobsViewModel,
             getClientProfileViewModel,
             updateWorkStatusViewModel,
-            getRecentJobsViewModel
+            getRecentJobsViewModel,
+            viewTradesmanProfileViewModel
             )
     }
 }
@@ -197,7 +201,8 @@ fun ContentScreen(
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
     updateWorkStatusViewModel: UpdateWorkStatusViewModel,
-    getRecentJobsViewModel: GetRecentJobsViewModel
+    getRecentJobsViewModel: GetRecentJobsViewModel,
+    viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -216,7 +221,7 @@ fun ContentScreen(
             1 -> BookingsTradesman(modifier = Modifier, navController)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel)
         }
     }
 }

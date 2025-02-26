@@ -199,11 +199,13 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     color = Color.Black,
                                     fontSize = 16.sp,
                                 )
-                                Text(
-                                    text = resume.specialty,
-                                    color = Color.Black,
-                                    fontSize = 16.sp,
-                                )
+                                resume.specialty?.let {
+                                    Text(
+                                        text = it,
+                                        color = Color.Black,
+                                        fontSize = 16.sp,
+                                    )
+                                }
                             }
 
                             // Tradesman Reviews Box
@@ -395,8 +397,10 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                 Button(
                                     onClick = {
 
+                                        resume.specialty?.let {
                                             bookingTradesmanViewModel.BookTradesman(phoneNumber,address,
-                                                resume.specialty,taskDescription,selectedDate,TradesmanId)
+                                                it,taskDescription,selectedDate,TradesmanId)
+                                        }
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonColors(

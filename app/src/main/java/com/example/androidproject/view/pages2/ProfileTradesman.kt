@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -62,145 +63,179 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.pages.GeneralSettings
+import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import kotlinx.coroutines.delay
+import viewResume
 import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
-fun ProfileTradesman(modifier: Modifier = Modifier, navController: NavController,logoutViewModel: LogoutViewModel) {
+fun ProfileTradesman(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    logoutViewModel: LogoutViewModel,
+    viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel
+) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("Job Profile", "General")
+    val viewTradesmanProfilestate by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewTradesmanProfileViewModel.viewTradesmanProfile()
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(top = 10.dp, start = 25.dp, end = 25.dp)
-                .fillMaxWidth()
-                .height(70.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left-aligned text
-            Text(
-                text = "Profile",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Medium
-            )
-
-            // Right-aligned icons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "User Account",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
-                )
+        when (val trademanProf = viewTradesmanProfilestate) {
+            is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
+                // Show loading indicator
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
-        }
-
-
-        // Profile Info
-        Column(
-            modifier = Modifier.fillMaxWidth().background(Color.White)
-        ) {
-            Box(modifier = Modifier.padding(10.dp)) {
+            is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success -> {
+                // Handle success state
+                val tradesmanDetails = trademanProf.data
                 Row(
                     modifier = Modifier
+                        .padding(top = 10.dp, start = 25.dp, end = 25.dp)
                         .fillMaxWidth()
-                        .height(130.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1))
-                            ), shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(16.dp),
+                        .height(70.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(Color.White, RoundedCornerShape(50.dp))
+                    // Left-aligned text
+                    Text(
+                        text = "Profile",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    // Right-aligned icons
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "👤", modifier = Modifier.align(Alignment.Center), fontSize = 50.sp)
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notifications Icon",
+                            tint = Color(0xFF3CC0B0),
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "User Account",
+                            tint = Color(0xFF3CC0B0),
+                            modifier = Modifier.size(32.dp)
+                        )
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.padding(top = 5.dp)) {
-                        Text(text = "Tradesman’s Name", color = Color.White, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
-                        Text(text = "Lorem@gmail.com", color = Color.White, style = TextStyle(fontSize = 14.sp))
-                        Text(text = "Dagupan, Philippines", color = Color.White, style = TextStyle(fontSize = 14.sp))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Box(
+                }
+
+                // Profile Info
+                Column(
+                    modifier = Modifier.fillMaxWidth().background(Color.White)
+                ) {
+                    Box(modifier = Modifier.padding(10.dp)) {
+                        Row(
                             modifier = Modifier
-                                .width(100.dp)
-                                .height(30.dp)
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(Color.White),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1))
+                                    ), shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(16.dp),
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(Icons.Default.Circle, contentDescription = "Active", tint = Color.Yellow, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "Available", color = Color.Black, style = TextStyle(fontSize = 14.sp))
+                            // Tradesman image
+                            AsyncImage(
+                                model = tradesmanDetails.profilepic?: "N/A",
+                                contentDescription = "Tradesman Image",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .padding(start = 10.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column(modifier = Modifier.padding(top = 5.dp)) {
+                                Text(text = tradesmanDetails.tradesmanfullname?: "N/A", color = Color.White, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
+                                Text(text = tradesmanDetails.email?: "N/A", color = Color.White, style = TextStyle(fontSize = 14.sp))
+                                Text(text = tradesmanDetails.preferedworklocation?: "N/A", color = Color.White, style = TextStyle(fontSize = 14.sp))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .width(100.dp)
+                                        .height(30.dp)
+                                        .clip(RoundedCornerShape(50.dp))
+                                        .background(Color.White),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(Icons.Default.Circle, contentDescription = "Active", tint = Color.Yellow, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(text = "Available", color = Color.Black, style = TextStyle(fontSize = 14.sp))
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
 
+                // Tab Selection
+                Column {
+                    TabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        tabNames.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = { selectedTabIndex = index },
+                                text = { Text(title, fontSize = 14.sp) },
+                            )
+                        }
+                    }
 
-        // Tab Selection
-        Column {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                tabNames.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(title, fontSize = 14.sp) },
-                    )
+                    // Tab Content
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
+                            .padding(10.dp)
+                    ) {
+                        when (selectedTabIndex) {
+                            0 -> JobProfile(navController,tradesmanDetails)
+                            1 -> SettingsTradesmanScreen(navController, logoutViewModel)
+                        }
+                    }
                 }
             }
-
-            // Tab Content
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(10.dp)
-            ) {
-                when (selectedTabIndex) {
-                    0 -> JobProfile(navController)
-                    1 -> SettingsTradesmanScreen(navController,logoutViewModel)
+            is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Error -> {
+                // Handle error state
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "Error: ${trademanProf.message}", color = Color.Red)
                 }
             }
+            else -> Unit
         }
     }
 }
 
 @Composable
-fun JobProfile(navController: NavController){
+fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
 
     var scale by remember { mutableStateOf(1f) }
 
@@ -226,33 +261,37 @@ fun JobProfile(navController: NavController){
         Box(modifier = Modifier
             .border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier
-                .padding(10.dp)) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .scale(animatedScale)
-                    .background(Color(0xFF3E5CE1), RoundedCornerShape(10.dp))
-                    .clickable {
-                        navController.navigate("profileverification")
-                        scale = 1.1f  },
-                    contentAlignment = Alignment.Center){
-                    Row(modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                .padding(10.dp))
+            {
+                if(tradesmanDetails.isapprove == 0 ){
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .scale(animatedScale)
+                        .background(Color(0xFF3E5CE1), RoundedCornerShape(10.dp))
+                        .clickable {
+                            navController.navigate("profileverification")
+                            scale = 1.1f  },
+                        contentAlignment = Alignment.Center){
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
                         ){
 
-                        Text(modifier = Modifier.padding(8.dp), text = "Verify Profile", color = Color.White, fontSize = 14.sp)
+                            Text(modifier = Modifier.padding(8.dp), text = "Verify Profile", color = Color.White, fontSize = 14.sp)
 
 
+                        }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Job Title : ",
+                        text = "Specialty : ${tradesmanDetails.specialty?.takeIf { it != "null" } ?: "N/A"}",
                         color = Color.Gray,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -274,7 +313,7 @@ fun JobProfile(navController: NavController){
 
                     }
                     Text(
-                        text = "Descripton about yourself",
+                        text = tradesmanDetails.aboutme?: "N/A",
                         fontSize = 16.sp,
                         color = Color.Gray,
                         fontWeight = FontWeight.Normal
@@ -288,7 +327,7 @@ fun JobProfile(navController: NavController){
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Preferred Location : ",
+                        text = "Preferred Location : ${tradesmanDetails.preferedworklocation?: "N/A"} ",
                         color = Color.Gray,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -302,7 +341,7 @@ fun JobProfile(navController: NavController){
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Est. Rate :",
+                    Text(   text = "Est. Rate : ${tradesmanDetails.workfee?.takeIf { it != 0 }?.toString() ?: "N/A"}",
                         fontSize = 16.sp,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold)

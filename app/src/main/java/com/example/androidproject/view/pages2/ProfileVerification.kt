@@ -55,7 +55,7 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
     var currentStep by remember { mutableStateOf(1) }
     var progressPercentage by remember { mutableStateOf(0) }
 
-    val isTyping = estimatedRate.isNotEmpty()
+
 
     val context = LocalContext.current
 
@@ -70,7 +70,7 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
     var tradeCredentialUri by remember { mutableStateOf<Uri?>(null) }
 
 
-
+    val isTyping = estimatedRate.isNotEmpty()
 
     Column(
         modifier = Modifier

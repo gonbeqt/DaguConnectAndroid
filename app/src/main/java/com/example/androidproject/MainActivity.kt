@@ -65,6 +65,7 @@ import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
@@ -74,6 +75,7 @@ import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewM
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
+import com.example.androidproject.viewmodel.factories.Tradesman_Profile.ViewTradesmaProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.UpdateWorkStatusViewModelFactory
@@ -184,10 +186,14 @@ class MainActivity : ComponentActivity() {
         val getRecentJobsViewModelFactory = GetRecentJobsViewModelFactory(apiService, this)
         val getRecentJobsViewModel = ViewModelProvider(this, getRecentJobsViewModelFactory)[GetRecentJobsViewModel::class.java]
 
+        val viewTradesmanProfileVMFactory = ViewTradesmaProfileViewModelFactory(apiService, this)
+        val viewTradesmanProfileViewModel = ViewModelProvider(this, viewTradesmanProfileVMFactory)[ViewTradesmanProfileViewModel::class.java]
+
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "profileverification" ) {
+                NavHost(navController = navController, startDestination = startDestination) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -214,7 +220,8 @@ class MainActivity : ComponentActivity() {
                             getMyJobsViewModel,
                             getClientProfileViewModel,
                             updateWorkStatusViewModel,
-                            getRecentJobsViewModel)
+                            getRecentJobsViewModel,
+                            viewTradesmanProfileViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -329,7 +336,7 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel)
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel)
                     }
                     composable("manageprofile") {
                         ManageProfile(modifier = Modifier, navController)
