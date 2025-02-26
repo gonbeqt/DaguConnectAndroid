@@ -21,13 +21,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -49,12 +58,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.view.pages.GeneralSettings
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -211,7 +222,7 @@ fun JobProfile(navController: NavController){
     }
 
     // Additional Layout from Image
-    Column(modifier = Modifier.padding(8.dp)) {
+    Column(modifier = Modifier.padding(8.dp).verticalScroll(rememberScrollState())) {
         Box(modifier = Modifier
             .border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier
@@ -338,51 +349,63 @@ fun GeneralTradesmanSettings(
     icon: ImageVector,
     title: String,
     description: String,
+    trailingIcon: ImageVector?,
     onClick: () -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
-            .background(Color.White)
-            .padding(8.dp)
-            .clickable { onClick() }
-    ) {
-        Box(modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF9F9F9),
-                shape = RoundedCornerShape(8.dp))) {
-
-            Column(modifier = Modifier.padding(10.dp)) {
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 10.dp)
-                    )
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                    , tint = Color.Black
+                )
+                Column(modifier = Modifier.padding(start = 14.dp)) {
                     Text(
                         text = title,
-                        modifier = Modifier.padding(start = 14.dp)
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
-
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                 }
-                Text(
-                    text = description,
-                    modifier = Modifier.padding(top = 5.dp, start = 10.dp)
-                )
-
             }
+            trailingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
 
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                        .clickable { onClick() }
+
+                )
+            }
         }
     }
-
 }
-
 
 @Composable
 fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel) {
-
+    var isChecked by remember { mutableStateOf(true) }
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
     LaunchedEffect(logoutResult) {
@@ -397,57 +420,131 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
             logoutViewModel.resetLogoutResult()
         }
     }
-    Column {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxSize().padding(bottom = 100.dp)) {
 
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_notification),
-            title = "Notification",
-            description = "Manage alerts and updates.",
-            onClick = { /* Handle Notification click */ }
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
-            title = "Privacy",
-            description = "Change your password.",
-            onClick = {navController.navigate("changepassword")}
-        )
-        Text(
-            text = "Help and Support", fontWeight = FontWeight(500),
-            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_about),
-            title = "About Us",
-            description = "Know more about our team.",
-            onClick = {navController.navigate("aboutus")}
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_report),
-            title = "Report a Problem",
-            description = "Report a problem.",
-            onClick = { /* Handle Report a Problem click */ }
-        )
-        Text(
-            text = "Log Out", fontWeight = FontWeight(500),
-            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
-        )
-        GeneralTradesmanSettings(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
-            title = "Log Out",
-            description = "",
-            onClick = {
-                val token = TokenManager.getToken()
-                if (token != null) {
-                    logoutViewModel.logout()
-                } else {
-                    // Handle case where token is null
-                    TokenManager.clearToken()
-                    AccountManager.clearAccountData()
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .clickable { },
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector =Icons.Default.NotificationsNone,
+                            contentDescription = "Notification Icon",
+                            modifier = Modifier.size(24.dp),
+                            tint = Color.Black
+                        )
+                        Column(modifier = Modifier.padding(start = 14.dp)) {
+                            Text(
+                                text = "Notification",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                            Text(
+                                text = "Manage alerts update",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
                     }
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = { isChecked = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color(0xFF3CC0B0),
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = Color.Gray
+                        )
+                    )
                 }
             }
+        GeneralTradesmanSettings(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
+                title = "Privacy",
+                description = "Change your password.",
+                trailingIcon = Icons.Default.ArrowForwardIos,
+                onClick = { navController.navigate("changepassword") }
+            )
+            Text(
+                text = "Help and Support", fontWeight = FontWeight(500),
+                fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
+            )
+        GeneralTradesmanSettings(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_about),
+                title = "About Us",
+                description = "Know more about our team.",
+                trailingIcon = Icons.Default.ArrowForwardIos,
+                onClick = { navController.navigate("aboutus") }
+            )
+        GeneralTradesmanSettings(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_report),
+                title = "Report a Problem",
+                description = "Report a problem.",
+                trailingIcon = Icons.Default.ArrowForwardIos,
+                onClick = { navController.navigate("reportproblem") }
+            )
+        Text(
+            text = "Log Out", fontWeight = FontWeight(500), color = Color.Black,
+            fontSize = 20.sp, modifier = Modifier.padding( 12.dp)
         )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 5.dp)
+                .clickable {
+                    val token = TokenManager.getToken()
+                    if (token != null) {
+                        logoutViewModel.logout()
+                    } else {
+                        // Handle case where token is null
+                        TokenManager.clearToken()
+                        AccountManager.clearAccountData()
+                        navController.navigate("login") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        }
+                    }
+                },
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) // Added elevation
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Row(
+                    modifier = Modifier.align(Alignment.CenterStart).padding(16.dp), // Aligns Row to center-start
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_logout),
+                        contentDescription = "Logout Icon",
+                        modifier = Modifier.padding(start = 5.dp),
+                        tint = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Log Out",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Start,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
     }
 }

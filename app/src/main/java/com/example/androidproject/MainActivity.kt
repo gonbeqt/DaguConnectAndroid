@@ -51,9 +51,11 @@ import com.example.androidproject.view.pages.RateAndReviews
 import com.example.androidproject.view.pages2.AvailabilityStatus
 import com.example.androidproject.view.pages2.BookingsTradesman
 import com.example.androidproject.view.pages2.BookmarkedTradesman
+import com.example.androidproject.view.pages2.CancelTradesmanNow
 import com.example.androidproject.view.pages2.HiringDetails
 import com.example.androidproject.view.pages2.HomeTradesman
 import com.example.androidproject.view.pages2.ManageProfile
+import com.example.androidproject.view.pages2.MyJobApplicationDetails
 import com.example.androidproject.view.pages2.ProfileTradesman
 import com.example.androidproject.view.pages2.ProfileVerification
 import com.example.androidproject.view.pages2.ScheduleTradesman
@@ -185,7 +187,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination ) {
+                NavHost(navController = navController, startDestination = "profileverification" ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -337,6 +339,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("profileverification") {
                         ProfileVerification(modifier = Modifier, navController)
+                    }
+                    composable("canceltradesmannow") {
+                        CancelTradesmanNow(navController)
+                    }
+                    composable("myjobapplicationdetails") {
+                        MyJobApplicationDetails(navController)
                     }
                 }
             }
