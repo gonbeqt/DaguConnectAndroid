@@ -78,8 +78,10 @@ import com.example.androidproject.viewmodel.factories.bookings.UpdateWorkStatusV
 import com.example.androidproject.viewmodel.factories.bookings.ViewClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.client_profile.GetClientProfileViewModelFactory
+import com.example.androidproject.viewmodel.factories.job_application.PostJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.GetRecentJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewModelFactory
@@ -209,8 +211,7 @@ class MainActivity : ComponentActivity() {
                             postJobsViewModel,
                             getMyJobsViewModel,
                             getClientProfileViewModel,
-                            updateWorkStatusViewModel)
-                            getClientProfileViewModel,
+                            updateWorkStatusViewModel,
                             getRecentJobsViewModel)
                     }
                     composable("message_screen") {
