@@ -54,6 +54,7 @@ import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
+import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
@@ -70,7 +71,7 @@ fun MainScreen(
     postJobsViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
-    updateWorkStatusViewModel : UpdateWorkStatusViewModel
+    updateWorkStatusViewModel : UpdateWorkStatusViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel
     ) {
     val context = LocalContext.current
@@ -175,7 +176,7 @@ fun MainScreen(
             postJobsViewModel,
             getMyJobsViewModel,
             getClientProfileViewModel,
-            updateWorkStatusViewModel
+            updateWorkStatusViewModel,
             getRecentJobsViewModel
             )
     }
@@ -195,7 +196,7 @@ fun ContentScreen(
     postJobsViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
-    updateWorkStatusViewModel: UpdateWorkStatusViewModel
+    updateWorkStatusViewModel: UpdateWorkStatusViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
