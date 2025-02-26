@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName
 
 data class GetClientsBooking(
     val address: String,
+    val ratings: Float,
     @SerializedName("booking_date")
     val bookingdate: String,
     @SerializedName("booking_status")

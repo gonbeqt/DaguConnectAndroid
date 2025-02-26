@@ -1,5 +1,9 @@
 package com.example.androidproject.view.pages
 
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,7 +68,7 @@ import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavController, resumeId : String,viewRatingsViewModel: ViewRatingsViewModel) {
     val viewResumeState by viewResumeViewModel.viewResumeState.collectAsState()
     val ResumeId = resumeId.toIntOrNull() ?: return
-
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
@@ -200,7 +205,10 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             )
                                             Spacer(modifier = Modifier.size(4.dp))
                                             Text(
-                                                text = "4",
+                                                when {
+                                                    resume.ratings == null || resume.ratings == 0f -> "0"
+                                                    else -> String.format("%.1f", resume.ratings)
+                                                },
                                                 fontSize = 14.sp
                                             )
                                         }
@@ -271,9 +279,16 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             fontWeight = FontWeight(500))
 
                                         Text(
-                                            text =  "View File",
+                                            text = "View File",
                                             color = Color.Black,
-                                            fontSize = 16.sp
+                                            fontSize = 16.sp,
+                                            modifier = Modifier
+                                                .clickable {
+
+                                                    val fileUrl = resume.documents // Assuming this is the URL to the file
+                                                    val fileName = "trade_credential_${resume.tradesmanfullname}.pdf" // Customize the file name as needed
+                                                    downloadFile(context, fileUrl, fileName)
+                                                }
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(16.dp))
@@ -296,7 +311,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                         )
 
                                         Text(
-                                            text = "63-94748-26132",
+                                            text = resume.phonenumber?: "N/A",
                                             color = Color.Black,
                                             fontSize = 16.sp
                                         )
@@ -541,4 +556,18 @@ fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
 
 
 
+fun downloadFile(context: Context, fileUrl: String, fileName: String) {
+    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val uri = Uri.parse(fileUrl)
+
+    val request = DownloadManager.Request(uri)
+        .setTitle(fileName)
+        .setDescription("Downloading")
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+        .setAllowedOverMetered(true)
+        .setAllowedOverRoaming(true)
+
+    downloadManager.enqueue(request)
+}
 
