@@ -246,9 +246,9 @@ fun ProfileScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.BottomEnd // Ensures FAB stays at bottom-end
+                .padding(16.dp)
         ) {
+            Log.d("fab", "fab")
             FabPosting(
                 onPostNewService = { newPost ->
                     postsList = postsList + newPost
