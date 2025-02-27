@@ -60,7 +60,6 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
-import kotlinx.coroutines.NonCancellable.isCompleted
 import java.sql.Types.NULL
 
 
@@ -883,7 +882,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                         ) {
 
 
-                            Text(text = "Cancell", fontSize = smallTextSize, color = Color.White)
+                            Text(text = "Cancel", fontSize = smallTextSize, color = Color.White)
 
                         }
 
