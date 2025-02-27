@@ -14,7 +14,8 @@ class GetMessagesPagingSource(
         return try {
             val response = apiService.getConversation(chatId)
             if (response.isSuccessful) {
-                val messages = response.body() ?: emptyList()
+                val responseBody = response.body()
+                val messages = responseBody?: emptyList()
                 LoadResult.Page(
                     data = messages,
                     prevKey = if (page == 1) null else page - 1,

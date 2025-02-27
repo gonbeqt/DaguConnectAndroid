@@ -129,7 +129,7 @@ interface ApiService {
     suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicationData>
 
     @GET("/user/message/{chatId}")
-    suspend fun getConversation(@Path("chatId") chatId: Int): Response<GetMessages>
+    suspend fun getConversation(@Path("chatId") chatId: Int): Response<List<GetMessages>>
 
     @GET("/user/tradesman/getResume/Details")
     suspend fun getTradesmanResume(): Response<viewResume>
