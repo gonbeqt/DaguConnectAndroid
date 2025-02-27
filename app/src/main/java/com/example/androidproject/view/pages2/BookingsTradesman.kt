@@ -24,10 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -53,7 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
@@ -159,13 +163,13 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                 5 -> CancelledBookingsTradesmanContent(navController)
                             }
 
-                            "My Applicant" -> when (selectedTabIndex) {
-                                0 -> AllApplicantsTradesmanContent()
-                                1 -> PendingApplicantsTradesmanContent(navController)
-                                2 -> DeclinedApplicantsTradesmanContent(navController)
-                                3 -> ActiveApplicantsTradesmanContent()
-                                4 -> CompletedApplicantsTradesmanContent(navController)
-                                5 -> CancelledApplicantsTradesmanContent(navController)
+                            "My Submissions" -> when (selectedTabIndex) {
+                                0 -> AllMySubmissionsTradesmanContent()
+                                1 -> PendingMySubmissionsTradesmanContent(navController)
+                                2 -> DeclinedMySubmissionsTradesmanContent(navController)
+                                3 -> ActiveMySubmissionsTradesmanContent(navController)
+                                4 -> CompletedMySubmissionsTradesmanContent(navController)
+                                5 -> CancelledMySubmissionsTradesmanContent(navController)
                             }
                         }
                     }
@@ -209,19 +213,19 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
         // Right-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == "Submissions") myGradient3 else SolidColor(Color.Transparent))
+                .background(if (selectedSection == "My Submissions") myGradient3 else SolidColor(Color.Transparent))
                 .padding(4.dp)
                 .weight(1f),
         ) {
             TextButton(
-                onClick = { onSectionSelected("Submissions") },
+                onClick = { onSectionSelected("My Submissions") },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "Submissions") Color.White else Color.Black
+                    contentColor = if (selectedSection == "My Submissions") Color.White else Color.Black
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
-                    text = "Submissions",
+                    text = "My Submissions",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -240,7 +244,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
 fun AllBookingsTradesmanContent() {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "333/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
 
     )
     LazyColumn(
@@ -413,81 +417,143 @@ fun CancelledBookingsTradesmanContent(navController: NavController) {
 //Design For Items
 @Composable
 fun AllTradesmanItem(trade: Tradesman) {
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 180.dp
-        WindowType.MEDIUM -> 410.dp to 190.dp
-        WindowType.LARGE -> 420.dp to 200.dp
+        WindowType.SMALL -> 470.dp to 210.dp
+        WindowType.MEDIUM -> 480.dp to 220.dp
+        WindowType.LARGE -> 490.dp to 230.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
     }
 
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
+            .size(cardHeight.first,cardHeight.second)
             .clickable { }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(Color.White),
+            contentAlignment = Alignment.CenterStart
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 // Tradesman image
                 Image(
-                    painter = painterResource(trade.imageResId),
+                     painter = painterResource(R.drawable.pfp),
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
+                        .size(100.dp)
+                        .padding(start = 10.dp)
                 )
 
                 // Tradesman details
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .padding(start = 10.dp)
                 ) {
-                    Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                    Text(
+                        text = "Karlos Rivo",
+                        color = Color.Black,
+                        fontWeight = FontWeight(500),
+                        fontSize = nameTextSize,
+                    )
+                    Text(
+                        text = "Electrician",
+                        color = Color.Black,
+                        fontSize =taskTextSize,
+                    )
+
+
+                    // Rate Box
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = (Color(0xFFFFF2DD)),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
                         Text(
-                            text = trade.username,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            text = "P 500/hr",
+                            fontSize = smallTextSize,
+                            modifier = Modifier.padding(horizontal = 4.dp)
                         )
-                        Text(text = "Pending", fontSize = 14.sp)
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = (Color(0xFFFFF2DD)),
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Star Icon",
+                                tint = Color(0xFFFFA500),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.size(4.dp))
+                            Text(
+                                text = "4",
+                                fontSize = smallTextSize
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+
+
                     Text(
-                        text = "Service: Plumbing Repair",
+                        text = "Weekdays Selected",
                         color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                        fontSize = taskTextSize,
+
+                        )
                     Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
+                        text = "date",
+                        color = Color.Gray,
+                        fontSize = smallTextSize,
+
+                        )
                 }
+
+                Text(
+                    text = "pending",
+                    fontSize = smallTextSize,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(end = 8.dp)
+
+
+                )
+
             }
         }
     }
@@ -497,86 +563,140 @@ fun AllTradesmanItem(trade: Tradesman) {
 @Composable
 fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
 
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .size(cardHeight.first,cardHeight.second)
+        ,
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(Color.White),
         ) {
-            Column(
-                Modifier
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
-
-
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(100.dp)
+                            .padding(start = 10.dp)
                     )
 
                     // Tradesman details
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 12.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                            .padding(start = 10.dp)
                     ) {
+                        Text(
+                            text = "Karlos Rivo",
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = nameTextSize,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = "Electrician",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "P500/hr",
+                                    fontSize = smallTextSize,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
 
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = "4",
+                                        fontSize = smallTextSize
+                                    )
+                                }
+                            }
+                        }
                         Text(
-                            text = trade.username,
+                            text = "Weekdays Selected",
                             color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = taskTextSize,
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: Plumbing Repair",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Date: Jan 15, 2025",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "Time: 10:00 AM",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Location: 123 Elm Street",
-                            color = Color.Black,
-                            fontSize = 14.sp
+                            text = "date",
+                            color = Color.Gray,
+                            fontSize = smallTextSize,
                         )
                     }
+
                 }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -584,7 +704,7 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {navController.navigate("canceltradesmannow") }
+                            .clickable {  }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -596,13 +716,13 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                     ) {
 
 
-                        Text(text = "Cancel Job Application", fontSize = 16.sp)
+                        Text(text = "Cancel Appointment", fontSize = smallTextSize)
 
                     }
 
                     Box(
                         modifier = Modifier
-                            .clickable {navController.navigate("myjobapplicationdetails") }
+                            .clickable {  }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -613,13 +733,13 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                         contentAlignment = Alignment.Center
                     ) {
 
-                        Text(text = "Job Application", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                        Text(text = "Booking Details", color = Color(0xFFECAB1E), fontSize = smallTextSize)
                     }
                 }
             }
-
         }
     }
+
 //    var showApproveDialog by remember { mutableStateOf(false) }
 //    var showDeclineDialog by remember { mutableStateOf(false) }
 //    var showJobApproveDialog by remember { mutableStateOf(false) }
@@ -812,104 +932,164 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
 fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .size(cardHeight.first,cardHeight.second)
+        ,
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(Color.White),
         ) {
-            Column(
-                Modifier
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
-
-
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(100.dp)
+                            .padding(start = 10.dp)
                     )
 
                     // Tradesman details
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 12.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                            .padding(start = 10.dp)
                     ) {
+                        Text(
+                            text = "Karlos Rivo",
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = nameTextSize,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = "Electrician",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "P500/hr",
+                                    fontSize = smallTextSize,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
 
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = "4",
+                                        fontSize = smallTextSize
+                                    )
+                                }
+                            }
+                        }
                         Text(
-                            text = trade.username,
+                            text = "Weekdays Selected",
                             color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = taskTextSize,
                         )
+                        Text(
+                            text = "date",
+                            color = Color.Gray,
+                            fontSize = smallTextSize,
+                        )
+                    }
 
+                }
 
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
 
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Service: Plumbing Repair",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Date: Jan 15, 2025",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "Time: 10:00 AM",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Location: 123 Elm Street",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .padding(vertical = 8.dp),  // Adjust padding as needed
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Apply Again", fontSize = smallTextSize)
                     }
                 }
 
 
-                Box(
-                    modifier = Modifier
-                        .clickable {}
-                        .background(
-                            color = Color.Transparent,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                        .weight(1f)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-
-                    Text(text = "Apply Again", fontSize = 16.sp)
-                }
 
             }
         }
@@ -919,98 +1099,147 @@ fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
 @Composable
 fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
 
-
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .size(cardHeight.first,cardHeight.second)
+        ,
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(Color.White),
         ) {
-            Column(
-                Modifier
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
-
-
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(100.dp)
+                            .padding(start = 10.dp)
                     )
 
                     // Tradesman details
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 12.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                            .padding(start = 10.dp)
                     ) {
-
                         Text(
-                            text = trade.username,
+                            text = "Karlos Rivo",
                             color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-
-
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Service: Plumbing Repair",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Date: Jan 15, 2025",
-                            color = Color.Black,
-                            fontSize = 14.sp
+                            fontWeight = FontWeight(500),
+                            fontSize = nameTextSize,
+                            modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = "Time: 10:00 AM",
+                            text = "Electrician",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize,
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "P500/hr",
+                                    fontSize = smallTextSize,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = "4",
+                                        fontSize = smallTextSize
+                                    )
+                                }
+                            }
+                        }
                         Text(
-                            text = "Location: 123 Elm Street",
+                            text = "Weekdays Selected",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize,
+                        )
+                        Text(
+                            text = "date",
+                            color = Color.Gray,
+                            fontSize = smallTextSize,
                         )
                     }
+
                 }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("canceltradesmannow") }
+                            .clickable {  }
                             .background(
                                 color = Color(0xFFC51B1B),
                                 shape = RoundedCornerShape(12.dp)
@@ -1021,14 +1250,13 @@ fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
                     ) {
 
 
-                        Text(text = "Cancel", fontSize = 14.sp, color = Color.White)
+                        Text(text = "Cancel", fontSize = smallTextSize,color = Color.White,)
 
                     }
+
                     Box(
                         modifier = Modifier
-                            .clickable {
-
-                            }
+                            .clickable {  }
                             .background(
                                 color = Color(0xFF42C2AE),
                                 shape = RoundedCornerShape(12.dp)
@@ -1037,148 +1265,193 @@ fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Completed",
-                            color = Color.White,
-                            fontSize = 14.sp
-                        )
+
+                        Text(text = "Completed", color = Color.White, fontSize = smallTextSize)
                     }
                 }
             }
-
         }
     }
+
 }
 @Composable
 fun CompletedItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .size(cardHeight.first,cardHeight.second)
+        ,
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(Color.White),
         ) {
-            Column(
-                Modifier
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
-
-
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(100.dp)
+                            .padding(start = 10.dp)
                     )
 
                     // Tradesman details
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 12.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                            .padding(start = 10.dp)
                     ) {
-
                         Text(
-                            text = trade.username,
+                            text = "Karlos Rivo",
                             color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-
-
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Service: Plumbing Repair",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Date: Jan 15, 2025",
-                            color = Color.Black,
-                            fontSize = 14.sp
+                            fontWeight = FontWeight(500),
+                            fontSize = nameTextSize,
+                            modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = "Time: 10:00 AM",
+                            text = "Electrician",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize,
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "P500/hr",
+                                    fontSize = smallTextSize,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = "4",
+                                        fontSize = smallTextSize
+                                    )
+                                }
+                            }
+                        }
                         Text(
-                            text = "Location: 123 Elm Street",
+                            text = "Weekdays Selected",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize,
+                        )
+                        Text(
+                            text = "date",
+                            color = Color.Gray,
+                            fontSize = smallTextSize,
                         )
                     }
+
                 }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("canceltradesmannow") }
+                            .clickable {  }
                             .background(
-                                color = Color(0xFFC51B1B),
+                                color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
 
 
-                        Text(text = "Book Again", fontSize = 14.sp, color = Color.White)
+                        Text(text = "Book Again", fontSize = smallTextSize)
 
                     }
+
                     Box(
                         modifier = Modifier
-                            .clickable {
-
-                            }
+                            .clickable {  }
                             .background(
-                                color = Color(0xFF42C2AE),
+                                color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Rate",
-                            color = Color.White,
-                            fontSize = 14.sp
-                        )
+
+                        Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = smallTextSize)
                     }
                 }
             }
-
         }
     }
+
 }
 
 
@@ -1186,111 +1459,179 @@ fun CompletedItem(trade: Tradesman, navController: NavController) {
 fun CancelledItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .size(cardHeight.first,cardHeight.second)
+        ,
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(Color.White),
         ) {
-            Column(
-                Modifier
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
-
-
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
                     Image(
-                        painter = painterResource(trade.imageResId),
+                        painter = painterResource(R.drawable.pfp),
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(100.dp)
+                            .padding(start = 10.dp)
                     )
 
                     // Tradesman details
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 12.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                            .padding(start = 10.dp)
                     ) {
+                        Text(
+                            text = "Karlos Rivo",
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = nameTextSize,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                        Text(
+                            text = "Electrician",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                        )
+                        Row(
+                            modifier = Modifier.padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Rate Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "P500/hr",
+                                    fontSize = smallTextSize,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
 
+                            // Reviews Box
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = (Color(0xFFFFF2DD)),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star Icon",
+                                        tint = Color(0xFFFFA500),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text = "4",
+                                        fontSize = smallTextSize
+                                    )
+                                }
+                            }
+                        }
                         Text(
-                            text = trade.username,
+                            text = "Weekdays Selected",
                             color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = taskTextSize,
                         )
+                        Text(
+                            text = "date",
+                            color = Color.Gray,
+                            fontSize = smallTextSize,
+                        )
+                    }
 
+                }
 
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
 
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Service: Plumbing Repair",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Date: Jan 15, 2025",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "Time: 10:00 AM",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Location: 123 Elm Street",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .padding(vertical = 8.dp),  // Adjust padding as needed
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Apply Again", fontSize = smallTextSize)
                     }
                 }
 
 
-                Box(
-                    modifier = Modifier
-                        .clickable {}
-                        .background(
-                            color = Color.Transparent,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                        .weight(1f)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-
-                    Text(text = "Apply Again", fontSize = 16.sp)
-                }
 
             }
         }
     }
 }
+
+//MY SUBMISSION
+//MY SUBMISSION
+//MY SUBMISSION
+//MY SUBMISSION
+//MY SUBMISSION
+//MY SUBMISSION
+//MY SUBMISSION
 @Composable
-fun AllApplicantsTradesmanContent() {
+fun AllMySubmissionsTradesmanContent() {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1315,14 +1656,14 @@ fun AllApplicantsTradesmanContent() {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllApplicantsTradesmanItem(trade)
+            AllMySubmissionsTradesmanItem(trade)
         }
     }
 }
 
 
 @Composable
-fun PendingApplicantsTradesmanContent(navController: NavController) {
+fun PendingMySubmissionsTradesmanContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1347,12 +1688,12 @@ fun PendingApplicantsTradesmanContent(navController: NavController) {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            PendingApplicantsTradesmanItem(trade,navController)
+            PendingMySubmissionsTradesmanItem(trade,navController)
         }
     }
 }
 @Composable
-fun DeclinedApplicantsTradesmanContent(navController: NavController) {
+fun DeclinedMySubmissionsTradesmanContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1377,44 +1718,13 @@ fun DeclinedApplicantsTradesmanContent(navController: NavController) {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            DeclinedApplicantsTradesmanItem(trade,navController)
-        }
-    }
-}
-
-@Composable
-fun ActiveApplicantsTradesmanContent() {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
-    LazyColumn(
-        modifier = Modifier
-            .padding(bottom = 70.dp)
-
-            .fillMaxHeight()
-            .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            AllApplicantsTradesmanItem(trade)
+            DeclinedMySubmissionsTradesmanItem(trade,navController)
         }
     }
 }
 
 @Composable
-fun CompletedApplicantsTradesmanContent(navController: NavController) {
+fun ActiveMySubmissionsTradesmanContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1439,12 +1749,43 @@ fun CompletedApplicantsTradesmanContent(navController: NavController) {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            CompletedApplicantsTradesmanItem(trade, navController )
+            ActiveMySubmissionsTradesmanItem(trade,navController)
+        }
+    }
+}
+
+@Composable
+fun CompletedMySubmissionsTradesmanContent(navController: NavController) {
+    val tradesman = listOf(
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
+    )
+    LazyColumn(
+        modifier = Modifier
+            .padding(bottom = 70.dp)
+
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+
+        ,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(tradesman.size) { index ->
+            val trade = tradesman[index]
+            CompletedMySubmissionsTradesmanItem(trade, navController )
         }
     }
 }
 @Composable
-fun CancelledApplicantsTradesmanContent(navController: NavController) {
+fun CancelledMySubmissionsTradesmanContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1468,7 +1809,7 @@ fun CancelledApplicantsTradesmanContent(navController: NavController) {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            CancelledApplicantsTradesmanItem(trade, navController )
+            CancelledMySubmissionsTradesmanItem(trade, navController )
         }
     }
 }
@@ -1477,7 +1818,7 @@ fun CancelledApplicantsTradesmanContent(navController: NavController) {
 
 //Design For Items
 @Composable
-fun AllApplicantsTradesmanItem(trade: Tradesman) {
+fun AllMySubmissionsTradesmanItem(trade: Tradesman) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 190.dp
@@ -1519,12 +1860,15 @@ fun AllApplicantsTradesmanItem(trade: Tradesman) {
                         .padding(start = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+                    Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(text = "Pending", fontSize = 14.sp)
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Service: Plumbing Repair",
@@ -1556,13 +1900,14 @@ fun AllApplicantsTradesmanItem(trade: Tradesman) {
 
 
 @Composable
-fun PendingApplicantsTradesmanItem(trade: Tradesman, navController: NavController) {
+fun PendingMySubmissionsTradesmanItem(trade: Tradesman, navController: NavController) {
+
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 190.dp
-        WindowType.MEDIUM -> 400.dp to 200.dp
-        WindowType.LARGE -> 410.dp to 210.dp
+        WindowType.SMALL -> 400.dp to 270.dp
+        WindowType.MEDIUM -> 410.dp to 280.dp
+        WindowType.LARGE -> 420.dp to 280.dp
     }
 
     Card(
@@ -1576,72 +1921,124 @@ fun PendingApplicantsTradesmanItem(trade: Tradesman, navController: NavControlle
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
 
-                // Tradesman details
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Service: Plumbing Repair",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
 
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Cancel Job ", fontSize = 16.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Job Details", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                    }
+                }
             }
+
         }
     }
 }
 @Composable
-fun DeclinedApplicantsTradesmanItem(trade: Tradesman, navController: NavController) {
+fun ActiveMySubmissionsTradesmanItem(trade: Tradesman, navController: NavController) {
+
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 190.dp
-        WindowType.MEDIUM -> 400.dp to 200.dp
-        WindowType.LARGE -> 410.dp to 210.dp
+        WindowType.SMALL -> 410.dp to 270.dp
+        WindowType.MEDIUM -> 420.dp to 280.dp
+        WindowType.LARGE -> 430.dp to 280.dp
     }
 
     Card(
@@ -1655,72 +2052,122 @@ fun DeclinedApplicantsTradesmanItem(trade: Tradesman, navController: NavControll
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
 
-                // Tradesman details
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Service: Plumbing Repair",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
 
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { }
+                            .background(
+                                color = Color(0xFFC51B1B),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Cancel", fontSize = 16.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable {}
+                            .background(
+                                color = Color(0xFF42C2AE),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Completed", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                    }
+                }
             }
+
         }
     }
 }
 @Composable
-fun CompletedApplicantsTradesmanItem(trade: Tradesman, navController: NavController) {
+fun DeclinedMySubmissionsTradesmanItem(trade: Tradesman, navController: NavController) {
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 190.dp
-        WindowType.MEDIUM -> 400.dp to 200.dp
-        WindowType.LARGE -> 410.dp to 210.dp
+        WindowType.SMALL -> 400.dp to 270.dp
+        WindowType.MEDIUM -> 410.dp to 280.dp
+        WindowType.LARGE -> 420.dp to 290.dp
     }
 
     Card(
@@ -1734,76 +2181,245 @@ fun CompletedApplicantsTradesmanItem(trade: Tradesman, navController: NavControl
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
 
-                // Tradesman details
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Service: Plumbing Repair",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
 
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
 
 
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .padding(vertical = 8.dp),  // Adjust padding as needed
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Apply Again", fontSize = 14.sp)
+                    }
+                }
+                }
             }
+
+    }
+}
+@Composable
+fun CompletedMySubmissionsTradesmanItem(trade: Tradesman, navController: NavController) {
+
+
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 400.dp to 270.dp
+        WindowType.MEDIUM -> 410.dp to 280.dp
+        WindowType.LARGE -> 420.dp to 290.dp
+    }
+
+
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable {}
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+
+                        Text(text = "Apply Again", fontSize = 16.sp)
+
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                    }
+                }
+            }
+
         }
     }
 }
 
 
 @Composable
-fun CancelledApplicantsTradesmanItem(trade: Tradesman, navController: NavController) {
+fun CancelledMySubmissionsTradesmanItem(trade: Tradesman, navController: NavController) {
+
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 190.dp
-        WindowType.MEDIUM -> 400.dp to 200.dp
-        WindowType.LARGE -> 410.dp to 210.dp
+        WindowType.SMALL -> 400.dp to 270.dp
+        WindowType.MEDIUM -> 410.dp to 280.dp
+        WindowType.LARGE -> 420.dp to 290.dp
     }
+
 
     Card(
         modifier = Modifier
@@ -1816,59 +2432,95 @@ fun CancelledApplicantsTradesmanItem(trade: Tradesman, navController: NavControl
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(10.dp)
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
 
-                // Tradesman details
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Service: Plumbing Repair",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Date: Jan 15, 2025",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Time: 10:00 AM",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Location: 123 Elm Street",
-                        color = Color.Black,
-                        fontSize = 14.sp
-                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+
+                            .clickable { }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .padding(vertical = 8.dp),  // Adjust padding as needed
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Apply Again", fontSize = 14.sp)
+                    }
+                }
+
             }
         }
     }

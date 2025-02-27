@@ -55,26 +55,11 @@ import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.Tradesman
-import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
-import com.example.androidproject.view.pages2.ActiveApplicantsTradesmanContent
-import com.example.androidproject.view.pages2.ActiveBookingsTradesmanContent
-import com.example.androidproject.view.pages2.AllApplicantsTradesmanContent
-import com.example.androidproject.view.pages2.AllBookingsTradesmanContent
-import com.example.androidproject.view.pages2.CancelledApplicantsTradesmanContent
-import com.example.androidproject.view.pages2.CancelledBookingsTradesmanContent
-import com.example.androidproject.view.pages2.CompletedApplicantsTradesmanContent
-import com.example.androidproject.view.pages2.CompletedBookingsTradesmanContent
-import com.example.androidproject.view.pages2.DeclinedApplicantsTradesmanContent
-import com.example.androidproject.view.pages2.DeclinedBookingsTradesmanContent
-import com.example.androidproject.view.pages2.JobsTradesmanTopSection
-import com.example.androidproject.view.pages2.PendingApplicantsTradesmanContent
-import com.example.androidproject.view.pages2.PendingBookingsTradesmanContent
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
-import kotlinx.coroutines.NonCancellable.isCompleted
 import java.sql.Types.NULL
 
 
@@ -897,7 +882,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                         ) {
 
 
-                            Text(text = "Cancell", fontSize = smallTextSize, color = Color.White)
+                            Text(text = "Cancel", fontSize = smallTextSize, color = Color.White)
 
                         }
 

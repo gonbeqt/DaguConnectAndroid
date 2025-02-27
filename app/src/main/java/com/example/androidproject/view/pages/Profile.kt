@@ -234,31 +234,35 @@ fun ProfileScreen(
 
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(top = 2.dp) // Separation from the white background
         ) {
             when (selectedTabIndex) {
                 0 -> MyPostsTab(getMyJobsViewModel) // Pass postsList
                 1 -> SettingsScreen(navController, logoutViewModel)
             }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                Log.d("fab", "fab")
+                FabPosting(
+                    onPostNewService = { newPost ->
+                        postsList = postsList + newPost
+                    },
+                    onDeadlineChange = { deadline ->
+                        println("Selected Deadline: $deadline")
+                    },
+                    postJobViewModel
+                )
+            }
+
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.BottomEnd // Ensures FAB stays at bottom-end
-        ) {
-            FabPosting(
-                onPostNewService = { newPost ->
-                    postsList = postsList + newPost
-                },
-                onDeadlineChange = { deadline ->
-                    println("Selected Deadline: $deadline") // Handle deadline change if needed
-                },
-                postJobViewModel
-            )
-        }
+
+
     }
 }
 
@@ -913,7 +917,8 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(RoundedCornerShape(8.dp))
+                        .verticalScroll(rememberScrollState()),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(
@@ -939,11 +944,11 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             value = applicantCount,
                             onValueChange = { applicantCount = it },
                             label = { Text("Applicants Count") },
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 56.dp),
+                                .heightIn(min = 26.dp),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color.White,
@@ -960,10 +965,10 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             value = description,
                             onValueChange = { description = it },
                             label = { Text("Description") },
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 56.dp),
+                                .heightIn(min = 50.dp),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color.White,
@@ -978,11 +983,11 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             value = location,
                             onValueChange = { location = it },
                             label = { Text("Location") },
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 56.dp),
+                                .heightIn(min = 50.dp),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color.White,
@@ -999,11 +1004,11 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                             value = rate,
                             onValueChange = { rate = it },
                             label = { Text("Estimated Budget") },
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 56.dp),
+                                .heightIn(min = 50.dp),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color.White,
@@ -1014,12 +1019,14 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 cursorColor = Color.Black
                             )
                         )
+                        Spacer(Modifier.height(6.dp))
                         Button(
                             onClick = { datePickerDialog.show() },
                             modifier = Modifier
                                 .width(360.dp)
-                                .heightIn(min = 56.dp),
-                            shape = RoundedCornerShape(16.dp),
+                                .heightIn(min = 56.dp)
+                                ,
+                            shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White
                             ),
