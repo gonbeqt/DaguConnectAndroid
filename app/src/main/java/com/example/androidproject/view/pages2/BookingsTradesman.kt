@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,15 +16,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ScrollableTabRow
@@ -31,8 +38,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,23 +49,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role.Companion.Checkbox
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.JobApplicationData
+import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.Tradesman
+import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
+import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel,getClientsBooking: GetClientBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -84,7 +97,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
             modifier = Modifier //top nav
                 .padding(top = 8.dp, start = 25.dp, end = 25.dp, bottom = 8.dp)
                 .fillMaxWidth()
-                .height(60.dp),
+                .height(50.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -150,12 +163,12 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     ) {
                         when (selectedSection) {
                             "My Jobs" -> when (selectedTabIndex) {
-                                0 -> AllBookingsTradesmanContent()
-                                1 -> PendingBookingsTradesmanContent(navController)
-                                2 -> DeclinedBookingsTradesmanContent(navController)
-                                3 -> ActiveBookingsTradesmanContent(navController)
-                                4 -> CompletedBookingsTradesmanContent(navController)
-                                5 -> CancelledBookingsTradesmanContent(navController)
+                                0 -> AllBookingsTradesmanContent(getClientsBooking)
+                                1 -> PendingBookingsTradesmanContent(navController,getClientsBooking)
+                                2 -> DeclinedBookingsTradesmanContent(navController,getClientsBooking)
+                                3 -> ActiveBookingsTradesmanContent(navController,getClientsBooking)
+                                4 -> CompletedBookingsTradesmanContent(navController,getClientsBooking)
+                                5 -> CancelledBookingsTradesmanContent(navController,getClientsBooking)
                             }
 
                             "My Submissions" -> when (selectedTabIndex) {
@@ -236,12 +249,12 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
 }
 
 @Composable
-fun AllBookingsTradesmanContent() {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
+fun AllBookingsTradesmanContent(getClientsBooking: GetClientBookingViewModel) {
+    val allBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
-    )
+    LaunchedEffect(Unit) {
+        getClientsBooking.invalidatePagingSource()
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -251,25 +264,19 @@ fun AllBookingsTradesmanContent() {
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            AllTradesmanItem(trade)
+        items(allBooking.itemCount) { index ->
+            val clients = allBooking[index]
+            if (clients != null) {
+                AllTradesmanItem(clients)
+            }
         }
     }
 }
 @Composable
-fun PendingBookingsTradesmanContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun PendingBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
+    val bookingPendingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
+    val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
     LazyColumn(
         modifier = Modifier
             .padding(bottom = 80.dp)
@@ -280,25 +287,20 @@ fun PendingBookingsTradesmanContent(navController: NavController) {
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            PendingTradesmanItem(trade,navController)
+        items(bookingPending.size) { index ->
+            val Pending = bookingPending[index]
+            if (Pending != null) {
+                PendingTradesmanItem(Pending,navController)
+            }
         }
     }
 }
 @Composable
-fun DeclinedBookingsTradesmanContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun DeclinedBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
+  val declinedBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
+    val declinedBookings = declinedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -309,26 +311,20 @@ fun DeclinedBookingsTradesmanContent(navController: NavController) {
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            DeclinedTradesmanItem(trade,navController)
+        items(declinedBookings.size) { index ->
+            val declined = declinedBookings[index]
+            if (declined != null) {
+                DeclinedTradesmanItem(declined,navController)
+            }
         }
     }
 }
 
 @Composable
-fun ActiveBookingsTradesmanContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun ActiveBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
+   val activeBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
+    val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Active" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -340,26 +336,21 @@ fun ActiveBookingsTradesmanContent(navController: NavController) {
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            ActiveTradesmanItem(trade, navController)
+        items(activeBookings.size) { index ->
+            val active = activeBookings[index]
+            if (active != null) {
+                ActiveTradesmanItem(active, navController)
+            }
         }
     }
 }
 
 @Composable
-fun CompletedBookingsTradesmanContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun CompletedBookingsTradesmanContent(navController: NavController,getClientsBooking:GetClientBookingViewModel) {
+    val completedBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
+    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -371,25 +362,20 @@ fun CompletedBookingsTradesmanContent(navController: NavController) {
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            CompletedItem(trade, navController )
+        items(completedBooking.size) { index ->
+            val Pending = completedBooking[index]
+            if (Pending != null) {
+                CompletedItem(Pending, navController )
+            }
         }
     }
 }
 @Composable
-fun CancelledBookingsTradesmanContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun CancelledBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
+    val cancelledBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
+    val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Cancelled" }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -400,9 +386,11 @@ fun CancelledBookingsTradesmanContent(navController: NavController) {
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            CancelledItem(trade, navController )
+        items(cancelledBookings.size) { index ->
+            val cancel = cancelledBookings[index]
+            if (cancel != null) {
+                CancelledItem(cancel, navController )
+            }
         }
     }
 }
@@ -411,7 +399,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController) {
 
 //Design For Items
 @Composable
-fun AllTradesmanItem(trade: Tradesman) {
+fun AllTradesmanItem(allBooking: GetClientsBooking) {
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -472,33 +460,14 @@ fun AllTradesmanItem(trade: Tradesman) {
                         .padding(start = 10.dp)
                 ) {
                     Text(
-                        text = "Karlos Rivo",
+                        text = allBooking.clientfullname,
                         color = Color.Black,
                         fontWeight = FontWeight(500),
                         fontSize = nameTextSize,
                     )
-                    Text(
-                        text = "Electrician",
-                        color = Color.Black,
-                        fontSize =taskTextSize,
-                    )
 
 
-                    // Rate Box
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = (Color(0xFFFFF2DD)),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "P 500/hr",
-                            fontSize = smallTextSize,
-                            modifier = Modifier.padding(horizontal = 4.dp)
-                        )
-                    }
+
                     Spacer(Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
@@ -516,10 +485,6 @@ fun AllTradesmanItem(trade: Tradesman) {
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.size(4.dp))
-                            Text(
-                                text = "4",
-                                fontSize = smallTextSize
-                            )
                         }
                     }
 
@@ -532,7 +497,7 @@ fun AllTradesmanItem(trade: Tradesman) {
 
                         )
                     Text(
-                        text = "date",
+                        text = allBooking.bookingdate,
                         color = Color.Gray,
                         fontSize = smallTextSize,
 
@@ -540,7 +505,7 @@ fun AllTradesmanItem(trade: Tradesman) {
                 }
 
                 Text(
-                    text = "pending",
+                    text = allBooking.bookingstatus,
                     fontSize = smallTextSize,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray,
@@ -556,7 +521,11 @@ fun AllTradesmanItem(trade: Tradesman) {
 
 
 @Composable
-fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
+fun PendingTradesmanItem(pending: GetClientsBooking, navController: NavController) {
+    var showApproveDialog by remember { mutableStateOf(false) }
+    var showDeclineDialog by remember { mutableStateOf(false) }
+    var showJobApproveDialog by remember { mutableStateOf(false) }
+    var showDeclineReasons by remember { mutableStateOf(false) }
 
 
     val windowSize = rememberWindowSizeClass()
@@ -620,16 +589,11 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = "Karlos Rivo",
+                            text = pending.clientfullname,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
                             modifier = Modifier.padding(top = 10.dp)
-                        )
-                        Text(
-                            text = "Electrician",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
                         )
                         Row(
                             modifier = Modifier.padding(top = 10.dp),
@@ -637,22 +601,7 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Rate Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "P500/hr",
-                                    fontSize = smallTextSize,
-                                    modifier = Modifier.padding(horizontal = 4.dp)
-                                )
-                            }
 
-                            // Reviews Box
                             Box(
                                 modifier = Modifier
                                     .background(
@@ -669,10 +618,6 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = "4",
-                                        fontSize = smallTextSize
-                                    )
                                 }
                             }
                         }
@@ -682,7 +627,7 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = "date",
+                            text = pending.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )
@@ -699,7 +644,7 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { showDeclineDialog = true }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -711,220 +656,211 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                     ) {
 
 
-                        Text(text = "Cancel Appointment", fontSize = smallTextSize)
+                        Text(text = "Decline", fontSize = smallTextSize)
 
                     }
 
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { showApproveDialog = true }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
 
-                        Text(text = "Booking Details", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                        Text(text = "Approve", color = Color(0xFF42C2AE), fontSize = smallTextSize)
                     }
                 }
             }
         }
     }
+    if (showApproveDialog) {
+        AlertDialog(
+            onDismissRequest = { showApproveDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Approve Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once approved, this job will be marked as active. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showApproveDialog = false
+                        showJobApproveDialog = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showApproveDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            }
+        )
+    }
 
-//    var showApproveDialog by remember { mutableStateOf(false) }
-//    var showDeclineDialog by remember { mutableStateOf(false) }
-//    var showJobApproveDialog by remember { mutableStateOf(false) }
-//    var showDeclineReasons by remember { mutableStateOf(false) }
-//    // Approve Dialog
-//    if (showApproveDialog) {
-//        AlertDialog(
-//            onDismissRequest = { showApproveDialog = false },
-//            title = {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.ic_approve_decline),
-//                        contentDescription = "Approval Icon",
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    Text(
-//                        text = "Approve Job",
-//                        fontSize = 20.sp,
-//                        textAlign = TextAlign.Start,
-//                        modifier = Modifier.weight(1f) // Makes text take remaining space
-//                    )
-//                }
-//            },
-//            text = { Text("Once approved, this job will be marked as active. Proceed?") },
-//            confirmButton = {
-//                Button(
-//                    onClick = {
-//                        showApproveDialog = false
-//                        showJobApproveDialog = true
-//
-//                    },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
-//                ) {
-//                    Text("Confirm", color = Color.White)
-//                }
-//            },
-//            dismissButton = {
-//                Button(
-//                    onClick = { showApproveDialog = false },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-//                ) {
-//                    Text("Cancel", color = Color.White)
-//                }
-//            }
-//        )
-//    }
+    if (showDeclineDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeclineDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Decline Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once declined, this job may not be available again. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeclineDialog = false
+                        showDeclineReasons = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDeclineDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            }
+        )
+    }
 
-//    // Decline Dialog
-//    if (showDeclineDialog) {
-//        AlertDialog(
-//            onDismissRequest = { showDeclineDialog = false },
-//            title = {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.ic_approve_decline),
-//                        contentDescription = "Approval Icon",
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    Text(
-//                        text = "Decline Job",
-//                        fontSize = 20.sp,
-//                        textAlign = TextAlign.Start,
-//                        modifier = Modifier.weight(1f) // Makes text take remaining space
-//                    )
-//                }
-//            },
-//            text = { Text("Once declined, this job may not be available again. Proceed?") },
-//            confirmButton = {
-//                Button(
-//                    onClick = {
-//                        showDeclineDialog = false
-//                        showDeclineReasons = true
-//                    },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-//                ) {
-//                    Text("Confirm", color = Color.White)
-//                }
-//            },
-//            dismissButton = {
-//                Button(
-//                    onClick = { showDeclineDialog = false },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-//                ) {
-//                    Text("Cancel", color = Color.White)
-//                }
-//            }
-//        )
-//    }
-//    if (showJobApproveDialog) {
-//        AlertDialog(
-//            onDismissRequest = { showJobApproveDialog = false },
-//            icon = {
-//                Image(
-//                    painter = painterResource(id = R.drawable.ic_jobapproved_checked), // Use your drawable here
-//                    contentDescription = "Jon Approve Icon",
-//                    modifier = Modifier.size(60.dp) // Adjust size as needed
-//                )
-//            },
-//            title = { Text("Job Approved!") },
-//            text = { Text("Reach out to the client for more project details.") },
-//            confirmButton = {
-//                Button(
-//                    onClick = { showJobApproveDialog = false },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
-//                    shape = RoundedCornerShape(12.dp),
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text("OK", color = Color.White)
-//                }
-//            }
-//        )
-//    }
-//    // decline Reasons Dialog
-//    // Decline Reasons Dialog
-//    if (showDeclineReasons) {
-//        var selectedReason by remember { mutableStateOf<String?>(null) }
-//
-//        val reasons = listOf(
-//            "Workload concerns",
-//            "Schedule conflicts",
-//            "Relocation issues",
-//            "Committed to a contract project",
-//            "Short notice start date",
-//            "Personal Reasons",
-//            "Other"
-//        )
-//
-//        AlertDialog(
-//            onDismissRequest = { showDeclineReasons = false },
-//            title = {
-//                Text(
-//                    text = "Reason for Declination",
-//                    fontSize = 18.sp,
-//                    color = Color(0xFF42C2AE) // Matches UI color
-//                )
-//            },
-//            text = {
-//                Column {
-//                    reasons.forEach { reason ->
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .clickable { selectedReason = reason },
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            Checkbox(
-//                                checked = selectedReason == reason,
-//                                onCheckedChange = { isChecked ->
-//                                    if (isChecked) {
-//                                        selectedReason = reason
-//                                    }
-//                                }
-//                            )
-//                            Text(reason, fontSize = 14.sp)
-//                        }
-//                    }
-//                }
-//            },
-//            confirmButton = {
-//                Button(
-//                    onClick = {
-//                        showDeclineReasons = false
-//                        // Handle selected reason here
-//                    },
-//                    enabled = selectedReason != null, // Enables only if an option is chosen
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)), // Matches UI color
-//                    shape = RoundedCornerShape(8.dp),
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text("Submit", color = Color.White)
-//                }
-//            }
-//        )
-//    }
+    if (showJobApproveDialog) {
+        AlertDialog(
+            onDismissRequest = { showJobApproveDialog = false },
+            icon = {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_jobapproved_checked),
+                    contentDescription = "Job Approve Icon",
+                    modifier = Modifier.size(60.dp)
+                )
+            },
+            title = { Text("Job Approved!") },
+            text = { Text("Reach out to the client for more project details.") },
+            confirmButton = {
+                Button(
+                    onClick = { showJobApproveDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("OK", color = Color.White)
+                }
+            }
+        )
+    }
 
+    if (showDeclineReasons) {
+        var selectedReason by remember { mutableStateOf<String?>(null) }
+
+        val reasons = listOf(
+            "Workload concerns",
+            "Schedule conflicts",
+            "Relocation issues",
+            "Committed to a contract project",
+            "Short notice start date",
+            "Personal Reasons",
+            "Other"
+        )
+
+        AlertDialog(
+            onDismissRequest = { showDeclineReasons = false },
+            title = {
+                Text(
+                    text = "Reason for Declination",
+                    fontSize = 18.sp,
+                    color = Color(0xFF42C2AE)
+                )
+            },
+            text = {
+                Column {
+                    reasons.forEach { reason ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedReason = reason },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = selectedReason == reason,
+                                onCheckedChange = { isChecked ->
+                                    if (isChecked) {
+                                        selectedReason = reason
+                                    }
+                                }
+                            )
+                            Text(reason, fontSize = 14.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeclineReasons = false
+                    },
+                    enabled = selectedReason != null,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Submit", color = Color.White)
+                }
+            }
+        )
+    }
 }
 
 
 
 
-@Composable
-fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
+
+    @Composable
+fun DeclinedTradesmanItem(declined: GetClientsBooking, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1002,23 +938,7 @@ fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Rate Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                            12.dp
-                                        )
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "P500/hr",
-                                    fontSize = smallTextSize,
-                                    modifier = Modifier.padding(horizontal = 4.dp)
-                                )
-                            }
+
 
                             // Reviews Box
                             Box(
@@ -1039,10 +959,6 @@ fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = "4",
-                                        fontSize = smallTextSize
-                                    )
                                 }
                             }
                         }
@@ -1052,7 +968,7 @@ fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = "date",
+                            text = declined.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )
@@ -1092,7 +1008,7 @@ fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
 }
 
 @Composable
-fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
+fun ActiveTradesmanItem(active: GetClientsBooking, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -1155,7 +1071,7 @@ fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = "Karlos Rivo",
+                            text = active.clientfullname,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -1171,21 +1087,7 @@ fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Rate Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "P500/hr",
-                                    fontSize = smallTextSize,
-                                    modifier = Modifier.padding(horizontal = 4.dp)
-                                )
-                            }
+
 
                             // Reviews Box
                             Box(
@@ -1204,10 +1106,6 @@ fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = "4",
-                                        fontSize = smallTextSize
-                                    )
                                 }
                             }
                         }
@@ -1217,7 +1115,7 @@ fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = "date",
+                            text = active.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )
@@ -1270,7 +1168,7 @@ fun ActiveTradesmanItem(trade: Tradesman, navController: NavController) {
 
 }
 @Composable
-fun CompletedItem(trade: Tradesman, navController: NavController) {
+fun CompletedItem(completed: GetClientsBooking, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1332,37 +1230,17 @@ fun CompletedItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = "Karlos Rivo",
+                            text = completed.clientfullname,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
                             modifier = Modifier.padding(top = 10.dp)
-                        )
-                        Text(
-                            text = "Electrician",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
                         )
                         Row(
                             modifier = Modifier.padding(top = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Rate Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "P500/hr",
-                                    fontSize = smallTextSize,
-                                    modifier = Modifier.padding(horizontal = 4.dp)
-                                )
-                            }
 
                             // Reviews Box
                             Box(
@@ -1394,7 +1272,7 @@ fun CompletedItem(trade: Tradesman, navController: NavController) {
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = "date",
+                            text = completed.clientfullname,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )
@@ -1451,7 +1329,7 @@ fun CompletedItem(trade: Tradesman, navController: NavController) {
 
 
 @Composable
-fun CancelledItem(trade: Tradesman, navController: NavController) {
+fun CancelledItem(cancel: GetClientsBooking, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1513,39 +1391,18 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = "Karlos Rivo",
+                            text = cancel.clientfullname,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
                             modifier = Modifier.padding(top = 10.dp)
-                        )
-                        Text(
-                            text = "Electrician",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
                         )
                         Row(
                             modifier = Modifier.padding(top = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Rate Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                            12.dp
-                                        )
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "P500/hr",
-                                    fontSize = smallTextSize,
-                                    modifier = Modifier.padding(horizontal = 4.dp)
-                                )
-                            }
+
 
                             // Reviews Box
                             Box(
@@ -1566,10 +1423,7 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = "4",
-                                        fontSize = smallTextSize
-                                    )
+
                                 }
                             }
                         }
@@ -1579,7 +1433,7 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
                             fontSize = taskTextSize,
                         )
                         Text(
-                            text = "date",
+                            text = cancel.bookingdate,
                             color = Color.Gray,
                             fontSize = smallTextSize,
                         )
@@ -1847,7 +1701,7 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Service: $jobType",
+                        text = "Service: $jobType ",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
@@ -2387,7 +2241,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     ) {
 
                         Text(
-                            text = myJob.clientFullname,
+                            text = trade.username,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp

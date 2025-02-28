@@ -84,10 +84,16 @@ fun MainScreen(
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel
     ) {
+    val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
-        NavigationItem("Bookings", Icons.Default.ListAlt),
+        if(role == true){
+            NavigationItem("Hiring Hub", Icons.Default.ListAlt)
+        }
+        else{
+            NavigationItem("Work Hub", Icons.Default.ListAlt)
+        },
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
         NavigationItem("Message", Icons.Default.Message),
         NavigationItem("Profile", Icons.Default.Person)
@@ -213,15 +219,13 @@ fun ContentScreen(
     updateWorkStatusViewModel: UpdateWorkStatusViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
-    getMyJobApplications: GetMyJobApplicationViewModel,
-    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
-    getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel
+    getMyJobApplications: GetMyJobApplicationViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
             0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportViewModel)
-            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateWorkStatusViewModel, getMyJobApplicantsViewModel, selectedTab)
+            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateWorkStatusViewModel,selectedTab)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileScreen(
@@ -231,7 +235,7 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications, putJobApplicationStatusViewModel)
+            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getClientsBooking, putJobApplicationStatusViewModel)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel)

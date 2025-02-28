@@ -1,10 +1,10 @@
-
 package com.example.androidproject.view.pages2
 
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -48,18 +48,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 
 
 @Composable
-fun ProfileVerification(modifier: Modifier = Modifier, navController: NavController) {
-    var currentStep by remember { mutableStateOf(1) }
-    var progressPercentage by remember { mutableStateOf(0) }
+fun ProfileVerification(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    submitResumeViewModel: SubmitResumeViewModel,
+    statusofapproval: String
+) {
+    val submitResumeState by submitResumeViewModel.submitResumeState.collectAsState()
 
+    // Initialize currentStep and progressPercentage based on statusofapproval
+    val initialStep = if (statusofapproval == "Pending") 5 else 1
+    val initialProgress = if (statusofapproval == "Pending") 100 else 0
 
+    var currentStep by remember { mutableStateOf(initialStep) }
+    var progressPercentage by remember { mutableStateOf(initialProgress) }
 
     val context = LocalContext.current
 
-    //ETOOOO
+    // State variables for fields
     var estimatedRate by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var aboutMe by remember { mutableStateOf("") }
@@ -69,8 +79,34 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
     var backIdUri by remember { mutableStateOf<Uri?>(null) }
     var tradeCredentialUri by remember { mutableStateOf<Uri?>(null) }
 
-
     val isTyping = estimatedRate.isNotEmpty()
+
+    // Validation function
+    fun validateStep(step: Int): Boolean {
+        return when (step) {
+            1 -> {
+                selectedJob != "Select job category" &&
+                        selectedLocation != "Select location" &&
+                        estimatedRate.isNotEmpty() &&
+                        phoneNumber.isNotEmpty()
+            }
+            2 -> aboutMe.isNotEmpty()
+            3 -> frontIdUri != null && backIdUri != null && tradeCredentialUri != null
+            4 -> true // Preview step, no additional validation needed
+            else -> true
+        }
+    }
+
+    // Function to show error message
+    fun showErrorMessage() {
+        val message = when (currentStep) {
+            1 -> "Please fill in Job Title, Preferred Location, Estimated Rate, and Phone Number."
+            2 -> "Please provide details in the About Me section."
+            3 -> "Please upload Front ID, Back ID, and Trade Credential."
+            else -> "Please complete all required fields."
+        }
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
 
     Column(
         modifier = Modifier
@@ -90,8 +126,7 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                             if (currentStep == 5) {
                                 navController.navigate("main_screen")
                                 currentStep++
-                                progressPercentage +=25
-
+                                progressPercentage += 25
                             }
                             currentStep--
                             progressPercentage -= 25
@@ -122,7 +157,6 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
-
                 Text(
                     text = "Complete",
                     color = Color(0xFFC1C1C1),
@@ -162,7 +196,7 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                     modifier = Modifier
                         .padding(10.dp)
                 ) {
-                    if (currentStep == 1) { //first page
+                    if (currentStep == 1) { // First page
                         Text(
                             modifier = Modifier.padding(start = 14.dp, top = 14.dp),
                             text = "Please provide your job details to continue.",
@@ -215,7 +249,6 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                             )
                         }
 
-
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Column(modifier = Modifier.padding(horizontal = 14.dp)) {
@@ -267,12 +300,9 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                         }
                                     )
                                 }
-
-
-
                             }
+                        }
 
-                            }
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Column(modifier = Modifier.padding(horizontal = 14.dp)) {
@@ -302,7 +332,7 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                         value = phoneNumber,
                                         onValueChange = { newText ->
                                             phoneNumber = if (newText.startsWith("+63")) {
-                                                newText.substring(1) // remove extra peso signs
+                                                newText.substring(1) // remove extra +63
                                             } else newText
                                         },
                                         textStyle = TextStyle(
@@ -330,8 +360,7 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                 }
                             }
                         }
-                    }else if (currentStep == 2){ //second page
-                        // PERSONAL DETAILS SCREEN
+                    } else if (currentStep == 2) { // Second page
                         Text(
                             modifier = Modifier.padding(start = 14.dp, top = 14.dp),
                             text = "Tell us about yourself.",
@@ -353,16 +382,14 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                 .fillMaxWidth()
                                 .height(300.dp)
                                 .border(1.dp, Color.Gray, RoundedCornerShape(6.dp))
-                                .padding(10.dp) // Adds padding inside the box
+                                .padding(10.dp)
                         ) {
                             BasicTextField(
                                 value = aboutMe,
                                 onValueChange = { newText ->
                                     if (newText.length <= 1000) {
-                                        // If it's within 1000 chars, just set it.
                                         aboutMe = newText
                                     } else {
-                                        // If the pasted text is more than 1000 chars, truncate it.
                                         aboutMe = newText.substring(0, 1000)
                                         Toast.makeText(context, "Character count exceeds", Toast.LENGTH_SHORT).show()
                                     }
@@ -395,19 +422,17 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                 color = if (aboutMe.length >= 910) Color.Red else Color.Black
                             )
                         }
-
-                    }
-                    else if (currentStep == 3) {
-                           UploadDocumentsScreen(  context = context,
-                               frontIdUri = frontIdUri,
-                               backIdUri = backIdUri,
-                               tradeCredentialUri = tradeCredentialUri,
-                               onFrontIdSelected = { frontIdUri = it },
-                               onBackIdSelected = { backIdUri = it },
-                               onTradeCredentialSelected = { tradeCredentialUri = it })
-                    }
-
-                    else if (currentStep == 4) { // Fourth page
+                    } else if (currentStep == 3) {
+                        UploadDocumentsScreen(
+                            context = context,
+                            frontIdUri = frontIdUri,
+                            backIdUri = backIdUri,
+                            tradeCredentialUri = tradeCredentialUri,
+                            onFrontIdSelected = { frontIdUri = it },
+                            onBackIdSelected = { backIdUri = it },
+                            onTradeCredentialSelected = { tradeCredentialUri = it }
+                        )
+                    } else if (currentStep == 4) { // Fourth page
                         Text(
                             modifier = Modifier.padding(start = 14.dp, top = 14.dp),
                             text = "You're almost done! Kindly review your details and submit when ready.",
@@ -423,39 +448,31 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                             Text("Phone Number: $phoneNumber")
                             Text("About Me: $aboutMe")
 
-                            // Clickable Front ID
                             frontIdUri?.let {
                                 Text(
                                     text = "Front ID: ${it.lastPathSegment}",
                                     color = Color.Blue,
-                                    textDecoration = TextDecoration.Underline,
                                     modifier = Modifier.clickable { openFile(context, it) }
                                 )
                             } ?: Text("Front ID: No file uploaded")
 
-                            // Clickable Back ID
                             backIdUri?.let {
                                 Text(
                                     text = "Back ID: ${it.lastPathSegment}",
                                     color = Color.Blue,
-                                    textDecoration = TextDecoration.Underline,
                                     modifier = Modifier.clickable { openFile(context, it) }
                                 )
                             } ?: Text("Back ID: No file uploaded")
 
-                            Text("Trade Credential:")
-
                             tradeCredentialUri?.let {
                                 Text(
-                                    text = "File PDF: ${it.lastPathSegment}",
+                                    text = "Trade Credential: ${it.lastPathSegment}",
                                     color = Color.Blue,
-                                    textDecoration = TextDecoration.Underline,
                                     modifier = Modifier.clickable { openFile(context, it) }
                                 )
-                            } ?: Text("File PDF: No file uploaded")
+                            } ?: Text("Trade Credential: No file uploaded")
                         }
-
-                } else if (currentStep == 5) {//fifth page
+                    } else if (currentStep == 5) { // Fifth page
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -481,15 +498,15 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                     fontSize = 14.sp,
                                     textAlign = TextAlign.Center
                                 )
-
                             }
                         }
-
                     }
-                    Column (Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(start = 14.dp, end = 14.dp, bottom = 20.dp),
+
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(start = 14.dp, end = 14.dp, bottom = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
@@ -498,44 +515,78 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                 .fillMaxWidth()
                                 .background(Color(0xFF42C2AE), shape = RoundedCornerShape(6.dp))
                                 .clickable {
-                                    if (currentStep == 1){
-                                        currentStep = 2
-                                        progressPercentage = 25
-                                    }else if (currentStep == 2){
-                                        currentStep = 3
-                                        progressPercentage = 50
-                                    }else if (currentStep == 3){
-                                        currentStep = 4
-                                        progressPercentage = 75
-                                    }else if(currentStep == 4){
-                                        currentStep = 5
-                                        progressPercentage = 100
+                                    if (validateStep(currentStep)) {
+                                        when (currentStep) {
+                                            1 -> {
+                                                currentStep = 2
+                                                progressPercentage = 25
+                                            }
+                                            2 -> {
+                                                currentStep = 3
+                                                progressPercentage = 50
+                                            }
+                                            3 -> {
+                                                currentStep = 4
+                                                progressPercentage = 75
+                                            }
+                                            4 -> {
+                                                val workFee = estimatedRate.toIntOrNull() ?: 0 // Safe conversion
+                                                submitResumeViewModel.submitResume(
+                                                    specialty = selectedJob,
+                                                    aboutme = aboutMe,
+                                                    workfee = workFee,
+                                                    preferedworklocation = selectedLocation,
+                                                    valididfront = frontIdUri!!,
+                                                    valididback = backIdUri!!,
+                                                    documents = tradeCredentialUri!!, // Ensure these are not null due to validation
+                                                    context = context
+                                                )
+                                                currentStep = 5
+                                                progressPercentage = 100
+                                            }
+                                        }
+                                    } else {
+                                        showErrorMessage()
                                     }
-
                                 }
                                 .padding(vertical = 12.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = when(progressPercentage){
+                                text = when (progressPercentage) {
                                     75 -> "Submit"
                                     100 -> "Done"
                                     else -> "Next"
-
                                 },
                                 color = Color.White,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Normal
                             )
                         }
+                        LaunchedEffect(submitResumeState) {
+                            when(val submitresume = submitResumeState){
+                                is SubmitResumeViewModel.SubmitResumeState.Loading -> {
+                                    // nothing
+                                }
+                                is SubmitResumeViewModel.SubmitResumeState.Success -> {
+                                    Toast.makeText(context,"Resume submitted successfully", Toast.LENGTH_SHORT).show()
+                                    submitResumeViewModel.resetState()
+                                }
+                                is SubmitResumeViewModel.SubmitResumeState.Error -> {
+                                    val error = submitresume.message
+                                    Toast.makeText(context,error, Toast.LENGTH_SHORT).show()
+                                    Log.d("testerrerro", error)
+                                    submitResumeViewModel.resetState()
+                                }
+                                else -> Unit
+                            }
+                        }
                     }
                 }
-
             }
         }
     }
 }
-
 @Composable
 fun StepProgressIndicator(currentStep: Int, totalSteps: Int = 5) {
     Row(
@@ -619,6 +670,7 @@ fun JobSelectionDropdown(
         }
     }
 }
+
 @Composable
 fun UploadDocumentsScreen(
     context: Context,
@@ -664,15 +716,31 @@ fun UploadDocumentsScreen(
             onOptionSelected = { selectedID = it }
         )
 
-        UploadField(label = "Front ID", uri = frontIdUri, onUploadClick = {
-            frontIdPickerLauncher.launch("image/*")
-        }) {
+        UploadField(
+            label = "Front ID",
+            uri = frontIdUri,
+            onUploadClick = {
+                if (selectedID.isEmpty()) {
+                    Toast.makeText(context, "Please choose a type of ID first", Toast.LENGTH_SHORT).show()
+                } else {
+                    frontIdPickerLauncher.launch("image/*")
+                }
+            }
+        ) {
             frontIdUri?.let { openFile(context, it) }
         }
 
-        UploadField(label = "Back ID", uri = backIdUri, onUploadClick = {
-            backIdPickerLauncher.launch("image/*")
-        }) {
+        UploadField(
+            label = "Back ID",
+            uri = backIdUri,
+            onUploadClick = {
+                if (selectedID.isEmpty()) {
+                    Toast.makeText(context, "Please choose a type of ID first", Toast.LENGTH_SHORT).show()
+                } else {
+                    backIdPickerLauncher.launch("image/*")
+                }
+            }
+        ) {
             backIdUri?.let { openFile(context, it) }
         }
 
@@ -691,13 +759,24 @@ fun UploadDocumentsScreen(
             onOptionSelected = { selectedDocument = it }
         )
 
-        UploadField(label = "Trade Credential", uri = tradeCredentialUri, fileType = "pdf", onUploadClick = {
-            pdfPickerLauncher.launch("application/pdf")
-        }) {
+        UploadField(
+            label = "Trade Credential",
+            uri = tradeCredentialUri,
+            fileType = "pdf",
+            onUploadClick = {
+                if (selectedDocument.isEmpty()) {
+                    Toast.makeText(context, "Please choose a type of credential first", Toast.LENGTH_SHORT).show()
+                } else {
+                    pdfPickerLauncher.launch("application/pdf")
+                }
+            }
+        ) {
             tradeCredentialUri?.let { openFile(context, it) }
         }
     }
 }
+
+
 @Composable
 fun UploadField(label: String, uri: Uri?, fileType: String = "image", onUploadClick: () -> Unit, onViewClick: () -> Unit) {
     Row(

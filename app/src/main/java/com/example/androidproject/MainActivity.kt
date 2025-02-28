@@ -65,6 +65,8 @@ import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
+
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
@@ -96,6 +98,7 @@ import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewM
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
 import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
+import com.example.androidproject.viewmodel.factories.resumes.SubmitResumeViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
@@ -198,6 +201,10 @@ class MainActivity : ComponentActivity() {
 
         val getMyJobApplicationViewModelFactory = GetMyJobApplicationViewModelFactory(apiService, this)
         val getMyJobApplicationViewModel = ViewModelProvider(this, getMyJobApplicationViewModelFactory)[GetMyJobApplicationViewModel::class.java]
+
+        val submitResumeVMFactory = SubmitResumeViewModelFactory(apiService, this)
+        val submitResumeViewModel = ViewModelProvider(this, submitResumeVMFactory)[SubmitResumeViewModel::class.java]
+
 
         val putJobApplicationStatusViewModelFactory = PutJobApplicationStatusViewModelFactory(apiService, this)
         val putJobApplicationStatusViewModel = ViewModelProvider(this, putJobApplicationStatusViewModelFactory)[PutJobApplicationStatusViewModel::class.java]
@@ -350,7 +357,7 @@ class MainActivity : ComponentActivity() {
                         HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel, putJobApplicationStatusViewModel)
+                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getClientBookingViewModel, putJobApplicationStatusViewModel)
                     }
                     composable("bookmarkedtradesman") {
                         BookmarkedTradesman(modifier = Modifier,navController)
@@ -367,8 +374,9 @@ class MainActivity : ComponentActivity() {
                     composable("availabilitystatus") {
                         AvailabilityStatus(modifier = Modifier, navController)
                     }
-                    composable("profileverification") {
-                        ProfileVerification(modifier = Modifier, navController)
+                    composable("profileverification/{statusofapproval}") { backStackEntry ->
+                        val statusofapproval = backStackEntry.arguments?.getString("statusofapproval") ?: ""
+                        ProfileVerification(modifier = Modifier, navController,submitResumeViewModel,statusofapproval)
                     }
                     composable("canceltradesmannow") {
                         CancelTradesmanNow(navController)

@@ -27,6 +27,7 @@ import com.example.androidproject.model.client.GetClientsBookingResponse
 import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
+import com.example.androidproject.model.client.SubmitResumeResponse
 import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.rateTradesmanRequest
 import com.example.androidproject.model.client.rateTradesmanResponse
@@ -34,6 +35,8 @@ import com.example.androidproject.model.client.ratingsItem
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.model.client.workstatusRequest
 import com.example.androidproject.model.client.workstatusResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 
 import retrofit2.http.Body
@@ -41,7 +44,9 @@ import retrofit2.http.POST
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 import viewResume
@@ -141,4 +146,17 @@ interface ApiService {
 
     @GET("/user/tradesman/getResume/Details")
     suspend fun getTradesmanResume(): Response<viewResume>
+
+    @Multipart
+    @POST("/user/tradesman/submit/resume")
+    suspend fun submitResume(
+        @Part("specialty") specialty: RequestBody,
+        @Part("about_me") aboutme: RequestBody,
+        @Part("work_fee") workfee: RequestBody,
+        @Part("prefered_location") preferedLocation: RequestBody,
+        @Part validIdFront: MultipartBody.Part, // File upload
+        @Part validIdBack: MultipartBody.Part,// File upload
+        @Part document: MultipartBody.Part // File upload
+
+    ): Response<SubmitResumeResponse>
 }
