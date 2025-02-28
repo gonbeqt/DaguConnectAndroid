@@ -68,6 +68,8 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
 
                     postJobApplicationViewModel.resetState()
                     isSubmitClicked = false
+
+                    navController.navigate("main_screen")
                 }
                 is PostJobApplicationViewModel.PostJobApplicationState.Error -> {
                     val errorState = postJobApplicationState as PostJobApplicationViewModel.PostJobApplicationState.Error
