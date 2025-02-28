@@ -345,7 +345,7 @@ class MainActivity : ComponentActivity() {
                         HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel)
+                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getClientBookingViewModel)
                     }
                     composable("bookmarkedtradesman") {
                         BookmarkedTradesman(modifier = Modifier,navController)

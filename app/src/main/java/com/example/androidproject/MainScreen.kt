@@ -229,7 +229,7 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications)
+            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getClientsBooking)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel)
