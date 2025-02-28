@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,10 +68,11 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -170,7 +172,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
                             "My Submissions" -> when (selectedTabIndex) {
                                 0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
-                                1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications)
+                                1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel)
                                 2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications)
                                 3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications)
                                 4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications)
@@ -1663,7 +1665,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
 
 
 @Composable
-fun PendingMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
+fun PendingMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
     val myJob = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1683,7 +1685,7 @@ fun PendingMySubmissionsTradesmanContent(navController: NavController, getMyJobA
     ) {
         items(pendingApplication.size) { index ->
             val pendingJobs = pendingApplication[index]
-            PendingMySubmissionsTradesmanItem(myJob = pendingJobs, navController = navController)
+            PendingMySubmissionsTradesmanItem(myJob = pendingJobs, navController = navController, putJobApplicationStatusViewModel)
         }
     }
 }
@@ -1886,8 +1888,8 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
 
 
 @Composable
-fun PendingMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
-
+fun PendingMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
+    val putState = putJobApplicationStatusViewModel.postJobApplicationState.collectAsState()
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
