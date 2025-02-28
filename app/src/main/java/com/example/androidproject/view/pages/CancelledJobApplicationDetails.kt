@@ -1,8 +1,7 @@
-package com.example.androidproject.view.pages2
+package com.example.androidproject.view.pages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -23,21 +21,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Message
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,13 +34,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.view.theme.myGradient3
 
+
 @Composable
-fun MyJobApplicationDetails(navController: NavController) {
+fun CancelledJobApplicationDetails(navController: NavController) {
     Column( // Change Box to Column
         modifier = Modifier
             .fillMaxSize()
@@ -89,13 +77,13 @@ fun MyJobApplicationDetails(navController: NavController) {
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Job Application Details",
+                        text = "Cancelled Job Application Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
                         modifier = Modifier
                             .padding(top = 15.dp)
-                            .weight(1f) // Ensures the text takes available space and is centered
+                            .weight(1f)
                     )
                 }
             }
@@ -123,7 +111,7 @@ fun MyJobApplicationDetails(navController: NavController) {
                     contentAlignment = Alignment.Center // Ensure padding is inside the gradient box
                 ) {
                     Text(
-                        text = "Your appointment is ",
+                        text = "Your appointment is Cancelled ",
                         fontSize = 20.sp,
                         color = Color.White,
                     )
@@ -141,7 +129,6 @@ fun MyJobApplicationDetails(navController: NavController) {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.White),
-                    contentAlignment = Alignment.CenterStart
                 ) {
 
                     // Tradesman details
@@ -149,15 +136,29 @@ fun MyJobApplicationDetails(navController: NavController) {
                         modifier = Modifier
                             .padding(start = 20.dp)
                     ) {
+                        Row (Modifier.fillMaxWidth()){
+                            Text(
+                                text = "Reason For Cancellation",
+                                color = Color.Black,
+                                fontWeight = FontWeight(500),
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(top = 10.dp)
+                            )
+                            Text(
+                                text = "Change Of Mind",
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(top = 10.dp)
+                            )
+                        }
+
                         Text(
-                            text = "Qualifaction Summary",
+                            text = "Description",
                             color = Color.Black,
-                            fontWeight = FontWeight(500),
-                            fontSize = 20.sp,
-                            modifier = Modifier.padding(top = 10.dp)
+                            fontSize = 18.sp,
                         )
                         Text(
-                            text = " ASDSADASDASDSADASD",
+                            text = "chuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchuchu",
                             color = Color.Black,
                             fontSize = 16.sp,
                         )
@@ -348,4 +349,3 @@ fun MyJobApplicationDetails(navController: NavController) {
         }
     }
 }
-

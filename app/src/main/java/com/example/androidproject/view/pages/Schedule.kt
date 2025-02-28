@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,7 +47,6 @@ import java.util.Locale
 fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, getClientsBooking: GetClientBookingViewModel) {
     val clientBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
-
     LaunchedEffect(Unit) {
         getClientsBooking.invalidatePagingSource()
     }
@@ -57,17 +57,15 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var selectedFilter by remember { mutableStateOf("My Clients") }
 
-    // Hardcoded applicants list remains unchanged
     val applicants = listOf(
         Tradesmandate("${R.drawable.pfp}", "Sarah", "Carpenter", "P550/hr", 4.3f, R.drawable.bookmark, "2025-02-19"),
         Tradesmandate("${R.drawable.pfp}", "Mike", "Painter", "P480/hr", 4.0f, R.drawable.bookmark, "2025-02-20")
     )
 
-    // Collect all unique booking dates for calendar highlighting, filtering for Active bookingStatus
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
-
+            .filter { it.bookingstatus == "Active" } // Filter for Active bookings
             .mapNotNull { booking ->
                 try {
                     LocalDate.parse(booking.bookingdate, dateFormatter)
@@ -77,14 +75,13 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
             }.toSet()
     }
 
-    // Filter clientBooking based on selectedClientDate and Active bookingStatus
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
             try {
                 val bookingDate = LocalDate.parse(it.bookingdate, dateFormatter)
-                bookingDate.isEqual(selectedClientDate)
+                bookingDate.isEqual(selectedClientDate) && it.bookingstatus == "Active"
             } catch (e: Exception) {
-                false // Skip invalid dates
+                false
             }
         }
 
@@ -114,10 +111,10 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                     }
                 },
                 onMonthChange = { month -> currentMonth = month },
-                allBookingDates = allBookingDates, // Pass all booking dates for highlighting
+                allBookingDates = allBookingDates,
                 tradesmen = if (selectedFilter == "My Clients") filteredClients.map {
                     Tradesmandate(
-                        it.tradesmanprofile, // Replace with proper image handling if available
+                        it.tradesmanprofile,
                         it.tradesmanfullname,
                         it.tasktype,
                         "P${it.workfee}",
@@ -430,22 +427,25 @@ fun CalendarSection(
 
 @Composable
 fun ScheduleTopSection(navController: NavController){
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 25.dp)
-            .fillMaxWidth()
-            .height(70.dp),
+
+    Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Left-aligned text
-        Text(
-            text = "Schedule",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Medium
-        )
 
+    )  {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 25.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
 
+        ) {
+            Text(
+                text = "Schedule",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Medium
+            )
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
@@ -454,7 +454,7 @@ fun ScheduleTopSection(navController: NavController){
                     .size(35.dp)
                     .clickable { navController.navigate("notification") }
             )
-
+        }
     }
 }
 
