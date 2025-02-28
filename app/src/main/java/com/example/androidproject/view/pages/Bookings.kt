@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -1811,19 +1812,10 @@ fun AllApplicantsItem(trade: Tradesman) {
 
 @Composable
 fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
-    var Cancel by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(-1) }
-    var otherReason by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-
-    val reasons = listOf(
-        "Change of Mind",
-        "Found a Different Service Provider",
-        "No Longer Needed",
-        "Scheduled Time Conflict",
-        "Personal Reasons",
-        "Others"
-    )
+    var showApproveDialog by remember { mutableStateOf(false) }
+    var showDeclineDialog by remember { mutableStateOf(false) }
+    var showJobApproveDialog by remember { mutableStateOf(false) }
+    var showDeclineReasons by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 230.dp
@@ -1915,7 +1907,8 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                         )
                     }
                 }
-                Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.End
+                Row(
+                    Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -1923,7 +1916,7 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                     ) {
                         Box(
                             modifier = Modifier
-                                .clickable { Cancel = true }
+                                .clickable { showDeclineDialog = true }
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -1940,7 +1933,7 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
 
                         Box(
                             modifier = Modifier
-                                .clickable { }
+                                .clickable { showApproveDialog = true}
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -1950,7 +1943,11 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                             contentAlignment = Alignment.Center
                         ) {
 
-                            Text(text = " Accept Job", color = Color(0xFFECAB1E), fontSize = nameTextSize)
+                            Text(
+                                text = " Accept Job",
+                                color = Color(0xFFECAB1E),
+                                fontSize = nameTextSize
+                            )
                         }
                     }
                 }
@@ -1958,139 +1955,179 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
             }
 
         }
-        if (Cancel) {
-            Dialog(onDismissRequest = { Cancel = false }) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        if (showApproveDialog) {
+            AlertDialog(
+                onDismissRequest = { showApproveDialog = false },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "Reason for Cancellation",
-                                fontSize = 20.sp,
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold
-                            )
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_approve_decline),
+                            contentDescription = "Approval Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Approve Job",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                },
+                text = { Text("Once approved, this job will be marked as active. Proceed?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showApproveDialog = false
+                            showJobApproveDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                    ) {
+                        Text("Confirm", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showApproveDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Cancel", color = Color.White)
+                    }
+                }
+            )
+        }
 
-                            Column(modifier = Modifier.padding(top = 16.dp)) {
-                                reasons.forEachIndexed { index, reason ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.padding(vertical = 8.dp)
-                                    ) {
-                                        Checkbox(
-                                            checked = selectedIndex == index,
-                                            onCheckedChange = {
-                                                selectedIndex =
-                                                    if (selectedIndex == index) -1 else index
-                                            },
-                                            colors = CheckboxDefaults.colors(
-                                                uncheckedColor = Color.Black,
-                                                checkedColor = Color(0xFF42C2AE)
-                                            )
-                                        )
-                                        Text(
-                                            text = reason,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color.Black,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
+        if (showDeclineDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeclineDialog = false },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_approve_decline),
+                            contentDescription = "Approval Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Decline Job",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                },
+                text = { Text("Once declined, this job may not be available again. Proceed?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeclineDialog = false
+                            showDeclineReasons = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Confirm", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showDeclineDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Cancel", color = Color.White)
+                    }
+                }
+            )
+        }
 
-                            if (selectedIndex == reasons.lastIndex) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                OutlinedTextField(
-                                    value = otherReason,
-                                    onValueChange = { otherReason = it },
-                                    placeholder = { Text("Enter your reason") },
-                                    shape = RoundedCornerShape(16.dp),
-                                    singleLine = true,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(min = 56.dp),
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.Transparent,
-                                        unfocusedContainerColor = Color.Transparent,
-                                        focusedIndicatorColor = Color.Blue,
-                                        unfocusedIndicatorColor = Color.Gray,
-                                        focusedLabelColor = Color.Blue,
-                                        unfocusedLabelColor = Color.Gray,
-                                        cursorColor = Color.Black
-                                    )
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            OutlinedTextField(
-                                value = description,
-                                onValueChange = { description = it },
-                                placeholder = { Text("Enter your description") },
-                                shape = RoundedCornerShape(16.dp),
-                                maxLines = 3,
+        if (showJobApproveDialog) {
+            AlertDialog(
+                onDismissRequest = { showJobApproveDialog = false },
+                icon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_jobapproved_checked),
+                        contentDescription = "Job Approve Icon",
+                        modifier = Modifier.size(60.dp)
+                    )
+                },
+                title = { Text("Job Approved!") },
+                text = { Text("Reach out to the client for more project details.") },
+                confirmButton = {
+                    Button(
+                        onClick = { showJobApproveDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("OK", color = Color.White)
+                    }
+                }
+            )
+        }
+
+        if (showDeclineReasons) {
+            var selectedReason by remember { mutableStateOf<String?>(null) }
+
+            val reasons = listOf(
+                "Workload concerns",
+                "Schedule conflicts",
+                "Relocation issues",
+                "Committed to a contract project",
+                "Short notice start date",
+                "Personal Reasons",
+                "Other"
+            )
+
+            AlertDialog(
+                onDismissRequest = { showDeclineReasons = false },
+                title = {
+                    Text(
+                        text = "Reason for Declination",
+                        fontSize = 18.sp,
+                        color = Color(0xFF42C2AE)
+                    )
+                },
+                text = {
+                    Column {
+                        reasons.forEach { reason ->
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(min = 100.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Blue,
-                                    unfocusedIndicatorColor = Color.Gray,
-                                    focusedLabelColor = Color.Blue,
-                                    unfocusedLabelColor = Color.Gray,
-                                    cursorColor = Color.Black
-                                )
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
+                                    .clickable { selectedReason = reason },
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Button(
-                                    onClick = { Cancel = false },
-                                    modifier = Modifier.size(110.dp, 45.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(
-                                            0xFF42C2AE
-                                        )
-                                    )
-                                ) {
-                                    Text("Cancel", color = Color.White)
-                                }
-                                Button(
-                                    onClick = {
-
-                                    },
-                                    modifier = Modifier.size(110.dp, 45.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFF42C2AE)
-                                    )
-                                ) {
-                                    Text("Submit", color = Color.White)
-                                }
+                                Checkbox(
+                                    checked = selectedReason == reason,
+                                    onCheckedChange = { isChecked ->
+                                        if (isChecked) {
+                                            selectedReason = reason
+                                        }
+                                    }
+                                )
+                                Text(reason, fontSize = 14.sp)
                             }
                         }
                     }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeclineReasons = false
+                        },
+                        enabled = selectedReason != null,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Submit", color = Color.White)
+                    }
                 }
-            }
-
+            )
         }
     }
 
