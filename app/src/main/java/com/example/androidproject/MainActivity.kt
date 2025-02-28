@@ -43,6 +43,7 @@ import com.example.androidproject.view.pages.BookingsScreen
 import com.example.androidproject.view.pages.CancelNow
 import com.example.androidproject.view.pages.CancelledDetails
 import com.example.androidproject.view.pages.CancelledItem
+import com.example.androidproject.view.pages.CancelledJobApplicationDetails
 import com.example.androidproject.view.pages.Categories.Carpentry
 import com.example.androidproject.view.pages.ConfirmBook
 import com.example.androidproject.view.pages.MessageScreen
@@ -315,8 +316,13 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("accountsettings"){
                         AccountSettings(navController)
-                    }
+                    }                    //Pang CANCEL
 
+
+                    //CANCELLED DETAILS
+                    composable("canceljobapplicationsdetails") {
+                        CancelledJobApplicationDetails(navController)
+                    }
 
                     //Tradesman Routes
                     composable("hometradesman") {
@@ -358,6 +364,7 @@ class MainActivity : ComponentActivity() {
                     composable("myjobapplicationdetails") {
                         MyJobApplicationDetails(navController)
                     }
+
                 }
             }
         }

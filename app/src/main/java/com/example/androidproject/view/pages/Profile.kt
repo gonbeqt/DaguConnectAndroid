@@ -114,30 +114,33 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 25.dp)
-                .fillMaxWidth()
-                .height(70.dp),
+        Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left-aligned text
-            Text(
-                text = "My Profile",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Medium
-            )
 
-            // Right-aligned icons
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications Icon",
-                tint = Color.Black,
+        )  {
+            Row(
                 modifier = Modifier
-                    .size(35.dp)
-                    .clickable { navController.navigate("notification") }
-            )
+                    .padding(horizontal = 25.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+
+            ) {
+                Text(
+                    text = "Profile",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color.Black,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clickable { navController.navigate("notification") }
+                )
+            }
         }
 
         // Profile Info Section

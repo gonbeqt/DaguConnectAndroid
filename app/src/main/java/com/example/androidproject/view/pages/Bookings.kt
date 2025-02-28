@@ -19,9 +19,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,19 +31,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -93,28 +102,35 @@ fun BookingsScreen(
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 25.dp)
-                    .fillMaxWidth()
-                    .height(70.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Bookings",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color.Black,
-                    modifier = Modifier
-                        .size(35.dp)
-                        .clickable { navController.navigate("notification") }
-                )
+          Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+
+          )  {
+              Row(
+                  modifier = Modifier
+                      .padding(horizontal = 25.dp)
+                      .fillMaxWidth(),
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                  verticalAlignment = Alignment.CenterVertically
+
+              ) {
+                  Text(
+                      text = "Bookings",
+                      fontSize = 28.sp,
+                      fontWeight = FontWeight.Medium
+                  )
+                  Icon(
+                      imageVector = Icons.Default.Notifications,
+                      contentDescription = "Notifications Icon",
+                      tint = Color.Black,
+                      modifier = Modifier
+                          .size(35.dp)
+                          .clickable { navController.navigate("notification") }
+                  )
+              }
             }
+
             BookingsTopSection(navController, selectedSection) { section ->
                 selectedSection = section
                 selectedTabIndex = 0
@@ -163,13 +179,14 @@ fun BookingsScreen(
                             4 -> CompletedBookingsContent(getClientsBooking, navController)
                             5 -> CancelledBookingsContent(getClientsBooking, navController)
                         }
-                        "My Applicant" -> when (selectedTabIndex) {
+                        "My Applicants" -> when (selectedTabIndex) {
                             0 -> AllApplicantsContent()
                             1 -> PendingApplicantsContent(navController)
                             2 -> DeclinedApplicantsContent(navController)
-                            3 -> ActiveApplicantsContent()
+                            3 -> ActiveApplicantsContent(navController)
                             4 -> CompletedApplicantsContent(navController)
                             5 -> CancelledApplicantsContent(navController)
+
                         }
                     }
                 }
@@ -267,7 +284,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
             val clientbooking = allBooking[index]
             if (clientbooking != null) {
                 AllItem(clientbooking,navController)
-
+                Log.d("ALLBOOKINGS", "AllBookingsContent: $clientbooking")
             }
         }
 
@@ -1512,6 +1529,9 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
     }
 }
 
+
+//MY APPLICANTS
+//MY APPLICANTS
 @Composable
 fun AllApplicantsContent() {
     val tradesman = listOf(
@@ -1538,6 +1558,7 @@ fun AllApplicantsContent() {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
             AllApplicantsItem(trade)
+
         }
     }
 }
@@ -1603,7 +1624,7 @@ fun DeclinedApplicantsContent(navController: NavController) {
 }
 
 @Composable
-fun ActiveApplicantsContent() {
+fun ActiveApplicantsContent(navController: NavController) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1627,7 +1648,7 @@ fun ActiveApplicantsContent() {
     ) {
         items(tradesman.size) { index ->
             val trade = tradesman[index]
-            AllApplicantsItem(trade)
+            ActiveApplicantsItem(trade, navController)
         }
     }
 }
@@ -1697,15 +1718,28 @@ fun CancelledApplicantsContent(navController: NavController) {
 fun AllApplicantsItem(trade: Tradesman) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 180.dp
-        WindowType.MEDIUM -> 410.dp to 190.dp
-        WindowType.LARGE -> 420.dp to 200.dp
+        WindowType.SMALL -> 400.dp to 170.dp
+        WindowType.MEDIUM -> 410.dp to 180.dp
+        WindowType.LARGE -> 420.dp to 190.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
+            .size(cardHeight.first, cardHeight.second),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -1736,34 +1770,37 @@ fun AllApplicantsItem(trade: Tradesman) {
                         .padding(start = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = trade.username,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+                    Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = nameTextSize
+                        )
+                        Text(text = "pending", fontSize = taskTextSize)
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Service: Plumbing Repair",
                         color = Color.Black,
-                        fontSize = 14.sp
+                        fontSize = taskTextSize
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Date: Jan 15, 2025",
                         color = Color.Black,
-                        fontSize = 14.sp
+                        fontSize = taskTextSize
                     )
                     Text(
                         text = "Time: 10:00 AM",
                         color = Color.Black,
-                        fontSize = 14.sp
+                        fontSize = taskTextSize
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Location: 123 Elm Street",
                         color = Color.Black,
-                        fontSize = 14.sp
+                        fontSize = taskTextSize
                     )
                 }
             }
@@ -1775,17 +1812,38 @@ fun AllApplicantsItem(trade: Tradesman) {
 
 @Composable
 fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
+    var Cancel by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+
+    val reasons = listOf(
+        "Change of Mind",
+        "Found a Different Service Provider",
+        "No Longer Needed",
+        "Scheduled Time Conflict",
+        "Personal Reasons",
+        "Others"
+    )
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 230.dp
+        WindowType.MEDIUM -> 410.dp to 240.dp
+        WindowType.LARGE -> 420.dp to 250.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
+            .size(cardHeight.first, cardHeight.second),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -1828,7 +1886,7 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                             text = trade.username,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = nameTextSize
                         )
 
 
@@ -1837,80 +1895,225 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                         Text(
                             text = "Service: Plumbing Repair",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Date: Jan 15, 2025",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Text(
                             text = "Time: 10:00 AM",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Location: 123 Elm Street",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                     }
                 }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.End
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable {navController.navigate("canceltradesmannow") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .clickable { Cancel = true }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
 
 
-                        Text(text = "Cancel Job Application", fontSize = 16.sp)
+                            Text(text = "Cancel Job ", fontSize = nameTextSize)
 
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clickable { }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+
+                            Text(text = " Accept Job", color = Color(0xFFECAB1E), fontSize = nameTextSize)
+                        }
                     }
+                }
 
-                    Box(
+            }
+
+        }
+        if (Cancel) {
+            Dialog(onDismissRequest = { Cancel = false }) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
                         modifier = Modifier
-                            .clickable {navController.navigate("myjobapplicationdetails") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                     ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "Reason for Cancellation",
+                                fontSize = 20.sp,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
 
-                        Text(text = "Job Application", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                            Column(modifier = Modifier.padding(top = 16.dp)) {
+                                reasons.forEachIndexed { index, reason ->
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    ) {
+                                        Checkbox(
+                                            checked = selectedIndex == index,
+                                            onCheckedChange = {
+                                                selectedIndex =
+                                                    if (selectedIndex == index) -1 else index
+                                            },
+                                            colors = CheckboxDefaults.colors(
+                                                uncheckedColor = Color.Black,
+                                                checkedColor = Color(0xFF42C2AE)
+                                            )
+                                        )
+                                        Text(
+                                            text = reason,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (selectedIndex == reasons.lastIndex) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = otherReason,
+                                    onValueChange = { otherReason = it },
+                                    placeholder = { Text("Enter your reason") },
+                                    shape = RoundedCornerShape(16.dp),
+                                    singleLine = true,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 56.dp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Blue,
+                                        unfocusedIndicatorColor = Color.Gray,
+                                        focusedLabelColor = Color.Blue,
+                                        unfocusedLabelColor = Color.Gray,
+                                        cursorColor = Color.Black
+                                    )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { description = it },
+                                placeholder = { Text("Enter your description") },
+                                shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Blue,
+                                    unfocusedIndicatorColor = Color.Gray,
+                                    focusedLabelColor = Color.Blue,
+                                    unfocusedLabelColor = Color.Gray,
+                                    cursorColor = Color.Black
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Button(
+                                    onClick = { Cancel = false },
+                                    modifier = Modifier.size(110.dp, 45.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFF42C2AE
+                                        )
+                                    )
+                                ) {
+                                    Text("Cancel", color = Color.White)
+                                }
+                                Button(
+                                    onClick = {
+
+                                    },
+                                    modifier = Modifier.size(110.dp, 45.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF42C2AE)
+                                    )
+                                ) {
+                                    Text("Submit", color = Color.White)
+                                }
+                            }
+                        }
                     }
                 }
             }
 
         }
     }
+
 }
 @Composable
 fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 230.dp
+        WindowType.MEDIUM -> 410.dp to 240.dp
+        WindowType.LARGE -> 420.dp to 250.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     Card(
         modifier = Modifier
             .size(cardHeight.first, cardHeight.second)
@@ -1957,7 +2160,7 @@ fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
                             text = trade.username,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = nameTextSize
                         )
 
 
@@ -1966,64 +2169,335 @@ fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
                         Text(
                             text = "Service: Plumbing Repair",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Date: Jan 15, 2025",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Text(
                             text = "Time: 10:00 AM",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Location: 123 Elm Street",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                     }
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End // Aligns content to the end
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {navController.navigate("canceltradesmannow") }
+                            .wrapContentWidth()
+                            .clickable { navController.navigate("canceljobapplicationsdetails")}
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
+
                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
+                            .padding(vertical = 8.dp, horizontal = 56.dp), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
-
-
-                        Text(text = "Cancel Job Application", fontSize = 16.sp)
-
+                        Text(text = "Details", fontSize = nameTextSize, color =  Color.Black)
                     }
+                }
+            }
+        }
+    }
+}
+@Composable
+fun ActiveApplicantsItem(trade: Tradesman, navController: NavController) {
+    var Cancel by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
 
-                    Box(
+    val reasons = listOf(
+        "Change of Mind",
+        "Found a Different Service Provider",
+        "No Longer Needed",
+        "Scheduled Time Conflict",
+        "Personal Reasons",
+        "Others"
+    )
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 400.dp to 230.dp
+        WindowType.MEDIUM -> 410.dp to 240.dp
+        WindowType.LARGE -> 420.dp to 250.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(trade.imageResId),
+                        contentDescription = "Tradesman Image",
                         modifier = Modifier
-                            .clickable {navController.navigate("myjobapplicationdetails") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .size(60.dp)
+                            .clip(CircleShape)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
                             .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
                     ) {
 
-                        Text(text = "Job Application", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                        Text(
+                            text = trade.username,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = nameTextSize
+                        )
+
+
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: Plumbing Repair",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Date: Jan 15, 2025",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                        Text(
+                            text = "Time: 10:00 AM",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Location: 123 Elm Street",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                    }
+                }
+
+                Row(
+                    Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clickable { Cancel = true }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+
+
+                            Text(text = "Cancel Job ", fontSize = nameTextSize)
+
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clickable { }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+
+                            Text(
+                                text = "Completed",
+                                color = Color(0xFFECAB1E),
+                                fontSize = nameTextSize
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        if (Cancel) {
+            Dialog(onDismissRequest = { Cancel = false }) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "Reason for Cancellation",
+                                fontSize = 20.sp,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Column(modifier = Modifier.padding(top = 16.dp)) {
+                                reasons.forEachIndexed { index, reason ->
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    ) {
+                                        Checkbox(
+                                            checked = selectedIndex == index,
+                                            onCheckedChange = {
+                                                selectedIndex =
+                                                    if (selectedIndex == index) -1 else index
+                                            },
+                                            colors = CheckboxDefaults.colors(
+                                                uncheckedColor = Color.Black,
+                                                checkedColor = Color(0xFF42C2AE)
+                                            )
+                                        )
+                                        Text(
+                                            text = reason,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (selectedIndex == reasons.lastIndex) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = otherReason,
+                                    onValueChange = { otherReason = it },
+                                    placeholder = { Text("Enter your reason") },
+                                    shape = RoundedCornerShape(16.dp),
+                                    singleLine = true,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 56.dp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Blue,
+                                        unfocusedIndicatorColor = Color.Gray,
+                                        focusedLabelColor = Color.Blue,
+                                        unfocusedLabelColor = Color.Gray,
+                                        cursorColor = Color.Black
+                                    )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { description = it },
+                                placeholder = { Text("Enter your description") },
+                                shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Blue,
+                                    unfocusedIndicatorColor = Color.Gray,
+                                    focusedLabelColor = Color.Blue,
+                                    unfocusedLabelColor = Color.Gray,
+                                    cursorColor = Color.Black
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Button(
+                                    onClick = { Cancel = false },
+                                    modifier = Modifier.size(110.dp, 45.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFF42C2AE
+                                        )
+                                    )
+                                ) {
+                                    Text("Cancel", color = Color.White)
+                                }
+                                Button(
+                                    onClick = {
+
+                                    },
+                                    modifier = Modifier.size(110.dp, 45.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF42C2AE)
+                                    )
+                                ) {
+                                    Text("Submit", color = Color.White)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2035,11 +2509,20 @@ fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
 fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 230.dp
+        WindowType.MEDIUM -> 410.dp to 240.dp
+        WindowType.LARGE -> 420.dp to 250.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     Card(
         modifier = Modifier
             .size(cardHeight.first, cardHeight.second)
@@ -2086,7 +2569,7 @@ fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
                             text = trade.username,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = nameTextSize
                         )
 
 
@@ -2095,64 +2578,45 @@ fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
                         Text(
                             text = "Service: Plumbing Repair",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Date: Jan 15, 2025",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Text(
                             text = "Time: 10:00 AM",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Location: 123 Elm Street",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                     }
                 }
-
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End // Aligns content to the end
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {navController.navigate("canceltradesmannow") }
+                            .wrapContentWidth()
+                            .clickable { }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
 
-
-                        Text(text = "Cancel Job Application", fontSize = 16.sp)
-
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clickable {navController.navigate("myjobapplicationdetails") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
                             .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
+                            .padding(vertical = 8.dp, horizontal = 56.dp), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
-
-                        Text(text = "Job Application", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                        Text(text = "Rate", fontSize = nameTextSize, color = Color(0xFFECAB1E))
                     }
                 }
             }
@@ -2166,11 +2630,20 @@ fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
 fun CancelledApplicantsItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 230.dp
+        WindowType.MEDIUM -> 410.dp to 240.dp
+        WindowType.LARGE -> 420.dp to 250.dp
     }
-
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     Card(
         modifier = Modifier
             .size(cardHeight.first, cardHeight.second)
@@ -2217,7 +2690,7 @@ fun CancelledApplicantsItem(trade: Tradesman, navController: NavController) {
                             text = trade.username,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = nameTextSize
                         )
 
 
@@ -2226,68 +2699,49 @@ fun CancelledApplicantsItem(trade: Tradesman, navController: NavController) {
                         Text(
                             text = "Service: Plumbing Repair",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Date: Jan 15, 2025",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize =taskTextSize
                         )
                         Text(
                             text = "Time: 10:00 AM",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Location: 123 Elm Street",
                             color = Color.Black,
-                            fontSize = 14.sp
+                            fontSize = taskTextSize
                         )
                     }
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End // Aligns content to the end
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {navController.navigate("canceltradesmannow") }
+                            .wrapContentWidth()
+                            .clickable {navController.navigate("canceljobapplicationsdetails") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
+
                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
+                            .padding(vertical = 8.dp, horizontal = 56.dp), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
-
-
-                        Text(text = "Cancel Job Application", fontSize = 16.sp)
-
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clickable {navController.navigate("myjobapplicationdetails") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(text = "Job Application", color = Color(0xFFECAB1E), fontSize = 16.sp)
+                        Text(text = "Details", fontSize = nameTextSize, color =  Color.Black)
                     }
                 }
             }
-
         }
     }
 }
