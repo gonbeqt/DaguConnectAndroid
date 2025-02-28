@@ -57,6 +57,7 @@ import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
+import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
@@ -82,7 +83,8 @@ fun MainScreen(
     viewTradesmanProfileViewModel : ViewTradesmanProfileViewModel,
     getMyJobApplications: GetMyJobApplicationViewModel,
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
-    getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel
+    getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
     ) {
     val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
@@ -197,7 +199,8 @@ fun MainScreen(
             viewTradesmanProfileViewModel,
             getMyJobApplications,
             putJobApplicationStatusViewModel,
-            getMyJobApplicantsViewModel
+            getMyJobApplicantsViewModel,
+            viewJobsApplication
             )
     }
 }
@@ -221,13 +224,14 @@ fun ContentScreen(
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
     getMyJobApplications: GetMyJobApplicationViewModel,
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
-    getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel
+    getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
             0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportViewModel)
-            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateWorkStatusViewModel, getMyJobApplicantsViewModel, selectedTab)
+            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobsApplication, selectedTab)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileScreen(
@@ -237,7 +241,7 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getClientsBooking, putJobApplicationStatusViewModel)
+            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getClientsBooking, putJobApplicationStatusViewModel, viewJobsApplication)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel)

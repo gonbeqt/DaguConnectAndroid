@@ -71,6 +71,7 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
+import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import java.sql.Types.NULL
 
@@ -82,6 +83,7 @@ fun BookingsScreen(
     getClientsBooking: GetClientBookingViewModel,
     updateWorkStatusViewModel: UpdateWorkStatusViewModel,
     getMyJobApplicants: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel,
     initialTabIndex: Int = 0 // Default to 0 if not provided
 ) {
     Log.i("Screen", "BookingsScreen")
@@ -182,12 +184,12 @@ fun BookingsScreen(
                             5 -> CancelledBookingsContent(getClientsBooking, navController)
                         }
                         "My Applicants" -> when (selectedTabIndex) {
-                            0 -> AllApplicantsContent(getMyJobApplicants)
-                            1 -> PendingApplicantsContent(navController, getMyJobApplicants)
-                            2 -> DeclinedApplicantsContent(navController, getMyJobApplicants)
-                            3 -> ActiveApplicantsContent(navController, getMyJobApplicants)
-                            4 -> CompletedApplicantsContent(navController, getMyJobApplicants)
-                            5 -> CancelledApplicantsContent(navController, getMyJobApplicants)
+                            0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
+                            1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                            2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                            3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication )
+                            4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                            5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
                         }
                     }
                 }
@@ -1533,7 +1535,7 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
 //MY APPLICANTS
 //MY APPLICANTS
 @Composable
-fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJobs = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1562,7 +1564,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel,) {
 
 
 @Composable
-fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
 
@@ -1585,7 +1587,7 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
     }
 }
 @Composable
-fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
@@ -1607,7 +1609,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
 }
 
 @Composable
-fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1633,7 +1635,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
 }
 
 @Composable
-fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1659,7 +1661,7 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
     }
 }
 @Composable
-fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {

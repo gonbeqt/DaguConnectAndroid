@@ -72,10 +72,11 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel,getClientsBooking: GetClientBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel,getClientsBooking: GetClientBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -175,11 +176,11 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
                             "My Submissions" -> when (selectedTabIndex) {
                                 0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
-                                1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel)
-                                2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications)
-                                3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications)
-                                4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications)
-                                5 -> CancelledMySubmissionsTradesmanContent(navController, getMyJobApplications)
+                                1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel, viewJobsApplication)
+                                2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
+                                3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
+                                4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
+                                5 -> CancelledMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication )
                             }
                         }
                     }
@@ -1524,7 +1525,8 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
 fun PendingMySubmissionsTradesmanContent(
     navController: NavController,
     getMyJobApplications: GetMyJobApplicationViewModel,
-    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
+    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
 ) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
@@ -1556,7 +1558,7 @@ fun PendingMySubmissionsTradesmanContent(
     }
 }
 @Composable
-fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
+fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1581,7 +1583,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
 }
 
 @Composable
-fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
+fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
 
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
@@ -1609,7 +1611,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
 }
 
 @Composable
-fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
+fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1636,7 +1638,7 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
     }
 }
 @Composable
-fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
+fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {

@@ -19,6 +19,8 @@ import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
+import com.example.androidproject.model.ViewJobApplicationData
+import com.example.androidproject.model.ViewJobApplicationResponse
 import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
 
@@ -159,4 +161,7 @@ interface ApiService {
         @Part document: MultipartBody.Part // File upload
 
     ): Response<SubmitResumeResponse>
+
+    @GET("/user/job-applications/view/1")
+    suspend fun viewJobApplication(@Path("jobId") jobId: Int): Response<ViewJobApplicationResponse>
 }
