@@ -129,7 +129,7 @@ interface ApiService {
     suspend fun getMyJobApplications(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicationData>
 
     @PUT("/user/tradesman/job-applications/change_status/{jobId}")
-    suspend fun updateTradesmanJobApplicationStatus(@Path("jobId") jobId: Int, @Body request: UpdateStatus): Response<Unit>
+    suspend fun updateJobApplicationStatus(@Path("jobId") jobId: Int, @Body request: UpdateStatus): Response<UpdateStatusResponse>
 
     @GET("user/client/job-applications")
     suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<UpdateStatusResponse>

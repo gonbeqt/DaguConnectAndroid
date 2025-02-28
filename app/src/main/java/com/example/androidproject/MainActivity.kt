@@ -84,6 +84,7 @@ import com.example.androidproject.viewmodel.factories.bookings.ViewClientBooking
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.client_profile.GetClientProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.PostJobApplicationViewModelFactory
+import com.example.androidproject.viewmodel.factories.job_application.PutJobApplicationStatusViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.tradesman.GetMyJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
@@ -96,6 +97,7 @@ import com.example.androidproject.viewmodel.factories.report.ReportViewModelFact
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
+import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
@@ -194,6 +196,9 @@ class MainActivity : ComponentActivity() {
 
         val getMyJobApplicationViewModelFactory = GetMyJobApplicationViewModelFactory(apiService, this)
         val getMyJobApplicationViewModel = ViewModelProvider(this, getMyJobApplicationViewModelFactory)[GetMyJobApplicationViewModel::class.java]
+
+        val putJobApplicationStatusViewModelFactory = PutJobApplicationStatusViewModelFactory(apiService, this)
+        val putJobApplicationStatusViewModel = ViewModelProvider(this, putJobApplicationStatusViewModelFactory)[PutJobApplicationStatusViewModel::class.java]
 
         setContent {
             AndroidProjectTheme {

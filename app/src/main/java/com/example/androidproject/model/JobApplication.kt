@@ -51,7 +51,9 @@ data class JobApplicationData(
 )
 
 data class UpdateStatus(
-    val status: String
+    val status: String,
+    @SerializedName("cancellation_reason")
+    val cancellationReason: String?
 )
 
 data class UpdateStatusResponse(
