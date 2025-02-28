@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -63,14 +64,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
-import com.example.androidproject.model.client.resumesItem
-import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
-import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
+import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import java.sql.Types.NULL
 
 
@@ -80,6 +80,7 @@ fun BookingsScreen(
     navController: NavController,
     getClientsBooking: GetClientBookingViewModel,
     updateWorkStatusViewModel: UpdateWorkStatusViewModel,
+    getMyJobApplicants: GetMyJobApplicantsViewModel,
     initialTabIndex: Int = 0 // Default to 0 if not provided
 ) {
     Log.i("Screen", "BookingsScreen")
@@ -180,13 +181,12 @@ fun BookingsScreen(
                             5 -> CancelledBookingsContent(getClientsBooking, navController)
                         }
                         "My Applicants" -> when (selectedTabIndex) {
-                            0 -> AllApplicantsContent()
-                            1 -> PendingApplicantsContent(navController)
-                            2 -> DeclinedApplicantsContent(navController)
-                            3 -> ActiveApplicantsContent(navController)
-                            4 -> CompletedApplicantsContent(navController)
-                            5 -> CancelledApplicantsContent(navController)
-
+                            0 -> AllApplicantsContent(getMyJobApplicants)
+                            1 -> PendingApplicantsContent(navController, getMyJobApplicants)
+                            2 -> DeclinedApplicantsContent(navController, getMyJobApplicants)
+                            3 -> ActiveApplicantsContent(navController, getMyJobApplicants)
+                            4 -> CompletedApplicantsContent(navController, getMyJobApplicants)
+                            5 -> CancelledApplicantsContent(navController, getMyJobApplicants)
                         }
                     }
                 }
@@ -1532,18 +1532,13 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
 //MY APPLICANTS
 //MY APPLICANTS
 @Composable
-fun AllApplicantsContent() {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+    val myJobs = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        getMyJobApplicant.invalidatePagingSource()
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -1554,9 +1549,11 @@ fun AllApplicantsContent() {
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            AllApplicantsItem(trade)
+        items(myJobs.itemCount) { index ->
+            val myJob = myJobs[index]
+            if (myJob != null) {
+                AllApplicantsItem(myJob)
+            }
 
         }
     }
@@ -1564,18 +1561,12 @@ fun AllApplicantsContent() {
 
 
 @Composable
-fun PendingApplicantsContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+    val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+
+
+    val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -1586,25 +1577,17 @@ fun PendingApplicantsContent(navController: NavController) {
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            PendingApplicantsItem(trade,navController)
+        items(pendingApplication.size) { index ->
+            val pendingJobs = pendingApplication[index]
+            PendingApplicantsItem(pendingJobs, navController)
         }
     }
 }
 @Composable
-fun DeclinedApplicantsContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+    val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+
+    val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -1615,26 +1598,22 @@ fun DeclinedApplicantsContent(navController: NavController) {
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            DeclinedApplicantsItem(trade,navController)
+        items(declinedApplication.size) { index ->
+            val declineJob = declinedApplication[index]
+            DeclinedApplicantsItem(declineJob, navController)
         }
     }
 }
 
 @Composable
-fun ActiveApplicantsContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+    val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        getMyJobApplicant.invalidatePagingSource()
+    }
+
+    val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -1645,26 +1624,23 @@ fun ActiveApplicantsContent(navController: NavController) {
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            ActiveApplicantsItem(trade, navController)
+        items(activeApplication.size) { index ->
+            val activeJobs = activeApplication[index]
+            ActiveApplicantsItem(activeJobs, navController)
         }
     }
 }
 
 @Composable
-fun CompletedApplicantsContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+    val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        getMyJobApplicant.invalidatePagingSource()
+    }
+
+    val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -1675,25 +1651,22 @@ fun CompletedApplicantsContent(navController: NavController) {
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            CompletedApplicantsItem(trade, navController )
+        items(completedApplication.size) { index ->
+            val completedJobs = completedApplication[index]
+            CompletedApplicantsItem(completedJobs, navController )
         }
     }
 }
 @Composable
-fun CancelledApplicantsContent(navController: NavController) {
-    val tradesman = listOf(
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
-        Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
-    )
+fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel,) {
+    val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        getMyJobApplicant.invalidatePagingSource()
+    }
+
+    val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -1703,9 +1676,9 @@ fun CancelledApplicantsContent(navController: NavController) {
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            CancelledApplicantsItem(trade, navController )
+        items(cancelledApplication.size) { index ->
+            val cancelledJobs = cancelledApplication[index]
+            CancelledApplicantsItem(cancelledJobs, navController )
         }
     }
 }
@@ -1714,7 +1687,14 @@ fun CancelledApplicantsContent(navController: NavController) {
 
 //Design For Items
 @Composable
-fun AllApplicantsItem(trade: Tradesman) {
+fun AllApplicantsItem(myJob: JobApplicantData) {
+
+    var jobType = myJob.jobType
+
+    if (jobType == "Electrical_work") {
+        jobType = "Electrical Work"
+    }
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 170.dp
@@ -1754,14 +1734,14 @@ fun AllApplicantsItem(trade: Tradesman) {
                 verticalAlignment = Alignment.Top
             ) {
                 // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
+                AsyncImage(
+                    model = myJob.clientProfilePicture, // Use URL here
+                    contentDescription = "Profile Image",
                     modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
+                        .size(62.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
-
                 // Tradesman details
                 Column(
                     modifier = Modifier
@@ -1771,33 +1751,33 @@ fun AllApplicantsItem(trade: Tradesman) {
                 ) {
                     Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                         Text(
-                            text = trade.username,
+                            text = myJob.tradesmanFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = nameTextSize
                         )
-                        Text(text = "pending", fontSize = taskTextSize)
+                        Text(text = myJob.status, fontSize = taskTextSize)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Service: Plumbing Repair",
+                        text = "Service: $jobType",
                         color = Color.Black,
                         fontSize = taskTextSize
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Date: Jan 15, 2025",
+                        text = "Applied on ${myJob.createdAt}",
                         color = Color.Black,
                         fontSize = taskTextSize
                     )
                     Text(
-                        text = "Time: 10:00 AM",
+                        text = "Submission Deadline: ${myJob.jobDeadline}",
                         color = Color.Black,
                         fontSize = taskTextSize
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Location: 123 Elm Street",
+                        text = "Address: ${myJob.jobAddress}",
                         color = Color.Black,
                         fontSize = taskTextSize
                     )
@@ -1810,7 +1790,7 @@ fun AllApplicantsItem(trade: Tradesman) {
 
 
 @Composable
-fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
+fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     var Cancel by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
@@ -1865,14 +1845,14 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                     verticalAlignment = Alignment.Top
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(trade.imageResId),
-                        contentDescription = "Tradesman Image",
+                    AsyncImage(
+                        model = myJob.clientProfilePicture, // Use URL here
+                        contentDescription = "Profile Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(62.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
-
                     // Tradesman details
                     Column(
                         modifier = Modifier
@@ -1882,34 +1862,31 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                     ) {
 
                         Text(
-                            text = trade.username,
+                            text = myJob.tradesmanFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = nameTextSize
                         )
-
-
-
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: Plumbing Repair",
+                            text = "Service: ${myJob.jobType}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Date: Jan 15, 2025",
+                            text = "Applied at: ${myJob.createdAt}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Text(
-                            text = "Time: 10:00 AM",
+                            text = "Submission Deadline: ${myJob.jobDeadline}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Location: 123 Elm Street",
+                            text = "Address: ${myJob.jobAddress}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
@@ -1919,7 +1896,6 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
-
                     ) {
                         Box(
                             modifier = Modifier
@@ -1932,10 +1908,7 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-
-
                             Text(text = "Cancel Job ", fontSize = nameTextSize)
-
                         }
 
                         Box(
@@ -2096,7 +2069,7 @@ fun PendingApplicantsItem(trade: Tradesman, navController: NavController) {
 
 }
 @Composable
-fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
+fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 230.dp
@@ -2129,8 +2102,6 @@ fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
-
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -2139,14 +2110,14 @@ fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
                     verticalAlignment = Alignment.Top
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(trade.imageResId),
-                        contentDescription = "Tradesman Image",
+                    AsyncImage(
+                        model = myJob.clientProfilePicture, // Use URL here
+                        contentDescription = "Profile Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(62.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
-
                     // Tradesman details
                     Column(
                         modifier = Modifier
@@ -2154,36 +2125,32 @@ fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 12.dp),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-
                         Text(
-                            text = trade.username,
+                            text = myJob.tradesmanFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
-                            fontSize = nameTextSize
+                            fontSize = 18.sp
                         )
-
-
-
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: Plumbing Repair",
+                            text = "Service: ${myJob.jobType}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Date: Jan 15, 2025",
+                            text = "Applied on: ${myJob.createdAt}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Text(
-                            text = "Time: 10:00 AM",
+                            text = "Submission Deadline: ${myJob.jobDeadline}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Location: 123 Elm Street",
+                            text = "Address: ${myJob.jobAddress}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
@@ -2215,7 +2182,7 @@ fun DeclinedApplicantsItem(trade: Tradesman, navController: NavController) {
     }
 }
 @Composable
-fun ActiveApplicantsItem(trade: Tradesman, navController: NavController) {
+fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     var Cancel by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
@@ -2271,14 +2238,14 @@ fun ActiveApplicantsItem(trade: Tradesman, navController: NavController) {
                     verticalAlignment = Alignment.Top
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(trade.imageResId),
-                        contentDescription = "Tradesman Image",
+                    AsyncImage(
+                        model = myJob.clientProfilePicture, // Use URL here
+                        contentDescription = "Profile Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(62.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
-
                     // Tradesman details
                     Column(
                         modifier = Modifier
@@ -2286,36 +2253,32 @@ fun ActiveApplicantsItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 12.dp),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-
                         Text(
-                            text = trade.username,
+                            text = myJob.tradesmanFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = nameTextSize
                         )
-
-
-
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: Plumbing Repair",
+                            text = "Service: ${myJob.jobType}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Date: Jan 15, 2025",
+                            text = "Applied on: ${myJob.createdAt}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Text(
-                            text = "Time: 10:00 AM",
+                            text = "Submission Deadline: ${myJob.jobDeadline}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Location: 123 Elm Street",
+                            text = "Address: ${myJob.jobAddress}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
@@ -2340,12 +2303,8 @@ fun ActiveApplicantsItem(trade: Tradesman, navController: NavController) {
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-
-
                             Text(text = "Cancel Job ", fontSize = nameTextSize)
-
                         }
-
                         Box(
                             modifier = Modifier
                                 .clickable { }
@@ -2505,7 +2464,7 @@ fun ActiveApplicantsItem(trade: Tradesman, navController: NavController) {
     }
 }
 @Composable
-fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
+fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 230.dp
@@ -2548,14 +2507,14 @@ fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
                     verticalAlignment = Alignment.Top
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(trade.imageResId),
-                        contentDescription = "Tradesman Image",
+                    AsyncImage(
+                        model = myJob.clientProfilePicture, // Use URL here
+                        contentDescription = "Profile Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(62.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
-
                     // Tradesman details
                     Column(
                         modifier = Modifier
@@ -2563,36 +2522,32 @@ fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 12.dp),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-
                         Text(
-                            text = trade.username,
+                            text = myJob.tradesmanFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = nameTextSize
                         )
-
-
-
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: Plumbing Repair",
+                            text = "Service: ${myJob.jobType}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Date: Jan 15, 2025",
+                            text = "Applied on: ${myJob.createdAt}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Text(
-                            text = "Time: 10:00 AM",
+                            text = "Submission Deadline: ${myJob.jobDeadline}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Location: 123 Elm Street",
+                            text = "Address: ${myJob.jobAddress}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
@@ -2626,7 +2581,7 @@ fun CompletedApplicantsItem(trade: Tradesman, navController: NavController) {
 
 
 @Composable
-fun CancelledApplicantsItem(trade: Tradesman, navController: NavController) {
+fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 230.dp
@@ -2669,14 +2624,14 @@ fun CancelledApplicantsItem(trade: Tradesman, navController: NavController) {
                     verticalAlignment = Alignment.Top
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(trade.imageResId),
-                        contentDescription = "Tradesman Image",
+                    AsyncImage(
+                        model = myJob.clientProfilePicture, // Use URL here
+                        contentDescription = "Profile Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
+                            .size(62.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
-
                     // Tradesman details
                     Column(
                         modifier = Modifier
@@ -2684,36 +2639,32 @@ fun CancelledApplicantsItem(trade: Tradesman, navController: NavController) {
                             .padding(start = 12.dp),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-
                         Text(
-                            text = trade.username,
+                            text = myJob.tradesmanFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = nameTextSize
                         )
-
-
-
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: Plumbing Repair",
+                            text = "Service: ${myJob.jobType}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Date: Jan 15, 2025",
+                            text = "Applied on: ${myJob.createdAt}",
                             color = Color.Black,
                             fontSize =taskTextSize
                         )
                         Text(
-                            text = "Time: 10:00 AM",
+                            text = "Submission Deadline: ${myJob.jobDeadline}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Location: 123 Elm Street",
+                            text = "Address: ${myJob.jobAddress}",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )

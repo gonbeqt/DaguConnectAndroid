@@ -9,10 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.JobApplicationData
-import com.example.androidproject.viewmodel.bookings.paginate.GetClientBookingPagingSource
-import com.example.androidproject.viewmodel.factories.job_application.tradesman.GetMyJobApplicationViewModelFactory
-import com.example.androidproject.viewmodel.job_application.client.paginate.GetMyJobApplicantsPagingSource
-import com.example.androidproject.viewmodel.job_application.client.paginate.GetMyJobApplicationPagingSource
+import com.example.androidproject.viewmodel.job_application.tradesman.paginate.GetMyJobApplicationPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -21,7 +18,7 @@ class GetMyJobApplicationViewModel(private val apiService: ApiService, private v
     private val refreshTrigger = MutableStateFlow(Unit)
     private val _pagingSource = MutableStateFlow<GetMyJobApplicationPagingSource?>(null)
 
-    val jobApplicantsPagingData: Flow<PagingData<JobApplicationData>> = refreshTrigger.flatMapLatest {
+    val jobApplicationPagingData: Flow<PagingData<JobApplicationData>> = refreshTrigger.flatMapLatest {
         Pager(
             config = PagingConfig(
                 pageSize = 10,
@@ -29,7 +26,9 @@ class GetMyJobApplicationViewModel(private val apiService: ApiService, private v
                 prefetchDistance = 2,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { GetMyJobApplicationPagingSource(apiService) }
+            pagingSourceFactory = {
+                GetMyJobApplicationPagingSource(apiService).also { _pagingSource.value = it }
+            }
         ).flow.cachedIn(viewModelScope)
     }
 

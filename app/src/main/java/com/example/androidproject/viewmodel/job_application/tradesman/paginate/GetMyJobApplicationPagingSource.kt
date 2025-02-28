@@ -1,4 +1,4 @@
-package com.example.androidproject.viewmodel.job_application.client.paginate
+package com.example.androidproject.viewmodel.job_application.tradesman.paginate
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

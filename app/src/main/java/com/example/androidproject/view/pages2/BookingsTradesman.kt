@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,21 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ScrollableTabRow
@@ -51,20 +44,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Checkbox
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
-import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.view.Tradesman
-import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
@@ -1639,7 +1627,7 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
 //MY SUBMISSION
 @Composable
 fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationViewModel) {
-    val myJobs = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val myJobs = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
     }
@@ -1666,7 +1654,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
 
 @Composable
 fun PendingMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
-    val myJob = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
@@ -1691,7 +1679,7 @@ fun PendingMySubmissionsTradesmanContent(navController: NavController, getMyJobA
 }
 @Composable
 fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
-    val myJob = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
@@ -1717,7 +1705,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
 @Composable
 fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
 
-    val myJob = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
@@ -1744,7 +1732,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
 
 @Composable
 fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
-    val myJob = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
@@ -1771,7 +1759,7 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
 }
 @Composable
 fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
-    val myJob = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
@@ -1859,13 +1847,13 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Service: $jobType ",
+                        text = "Service: $jobType",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Applied at: ${myJob.createdAt}",
+                        text = "Applied on ${myJob.createdAt}",
                         color = Color.Black,
                         fontSize = 14.sp
                     )

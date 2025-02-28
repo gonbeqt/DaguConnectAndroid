@@ -3,20 +3,21 @@ package com.example.androidproject.viewmodel.job_application.client.paginate
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.androidproject.api.ApiService
+import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.JobApplicationData
 
 class GetMyJobApplicantsPagingSource(
     private val apiService: ApiService
-) : PagingSource<Int, JobApplicationData>() {
+) : PagingSource<Int, JobApplicantData>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, JobApplicationData> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, JobApplicantData> {
         val page = params.key ?: 1
 
         return try {
             val response = apiService.getMyJobApplicants(page = page, limit = params.loadSize)
             if (response.isSuccessful) {
                 val responseBody = response.body()
-                val applicants = responseBody?.applications ?: emptyList() // Extract applications
+                val applicants = responseBody?.applicants ?: emptyList() // Extract applications
 
                 LoadResult.Page(
                     data = applicants,
@@ -31,7 +32,7 @@ class GetMyJobApplicantsPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, JobApplicationData>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, JobApplicantData>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
