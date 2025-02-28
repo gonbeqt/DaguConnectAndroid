@@ -59,8 +59,8 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
 
     // Hardcoded applicants list remains unchanged
     val applicants = listOf(
-        Tradesmandate("profile", "Sarah", "Carpenter", "P550/hr", 4.3f, R.drawable.bookmark, "2025-02-19"),
-        Tradesmandate("profile", "Mike", "Painter", "P480/hr", 4.0f, R.drawable.bookmark, "2025-02-20")
+        Tradesmandate("${R.drawable.pfp}", "Sarah", "Carpenter", "P550/hr", 4.3f, R.drawable.bookmark, "2025-02-19"),
+        Tradesmandate("${R.drawable.pfp}", "Mike", "Painter", "P480/hr", 4.0f, R.drawable.bookmark, "2025-02-20")
     )
 
     // Collect all unique booking dates for calendar highlighting, filtering for Active bookingStatus
@@ -648,11 +648,11 @@ fun MyApplicantItem(trade: Tradesmandate) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-         /*   Image( painterResource(),
+            Image( painterResource(trade.imageResId.toInt()),
                 contentDescription = "Tradesman Image",
                 modifier = Modifier
                     .size(120.dp, 120.dp)
-                    .padding(end = 10.dp))*/
+                    .padding(end = 10.dp))
             Column(
                 modifier = Modifier
                     .weight(1f)
