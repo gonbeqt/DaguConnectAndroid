@@ -50,3 +50,10 @@ data class JobApplicationData(
     val createdAt: String
 )
 
+data class UpdateStatus(
+    val status: String
+)
+
+data class UpdateStatusResponse(
+    val message: String
+)

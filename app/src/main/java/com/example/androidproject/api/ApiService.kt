@@ -15,6 +15,8 @@ import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
+import com.example.androidproject.model.UpdateStatus
+import com.example.androidproject.model.UpdateStatusResponse
 import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
 
@@ -126,8 +128,11 @@ interface ApiService {
     @GET("/user/tradesman/job-applications")
     suspend fun getMyJobApplications(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicationData>
 
+    @PUT("/user/tradesman/job-applications/change_status/{jobId}")
+    suspend fun updateTradesmanJobApplicationStatus(@Path("jobId") jobId: Int, @Body request: UpdateStatus): Response<Unit>
+
     @GET("user/client/job-applications")
-    suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicationData>
+    suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<UpdateStatusResponse>
 
     @GET("/user/message/{chatId}")
     suspend fun getConversation(@Path("chatId") chatId: Int): Response<List<GetMessages>>
