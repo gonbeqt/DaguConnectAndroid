@@ -93,7 +93,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
             modifier = Modifier //top nav
                 .padding(top = 8.dp, start = 25.dp, end = 25.dp, bottom = 8.dp)
                 .fillMaxWidth()
-                .height(60.dp),
+                .height(50.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -566,6 +566,10 @@ fun AllTradesmanItem(trade: Tradesman) {
 
 @Composable
 fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
+    var showApproveDialog by remember { mutableStateOf(false) }
+    var showDeclineDialog by remember { mutableStateOf(false) }
+    var showJobApproveDialog by remember { mutableStateOf(false) }
+    var showDeclineReasons by remember { mutableStateOf(false) }
 
 
     val windowSize = rememberWindowSizeClass()
@@ -708,7 +712,7 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { showDeclineDialog = true }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -720,219 +724,210 @@ fun PendingTradesmanItem(trade: Tradesman, navController: NavController) {
                     ) {
 
 
-                        Text(text = "Cancel Appointment", fontSize = smallTextSize)
+                        Text(text = "Decline", fontSize = smallTextSize)
 
                     }
 
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { showApproveDialog = true }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
 
-                        Text(text = "Booking Details", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                        Text(text = "Approve", color = Color(0xFF42C2AE), fontSize = smallTextSize)
                     }
                 }
             }
         }
     }
+    if (showApproveDialog) {
+        AlertDialog(
+            onDismissRequest = { showApproveDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Approve Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once approved, this job will be marked as active. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showApproveDialog = false
+                        showJobApproveDialog = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showApproveDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            }
+        )
+    }
 
-//    var showApproveDialog by remember { mutableStateOf(false) }
-//    var showDeclineDialog by remember { mutableStateOf(false) }
-//    var showJobApproveDialog by remember { mutableStateOf(false) }
-//    var showDeclineReasons by remember { mutableStateOf(false) }
-//    // Approve Dialog
-//    if (showApproveDialog) {
-//        AlertDialog(
-//            onDismissRequest = { showApproveDialog = false },
-//            title = {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.ic_approve_decline),
-//                        contentDescription = "Approval Icon",
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    Text(
-//                        text = "Approve Job",
-//                        fontSize = 20.sp,
-//                        textAlign = TextAlign.Start,
-//                        modifier = Modifier.weight(1f) // Makes text take remaining space
-//                    )
-//                }
-//            },
-//            text = { Text("Once approved, this job will be marked as active. Proceed?") },
-//            confirmButton = {
-//                Button(
-//                    onClick = {
-//                        showApproveDialog = false
-//                        showJobApproveDialog = true
-//
-//                    },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
-//                ) {
-//                    Text("Confirm", color = Color.White)
-//                }
-//            },
-//            dismissButton = {
-//                Button(
-//                    onClick = { showApproveDialog = false },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-//                ) {
-//                    Text("Cancel", color = Color.White)
-//                }
-//            }
-//        )
-//    }
+    if (showDeclineDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeclineDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Decline Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once declined, this job may not be available again. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeclineDialog = false
+                        showDeclineReasons = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDeclineDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            }
+        )
+    }
 
-//    // Decline Dialog
-//    if (showDeclineDialog) {
-//        AlertDialog(
-//            onDismissRequest = { showDeclineDialog = false },
-//            title = {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.ic_approve_decline),
-//                        contentDescription = "Approval Icon",
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    Text(
-//                        text = "Decline Job",
-//                        fontSize = 20.sp,
-//                        textAlign = TextAlign.Start,
-//                        modifier = Modifier.weight(1f) // Makes text take remaining space
-//                    )
-//                }
-//            },
-//            text = { Text("Once declined, this job may not be available again. Proceed?") },
-//            confirmButton = {
-//                Button(
-//                    onClick = {
-//                        showDeclineDialog = false
-//                        showDeclineReasons = true
-//                    },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-//                ) {
-//                    Text("Confirm", color = Color.White)
-//                }
-//            },
-//            dismissButton = {
-//                Button(
-//                    onClick = { showDeclineDialog = false },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-//                ) {
-//                    Text("Cancel", color = Color.White)
-//                }
-//            }
-//        )
-//    }
-//    if (showJobApproveDialog) {
-//        AlertDialog(
-//            onDismissRequest = { showJobApproveDialog = false },
-//            icon = {
-//                Image(
-//                    painter = painterResource(id = R.drawable.ic_jobapproved_checked), // Use your drawable here
-//                    contentDescription = "Jon Approve Icon",
-//                    modifier = Modifier.size(60.dp) // Adjust size as needed
-//                )
-//            },
-//            title = { Text("Job Approved!") },
-//            text = { Text("Reach out to the client for more project details.") },
-//            confirmButton = {
-//                Button(
-//                    onClick = { showJobApproveDialog = false },
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
-//                    shape = RoundedCornerShape(12.dp),
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text("OK", color = Color.White)
-//                }
-//            }
-//        )
-//    }
-//    // decline Reasons Dialog
-//    // Decline Reasons Dialog
-//    if (showDeclineReasons) {
-//        var selectedReason by remember { mutableStateOf<String?>(null) }
-//
-//        val reasons = listOf(
-//            "Workload concerns",
-//            "Schedule conflicts",
-//            "Relocation issues",
-//            "Committed to a contract project",
-//            "Short notice start date",
-//            "Personal Reasons",
-//            "Other"
-//        )
-//
-//        AlertDialog(
-//            onDismissRequest = { showDeclineReasons = false },
-//            title = {
-//                Text(
-//                    text = "Reason for Declination",
-//                    fontSize = 18.sp,
-//                    color = Color(0xFF42C2AE) // Matches UI color
-//                )
-//            },
-//            text = {
-//                Column {
-//                    reasons.forEach { reason ->
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .clickable { selectedReason = reason },
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            Checkbox(
-//                                checked = selectedReason == reason,
-//                                onCheckedChange = { isChecked ->
-//                                    if (isChecked) {
-//                                        selectedReason = reason
-//                                    }
-//                                }
-//                            )
-//                            Text(reason, fontSize = 14.sp)
-//                        }
-//                    }
-//                }
-//            },
-//            confirmButton = {
-//                Button(
-//                    onClick = {
-//                        showDeclineReasons = false
-//                        // Handle selected reason here
-//                    },
-//                    enabled = selectedReason != null, // Enables only if an option is chosen
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)), // Matches UI color
-//                    shape = RoundedCornerShape(8.dp),
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text("Submit", color = Color.White)
-//                }
-//            }
-//        )
-//    }
+    if (showJobApproveDialog) {
+        AlertDialog(
+            onDismissRequest = { showJobApproveDialog = false },
+            icon = {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_jobapproved_checked),
+                    contentDescription = "Job Approve Icon",
+                    modifier = Modifier.size(60.dp)
+                )
+            },
+            title = { Text("Job Approved!") },
+            text = { Text("Reach out to the client for more project details.") },
+            confirmButton = {
+                Button(
+                    onClick = { showJobApproveDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("OK", color = Color.White)
+                }
+            }
+        )
+    }
 
+    if (showDeclineReasons) {
+        var selectedReason by remember { mutableStateOf<String?>(null) }
+
+        val reasons = listOf(
+            "Workload concerns",
+            "Schedule conflicts",
+            "Relocation issues",
+            "Committed to a contract project",
+            "Short notice start date",
+            "Personal Reasons",
+            "Other"
+        )
+
+        AlertDialog(
+            onDismissRequest = { showDeclineReasons = false },
+            title = {
+                Text(
+                    text = "Reason for Declination",
+                    fontSize = 18.sp,
+                    color = Color(0xFF42C2AE)
+                )
+            },
+            text = {
+                Column {
+                    reasons.forEach { reason ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedReason = reason },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = selectedReason == reason,
+                                onCheckedChange = { isChecked ->
+                                    if (isChecked) {
+                                        selectedReason = reason
+                                    }
+                                }
+                            )
+                            Text(reason, fontSize = 14.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeclineReasons = false
+                    },
+                    enabled = selectedReason != null,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Submit", color = Color.White)
+                }
+            }
+        )
+    }
 }
 
 
 
 
-@Composable
+
+    @Composable
 fun DeclinedTradesmanItem(trade: Tradesman, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -1635,8 +1630,7 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
 //MY SUBMISSION
 //MY SUBMISSION
 @Composable
-fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationViewModel) {
-    val myJobs = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
+fun AllMySubmissionsTradesmanContent() {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1659,11 +1653,9 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(myJobs.itemCount) { index ->
-            val myJob = myJobs[index]
-            if (myJob != null) {
-                AllMySubmissionsTradesmanItem(myJob)
-            }
+        items(tradesman.size) { index ->
+            val trade = tradesman[index]
+            AllMySubmissionsTradesmanItem(trade)
         }
     }
 }
@@ -1825,17 +1817,12 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController) {
 
 //Design For Items
 @Composable
-fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
+fun AllMySubmissionsTradesmanItem(trade: Tradesman) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 190.dp
         WindowType.MEDIUM -> 400.dp to 200.dp
         WindowType.LARGE -> 410.dp to 210.dp
-    }
-    var jobType = myJob.jobType
-
-    if (jobType == "Electrical_work") {
-        jobType = "Electrical Work"
     }
 
     Card(
@@ -1856,14 +1843,15 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                AsyncImage(
-                    model = myJob.clientProfilePicture, // Use URL here
-                    contentDescription = "Profile Image",
+                // Tradesman image
+                Image(
+                    painter = painterResource(trade.imageResId),
+                    contentDescription = "Tradesman Image",
                     modifier = Modifier
-                        .size(62.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+                        .size(60.dp)
+                        .clip(CircleShape)
                 )
+
                 // Tradesman details
                 Column(
                     modifier = Modifier
@@ -1873,33 +1861,33 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                 ) {
                     Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                         Text(
-                            text = myJob.clientFullname,
+                            text = trade.username,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-                        Text(text = myJob.status, fontSize = 14.sp)
+                        Text(text = "Pending", fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Service: $jobType ",
+                        text = "Service: Plumbing Repair",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Applied at: ${myJob.createdAt}",
+                        text = "Date: Jan 15, 2025",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
                     Text(
-                        text = "Submission Deadline: ${myJob.jobDeadline}",
+                        text = "Time: 10:00 AM",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Address: ${myJob.jobAddress}",
+                        text = "Location: 123 Elm Street",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
