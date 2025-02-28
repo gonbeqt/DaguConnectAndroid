@@ -328,10 +328,12 @@ fun PostsCard(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = Color.White)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(8.dp)
+            )
 
     ) {
-        Box(modifier = Modifier.background(color = Color.White)) {
+        Box(modifier = Modifier.background(color = Color.White).shadow(1.dp)
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)

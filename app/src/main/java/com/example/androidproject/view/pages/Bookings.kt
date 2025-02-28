@@ -216,46 +216,45 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
         // Left-aligned clickable text with box
         Box(
             modifier = Modifier
+                .fillMaxHeight()
                 .background(if (selectedSection == "My Clients") Color(0xFF3CC0B0  ) else (Color.Transparent))
-                .padding(4.dp)
-                .weight(1f),
+                .weight(1f)
+                .clickable {
+                    onSectionSelected("My Clients")
+                },
             contentAlignment = Alignment.Center
         ) {
-            TextButton(
-                onClick = { onSectionSelected("My Clients") },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Clients") Color.White else Color.Black
-                ),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = "My Clients",
-                    fontSize = nameTextSize,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+
+            Text(
+                text = "My Clients",
+                fontSize = nameTextSize,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
+                color = if (selectedSection == "My Clients") Color.White else Color.Black
+            )
+
         }
 
         // Right-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == "My Applicants") myGradient3 else SolidColor(Color.Transparent))
-                .padding(4.dp)
-                .weight(1f),
+                .fillMaxHeight()
+                .background(if (selectedSection == "My Applicants") Color(0xFF3CC0B0  ) else (Color.Transparent))
+                .weight(1f)
+                .clickable {
+                    onSectionSelected("My Applicants")
+                },
+            contentAlignment = Alignment.Center
         ) {
-            TextButton(
-                onClick = { onSectionSelected("My Applicants") },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Applicants") Color.White else Color.Black
-                ),
-                modifier = Modifier.fillMaxSize()
-            ) {
+
                 Text(
                     text = "My Applicants",
                     fontSize = nameTextSize,
-                    fontWeight = FontWeight.Medium
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    color = if (selectedSection == "My Applicants") Color.White else Color.Black
                 )
-            }
+
         }
     }
 }
