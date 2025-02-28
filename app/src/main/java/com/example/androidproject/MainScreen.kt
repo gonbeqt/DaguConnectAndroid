@@ -77,10 +77,16 @@ fun MainScreen(
     getRecentJobsViewModel: GetRecentJobsViewModel,
     viewTradesmanProfileViewModel : ViewTradesmanProfileViewModel
     ) {
+    val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
-        NavigationItem("Bookings", Icons.Default.ListAlt),
+        if(role == true){
+            NavigationItem("Hiring Hub", Icons.Default.ListAlt)
+        }
+        else{
+            NavigationItem("Work Hub", Icons.Default.ListAlt)
+        },
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
         NavigationItem("Message", Icons.Default.Message),
         NavigationItem("Profile", Icons.Default.Person)
