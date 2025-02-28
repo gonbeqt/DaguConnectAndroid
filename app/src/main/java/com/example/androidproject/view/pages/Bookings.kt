@@ -50,10 +50,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
@@ -244,48 +246,40 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
 
 @Composable
 fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navController: NavController) {
-    val clientbookingState by getClientsBooking.clientbookingState.collectAsState()
+    val allBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
+    // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
-        getClientsBooking.getClientBookings()
+        getClientsBooking.invalidatePagingSource()
     }
-    when(clientbookingState){
-        is GetClientBookingViewModel.GetClientBookings.Loading ->{
-            //do nothing
-        }
-        is GetClientBookingViewModel.GetClientBookings.Success ->{
-        val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
 
-                ,
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(booking.size) { index ->
-                    val bookings = booking[index]
-                    AllItem(bookings,navController)
-                }
+        ,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+
+        items(allBooking.itemCount) { index ->
+            val clientbooking = allBooking[index]
+            if (clientbooking != null) {
+                AllItem(clientbooking,navController)
+
             }
         }
-        is GetClientBookingViewModel.GetClientBookings.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center, // Centers vertically
-                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
-            ) {
-                Text(
-                    text = "NO BOOKINGS",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-        }
-        else ->  Unit
+
+           /* items(booking.size) { index ->
+                val bookings = booking[index]
+                AllItem(bookings,navController)
+            }*/
+
+
+
+
+
     }
 
 }
@@ -293,248 +287,137 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 
 @Composable
 fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController) {
-    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.getClientBookings()
+        getClientBooking.invalidatePagingSource()
     }
-    when(clientbookingState){
-        is GetClientBookingViewModel.GetClientBookings.Loading ->{
-            //do nothing
-        }
-        is GetClientBookingViewModel.GetClientBookings.Success ->{
-            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-            val pendingBookings = booking.filter { it.bookingstatus == "Pending" }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
+    // Filter the bookings to get only those with status "Pending"
+    val pendingBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
 
-                ,
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(pendingBookings.size) { index ->
-                    val pendingbookings = pendingBookings[index]
-                    PendingItem(pendingbookings,navController)
-                }
-            }
-
+        ,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(pendingBookings.size) { index ->
+            val pendingbookings = pendingBookings[index]
+            PendingItem(pendingbookings,navController)
         }
-        is GetClientBookingViewModel.GetClientBookings.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center, // Centers vertically
-                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
-            ) {
-                Text(
-                    text = "NO BOOKINGS",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-        }
-        else ->  Unit
-
     }
+
+
+
 
 }
 @Composable
 fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
-    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.getClientBookings()
+        getClientBooking.invalidatePagingSource()
     }
 
-    when(clientbookingState){
-        is GetClientBookingViewModel.GetClientBookings.Loading ->{
-            //do nothing
+    // Filter the bookings to get only those with status "Declined"
+    val declinedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+        ,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(declinedBookings.size) { index ->
+            val declinedbooking = declinedBookings[index]
+            DeclinedItem(declinedbooking, navController )
         }
-        is GetClientBookingViewModel.GetClientBookings.Success ->{
-            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-            val declinedBookings = booking.filter { it.bookingstatus == "Declined" }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
-                ,
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(declinedBookings.size) { index ->
-                    val declinedbooking = declinedBookings[index]
-                    DeclinedItem(declinedbooking, navController )
-                }
-            }
-        }
-        is GetClientBookingViewModel.GetClientBookings.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center, // Centers vertically
-                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
-            ) {
-                Text(
-                    text = "NO BOOKINGS",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-        }
-        else ->  Unit
     }
+
+
 
 }
 
 @Composable
 fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navController:NavController,updateWorkStatusViewModel:UpdateWorkStatusViewModel) {
-    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.getClientBookings()
+        getClientBooking.invalidatePagingSource()
     }
+    // Filter the bookings to get only those with status "Active"
+    val ActiveBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingstatus == "Active" }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
 
-    when(clientbookingState){
-        is GetClientBookingViewModel.GetClientBookings.Loading ->{
-            //do nothing
+        ,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(ActiveBookings.size) { index ->
+            val activebooking = ActiveBookings[index]
+            ActiveItems(activebooking,navController,updateWorkStatusViewModel)
         }
-        is GetClientBookingViewModel.GetClientBookings.Success ->{
-            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-
-            val ActiveBookings = booking.filter { it.bookingstatus == "Active" }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
-
-                ,
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(ActiveBookings.size) { index ->
-                    val activebooking = ActiveBookings[index]
-                    ActiveItems(activebooking,navController,updateWorkStatusViewModel)
-                }
-            }
-
-        }
-        is GetClientBookingViewModel.GetClientBookings.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center, // Centers vertically
-                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
-            ) {
-                Text(
-                    text = "NO BOOKINGS",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-        }
-        else ->  Unit
     }
 
 }
 
 @Composable
 fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
-    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
-        getClientBooking.getClientBookings()
+        getClientBooking.invalidatePagingSource()
     }
+    // Filter the bookings to get only those with status "Completed"
+    val completedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingstatus == "Completed" }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
 
-    when(clientbookingState){
-        is GetClientBookingViewModel.GetClientBookings.Loading ->{
-            //do nothing
+        ,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(completedBookings.size) { index ->
+            val completedbooking = completedBookings[index]
+            CompletedItem(completedbooking, navController )
         }
-        is GetClientBookingViewModel.GetClientBookings.Success ->{
-            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-            val completedBookings = booking.filter { it.bookingstatus == "Completed" }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
-
-                ,
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(completedBookings.size) { index ->
-                    val completedbooking = completedBookings[index]
-                    CompletedItem(completedbooking, navController )
-                }
-            }
-        }
-        is GetClientBookingViewModel.GetClientBookings.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center, // Centers vertically
-                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
-            ) {
-                Text(
-                    text = "NO BOOKINGS",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-        }
-        else ->  Unit
     }
 
 }
 @Composable
 fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
-    val clientbookingState by getClientBooking.clientbookingState.collectAsState()
+    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.getClientBookings()
+        getClientBooking.invalidatePagingSource()
     }
 
-    when(clientbookingState){
-        is GetClientBookingViewModel.GetClientBookings.Loading ->{
-            //do nothing
+    // Filter the bookings to get only those with status "Completed"
+    val completedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingstatus == "Cancelled" }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFD9D9D9))
+        ,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(completedBookings.size) { index ->
+            val cancelledbooking = completedBookings[index]
+            CancelledItem(cancelledbooking, navController )
         }
-        is GetClientBookingViewModel.GetClientBookings.Success ->{
-            val booking = (clientbookingState as GetClientBookingViewModel.GetClientBookings.Success).data
-            val cancelledBookings = booking.filter { it.bookingstatus == "Cancelled" }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
-                ,
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(cancelledBookings.size) { index ->
-                    val cancelledbooking = cancelledBookings[index]
-                    CancelledItem(cancelledbooking, navController )
-                }
-            }
-        }
-        is GetClientBookingViewModel.GetClientBookings.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center, // Centers vertically
-                horizontalAlignment = Alignment.CenterHorizontally // Centers horizontally
-            ) {
-                Text(
-                    text = "NO BOOKINGS",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-        }
-        else ->  Unit
     }
 
 }

@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
@@ -25,14 +24,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import com.example.androidproject.R
-import com.example.androidproject.view.Tradesman
+import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.Tradesmandate
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
-import com.example.androidproject.view.theme.myGradient
-import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.view.theme.myGradient4
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -41,7 +43,13 @@ import java.util.Locale
 
 
 @Composable
-fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) {
+fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, getClientsBooking: GetClientBookingViewModel) {
+    val clientBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
+
+    LaunchedEffect(Unit) {
+        getClientsBooking.invalidatePagingSource()
+    }
     Log.i("Screen", "ScheduleScreen")
 
     var selectedClientDate by remember { mutableStateOf(LocalDate.now()) }
@@ -49,20 +57,42 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var selectedFilter by remember { mutableStateOf("My Clients") }
 
-    val clients = listOf(
-        Tradesmandate(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark, "2025-02-17"),
-        Tradesmandate(R.drawable.pfp, "John", "Electrician", "P600/hr", 4.2, R.drawable.bookmark, "2025-02-18")
+    // Hardcoded applicants list remains unchanged
+    val applicants = listOf(
+        Tradesmandate("profile", "Sarah", "Carpenter", "P550/hr", 4.3f, R.drawable.bookmark, "2025-02-19"),
+        Tradesmandate("profile", "Mike", "Painter", "P480/hr", 4.0f, R.drawable.bookmark, "2025-02-20")
     )
 
-    val applicants = listOf(
-        Tradesmandate(R.drawable.pfp, "Sarah", "Carpenter", "P550/hr", 4.3, R.drawable.bookmark, "2025-02-19"),
-        Tradesmandate(R.drawable.pfp, "Mike", "Painter", "P480/hr", 4.0, R.drawable.bookmark, "2025-02-20")
-    )
+    // Collect all unique booking dates for calendar highlighting, filtering for Active bookingStatus
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val allBookingDates = remember(clientBooking) {
+        clientBooking.itemSnapshotList.filterNotNull()
+
+            .mapNotNull { booking ->
+                try {
+                    LocalDate.parse(booking.bookingdate, dateFormatter)
+                } catch (e: Exception) {
+                    null
+                }
+            }.toSet()
+    }
+
+    // Filter clientBooking based on selectedClientDate and Active bookingStatus
+    val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
+        .filter {
+            try {
+                val bookingDate = LocalDate.parse(it.bookingdate, dateFormatter)
+                bookingDate.isEqual(selectedClientDate)
+            } catch (e: Exception) {
+                false // Skip invalid dates
+            }
+        }
 
     val selectedDate = if (selectedFilter == "My Clients") selectedClientDate else selectedApplicantDate
 
     Box(
-        Modifier.fillMaxSize()
+        Modifier
+            .fillMaxSize()
             .padding(WindowInsets.statusBars.asPaddingValues())
     ) {
         Column(
@@ -84,13 +114,24 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController) 
                     }
                 },
                 onMonthChange = { month -> currentMonth = month },
-                tradesmen = if (selectedFilter == "My Clients") clients else applicants
+                allBookingDates = allBookingDates, // Pass all booking dates for highlighting
+                tradesmen = if (selectedFilter == "My Clients") filteredClients.map {
+                    Tradesmandate(
+                        it.tradesmanprofile, // Replace with proper image handling if available
+                        it.tradesmanfullname,
+                        it.tasktype,
+                        "P${it.workfee}",
+                        it.ratings,
+                        R.drawable.bookmark,
+                        it.bookingdate
+                    )
+                } else applicants
             )
 
             FilterSection(selectedDate, selectedFilter) { selectedFilter = it }
 
             if (selectedFilter == "My Clients") {
-                MyClientsList(clients, selectedClientDate)
+                MyClientsList(clientBooking, selectedClientDate)
             } else {
                 MyApplicantsList(applicants, selectedApplicantDate)
             }
@@ -159,11 +200,32 @@ fun FilterSection(
 }
 
 @Composable
-fun MyClientsList(clients: List<Tradesmandate>, selectedDate: LocalDate) {
+fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val filteredClients = clients.filter {
-        LocalDate.parse(it.date, dateFormatter).isEqual(selectedDate)
+    val allBookingDates = remember(clientBooking) {
+        clientBooking.itemSnapshotList.filterNotNull()
+            .filter { it.bookingstatus == "Active" } // Filter for Active bookingStatus
+            .mapNotNull { booking ->
+                try {
+                    LocalDate.parse(booking.bookingdate, dateFormatter)
+                } catch (e: Exception) {
+                    null
+                }
+            }.toSet()
     }
+
+    val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
+        .filter {
+            try {
+                val bookingDate = LocalDate.parse(it.bookingdate, dateFormatter)
+                bookingDate.isEqual(selectedDate) && it.bookingstatus == "Active" // Filter for Active bookingStatus
+            } catch (e: Exception) {
+                false // Skip invalid dates
+            }
+        }
+
+    Log.d("MyClientsList", "Selected Date: $selectedDate, Filtered Clients: $filteredClients, All Booking Dates: $allBookingDates")
+
     if (filteredClients.isEmpty()) {
         Box(
             modifier = Modifier
@@ -180,7 +242,10 @@ fun MyClientsList(clients: List<Tradesmandate>, selectedDate: LocalDate) {
         }
     } else {
         LazyColumn(
-            modifier = Modifier.fillMaxHeight().background(Color.White).padding(bottom = 70.dp),
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(Color.White)
+                .padding(bottom = 70.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(filteredClients) { client ->
@@ -189,7 +254,6 @@ fun MyClientsList(clients: List<Tradesmandate>, selectedDate: LocalDate) {
         }
     }
 }
-
 @Composable
 fun MyApplicantsList(applicants: List<Tradesmandate>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -212,7 +276,10 @@ fun MyApplicantsList(applicants: List<Tradesmandate>, selectedDate: LocalDate) {
         }
     } else {
         LazyColumn(
-            modifier = Modifier.fillMaxHeight().background(Color.White).padding(bottom = 70.dp),
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(Color.White)
+                .padding(bottom = 70.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(filteredApplicants) { applicant ->
@@ -222,23 +289,30 @@ fun MyApplicantsList(applicants: List<Tradesmandate>, selectedDate: LocalDate) {
     }
 }
 
+// Rest of the existing composables remain mostly unchanged, but we'll update CalendarSection
+
 @Composable
 fun CalendarSection(
     currentMonth: YearMonth,
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
     onMonthChange: (YearMonth) -> Unit,
+    allBookingDates: Set<LocalDate>, // New parameter for all booking dates
     tradesmen: List<Tradesmandate> // Pass the list of tradesmen
 ) {
-    // Extract dates with data
+    // Extract dates with data from allBookingDates (for My Clients) or tradesmen (for My Applicants)
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val datesWithData = tradesmen.mapNotNull { trade ->
-        try {
-            LocalDate.parse(trade.date, dateFormatter)
-        } catch (e: Exception) {
-            null
-        }
-    }.toSet() // Convert to a Set for quick lookup
+    val datesWithData = if (tradesmen.isNotEmpty()) {
+        tradesmen.mapNotNull { trade ->
+            try {
+                LocalDate.parse(trade.date, dateFormatter)
+            } catch (e: Exception) {
+                null
+            }
+        }.toSet()
+    } else {
+        allBookingDates // Use all booking dates for My Clients
+    }
 
     Card(
         modifier = Modifier
@@ -256,15 +330,14 @@ fun CalendarSection(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-
             ) {
                 // Navigation for month (e.g., Jan to Feb)
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-
                 ) {
                     IconButton(onClick = { onMonthChange(currentMonth.minusMonths(1)) }) {
                         Icon(
@@ -377,7 +450,8 @@ fun ScheduleTopSection(navController: NavController){
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
-                modifier = Modifier.size(35.dp)
+                modifier = Modifier
+                    .size(35.dp)
                     .clickable { navController.navigate("notification") }
             )
 
@@ -386,8 +460,7 @@ fun ScheduleTopSection(navController: NavController){
 
 
 @Composable
-fun MyClientsItem(trade: Tradesmandate) {
-
+fun MyClientsItem(Clients: GetClientsBooking) {
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -420,32 +493,35 @@ fun MyClientsItem(trade: Tradesmandate) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Image( painterResource(trade.imageResId),
+            AsyncImage(
+                model = Clients.tradesmanprofile,
                 contentDescription = "Tradesman Image",
-                modifier = Modifier.size(120.dp,120.dp)
+                modifier = Modifier
+                    .size(120.dp, 120.dp)
                     .padding(end = 10.dp))
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
                     .padding(top = 7.dp, start = 8.dp)
 
             ) {
                 Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
                         modifier = Modifier.padding( top = 5.dp),
-                        text = trade.username,
+                        text = Clients.tradesmanfullname,
                         color = Color.Black,
                         fontSize = nameTextSize
                     )
                     Text(
                         modifier = Modifier.padding( top = 5.dp, end = 15.dp),
-                        text = "Pending",
+                        text = Clients.bookingstatus,
                         color = Color.Black,
                         fontSize = smallTextSize
                     )
                 }
 
                 Text(
-                    text = trade.category,
+                    text = Clients.tasktype,
                     color = Color.Gray,
                     fontSize = taskTextSize
                 )
@@ -453,7 +529,8 @@ fun MyClientsItem(trade: Tradesmandate) {
                     modifier = Modifier.padding(top = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(modifier = Modifier.padding(end = 5.dp)
+                    Box(modifier = Modifier
+                        .padding(end = 5.dp)
                         .background(
                             color = Color(0xFFFFF2DD),
                             shape = RoundedCornerShape(5.dp)
@@ -463,7 +540,7 @@ fun MyClientsItem(trade: Tradesmandate) {
                          {
                             Text(
                                 modifier = Modifier.padding(5.dp),
-                                text = trade.rate,
+                                text = "P${Clients.workfee}",
                                 fontSize = smallTextSize
                             )
                         }
@@ -479,7 +556,9 @@ fun MyClientsItem(trade: Tradesmandate) {
                             modifier = Modifier.padding(5.dp)
                         ) {
                             Icon(
-                                modifier = Modifier.size(16.dp).padding(top = 5.dp),
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .padding(top = 5.dp),
                                 imageVector = Icons.Default.Star,
                                 contentDescription = "Rating",
 
@@ -487,7 +566,7 @@ fun MyClientsItem(trade: Tradesmandate) {
 
                             )
                             Text(
-                                text = trade.reviews.toString(),
+                                text = "${Clients.ratings}",
                                 fontSize = smallTextSize
 
                             )
@@ -496,7 +575,8 @@ fun MyClientsItem(trade: Tradesmandate) {
                 }
 
                 Row(
-                    modifier = Modifier.padding(top = 5.dp)
+                    modifier = Modifier
+                        .padding(top = 5.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
 
@@ -508,7 +588,7 @@ fun MyClientsItem(trade: Tradesmandate) {
 
                         )
                         Text(
-                            text = trade.date,
+                            text = Clients.bookingdate,
                             fontSize = smallTextSize
                         )
                     }
@@ -568,12 +648,14 @@ fun MyApplicantItem(trade: Tradesmandate) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Image( painterResource(trade.imageResId),
+         /*   Image( painterResource(),
                 contentDescription = "Tradesman Image",
-                modifier = Modifier.size(120.dp,120.dp)
-                    .padding(end = 10.dp))
+                modifier = Modifier
+                    .size(120.dp, 120.dp)
+                    .padding(end = 10.dp))*/
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
                     .padding(top = 7.dp, start = 8.dp)
 
             ) {
@@ -601,7 +683,8 @@ fun MyApplicantItem(trade: Tradesmandate) {
                     modifier = Modifier.padding(top = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(modifier = Modifier.padding(end = 5.dp)
+                    Box(modifier = Modifier
+                        .padding(end = 5.dp)
                         .background(
                             color = Color(0xFFFFF2DD),
                             shape = RoundedCornerShape(5.dp)
@@ -627,7 +710,9 @@ fun MyApplicantItem(trade: Tradesmandate) {
                             modifier = Modifier.padding(5.dp)
                         ) {
                             Icon(
-                                modifier = Modifier.size(16.dp).padding(top = 5.dp),
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .padding(top = 5.dp),
                                 imageVector = Icons.Default.Star,
                                 contentDescription = "Rating",
 
@@ -644,7 +729,8 @@ fun MyApplicantItem(trade: Tradesmandate) {
                 }
 
                 Row(
-                    modifier = Modifier.padding(top = 5.dp)
+                    modifier = Modifier
+                        .padding(top = 5.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
 

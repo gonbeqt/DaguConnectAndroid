@@ -3,6 +3,13 @@ package com.example.androidproject.model.client
 import com.google.gson.annotations.SerializedName
 
 
+data class GetClientsBookingResponse(
+    val bookings: List<GetClientsBooking>,
+    @SerializedName("current_page")
+    val currentPage: Int,
+    @SerializedName("total_pages")
+    val totalPages: Int
+)
 
 data class GetClientsBooking(
     val address: String,
