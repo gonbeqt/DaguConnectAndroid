@@ -126,8 +126,6 @@ fun BookmarkTradesmanTopSection(navController: NavController){
 }
 
 
-
-
 //Design For Items
 @Composable
 fun BookmarkTradesmanItem(trade: Tradesman) {

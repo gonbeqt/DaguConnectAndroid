@@ -130,7 +130,10 @@ interface ApiService {
     ): Response<PostJobApplicationResponse>
 
     @GET("/user/tradesman/job-applications")
-    suspend fun getMyJobApplications(): Response<List<GetJobApplicationData>>
+    suspend fun getMyJobApplications(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicationData>
+
+    @GET("user/client/job-applications")
+    suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicationData>
 
     @GET("/user/message/{chatId}")
     suspend fun getConversation(@Path("chatId") chatId: Int): Response<List<GetMessages>>

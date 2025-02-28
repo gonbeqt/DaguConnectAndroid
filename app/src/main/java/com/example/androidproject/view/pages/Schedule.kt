@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -426,22 +427,25 @@ fun CalendarSection(
 
 @Composable
 fun ScheduleTopSection(navController: NavController){
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 25.dp)
-            .fillMaxWidth()
-            .height(70.dp),
+
+    Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Left-aligned text
-        Text(
-            text = "Schedule",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Medium
-        )
 
+    )  {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 25.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
 
+        ) {
+            Text(
+                text = "Schedule",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Medium
+            )
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
@@ -450,7 +454,7 @@ fun ScheduleTopSection(navController: NavController){
                     .size(35.dp)
                     .clickable { navController.navigate("notification") }
             )
-
+        }
     }
 }
 
