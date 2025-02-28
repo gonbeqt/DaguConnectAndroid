@@ -64,6 +64,8 @@ import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
+
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
@@ -92,6 +94,7 @@ import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewM
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
 import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
+import com.example.androidproject.viewmodel.factories.resumes.SubmitResumeViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
@@ -188,6 +191,9 @@ class MainActivity : ComponentActivity() {
 
         val viewTradesmanProfileVMFactory = ViewTradesmaProfileViewModelFactory(apiService, this)
         val viewTradesmanProfileViewModel = ViewModelProvider(this, viewTradesmanProfileVMFactory)[ViewTradesmanProfileViewModel::class.java]
+
+        val submitResumeVMFactory = SubmitResumeViewModelFactory(apiService, this)
+        val submitResumeViewModel = ViewModelProvider(this, submitResumeVMFactory)[SubmitResumeViewModel::class.java]
 
 
         setContent {
@@ -345,7 +351,7 @@ class MainActivity : ComponentActivity() {
                         AvailabilityStatus(modifier = Modifier, navController)
                     }
                     composable("profileverification") {
-                        ProfileVerification(modifier = Modifier, navController)
+                        ProfileVerification(modifier = Modifier, navController,submitResumeViewModel)
                     }
                     composable("canceltradesmannow") {
                         CancelTradesmanNow(navController)

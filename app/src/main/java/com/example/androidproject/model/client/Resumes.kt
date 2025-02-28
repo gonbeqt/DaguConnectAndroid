@@ -34,6 +34,10 @@ data class resumesItem(
     val is_active: Int
 )
 
+data class SubmitResumeResponse(
+    val message: String
+)
+
 
 
 
