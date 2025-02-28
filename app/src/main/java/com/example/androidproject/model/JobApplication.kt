@@ -27,13 +27,26 @@ data class JobApplicationData(
     val resumeId: Int,
     @SerializedName("job_id")
     val jobId: Int,
+    @SerializedName("client_id")
+    val clientId: Int,
+    @SerializedName("client_fullname")
+    val clientFullname: String,
+    @SerializedName("tradesman_fullname")
+    val tradesmanFullname: String,
     @SerializedName("tradesman_profile_picture")
     val tradesmanProfilePicture: String,
+    @SerializedName("client_profile_picture")
+    val clientProfilePicture: String,
+    @SerializedName("job_address")
+    val jobAddress: String,
     @SerializedName("job_type")
     val jobType: String,
+    @SerializedName("job_deadline")
+    val jobDeadline: String,
     @SerializedName("qualification_summary")
     val qualificationSummary: String,
     val status: String,
     @SerializedName("created_at")
-    val createdAt: String,
+    val createdAt: String
 )
+

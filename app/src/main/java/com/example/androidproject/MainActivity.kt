@@ -83,6 +83,7 @@ import com.example.androidproject.viewmodel.factories.bookings.ViewClientBooking
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.client_profile.GetClientProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.PostJobApplicationViewModelFactory
+import com.example.androidproject.viewmodel.factories.job_application.tradesman.GetMyJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetRecentJobsViewModelFactory
@@ -94,6 +95,7 @@ import com.example.androidproject.viewmodel.factories.report.ReportViewModelFact
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
+import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
@@ -189,6 +191,8 @@ class MainActivity : ComponentActivity() {
         val viewTradesmanProfileVMFactory = ViewTradesmaProfileViewModelFactory(apiService, this)
         val viewTradesmanProfileViewModel = ViewModelProvider(this, viewTradesmanProfileVMFactory)[ViewTradesmanProfileViewModel::class.java]
 
+        val getMyJobApplicationViewModelFactory = GetMyJobApplicationViewModelFactory(apiService, this)
+        val getMyJobApplicationViewModel = ViewModelProvider(this, getMyJobApplicationViewModelFactory)[GetMyJobApplicationViewModel::class.java]
 
         setContent {
             AndroidProjectTheme {
@@ -221,7 +225,8 @@ class MainActivity : ComponentActivity() {
                             getClientProfileViewModel,
                             updateWorkStatusViewModel,
                             getRecentJobsViewModel,
-                            viewTradesmanProfileViewModel)
+                            viewTradesmanProfileViewModel,
+                            getMyJobApplicationViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -327,7 +332,7 @@ class MainActivity : ComponentActivity() {
                         HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController)
+                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel)
                     }
                     composable("bookmarkedtradesman") {
                         BookmarkedTradesman(modifier = Modifier,navController)

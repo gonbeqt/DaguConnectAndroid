@@ -55,6 +55,7 @@ import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
@@ -75,7 +76,8 @@ fun MainScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     updateWorkStatusViewModel : UpdateWorkStatusViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel,
-    viewTradesmanProfileViewModel : ViewTradesmanProfileViewModel
+    viewTradesmanProfileViewModel : ViewTradesmanProfileViewModel,
+    getMyJobApplications: GetMyJobApplicationViewModel
     ) {
     val context = LocalContext.current
     val navItems = listOf(
@@ -181,7 +183,8 @@ fun MainScreen(
             getClientProfileViewModel,
             updateWorkStatusViewModel,
             getRecentJobsViewModel,
-            viewTradesmanProfileViewModel
+            viewTradesmanProfileViewModel,
+            getMyJobApplications
             )
     }
 }
@@ -202,7 +205,8 @@ fun ContentScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     updateWorkStatusViewModel: UpdateWorkStatusViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel,
-    viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel
+    viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
+    getMyJobApplications: GetMyJobApplicationViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -218,7 +222,7 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier, navController)
+            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel)

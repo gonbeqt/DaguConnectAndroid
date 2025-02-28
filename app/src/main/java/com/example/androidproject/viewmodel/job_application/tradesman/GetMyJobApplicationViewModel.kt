@@ -9,7 +9,9 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.JobApplicationData
+import com.example.androidproject.viewmodel.factories.job_application.tradesman.GetMyJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.job_application.client.paginate.GetMyJobApplicantsPagingSource
+import com.example.androidproject.viewmodel.job_application.client.paginate.GetMyJobApplicationPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -25,7 +27,7 @@ class GetMyJobApplicationViewModel(private val apiService: ApiService, private v
                 prefetchDistance = 2,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { GetMyJobApplicantsPagingSource(apiService) }
+            pagingSourceFactory = { GetMyJobApplicationPagingSource(apiService) }
         ).flow.cachedIn(viewModelScope)
     }
 

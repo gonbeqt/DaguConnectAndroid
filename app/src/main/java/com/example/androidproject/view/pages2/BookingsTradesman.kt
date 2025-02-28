@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role.Companion.Checkbox
 import androidx.compose.ui.text.font.FontWeight
@@ -55,17 +56,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController) {
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -164,7 +168,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             }
 
                             "My Submissions" -> when (selectedTabIndex) {
-                                0 -> AllMySubmissionsTradesmanContent()
+                                0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
                                 1 -> PendingMySubmissionsTradesmanContent(navController)
                                 2 -> DeclinedMySubmissionsTradesmanContent(navController)
                                 3 -> ActiveMySubmissionsTradesmanContent(navController)
@@ -1631,7 +1635,8 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
 //MY SUBMISSION
 //MY SUBMISSION
 @Composable
-fun AllMySubmissionsTradesmanContent() {
+fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationViewModel) {
+    val myJobs = getMyJobApplications.jobApplicantsPagingData.collectAsLazyPagingItems()
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
@@ -1654,9 +1659,11 @@ fun AllMySubmissionsTradesmanContent() {
         ,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(tradesman.size) { index ->
-            val trade = tradesman[index]
-            AllMySubmissionsTradesmanItem(trade)
+        items(myJobs.itemCount) { index ->
+            val myJob = myJobs[index]
+            if (myJob != null) {
+                AllMySubmissionsTradesmanItem(myJob)
+            }
         }
     }
 }
@@ -1818,12 +1825,17 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController) {
 
 //Design For Items
 @Composable
-fun AllMySubmissionsTradesmanItem(trade: Tradesman) {
+fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 190.dp
         WindowType.MEDIUM -> 400.dp to 200.dp
         WindowType.LARGE -> 410.dp to 210.dp
+    }
+    var jobType = myJob.jobType
+
+    if (jobType == "Electrical_work") {
+        jobType = "Electrical Work"
     }
 
     Card(
@@ -1844,15 +1856,14 @@ fun AllMySubmissionsTradesmanItem(trade: Tradesman) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                // Tradesman image
-                Image(
-                    painter = painterResource(trade.imageResId),
-                    contentDescription = "Tradesman Image",
+                AsyncImage(
+                    model = myJob.clientProfilePicture, // Use URL here
+                    contentDescription = "Profile Image",
                     modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
+                        .size(62.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
-
                 // Tradesman details
                 Column(
                     modifier = Modifier
@@ -1862,33 +1873,33 @@ fun AllMySubmissionsTradesmanItem(trade: Tradesman) {
                 ) {
                     Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                         Text(
-                            text = trade.username,
+                            text = myJob.clientFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-                        Text(text = "Pending", fontSize = 14.sp)
+                        Text(text = myJob.status, fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Service: Plumbing Repair",
+                        text = "Service: $jobType ",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Date: Jan 15, 2025",
+                        text = "Applied at: ${myJob.createdAt}",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
                     Text(
-                        text = "Time: 10:00 AM",
+                        text = "Submission Deadline: ${myJob.jobDeadline}",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Location: 123 Elm Street",
+                        text = "Address: ${myJob.jobAddress}",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
