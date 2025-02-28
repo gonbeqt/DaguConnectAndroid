@@ -1630,7 +1630,7 @@ fun CancelledItem(trade: Tradesman, navController: NavController) {
 //MY SUBMISSION
 //MY SUBMISSION
 @Composable
-fun AllMySubmissionsTradesmanContent() {
+fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationViewModel) {
     val tradesman = listOf(
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark),
         Tradesman(R.drawable.pfp,"Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark) ,
