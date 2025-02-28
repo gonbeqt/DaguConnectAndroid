@@ -52,12 +52,20 @@ import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 
 
 @Composable
-fun ProfileVerification(modifier: Modifier = Modifier, navController: NavController,submitResumeViewModel: SubmitResumeViewModel) {
+fun ProfileVerification(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    submitResumeViewModel: SubmitResumeViewModel,
+    statusofapproval: String
+) {
     val submitResumeState by submitResumeViewModel.submitResumeState.collectAsState()
 
+    // Initialize currentStep and progressPercentage based on statusofapproval
+    val initialStep = if (statusofapproval == "Pending") 5 else 1
+    val initialProgress = if (statusofapproval == "Pending") 100 else 0
 
-    var currentStep by remember { mutableStateOf(1) }
-    var progressPercentage by remember { mutableStateOf(0) }
+    var currentStep by remember { mutableStateOf(initialStep) }
+    var progressPercentage by remember { mutableStateOf(initialProgress) }
 
     val context = LocalContext.current
 
@@ -536,7 +544,6 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                                                 currentStep = 5
                                                 progressPercentage = 100
                                             }
-
                                         }
                                     } else {
                                         showErrorMessage()
@@ -557,18 +564,15 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
                             )
                         }
                         LaunchedEffect(submitResumeState) {
-
                             when(val submitresume = submitResumeState){
                                 is SubmitResumeViewModel.SubmitResumeState.Loading -> {
                                     // nothing
                                 }
                                 is SubmitResumeViewModel.SubmitResumeState.Success -> {
-                                  Toast.makeText(context,"Resume submitted successfully", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context,"Resume submitted successfully", Toast.LENGTH_SHORT).show()
                                     submitResumeViewModel.resetState()
-
                                 }
                                 is SubmitResumeViewModel.SubmitResumeState.Error -> {
-
                                     val error = submitresume.message
                                     Toast.makeText(context,error, Toast.LENGTH_SHORT).show()
                                     Log.d("testerrerro", error)
@@ -583,7 +587,6 @@ fun ProfileVerification(modifier: Modifier = Modifier, navController: NavControl
         }
     }
 }
-
 @Composable
 fun StepProgressIndicator(currentStep: Int, totalSteps: Int = 5) {
     Row(

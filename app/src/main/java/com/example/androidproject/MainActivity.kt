@@ -362,8 +362,9 @@ class MainActivity : ComponentActivity() {
                     composable("availabilitystatus") {
                         AvailabilityStatus(modifier = Modifier, navController)
                     }
-                    composable("profileverification") {
-                        ProfileVerification(modifier = Modifier, navController,submitResumeViewModel)
+                    composable("profileverification/{statusofapproval}") { backStackEntry ->
+                        val statusofapproval = backStackEntry.arguments?.getString("statusofapproval") ?: ""
+                        ProfileVerification(modifier = Modifier, navController,submitResumeViewModel,statusofapproval)
                     }
                     composable("canceltradesmannow") {
                         CancelTradesmanNow(navController)

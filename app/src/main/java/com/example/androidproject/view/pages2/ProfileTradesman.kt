@@ -235,8 +235,7 @@ fun ProfileTradesman(
 }
 
 @Composable
-fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
-
+fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
     var scale by remember { mutableStateOf(1f) }
 
     val animatedScale by animateFloatAsState(
@@ -252,34 +251,51 @@ fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
     LaunchedEffect(Unit) {
         while (true) {
             scale = if (scale == 1f) 1.1f else 1f
-            delay(800.milliseconds) // Match with animation duration
+            delay(800.milliseconds)
         }
     }
 
-    // Additional Layout from Image
+    // Check if isapprove is 0, then set all fields to "N/A" or appropriate defaults
+    val displayDetails = if (tradesmanDetails.isapprove == 0) {
+        tradesmanDetails.copy(
+            specialty = "N/A",
+            aboutme = "N/A",
+            preferedworklocation = "N/A",
+            workfee = 0,
+            phonenumber = "N/A" // Provide a default non-null value for phonenumber
+            // Add other non-nullable fields here if they exist
+        )
+    } else {
+        tradesmanDetails
+    }
+
+    // Rest of the composable remains the same...
     Column(modifier = Modifier.padding(8.dp).verticalScroll(rememberScrollState())) {
-        Box(modifier = Modifier
-            .border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
-            Column(modifier = Modifier
-                .padding(10.dp))
-            {
-                if(tradesmanDetails.isapprove == 0 ){
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .scale(animatedScale)
-                        .background(Color(0xFF3E5CE1), RoundedCornerShape(10.dp))
-                        .clickable {
-                            navController.navigate("profileverification")
-                            scale = 1.1f  },
-                        contentAlignment = Alignment.Center){
-                        Row(modifier = Modifier.fillMaxWidth(),
+        Box(modifier = Modifier.border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                if (tradesmanDetails.isapprove == 0) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                            .scale(animatedScale)
+                            .background(Color(0xFF3E5CE1), RoundedCornerShape(10.dp))
+                            .clickable {
+                                navController.navigate("profileverification/${tradesmanDetails.statusofapproval}")
+                                scale = 1.1f
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center
-                        ){
-
-                            Text(modifier = Modifier.padding(8.dp), text = "Verify Profile", color = Color.White, fontSize = 14.sp)
-
-
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(8.dp),
+                                text = "Verify Profile",
+                                color = Color.White,
+                                fontSize = 14.sp
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.height(10.dp))
@@ -291,13 +307,11 @@ fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Specialty : ${tradesmanDetails.specialty?.takeIf { it != "null" } ?: "N/A"}",
+                        text = "Specialty : ${displayDetails.specialty?.takeIf { it != "null" } ?: "N/A"}",
                         color = Color.Gray,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-
-
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Column {
@@ -306,19 +320,19 @@ fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "About Me:",
+                        Text(
+                            text = "About Me:",
                             fontSize = 16.sp,
                             color = Color.Gray,
-                            fontWeight = FontWeight.Bold)
-
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                     Text(
-                        text = tradesmanDetails.aboutme?: "N/A",
+                        text = displayDetails.aboutme ?: "N/A",
                         fontSize = 16.sp,
                         color = Color.Gray,
                         fontWeight = FontWeight.Normal
                     )
-
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -327,13 +341,11 @@ fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Preferred Location : ${tradesmanDetails.preferedworklocation?: "N/A"} ",
+                        text = "Preferred Location : ${displayDetails.preferedworklocation ?: "N/A"}",
                         color = Color.Gray,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-
-
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -341,27 +353,26 @@ fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(   text = "Est. Rate : ${tradesmanDetails.workfee?.takeIf { it != 0 }?.toString() ?: "N/A"}",
+                    Text(
+                        text = "Est. Rate : ${displayDetails.workfee?.takeIf { it != 0 }?.toString() ?: "N/A"}",
                         fontSize = 16.sp,
                         color = Color.Gray,
-                        fontWeight = FontWeight.Bold)
-
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Trade Credential :",
+                    Text(
+                        text = "Trade Credential :",
                         fontSize = 16.sp,
                         color = Color.Gray,
-                        fontWeight = FontWeight.Bold)
-
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-
-
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -369,7 +380,7 @@ fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
             Text(text = "Ratings and Testimonials", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(text = "Feedback from satisfied clients", fontSize = 14.sp, color = Color.Gray)
             Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
                     Text(
                         text = "Showcase your services to earn reviews!",
@@ -379,7 +390,6 @@ fun JobProfile(navController: NavController,tradesmanDetails : viewResume ){
                 }
             }
         }
-
     }
 }
 

@@ -23,7 +23,6 @@ import com.example.androidproject.model.client.GetClientsBookingResponse
 import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
-import com.example.androidproject.model.client.SubmitResumeRequest
 import com.example.androidproject.model.client.SubmitResumeResponse
 import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.rateTradesmanRequest

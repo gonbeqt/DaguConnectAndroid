@@ -26,5 +26,8 @@ data class viewResume(
     @SerializedName("about_me")
     val aboutme: String,
     @SerializedName("is_approve")
-    val isapprove: Int
+    val isapprove: Int,
+    @SerializedName("status_of_approval")
+    val statusofapproval: String
+
 )
