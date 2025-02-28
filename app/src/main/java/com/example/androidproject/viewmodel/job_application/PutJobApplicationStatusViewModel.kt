@@ -4,10 +4,8 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
-import com.example.androidproject.model.PostJobApplicationResponse
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
-import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel.PostJobApplicationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -33,6 +31,10 @@ class PutJobApplicationStatusViewModel(private val apiService: ApiService, priva
                 _PutJobApplicationStatusState.value = PutJobApplicationState.Error(e.message ?: "An error occurred")
             }
         }
+    }
+
+    fun resetState() {
+        _PutJobApplicationStatusState.value = PutJobApplicationState.Idle
     }
 
     sealed class PutJobApplicationState{

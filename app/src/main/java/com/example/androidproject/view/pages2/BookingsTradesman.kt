@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages2
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +39,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +70,6 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
-import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
@@ -221,7 +223,11 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
         // Right-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == "My Submissions") myGradient3 else SolidColor(Color.Transparent))
+                .background(
+                    if (selectedSection == "My Submissions") myGradient3 else SolidColor(
+                        Color.Transparent
+                    )
+                )
                 .padding(4.dp)
                 .weight(1f),
         ) {
@@ -425,7 +431,7 @@ fun AllTradesmanItem(allBooking: GetClientsBooking) {
 
     Card(
         modifier = Modifier
-            .size(cardHeight.first,cardHeight.second)
+            .size(cardHeight.first, cardHeight.second)
             .clickable { }, // Add implementation for click if needed
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -606,7 +612,9 @@ fun PendingTradesmanItem(pending: GetClientsBooking, navController: NavControlle
                                 modifier = Modifier
                                     .background(
                                         color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
                                     )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
@@ -985,7 +993,8 @@ fun DeclinedTradesmanItem(declined: GetClientsBooking, navController: NavControl
                     contentAlignment = Alignment.Center
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
 
                             .clickable { }
                             .background(
@@ -1094,7 +1103,9 @@ fun ActiveTradesmanItem(active: GetClientsBooking, navController: NavController)
                                 modifier = Modifier
                                     .background(
                                         color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
                                     )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
@@ -1132,7 +1143,7 @@ fun ActiveTradesmanItem(active: GetClientsBooking, navController: NavController)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { }
                             .background(
                                 color = Color(0xFFC51B1B),
                                 shape = RoundedCornerShape(12.dp)
@@ -1149,7 +1160,7 @@ fun ActiveTradesmanItem(active: GetClientsBooking, navController: NavController)
 
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { }
                             .background(
                                 color = Color(0xFF42C2AE),
                                 shape = RoundedCornerShape(12.dp)
@@ -1247,7 +1258,9 @@ fun CompletedItem(completed: GetClientsBooking, navController: NavController) {
                                 modifier = Modifier
                                     .background(
                                         color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                            12.dp
+                                        )
                                     )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
@@ -1289,7 +1302,7 @@ fun CompletedItem(completed: GetClientsBooking, navController: NavController) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1307,7 +1320,7 @@ fun CompletedItem(completed: GetClientsBooking, navController: NavController) {
 
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1450,7 +1463,8 @@ fun CancelledItem(cancel: GetClientsBooking, navController: NavController) {
                     contentAlignment = Alignment.Center
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
 
                             .clickable { }
                             .background(
@@ -1507,27 +1521,37 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
 
 
 @Composable
-fun PendingMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
+fun PendingMySubmissionsTradesmanContent(
+    navController: NavController,
+    getMyJobApplications: GetMyJobApplicationViewModel,
+    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
+) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
     }
-    val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
+
     LazyColumn(
         modifier = Modifier
             .padding(bottom = 70.dp)
-
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
+            .background(Color(0xFFD9D9D9)),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(pendingApplication.size) { index ->
-            val pendingJobs = pendingApplication[index]
-            PendingMySubmissionsTradesmanItem(myJob = pendingJobs, navController = navController, putJobApplicationStatusViewModel)
+        items(myJob.itemCount) { index ->
+            val job = myJob[index]
+            if (job != null && job.status == "Pending") {
+                PendingMySubmissionsTradesmanItem(
+                    myJob = job,
+                    navController = navController,
+                    putJobApplicationStatusViewModel = putJobApplicationStatusViewModel,
+                    onJobCancelled = {
+                        myJob.refresh() // Refresh list when job is canceled
+                    }
+                )
+            }
         }
     }
 }
@@ -1730,13 +1754,29 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
 
 
 @Composable
-fun PendingMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
-    val putState = putJobApplicationStatusViewModel.postJobApplicationState.collectAsState()
+fun PendingMySubmissionsTradesmanItem(
+    myJob: JobApplicationData,
+    navController: NavController,
+    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
+    onJobCancelled: () -> Unit
+) {
+    val putState by putJobApplicationStatusViewModel.postJobApplicationState.collectAsState()
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
         WindowType.LARGE -> 420.dp to 280.dp
+    }
+
+    LaunchedEffect(putState) {
+        when (putState) {
+            is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
+                Toast.makeText(navController.context, "Job cancelled", Toast.LENGTH_SHORT).show()
+                putJobApplicationStatusViewModel.resetState()
+                onJobCancelled() // Refresh list
+            }
+            else -> {}
+        }
     }
 
     Card(
@@ -1815,7 +1855,9 @@ fun PendingMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: 
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { }
+                            .clickable {
+                                putJobApplicationStatusViewModel.putJobApplicationStatus(myJob.id, "Cancelled", "Cancelled It Test")
+                            }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -2051,7 +2093,8 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                     contentAlignment = Alignment.Center
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
 
                             .clickable { }
                             .background(
@@ -2241,7 +2284,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     ) {
 
                         Text(
-                            text = trade.username,
+                            text = myJob.clientFullname,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
@@ -2280,7 +2323,8 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     contentAlignment = Alignment.Center
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .clickable { }
                             .background(
                                 color = Color.Transparent,
