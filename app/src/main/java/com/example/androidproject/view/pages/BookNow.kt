@@ -176,11 +176,13 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 
                                             )
                                         }
-                                        Text(
-                                            text = resume.preferedworklocation,
-                                            color = Color.Black,
-                                            fontSize = 16.sp
-                                        )
+                                        resume.preferedworklocation?.let {
+                                            Text(
+                                                text = it,
+                                                color = Color.Black,
+                                                fontSize = 16.sp
+                                            )
+                                        }
 
 
                                     }
@@ -241,11 +243,13 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                             fontSize = 18.sp,
                                             fontWeight = FontWeight(500))
 
-                                        Text(
-                                            text = resume.preferedworklocation,
-                                            color = Color.Black,
-                                            fontSize = 16.sp,
-                                        )
+                                        resume.preferedworklocation?.let {
+                                            Text(
+                                                text = it,
+                                                color = Color.Black,
+                                                fontSize = 16.sp,
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -284,7 +288,9 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 
                                                     val fileUrl = resume.documents // Assuming this is the URL to the file
                                                     val fileName = "trade_credential_${resume.tradesmanfullname}.pdf" // Customize the file name as needed
-                                                    downloadFile(context, fileUrl, fileName)
+                                                    if (fileUrl != null) {
+                                                        downloadFile(context, fileUrl, fileName)
+                                                    }
                                                 }
                                         )
                                     }

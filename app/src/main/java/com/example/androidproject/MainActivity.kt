@@ -70,6 +70,7 @@ import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
@@ -80,6 +81,7 @@ import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.ViewTradesmaProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
+import com.example.androidproject.viewmodel.factories.bookings.GetTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.UpdateWorkStatusViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.ViewClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
@@ -215,6 +217,9 @@ class MainActivity : ComponentActivity() {
 
         val viewJobApplicationViewModelFactory = ViewJobApplicationViewModelFactory(apiService, this)
         val viewJobApplicationViewModel = ViewModelProvider(this, viewJobApplicationViewModelFactory)[ViewJobApplicationViewModel::class.java]
+
+        val getTradesmanBookingVMFactory = GetTradesmanViewModelFactory(apiService)
+        val getTradesmanBookingViewModel = ViewModelProvider(this, getTradesmanBookingVMFactory)[GetTradesmanBookingViewModel::class.java]
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -250,7 +255,8 @@ class MainActivity : ComponentActivity() {
                             getMyJobApplicationViewModel,
                             putJobApplicationStatusViewModel,
                             getMyJobApplicantsViewModel,
-                            viewJobApplicationViewModel)
+                            viewJobApplicationViewModel,
+                            getTradesmanBookingViewModel)
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -361,7 +367,7 @@ class MainActivity : ComponentActivity() {
                         HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getClientBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
+                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
                     }
                     composable("bookmarkedtradesman") {
                         BookmarkedTradesman(modifier = Modifier,navController)

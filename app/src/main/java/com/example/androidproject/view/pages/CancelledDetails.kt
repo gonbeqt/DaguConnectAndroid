@@ -77,7 +77,7 @@ fun HeaderSection(navController: NavController) {
                         color = Color.Black,
                         textAlign = TextAlign.Left,
                         modifier = Modifier
-                            .padding(top = 15.dp)
+                            .padding(top = 16.dp)
                             .weight(1f)
                     )
                 }

@@ -26,6 +26,7 @@ import com.example.androidproject.model.client.BookTradesmanResponse
 
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.model.client.GetClientsBookingResponse
+import com.example.androidproject.model.client.GetTradesmanBookingResponse
 import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
@@ -164,4 +165,7 @@ interface ApiService {
 
     @GET("/user/job-applications/view/{jobId}")
     suspend fun viewJobApplication(@Path("jobId") jobId: Int): Response<ViewJobApplicationResponse>
+
+    @GET("/user/tradesman/getbooking")
+    suspend fun getTradesmanBooking(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10) : Response <GetTradesmanBookingResponse>
 }

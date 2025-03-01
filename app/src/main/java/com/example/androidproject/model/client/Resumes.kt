@@ -1,4 +1,4 @@
-package com.example.androidproject.model.client
+    package com.example.androidproject.model.client
 
 import com.google.gson.annotations.SerializedName
 data class ResumesResponse(

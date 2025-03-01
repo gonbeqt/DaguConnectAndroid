@@ -5,15 +5,15 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.client.GetClientsBooking
-import com.example.androidproject.model.client.resumesItem
+import com.example.androidproject.model.client.GetTradesmanBooking
 
-class GetClientBookingPagingSource(private val apiService: ApiService) : PagingSource<Int, GetClientsBooking>() {
+class GetTradesmanBookingPagingSource(private val apiService: ApiService) : PagingSource<Int, GetTradesmanBooking>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GetClientsBooking> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GetTradesmanBooking> {
         return try {
             val page = params.key ?: 1
             Log.d("PagingSource", "Loading page $page")
-            val response = apiService.getClientBooking(page, params.loadSize)
+            val response = apiService.getTradesmanBooking(page, params.loadSize)
             val bookings = response.body()?.bookings ?: emptyList()
             Log.d("PagingSource", "Loaded ${bookings.size} items")
             LoadResult.Page(
@@ -27,7 +27,7 @@ class GetClientBookingPagingSource(private val apiService: ApiService) : PagingS
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, GetClientsBooking>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, GetTradesmanBooking>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)

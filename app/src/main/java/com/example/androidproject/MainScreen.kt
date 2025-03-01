@@ -47,12 +47,14 @@ import com.example.androidproject.view.pages2.ScheduleTradesman
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.model.client.GetTradesmanBooking
 import com.example.androidproject.view.pages.MessageScreen
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
@@ -84,7 +86,8 @@ fun MainScreen(
     getMyJobApplications: GetMyJobApplicationViewModel,
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
-    viewJobsApplication: ViewJobApplicationViewModel
+    viewJobsApplication: ViewJobApplicationViewModel,
+    getTradesmanBooking : GetTradesmanBookingViewModel
     ) {
     val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
@@ -200,7 +203,8 @@ fun MainScreen(
             getMyJobApplications,
             putJobApplicationStatusViewModel,
             getMyJobApplicantsViewModel,
-            viewJobsApplication
+            viewJobsApplication,
+            getTradesmanBooking
             )
     }
 }
@@ -225,7 +229,8 @@ fun ContentScreen(
     getMyJobApplications: GetMyJobApplicationViewModel,
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
-    viewJobsApplication: ViewJobApplicationViewModel
+    viewJobsApplication: ViewJobApplicationViewModel,
+    getTradesmanBooking : GetTradesmanBookingViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -241,7 +246,7 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getClientsBooking, putJobApplicationStatusViewModel, viewJobsApplication)
+            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel)

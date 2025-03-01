@@ -59,16 +59,18 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.model.client.GetTradesmanBooking
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel,getClientsBooking: GetClientBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel,getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -158,12 +160,12 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     ) {
                         when (selectedSection) {
                             "My Jobs" -> when (selectedTabIndex) {
-                                0 -> AllBookingsTradesmanContent(getClientsBooking)
-                                1 -> PendingBookingsTradesmanContent(navController,getClientsBooking)
-                                2 -> DeclinedBookingsTradesmanContent(navController,getClientsBooking)
-                                3 -> ActiveBookingsTradesmanContent(navController,getClientsBooking)
-                                4 -> CompletedBookingsTradesmanContent(navController,getClientsBooking)
-                                5 -> CancelledBookingsTradesmanContent(navController,getClientsBooking)
+                                0 -> AllBookingsTradesmanContent(getTradesmanBooking)
+                                1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking)
+                                2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
+                                3 -> ActiveBookingsTradesmanContent(navController,getTradesmanBooking)
+                                4 -> CompletedBookingsTradesmanContent(navController,getTradesmanBooking)
+                                5 -> CancelledBookingsTradesmanContent(navController,getTradesmanBooking)
                             }
 
                             "My Submissions" -> when (selectedTabIndex) {
@@ -248,11 +250,11 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
 }
 
 @Composable
-fun AllBookingsTradesmanContent(getClientsBooking: GetClientBookingViewModel) {
-    val allBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewModel) {
+    val allBooking = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientsBooking.invalidatePagingSource()
+        getTradesmanBooking.invalidatePagingSource()
     }
     LazyColumn(
         modifier = Modifier
@@ -272,9 +274,12 @@ fun AllBookingsTradesmanContent(getClientsBooking: GetClientBookingViewModel) {
     }
 }
 @Composable
-fun PendingBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
-    val bookingPendingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun PendingBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
+    val bookingPendingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
+    LaunchedEffect(Unit) {
+        getTradesmanBooking.invalidatePagingSource()
+    }
     val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
     LazyColumn(
         modifier = Modifier
@@ -295,8 +300,12 @@ fun PendingBookingsTradesmanContent(navController: NavController,getClientsBooki
     }
 }
 @Composable
-fun DeclinedBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
-  val declinedBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
+  val declinedBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        getTradesmanBooking.invalidatePagingSource()
+    }
 
     val declinedBookings = declinedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
 
@@ -320,9 +329,12 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getClientsBook
 }
 
 @Composable
-fun ActiveBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
-   val activeBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
+   val activeBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
+    LaunchedEffect(Unit) {
+        getTradesmanBooking.invalidatePagingSource()
+    }
     val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Active" }
     LazyColumn(
         modifier = Modifier
@@ -345,9 +357,12 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getClientsBookin
 }
 
 @Composable
-fun CompletedBookingsTradesmanContent(navController: NavController,getClientsBooking:GetClientBookingViewModel) {
-    val completedBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
+    val completedBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
+    LaunchedEffect(Unit) {
+        getTradesmanBooking.invalidatePagingSource()
+    }
     val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
 
     LazyColumn(
@@ -370,8 +385,11 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getClientsBoo
     }
 }
 @Composable
-fun CancelledBookingsTradesmanContent(navController: NavController,getClientsBooking: GetClientBookingViewModel) {
-    val cancelledBookingstate = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
+    val cancelledBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        getTradesmanBooking.invalidatePagingSource()
+    }
 
     val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Cancelled" }
 
@@ -398,7 +416,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getClientsBoo
 
 //Design For Items
 @Composable
-fun AllTradesmanItem(allBooking: GetClientsBooking) {
+fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -520,7 +538,7 @@ fun AllTradesmanItem(allBooking: GetClientsBooking) {
 
 
 @Composable
-fun PendingTradesmanItem(pending: GetClientsBooking, navController: NavController) {
+fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavController) {
     var showApproveDialog by remember { mutableStateOf(false) }
     var showDeclineDialog by remember { mutableStateOf(false) }
     var showJobApproveDialog by remember { mutableStateOf(false) }
@@ -861,7 +879,7 @@ fun PendingTradesmanItem(pending: GetClientsBooking, navController: NavControlle
 
 
     @Composable
-fun DeclinedTradesmanItem(declined: GetClientsBooking, navController: NavController) {
+fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1010,7 +1028,7 @@ fun DeclinedTradesmanItem(declined: GetClientsBooking, navController: NavControl
 }
 
 @Composable
-fun ActiveTradesmanItem(active: GetClientsBooking, navController: NavController) {
+fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -1172,7 +1190,7 @@ fun ActiveTradesmanItem(active: GetClientsBooking, navController: NavController)
 
 }
 @Composable
-fun CompletedItem(completed: GetClientsBooking, navController: NavController) {
+fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1335,7 +1353,7 @@ fun CompletedItem(completed: GetClientsBooking, navController: NavController) {
 
 
 @Composable
-fun CancelledItem(cancel: GetClientsBooking, navController: NavController) {
+fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp

@@ -194,11 +194,13 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     fontSize = 20.sp,
                                     modifier = Modifier.padding(top = 10.dp)
                                 )
-                                Text(
-                                    text = resume.preferedworklocation,
-                                    color = Color.Black,
-                                    fontSize = 16.sp,
-                                )
+                                resume.preferedworklocation?.let {
+                                    Text(
+                                        text = it,
+                                        color = Color.Black,
+                                        fontSize = 16.sp,
+                                    )
+                                }
                                 resume.specialty?.let {
                                     Text(
                                         text = it,
