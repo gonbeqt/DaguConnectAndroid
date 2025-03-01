@@ -1,5 +1,6 @@
 package com.example.androidproject.view.pages
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,9 +27,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,10 +41,26 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
+import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 
 
 @Composable
-fun CancelledJobApplicationDetails(navController: NavController) {
+fun CancelledJobApplicationDetails(navController: NavController, viewJobApplication: ViewJobApplicationViewModel, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
+    val viewJobApplicationState by viewJobApplication.viewApplicationState.collectAsState()
+    when (viewJobApplicationState) {
+        is ViewJobApplicationViewModel.ViewJobApplicationState.Error -> {
+
+        }
+        is ViewJobApplicationViewModel.ViewJobApplicationState.Loading -> {
+
+        }
+
+        is ViewJobApplicationViewModel.ViewJobApplicationState.Idle -> {
+
+        }
+        is ViewJobApplicationViewModel.ViewJobApplicationState.Success -> {
+            val viewJob = (viewJobApplicationState as ViewJobApplicationViewModel.ViewJobApplicationState.Success).data
     Column( // Change Box to Column
         modifier = Modifier
             .fillMaxSize()
@@ -215,29 +235,35 @@ fun CancelledJobApplicationDetails(navController: NavController) {
                                     .padding(start = 10.dp)
                             ) {
 
-                                Text(
-                                    text = "LOOKING FOR",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight(500),
-                                    fontSize = 18.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                                Text(
-                                    text = "KARLOS RIVO",
-                                    color = Color.Gray,
-                                    fontWeight = FontWeight(500),
-                                    fontSize = 16.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
+                                if (viewJob != null) {
+                                    Text(
+                                        text = "LOOKING FOR ${viewJob.jobApplication.jobType}",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight(500),
+                                        fontSize = 18.sp,
+                                        modifier = Modifier.padding(top = 10.dp)
+                                    )
+                                }
+                                if (viewJob != null) {
+                                    Text(
+                                        text = "${viewJob.jobApplication.tradesmanFullname}",
+                                        color = Color.Gray,
+                                        fontWeight = FontWeight(500),
+                                        fontSize = 16.sp,
+                                        modifier = Modifier.padding(top = 10.dp)
+                                    )
+                                }
                                 Row(
                                     Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = "Location:",
-                                        color = Color.Black,
-                                        fontSize = 16.sp,
-                                    )
+                                    if (viewJob != null) {
+                                        Text(
+                                            text = "Address: ${viewJob.jobApplication.jobAddress}",
+                                            color = Color.Black,
+                                            fontSize = 16.sp,
+                                        )
+                                    }
                                     Text(
                                         text = "Lagos, Nigeria",
                                         color = Color.Black,
@@ -249,11 +275,13 @@ fun CancelledJobApplicationDetails(navController: NavController) {
                                     Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = "Deadline:",
-                                        color = Color.Black,
-                                        fontSize = 16.sp,
-                                    )
+                                    if (viewJob != null) {
+                                        Text(
+                                            text = "Deadline: ${viewJob.jobApplication.jobDeadline}",
+                                            color = Color.Black,
+                                            fontSize = 16.sp,
+                                        )
+                                    }
                                     Text(
                                         text = "March 24, 2005",
                                         color = Color.Black,
@@ -348,4 +376,5 @@ fun CancelledJobApplicationDetails(navController: NavController) {
             }
         }
     }
+        }}
 }

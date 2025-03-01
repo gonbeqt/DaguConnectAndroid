@@ -71,6 +71,7 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
+import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import java.sql.Types.NULL
@@ -84,6 +85,7 @@ fun BookingsScreen(
     updateWorkStatusViewModel: UpdateWorkStatusViewModel,
     getMyJobApplicants: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
+    putJobApplicationStatus: PutJobApplicationStatusViewModel,
     initialTabIndex: Int = 0 // Default to 0 if not provided
 ) {
     Log.i("Screen", "BookingsScreen")
@@ -185,7 +187,7 @@ fun BookingsScreen(
                         }
                         "My Applicants" -> when (selectedTabIndex) {
                             0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
-                            1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                            1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
                             2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
                             3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication )
                             4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
@@ -1564,7 +1566,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
 
 
 @Composable
-fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
 
@@ -1582,7 +1584,7 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
     ) {
         items(pendingApplication.size) { index ->
             val pendingJobs = pendingApplication[index]
-            PendingApplicantsItem(pendingJobs, navController)
+            PendingApplicantsItem(pendingJobs, navController, putJobApplicationStatus)
         }
     }
 }
@@ -1793,15 +1795,35 @@ fun AllApplicantsItem(myJob: JobApplicantData) {
 
 
 @Composable
-fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController) {
-    var Cancel by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(-1) }
-    var otherReason by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
+    val putJob by putJobApplicationStatus.putJobApplicationState.collectAsState()
     var showApproveDialog by remember { mutableStateOf(false) }
     var showDeclineDialog by remember { mutableStateOf(false) }
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
+    var buttonSubmit by remember { mutableStateOf(false) }
+    when(putJob) {
+        is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
+
+        }
+
+        is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
+
+        }
+
+        is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
+
+        }
+
+        is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
+            if (buttonSubmit) {
+                Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
+                putJobApplicationStatus.resetState()
+                navController.navigate("main_screen")
+            }
+        }
+    }
+
     val reasons = listOf(
         "Change of Mind",
         "Found a Different Service Provider",
@@ -1812,9 +1834,9 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController)
     )
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 230.dp
-        WindowType.MEDIUM -> 410.dp to 240.dp
-        WindowType.LARGE -> 420.dp to 250.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -1970,6 +1992,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController)
                         onClick = {
                             showApproveDialog = false
                             showJobApproveDialog = true
+                            putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Active", "")
+
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
                     ) {
@@ -2015,6 +2039,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController)
                         onClick = {
                             showDeclineDialog = false
                             showDeclineReasons = true
+                            Log.d("My jobs", myJob.id.toString())
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                     ) {
@@ -2046,7 +2071,9 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController)
                 text = { Text("Reach out to the client for more project details.") },
                 confirmButton = {
                     Button(
-                        onClick = { showJobApproveDialog = false },
+                        onClick = { showJobApproveDialog = false
+                            buttonSubmit = true
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -2104,7 +2131,10 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController)
                 confirmButton = {
                     Button(
                         onClick = {
+                            buttonSubmit = true
                             showDeclineReasons = false
+                            putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Cancelled", selectedReason)
+
                         },
                         enabled = selectedReason != null,
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
@@ -2123,9 +2153,9 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController)
 fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 230.dp
-        WindowType.MEDIUM -> 410.dp to 240.dp
-        WindowType.LARGE -> 420.dp to 250.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -2249,9 +2279,9 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
     )
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 230.dp
-        WindowType.MEDIUM -> 410.dp to 240.dp
-        WindowType.LARGE -> 420.dp to 250.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -2518,9 +2548,9 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
 fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 230.dp
-        WindowType.MEDIUM -> 410.dp to 240.dp
-        WindowType.LARGE -> 420.dp to 250.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -2635,9 +2665,9 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
 fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 230.dp
-        WindowType.MEDIUM -> 410.dp to 240.dp
-        WindowType.LARGE -> 420.dp to 250.dp
+        WindowType.SMALL -> 400.dp to 250.dp
+        WindowType.MEDIUM -> 410.dp to 260.dp
+        WindowType.LARGE -> 420.dp to 270.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp

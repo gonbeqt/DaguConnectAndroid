@@ -12,29 +12,29 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 
 class PutJobApplicationStatusViewModel(private val apiService: ApiService, private val context: Context): ViewModel() {
-    private val _PutJobApplicationStatusState = MutableStateFlow<PutJobApplicationState>(
+    private val _putJobApplicationStatusState = MutableStateFlow<PutJobApplicationState>(
         PutJobApplicationState.Idle)
-    val postJobApplicationState: StateFlow<PutJobApplicationState> = _PutJobApplicationStatusState
+    val putJobApplicationState: StateFlow<PutJobApplicationState> = _putJobApplicationStatusState
 
-    fun putJobApplicationStatus(id: Int, status: String, reason: String?) {
+    fun updateJobApplicationStatus(id: Int, status: String, reason: String?) {
         viewModelScope.launch {
-            _PutJobApplicationStatusState.value = PutJobApplicationState.Loading
+            _putJobApplicationStatusState.value = PutJobApplicationState.Loading
             val data  = UpdateStatus(status, reason)
             val put = apiService.updateJobApplicationStatus(id, data)
             try {
                 if (put.isSuccessful) {
-                    _PutJobApplicationStatusState.value = PutJobApplicationState.Success(put)
+                    _putJobApplicationStatusState.value = PutJobApplicationState.Success(put)
                 } else {
-                    _PutJobApplicationStatusState.value = PutJobApplicationState.Error(put.message())
+                    _putJobApplicationStatusState.value = PutJobApplicationState.Error(put.message())
                 }
             } catch (e: Exception) {
-                _PutJobApplicationStatusState.value = PutJobApplicationState.Error(e.message ?: "An error occurred")
+                _putJobApplicationStatusState.value = PutJobApplicationState.Error(e.message ?: "An error occurred")
             }
         }
     }
 
     fun resetState() {
-        _PutJobApplicationStatusState.value = PutJobApplicationState.Idle
+        _putJobApplicationStatusState.value = PutJobApplicationState.Idle
     }
 
     sealed class PutJobApplicationState{

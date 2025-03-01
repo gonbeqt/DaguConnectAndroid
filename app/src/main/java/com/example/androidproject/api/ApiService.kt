@@ -162,6 +162,6 @@ interface ApiService {
 
     ): Response<SubmitResumeResponse>
 
-    @GET("/user/job-applications/view/1")
+    @GET("/user/job-applications/view/{jobId}")
     suspend fun viewJobApplication(@Path("jobId") jobId: Int): Response<ViewJobApplicationResponse>
 }

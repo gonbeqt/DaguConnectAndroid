@@ -281,7 +281,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("booking") {
-                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel)
+                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
                     }
                     composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
@@ -344,7 +344,7 @@ class MainActivity : ComponentActivity() {
 
                     //CANCELLED DETAILS
                     composable("canceljobapplicationsdetails") {
-                        CancelledJobApplicationDetails(navController)
+                        CancelledJobApplicationDetails(navController, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
                     }
 
                     //Tradesman Routes
@@ -382,8 +382,9 @@ class MainActivity : ComponentActivity() {
                         val statusofapproval = backStackEntry.arguments?.getString("statusofapproval") ?: ""
                         ProfileVerification(modifier = Modifier, navController,submitResumeViewModel,statusofapproval)
                     }
-                    composable("canceltradesmannow") {
-                        CancelTradesmanNow(navController)
+                    composable("canceltradesmannow/{jobId}") { backStackEntry ->
+                        val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                        CancelTradesmanNow(jobId, navController, viewJobApplication = viewJobApplicationViewModel, putJobApplicationStatus = putJobApplicationStatusViewModel)
                     }
                     composable("myjobapplicationdetails") {
                         MyJobApplicationDetails(navController)
