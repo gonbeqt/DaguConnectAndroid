@@ -68,6 +68,7 @@ import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
@@ -299,7 +300,8 @@ fun PostsCard(
     onApplicantsClick: () -> Unit,
     getJobs: GetJobs
 ) {
-
+    val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
+    val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
     var isDialogVisible by remember { mutableStateOf(false) }
     var editableTitle by remember { mutableStateOf(getJobs.jobType) }
     var editableDescription by remember { mutableStateOf(getJobs.jobDescription) }
@@ -373,30 +375,30 @@ fun PostsCard(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal
                 )
-                Text(text = "Location: $editableLocation", fontSize = 16.sp)
+                Text(text = "Job Address: $editableLocation", fontSize = 16.sp)
 
                 Text(
-                    text = "Est. Budget: $editableRate",
+                    text = "Budget: $editableRate pesos",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal
                 )
                 Text(
-                    text = "Category: ${getJobs.jobType}",
+                    text = "Service Type: ${getJobs.jobType}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
                 )
                 Text(
-                    text = "${getJobs.totalApplicants} Applicants",
+                    text = "Applicants: ${getJobs.totalApplicants}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onApplicantsClick() }
                 )
-                Text(text = "Deadline: $editableDeadline", fontSize = 16.sp, color = Color.Red) // Display Deadline
+                Text(text = "Job Deadline: $deadline", fontSize = 16.sp, color = Color.Red) // Display Deadline
 
                 // Other card content
                 Text(
-                    text = "Posted on ${getJobs.createdAt} - ${getJobs.status}",
+                    text = "Posted on $date - ${getJobs.status}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )

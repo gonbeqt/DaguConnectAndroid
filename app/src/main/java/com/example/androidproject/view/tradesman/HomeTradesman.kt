@@ -28,6 +28,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -173,6 +174,9 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
 @Composable
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        getJobsViewModel.refreshJobs()
+    }
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFE9E9E9))) {
         LazyColumn(
             modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),

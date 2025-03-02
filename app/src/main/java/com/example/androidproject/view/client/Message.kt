@@ -28,14 +28,12 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -44,113 +42,98 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import coil.compose.AsyncImage
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.Chats
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
-import androidx.compose.animation.core.*
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.style.TextAlign
-import com.example.androidproject.view.extras.InactiveConfirmation
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androidproject.view.extras.LoadingTradesmanUI
-import kotlinx.coroutines.delay
 
 
 @Composable
-fun MessageScreen(modifier: Modifier = Modifier,navController: NavController, viewModel: GetChatViewModel ) {
-    val chatState by viewModel.chatState.collectAsState()
-    var lastInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) } // Track last interaction
-    var isInactive by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        viewModel.getChats()
-    }
-
-    LaunchedEffect(lastInteraction) {
-        delay(10_000L) // 10 seconds
-        if (chatState is GetChatViewModel.ChatState.Success) {
-            isInactive = true
-        }
-    }
-
-    when (chatState) {
-        is GetChatViewModel.ChatState.Loading -> {
-            // Show loading indicator
+fun MessageScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    getChatViewModel: GetChatViewModel
+) {
+    val chatState = getChatViewModel.getChatsPagingData.collectAsLazyPagingItems()
+    val loadState = chatState.loadState
+    when {
+        // Initial loading state
+        loadState.refresh is LoadState.Loading && chatState.itemCount == 0 -> {
             LoadingTradesmanUI()
         }
-        is GetChatViewModel.ChatState.Success -> {
-            val chats = (chatState as GetChatViewModel.ChatState.Success).data
+
+        // Loading more items (append) or error states can be handled too if needed
+        else -> {
             Column(
                 modifier = Modifier
                     .background(Color.White)
                     .fillMaxSize()
                     .padding(WindowInsets.statusBars.asPaddingValues())
             ) {
+                MessageTopSection(navController)
 
-                MessageTopSection(navController )
-                   Row(
-                       modifier = Modifier.fillMaxWidth()
-                           .padding(horizontal = 25.dp)
-                           .background(Color(0xFFFFFFFF), shape = RoundedCornerShape(8.dp))
-                           .border(1.dp, Color(0xFFBEBEBE), shape = RoundedCornerShape(8.dp)),
-                       verticalAlignment = Alignment.CenterVertically
-                   ) {
-
-                       Icon(
-                           imageVector = Icons.Default.Search,
-                           contentDescription = "Search Icon",
-                           tint = Color.Gray,
-                           modifier = Modifier
-                               .size(42.dp)
-                               .padding(start = 16.dp)
-                       )
-                       TextField(
-                           value = "",
-                           onValueChange = { /* Handle input */ },
-                           placeholder = { Text(text = "Search...") },
-                           modifier = Modifier.fillMaxWidth(),
-                           colors = TextFieldDefaults.colors(
-                               focusedContainerColor = Color.White,
-                               unfocusedContainerColor = Color.White,
-                               disabledContainerColor = Color.White,
-                               focusedIndicatorColor = Color.Transparent,
-                               unfocusedIndicatorColor = Color.Transparent
-                           )
-                       )
-                   }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 25.dp)
+                        .background(Color(0xFFFFFFFF), shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFBEBEBE), shape = RoundedCornerShape(8.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search Icon",
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .size(42.dp)
+                            .padding(start = 16.dp)
+                    )
+                    TextField(
+                        value = "",
+                        onValueChange = { /* Handle input */ },
+                        placeholder = { Text(text = "Search...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            disabledContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Chat List
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(chats.size) { index -> // chat list size
-                        ChatListItem(chats = chats[index],navController)
+                    items(chatState.itemCount) { index ->
+                        val chats = chatState[index]
+                        if (chats != null) {
+                            ChatListItem(chats = chats, navController)
+                        }
+                    }
+
+                    // Optional: Add loading indicator at bottom when appending more items
+                    if (loadState.append is LoadState.Loading) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
                     }
                 }
             }
-            if (isInactive) {
-                InactiveConfirmation(onYesClick = {
-                    viewModel.getChats() // Refresh chats
-                    isInactive = false // Hide confirmation
-                    lastInteraction = System.currentTimeMillis() // Reset timer
-                })
-            }
-        }
-
-        is GetChatViewModel.ChatState.Error -> {
-            val errorMessage = (chatState as GetChatViewModel.ChatState.Error).message
-            Text(text = "Error: $errorMessage")
-        }
-        is GetChatViewModel.ChatState.Idle -> {
         }
     }
 }

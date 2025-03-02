@@ -106,7 +106,7 @@ interface ApiService {
     suspend fun getCleintBookingById(@Path("resumeId") resumeId: Int): Response<ViewClientBooking>
 
     @GET("/user/chat/get")
-    suspend fun getChat(): Response<GetChats>
+    suspend fun getChat(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetChats>
 
     @POST("/user/client/booktradesman/{tradesman_Id}")
     suspend fun booktradesman(

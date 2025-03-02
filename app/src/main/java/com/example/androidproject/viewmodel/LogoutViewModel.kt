@@ -1,6 +1,7 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
+import com.example.androidproject.data.preferences.AccountManager.clearAccountData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +17,7 @@ class LogoutViewModel(private val apiService: ApiService) : ViewModel() {
             try {
                 val response = apiService.logout()
                 _logoutResult.value = response.isSuccessful
+                clearAccountData()
             } catch (e: Exception) {
                 _logoutResult.value = false
             }

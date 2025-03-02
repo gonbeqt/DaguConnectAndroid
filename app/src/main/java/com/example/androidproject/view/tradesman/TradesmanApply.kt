@@ -43,11 +43,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.view.extras.LoadingTradesmanUI
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 
 @Composable
-fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJobViewModel) {
+fun TradesmanApply(
+    jobId: String,
+    navController: NavController,
+    viewModel: ViewJobViewModel
+) {
     val viewJobState by viewModel.jobState.collectAsState()
     val jobID = jobId.toIntOrNull() ?: return
 
@@ -55,72 +60,72 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
         viewModel.getJobById(jobID)
     }
 
-    when (viewJobState) {
-        is ViewJobViewModel.JobState.Loading -> {
-
-            // Show a loading indicator
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Loading...", fontSize = 18.sp, color = Color.Gray)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(myGradient3)
+    ) {
+        // Top Bar with Back Arrow and Title
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .background(myGradient3)
+                    .fillMaxWidth()
+                    .size(80.dp)
+                    .padding(top = 20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Arrow Back",
+                        modifier = Modifier
+                            .clickable { navController.navigate("main_screen") }
+                            .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
+                        tint = Color(0xFF81D796)
+                    )
+                    Text(
+                        text = "Job Details",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier
+                            .padding(top = 10.dp)
+                            .weight(1f)
+                    )
+                }
             }
         }
-        is ViewJobViewModel.JobState.Success -> {
-            val job = (viewJobState as ViewJobViewModel.JobState.Success).data
-            val date = ViewModelSetups.formatDateTime(job.job.createdAt)
-            val deadline = ViewModelSetups.formatDateTime(job.job.deadline)
-            val items = listOf(job.job.jobType) // Your list of items
-            Column( // Change Box to Column
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(myGradient3)
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .background(myGradient3)
-                            .fillMaxWidth()
-                            .size(80.dp)
-                            .padding(top = 20.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Arrow Back",
-                                Modifier
-                                    .clickable { navController.navigate("main_screen") }
-                                    .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
-                                tint = Color(0xFF81D796)
-                            )
-                            Text(
-                                text = "Job Details",
-                                fontSize = 20.sp,
-                                color = Color.White,
-                                textAlign = TextAlign.Left,
-                                modifier = Modifier
-                                    .padding(top = 10.dp)
-                                    .weight(1f) // Ensures the text takes available space and is centered
-                            )
-                        }
-                    }
-                }
+
+        // Main Content Based on ViewJobState
+        when (viewJobState) {
+            is ViewJobViewModel.JobState.Loading -> {
+                LoadingTradesmanUI()
+            }
+
+            is ViewJobViewModel.JobState.Success -> {
+                val job = (viewJobState as ViewJobViewModel.JobState.Success).data
+                val date = ViewModelSetups.formatDateTime(job.job.createdAt)
+                val deadline = ViewModelSetups.formatDateTime(job.job.deadline)
+                val items = listOf(job.job.jobType)
+
                 Card(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp), // Apply top corner radius
-                    colors = CardDefaults.cardColors(Color.White) // Set background color inside Card
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                    colors = CardDefaults.cardColors(Color.White)
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(10.dp) // Apply padding here, instead of background
+                            .padding(10.dp)
                     ) {
-
+                        // Client Info Section
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -129,7 +134,7 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             AsyncImage(
-                                model = job.job.clientProfile, // Use URL here
+                                model = job.job.clientProfile,
                                 contentDescription = "Profile Image",
                                 modifier = Modifier
                                     .size(62.dp)
@@ -154,46 +159,67 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                     fontSize = 16.sp
                                 )
                                 Box(
-                                    modifier = Modifier
-                                        .padding(vertical = 4.dp)
+                                    modifier = Modifier.padding(vertical = 4.dp)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.LocationOn,
-                                                contentDescription = "Bookmark Icon",
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.size(4.dp))
-                                            Text(
-                                                text = "Deadline: $deadline",
-                                                fontSize = 12.sp
-                                            )
-                                        }
-
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = "Bookmark Icon",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.size(4.dp))
+                                        Text(
+                                            text = "Deadline: $deadline",
+                                            fontSize = 12.sp
+                                        )
                                     }
                                 }
                             }
                         }
-                        Spacer(Modifier.height(8.dp))
-                        Row (modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceBetween){
-                            Text(text = "Hiring: ${job.job.jobType}", fontSize = 24.sp, fontWeight = FontWeight(500))
-                        }
-                        Text(text = "Posted on $date - Active",Modifier.padding(horizontal = 20.dp))
 
-                        Card(modifier = Modifier.fillMaxWidth().height(100.dp),
+                        Spacer(Modifier.height(8.dp))
+
+                        // Job Title and Posting Info
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Hiring: ${job.job.jobType}",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight(500)
+                            )
+                        }
+                        Text(
+                            text = "Posted on $date - Active",
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+
+                        // Job Description Card
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp),
                             border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
                             colors = CardDefaults.cardColors(Color.White),
                             shape = RectangleShape
-                        ){
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 20.dp), verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally) {
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp, horizontal = 20.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(text = job.job.jobDescription)
                             }
                         }
+
+                        // Salary and Location Card
                         Card(
-                            modifier = Modifier
-                                .fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth(),
                             border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
                             colors = CardDefaults.cardColors(Color.White),
                             shape = RectangleShape
@@ -203,19 +229,17 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                     .fillMaxWidth()
                                     .padding(vertical = 10.dp, horizontal = 20.dp)
                             ) {
-                                // First Column
                                 Column(
-                                    modifier = Modifier
-                                        .weight(1f) // Allocate equal horizontal space
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Text(text = "Estimated Salary")
-                                    Text(text = "${job.job.salary} Pesos",color = Color.Gray)
+                                    Text(
+                                        text = "${job.job.salary} Pesos",
+                                        color = Color.Gray
+                                    )
                                 }
-
-                                // Second Column
                                 Column(
-                                    modifier = Modifier
-                                        .weight(1f) // Allocate equal horizontal space
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
@@ -229,12 +253,21 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                 }
                             }
                         }
-                        Card(modifier = Modifier.fillMaxWidth().height(150.dp),
+
+                        // Specialty Required Card
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp),
                             border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
                             colors = CardDefaults.cardColors(Color.White),
                             shape = RectangleShape
-                        ){
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp), verticalArrangement = Arrangement.Center,
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp, horizontal = 10.dp),
+                                verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
                                     text = "Specialty Required",
@@ -249,41 +282,53 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(16.dp),
-
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Distributes the boxes evenly
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
                                     items.forEach { item ->
                                         Box(
                                             modifier = Modifier
-                                                .size(110.dp,50.dp)
+                                                .size(110.dp, 50.dp)
                                                 .background(Color(0xFFF1F1F1))
                                                 .padding(4.dp)
-                                                .clip(RoundedCornerShape(12.dp)),
+                                                .clip(RoundedCornerShape(12.dp))
                                         ) {
-                                            // Content for each Box
                                             Text(
                                                 text = item,
                                                 modifier = Modifier.align(Alignment.Center),
-                                                color = Color.Black,
+                                                color = Color.Black
                                             )
                                         }
                                     }
                                 }
                             }
                         }
-                        Spacer(Modifier.height(20.dp))
-                        Column(modifier = Modifier.fillMaxWidth()){
-                            Row (Modifier.fillMaxWidth().padding(start = 20.dp),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically){
-                                Text(text = "Other services needed by this client (0)",
-                                    fontSize = 18.sp, fontWeight = FontWeight(500))
 
+                        Spacer(Modifier.height(20.dp))
+
+                        // Other Services and Status
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 20.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Other services needed by this client (0)",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(500)
+                                )
                             }
-                            Row (Modifier.fillMaxWidth().padding(50.dp),
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(50.dp),
                                 horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically){
-                                Text(text = "Status: ${job.job.status}",
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Status: ${job.job.status}",
                                     fontSize = 14.sp,
                                     fontStyle = FontStyle.Normal,
                                     color = Color.Gray
@@ -292,6 +337,8 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                         }
                     }
                 }
+
+                // Apply Button at the Bottom
                 Column(
                     modifier = Modifier
                         .background(Color.Black)
@@ -299,10 +346,10 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(
-                        onClick = {navController.navigate("hiringdetails/${job.job.id}")},
+                        onClick = { navController.navigate("hiringdetails/${job.job.id}") },
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(Color.White),
-                        border = BorderStroke(1.dp, Color.Black),
+                        border = BorderStroke(1.dp, Color.Black)
                     ) {
                         Text(
                             text = "Apply Now",
@@ -312,19 +359,25 @@ fun TradesmanApply(jobId: String, navController: NavController, viewModel: ViewJ
                         )
                     }
                 }
-
             }
-        }
 
-        is ViewJobViewModel.JobState.Error -> {
-            val errorMessage = (viewJobState as ViewJobViewModel.JobState.Error).message
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Error: $errorMessage", fontSize = 18.sp, color = Color.Red)
+            is ViewJobViewModel.JobState.Error -> {
+                val errorMessage = (viewJobState as ViewJobViewModel.JobState.Error).message
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Error: $errorMessage",
+                        fontSize = 18.sp,
+                        color = Color.Red
+                    )
+                }
             }
-        }
 
-        ViewJobViewModel.JobState.Idle -> {
-
+            is ViewJobViewModel.JobState.Idle -> {
+                // No UI to display in Idle state
+            }
         }
     }
 }

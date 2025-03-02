@@ -3,42 +3,38 @@ package com.example.androidproject.viewmodel.chats
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.Chats
-import com.example.androidproject.model.GetChats
+import com.example.androidproject.viewmodel.chats.paginate.GetChatPagingSource
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 class GetChatViewModel(private val apiService: ApiService) : ViewModel() {
-    private val _chatState = MutableStateFlow<ChatState>(ChatState.Idle)
-    val chatState: MutableStateFlow<ChatState> = _chatState
+    private val refreshTrigger = MutableStateFlow(Unit)
+    private val _pagingSource = MutableStateFlow<GetChatPagingSource?>(null)
 
-    fun getChats() {
-        _chatState.value = ChatState.Loading
-        viewModelScope.launch {
-            try {
-                val response = apiService.getChat()
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val chats = body?.chats
-                    if (body != null) {
-                        _chatState.value = chats?.let { ChatState.Success(it) }!!
-                    }
-                } else {
-                    _chatState.value = ChatState.Error(response.message())
-                    Log.e("GetChatViewModel", "Error: ${response.message()}")
-                }
-            } catch (e: Exception) {
-                _chatState.value = ChatState.Error(e.localizedMessage ?: "Unknown error")
-                Log.e("GetChatViewModel", "Error: ${e.localizedMessage}")
+    val getChatsPagingData: Flow<PagingData<Chats>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                initialLoadSize = 10,
+                prefetchDistance = 2,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                GetChatPagingSource(apiService).also { _pagingSource.value = it }
             }
-        }
+        ).flow.cachedIn(viewModelScope)
+
+    fun refreshChats() {
+        refreshTrigger.value = Unit
     }
 
-    sealed class ChatState {
-        object Idle : ChatState()
-        object Loading : ChatState()
-        data class Success(val data: List<Chats>) : ChatState()
-        data class Error(val message: String) : ChatState()
+    fun invalidatePagingSource() {
+        _pagingSource.value?.invalidate()
     }
 }

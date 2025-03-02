@@ -3,7 +3,11 @@ package com.example.androidproject.model
 import com.google.gson.annotations.SerializedName
 
 data class GetChats(
-    val chats: List<Chats>
+    val chats: List<Chats>,
+    @SerializedName("current_page")
+    val currentPage: Int,
+    @SerializedName("last_page")
+    val lastPage: Int
 )
 
 data class Chats(

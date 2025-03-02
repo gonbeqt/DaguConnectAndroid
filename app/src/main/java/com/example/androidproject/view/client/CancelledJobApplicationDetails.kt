@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -30,13 +31,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
@@ -217,12 +221,16 @@ fun CancelledJobApplicationDetails(navController: NavController, viewJobApplicat
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Tradesman image
-                            Image(
-                                painter = painterResource(R.drawable.pfp),
-                                contentDescription = "Tradesman Image",
-                                modifier = Modifier
-                                    .size(100.dp)
-                            )
+                            if (viewJob != null) {
+                                AsyncImage(
+                                    model = viewJob.jobApplication.tradesmanProfilePicture, // Use URL here
+                                    contentDescription = "Profile Image",
+                                    modifier = Modifier
+                                        .size(62.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
 
                             // Tradesman details
                             Column(
@@ -233,7 +241,7 @@ fun CancelledJobApplicationDetails(navController: NavController, viewJobApplicat
 
                                 if (viewJob != null) {
                                     Text(
-                                        text = "LOOKING FOR ${viewJob.jobApplication.jobType}",
+                                        text = "Looking for ${viewJob.jobApplication.jobType}",
                                         color = Color.Black,
                                         fontWeight = FontWeight(500),
                                         fontSize = 18.sp,
@@ -242,7 +250,7 @@ fun CancelledJobApplicationDetails(navController: NavController, viewJobApplicat
                                 }
                                 if (viewJob != null) {
                                     Text(
-                                        text = "${viewJob.jobApplication.tradesmanFullname}",
+                                        text = viewJob.jobApplication.tradesmanFullname,
                                         color = Color.Gray,
                                         fontWeight = FontWeight(500),
                                         fontSize = 16.sp,

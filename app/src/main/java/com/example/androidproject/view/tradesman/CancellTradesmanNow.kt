@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
@@ -66,6 +67,7 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     val id = jobApplicationId.toIntOrNull()
+
     LaunchedEffect(Unit) {
         if (id != null) {
             viewJobApplication.viewJobApplication(id)
@@ -94,6 +96,7 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
         }
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
+            Cancel = false
             Toast.makeText(LocalContext.current, "Job Application Cancelled", Toast.LENGTH_SHORT).show()
             putJobApplicationStatus.resetState()
             navController.navigate("main_screen")
@@ -112,7 +115,8 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
          }
          is ViewJobApplicationViewModel.ViewJobApplicationState.Success -> {
              val viewJob = (viewJobApplicationState as ViewJobApplicationViewModel.ViewJobApplicationState.Success).data
-
+             val deadline = ViewModelSetups.formatDateTime(viewJob?.jobApplication?.jobDeadline)
+             val createdAt = ViewModelSetups.formatDateTime(viewJob?.jobApplication?.createdAt)
              Column( // Change Box to Column
                  modifier = Modifier
                      .fillMaxSize()
@@ -281,7 +285,7 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
 
                                          if (viewJob != null) {
                                              Text(
-                                                 text = "LOOKING FOR ${viewJob.jobApplication.jobType}",
+                                                 text = "Looking for ${viewJob.jobApplication.jobType}",
                                                  color = Color.Black,
                                                  fontWeight = FontWeight(500),
                                                  fontSize = 18.sp,
@@ -300,36 +304,32 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
                                          Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                                              if (viewJob != null) {
                                                  Text(
-                                                     text = "Address: ${viewJob.jobApplication.jobAddress}",
+                                                     text = "Job address: ${viewJob.jobApplication.jobAddress}",
                                                      color = Color.Black,
                                                      fontSize = 16.sp,
                                                  )
                                              }
-                                             Text(
-                                                 text = "Lagos, Nigeria"
-                                                 , color = Color.Black,
-                                                 fontSize = 16.sp,
-                                             )
                                          }
-
                                          Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                                              if (viewJob != null) {
                                                  Text(
-                                                     text = "Deadline: ${viewJob.jobApplication.jobDeadline}",
+                                                     text = "Submitted on: $createdAt"
+                                                     , color = Color.Black,
+                                                     fontSize = 16.sp,
+                                                 )
+                                             }
+                                         }
+                                         Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
+                                             if (viewJob != null) {
+                                                 Text(
+                                                     text = "Deadline: $deadline",
                                                      color = Color.Black,
                                                      fontSize = 16.sp,
                                                  )
                                              }
-                                             Text(
-                                                 text = "March 24, 2005"
-                                                 , color = Color.Black,
-                                                 fontSize = 16.sp,
-                                             )
                                          }
-
                                      }
                                  }
-
                              }
                          }
                          Spacer(Modifier.height(16.dp))
@@ -441,7 +441,6 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
                                      .size(300.dp, 30.dp),
                                  contentAlignment = Alignment.Center
                              ) {
-
                                  Text(
                                      text = "Cancel Application",
                                      color = Color.Black,
@@ -453,9 +452,6 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
 
                      }
                  }
-
-
-
                  if (Cancel) {
                              Dialog(onDismissRequest = { Cancel = false }) {
                                  Box(
