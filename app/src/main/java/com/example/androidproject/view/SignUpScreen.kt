@@ -272,7 +272,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     confirmPassword = confirmPassword,
                     registerState = registerState,
                     modifier = Modifier.constrainAs(signUpButton) {
-                        top.linkTo(roles.bottom, margin =10.dp,)
+                        top.linkTo(roles.bottom, margin =5.dp,)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -283,7 +283,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                 RegistrationLoginButton(
                     navController = navController,
                     modifier = Modifier.constrainAs(loginButton) {
-                        top.linkTo(signUpButton.bottom, margin =5.dp)
+                        top.linkTo(signUpButton.bottom)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
@@ -321,7 +321,7 @@ fun FirstnameField(firstName: String,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 56.dp), // Adjust height as needed
-                shape = RoundedCornerShape(16.dp), // Set corner radius here
+                shape = RoundedCornerShape(12.dp), // Set corner radius here
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -364,7 +364,7 @@ fun LastnameField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp), // Adjust height as needed
-            shape = RoundedCornerShape(16.dp), // Set corner radius here
+            shape = RoundedCornerShape(12.dp), // Set corner radius here
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -404,7 +404,7 @@ fun UsernameField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp), // Adjust height as needed
-            shape = RoundedCornerShape(16.dp), // Set corner radius here
+            shape = RoundedCornerShape(12.dp), // Set corner radius here
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -450,7 +450,7 @@ fun EmailField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp), // Set corner radius here
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -476,38 +476,51 @@ fun EmailField(
     }
 }
 @Composable
-fun BirthdayCalendar(birthdate: String,
-                     onBirthDateChange: (String) -> Unit,
-                     modifier: Modifier = Modifier){
-
+fun BirthdayCalendar(
+    birthdate: String,
+    onBirthDateChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+
+    val today = LocalDate.now()
+    val minDate = today.minusYears(100)
+    val maxDate = today.minusYears(18) // Minimum age requirement (18 years old)
 
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
             val birthDate = LocalDate.of(year, month + 1, dayOfMonth)
-            selectedDate = birthDate
-            val formattedDate = birthDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            onBirthDateChange(formattedDate)
+
+            // Check if the selected date is valid (18 years old and above)
+            if (birthDate.isAfter(maxDate)) {
+                Toast.makeText(context, "You must be at least 18 years old to register.", Toast.LENGTH_SHORT).show()
+            } else {
+                selectedDate = birthDate
+                val formattedDate = birthDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                onBirthDateChange(formattedDate)
+            }
         },
-        LocalDate.now().year - 18, // Default year (18 years ago)
-        LocalDate.now().monthValue - 1,
-        LocalDate.now().dayOfMonth
+        maxDate.year, // Default to the maximum allowed year (18 years ago)
+        maxDate.monthValue - 1,
+        maxDate.dayOfMonth
     )
+
+    // Set valid date range (from minDate to maxDate)
+    datePickerDialog.datePicker.minDate = minDate.toEpochDay() * 24 * 60 * 60 * 1000
+    datePickerDialog.datePicker.maxDate = maxDate.toEpochDay() * 24 * 60 * 60 * 1000
+
     Column(modifier = modifier) {
         Button(
             onClick = { datePickerDialog.show() },
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White
-            ),
-            border = BorderStroke(1.dp, Color.Gray),
-
-            ) {
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+            border = BorderStroke(1.dp, Color.Gray)
+        ) {
             Row(
                 Modifier.fillMaxWidth().offset(x = (-10).dp),
                 horizontalArrangement = Arrangement.Start,
@@ -515,7 +528,8 @@ fun BirthdayCalendar(birthdate: String,
             ) {
                 Icon(
                     imageVector = Icons.Default.CalendarToday,
-                    contentDescription = "Calendar Icon", tint = Color.Black
+                    contentDescription = "Calendar Icon",
+                    tint = Color.Black
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -524,10 +538,10 @@ fun BirthdayCalendar(birthdate: String,
                     color = Color.Gray
                 )
             }
-
         }
     }
 }
+
 @Composable
 fun PasswordField(
     password: String,
@@ -570,7 +584,7 @@ fun PasswordField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp), // Adjust height as needed
-            shape = RoundedCornerShape(16.dp), // Set corner radius here
+            shape = RoundedCornerShape(12.dp), // Set corner radius here
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,

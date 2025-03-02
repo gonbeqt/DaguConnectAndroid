@@ -199,7 +199,7 @@ fun MessageTopSection(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp)
+            .shadow(0.2.dp)
             .background(Color.White)
     ) {
         Row(

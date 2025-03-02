@@ -38,13 +38,22 @@ import com.example.androidproject.R
 @Composable
 fun AboutUs(navController: NavController){
         val faqs = listOf(
-            "What is DaguConnect?" to "DaguConnect is a platform that connects clients with skilled tradespeople across various industries, including aircon repair, masonry, mechanics, house painting, roofing, welding, and more. Whether you need repairs, installations, or maintenance services, DaguConnect helps you find reliable professionals to get the job done efficiently and with high-quality craftsmanship.",
-            "How do I sign up as a tradesperson?" to "You can sign up as a tradesperson through the DaguConnect website or mobile app by creating an account, providing your skills and experience, and verifying your details to start connecting with clients.",
-            "Can clients contact tradespeople directly?" to "Yes, clients can contact tradespeople directly via the DaguConnect app, allowing for easy communication, service inquiries, and job scheduling.",
-            "How do I receive job requests?" to "Job requests will appear in your bookings pending as soon as a client selects your service, allowing you to review details, communicate with the client, and accept or decline the request.",
-            "Is there a way to verify a tradesperson’s credibility?" to "Yes, we have a detailed review and rating system in place to help verify a tradesperson's credibility. Customers can leave feedback based on their experiences, which allows future clients to assess the quality of the tradesperson's work. This system also includes ratings for professionalism, punctuality, and the overall job quality. We encourage transparent reviews to ensure that tradespeople maintain high standards and build trust with their clients.",
-            "How are payments handled?" to "Payments are securely handled through face-to-face transactions. The tradesperson and customer can agree on the payment terms directly, and all payments are processed in person, ensuring transparency and trust. We recommend using secure payment methods, and we encourage both parties to keep a record of the transaction for future reference.",
-            "What should I do if I encounter an issue?" to "If you encounter any issues, you can reach out to our dedicated support team for assistance. Our team is available to help resolve any concerns you may have, whether it’s related to payments, services, or any other aspect of your experience. We’re committed to ensuring that any problems are addressed quickly and efficiently to provide you with the best possible service."
+            "What is DaguConnect?" to "DaguConnect is a platform dedicated to bridging the gap between tradespeople and clients seeking professional services for home repairs, maintenance, and other specialized tasks. Our digital solution simplifies the connection process, making it easier for skilled professionals to reach new opportunities while providing clients with a reliable way to access trusted service providers. We focus on fostering connections and delivering a seamless user experience that benefits both sides.",
+            "Our Mission Statement" to "Our mission is to empower skilled tradespeople by enhancing their visibility and creating opportunities for professional growth. We are committed to offering a secure, efficient platform that allows our users to connect, communicate, and collaborate with confidence. By ensuring quality and reliability in every interaction, we strive to redefine how trades services are accessed and delivered.",
+            "Guiding Vision for the Future" to "We envision a future where the trades industry is transformed through innovation and community. Our goal is to be the leading digital platform that not only makes quality home services accessible to everyone but also creates a supportive ecosystem where every tradesperson can thrive. At DaguConnect, we aspire to build a legacy of trust, excellence, and continuous improvement for the benefit of all.",
+            "Our Expert Team" to "Behind DaguConnect is a team of sophomore Information Technology students from PHINMA University of Pangasinan. United by shared passion for developing innovative digital solutions, we collaborate to address real-world challenges through collective creativity and technological expertise.\n" +
+                    "\n" +
+                    "Meet the Team\n" +
+                    "\n" +
+                    "• Karlos Son Rivo - Project Manager\n" +
+                    "• Ahron Paul Villacote - Lead Developer\n" +
+                    "• Ezekiel Vidal - Assistant Developer\n" +
+                    "• Trixie Julia Santillan - System Analyst\n" +
+                    "• Charry Doria -  UI/UX Designer\n" +
+
+            "\nTogether, our team is committed to leveraging technology yo develop solutions that enhance community efficiency and effectiveness, reflecting our dedication to excellence and innovation."
+
+
         )
 
         Column(
@@ -66,7 +75,7 @@ fun AboutUs(navController: NavController){
                     )
                 }
                 Text(
-                    text = "FAQs",
+                    text = "About Us",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(start = 8.dp)

@@ -48,7 +48,6 @@ import com.example.androidproject.view.client.NotificationScreen
 import com.example.androidproject.view.client.RateAndReviews
 import com.example.androidproject.view.tradesman.AvailabilityStatus
 import com.example.androidproject.view.tradesman.BookingsTradesman
-import com.example.androidproject.view.tradesman.BookmarkedTradesman
 import com.example.androidproject.view.tradesman.CancelTradesmanNow
 import com.example.androidproject.view.tradesman.HiringDetails
 import com.example.androidproject.view.tradesman.HomeTradesman
@@ -365,9 +364,6 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
-                    }
-                    composable("bookmarkedtradesman") {
-                        BookmarkedTradesman(modifier = Modifier,navController)
                     }
                     composable("scheduletradesman") {
                         ScheduleTradesman(modifier = Modifier,navController)

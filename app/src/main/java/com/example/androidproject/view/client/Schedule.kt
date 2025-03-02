@@ -4,10 +4,13 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -96,6 +99,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                 .fillMaxWidth()
                 .wrapContentSize()
                 .background(Color.White)
+
         ) {
             ScheduleTopSection(navController)
 
@@ -142,11 +146,22 @@ fun FilterSection(
     onFilterChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
 
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             Modifier.fillMaxWidth(),
@@ -156,19 +171,19 @@ fun FilterSection(
             Text(
                 text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
+                fontSize = nameTextSize,
                 color = Color.Black
             )
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.wrapContentSize(Alignment.Center)) {
                 TextButton(onClick = { expanded = true }) {
-                    Text(text = selectedFilter, color = Color(0xFF3CC0B0))
+                    Text(text = selectedFilter, color = Color(0xFF3CC0B0), fontSize = taskTextSize)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF3CC0B0))
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                        text = { Text("My Clients") },
+                        text = { Text("My Clients", fontSize = taskTextSize) },
                         onClick = {
                             onFilterChange("My Clients")
                             expanded = false
@@ -176,7 +191,7 @@ fun FilterSection(
                     )
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                        text = { Text("My Applicants") },
+                        text = { Text("My Applicants" , fontSize = taskTextSize) },
                         onClick = {
                             onFilterChange("My Applicants")
                             expanded = false
@@ -188,7 +203,7 @@ fun FilterSection(
 
         Text(
             text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-            fontSize = 16.sp,
+            fontSize = taskTextSize,
             fontWeight = FontWeight.Normal,
             color = Color.Gray
         )
@@ -309,25 +324,23 @@ fun CalendarSection(
     } else {
         allBookingDates // Use all booking dates for My Clients
     }
-
+    Spacer(Modifier.height(6.dp))
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp), // Set rounded corners
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(280.dp)
+                .height(210.dp)
                 .background(brush = myGradient4) // Apply gradient
-                .padding(8.dp) // Padding inside the card
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                // Navigation for month (e.g., Jan to Feb)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -339,12 +352,14 @@ fun CalendarSection(
                         Icon(
                             Icons.Default.ArrowBackIos,
                             contentDescription = "Previous Month",
-                            tint = Color.White
+                            tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+
                         )
                     }
                     Text(
                         text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -352,7 +367,8 @@ fun CalendarSection(
                         Icon(
                             Icons.Default.ArrowForwardIos,
                             contentDescription = "Next Month",
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -365,7 +381,7 @@ fun CalendarSection(
                     listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN").forEach { day ->
                         Text(
                             text = day,
-                            fontSize = 12.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -390,12 +406,14 @@ fun CalendarSection(
 
                                     Box(
                                         modifier = Modifier
-                                            .size(30.dp)
+                                            .size(20.dp)
                                             .background(
                                                 if (date == selectedDate) Color.Black else Color.Transparent,
                                                 shape = MaterialTheme.shapes.small
                                             )
-                                            .clickable { onDateSelected(date) },
+                                            .clickable( indication = null,
+                                                interactionSource = remember { MutableInteractionSource() }
+                                            ) { onDateSelected(date) },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
@@ -405,11 +423,12 @@ fun CalendarSection(
                                                 hasData -> Color.Yellow // Highlight days with data
                                                 else -> Color.White
                                             },
+                                            fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
                                 } else {
-                                    Spacer(modifier = Modifier.size(30.dp)) // Empty spaces for alignment
+                                    Spacer(modifier = Modifier.size(20.dp)) // Empty spaces for alignment
                                 }
                                 day++
                             }
@@ -427,7 +446,7 @@ fun CalendarSection(
 @Composable
 fun ScheduleTopSection(navController: NavController){
 
-    Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
+    Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
 

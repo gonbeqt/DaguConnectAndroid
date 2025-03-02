@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
@@ -75,6 +78,22 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
     val bookingState by bookingTradesmanViewModel.bookTradesmanState.collectAsState()
     var isValid by remember { mutableStateOf(false) }
     val phoneRegex = "^09[0-9]{9}$".toRegex()
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
@@ -112,8 +131,8 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                         modifier = Modifier
                             .background(myGradient3)
                             .fillMaxWidth()
-                            .size(100.dp)
-                            .padding(top = 20.dp)
+                            .size(70.dp)
+                            .padding(top = 5.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -122,7 +141,12 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                             Icon(
                                 imageVector = Icons.Default.ArrowBackIosNew,
                                 contentDescription = "Arrow Back",
-                                Modifier.clickable { navController.popBackStack() }
+                                modifier = Modifier
+                                    .clickable
+                                        (indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    )
+                                    { navController.popBackStack() }
                                     .padding(16.dp),
                                 tint = Color.White
                             )
@@ -141,170 +165,120 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                         }
 
                     }
-                }
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 100.dp)
-                        .background(myGradient3)
 
-                    .verticalScroll(rememberScrollState())
-                    ,
-
-                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
-                ) {
-                    Column(
+                    Card(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xFFF9F9F9))
+                            .fillMaxWidth()
+                            .background(myGradient3)
+                        ,
+                        shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                                .fillMaxSize()
+                                .background(Color(0xFFF9F9F9))
                         ) {
-                            // Tradesman image
-                            AsyncImage(
-                                model = resume.profilepic,
-                                contentDescription = "Tradesman Image",
+                            Row(
                                 modifier = Modifier
-                                    .size(100.dp)
-                                    .padding(start = 10.dp)
-                            )
-
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 10.dp)
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = resume.tradesmanfullname,
-                                    color = Color.Black,
-                                    fontWeight = FontWeight(500),
-                                    fontSize = 20.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
+                                // Tradesman image
+                                AsyncImage(
+                                    model = resume.profilepic,
+                                    contentDescription = "Tradesman Image",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(start = 10.dp)
                                 )
-                                resume.preferedworklocation?.let {
+
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 10.dp)
+                                ) {
                                     Text(
-                                        text = it,
+                                        text = resume.tradesmanfullname,
                                         color = Color.Black,
-                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight(500),
+                                        fontSize = nameTextSize,
+                                        modifier = Modifier.padding(top = 10.dp)
                                     )
+                                    resume.preferedworklocation?.let {
+                                        Text(
+                                            text = it,
+                                            color = Color.Black,
+                                            fontSize = taskTextSize,
+                                        )
+                                    }
+                                    resume.specialty?.let {
+                                        Text(
+                                            text = it,
+                                            color = Color.Black,
+                                            fontSize = taskTextSize,
+                                        )
+                                    }
                                 }
-                                resume.specialty?.let {
-                                    Text(
-                                        text = it,
-                                        color = Color.Black,
-                                        fontSize = 16.sp,
-                                    )
+
+                                // Tradesman Reviews Box
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = Color(0xFFFFF2DD),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "Star Icon",
+                                            tint = Color(0xFFFFA500),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.size(4.dp))
+                                        Text(
+                                            text = "4",
+                                            fontSize = smallTextSize
+                                        )
+                                    }
                                 }
                             }
 
-                            // Tradesman Reviews Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = Color(0xFFFFF2DD),
-                                        shape = RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Star Icon",
-                                        tint = Color(0xFFFFA500),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = "4",
-                                        fontSize = 14.sp
-                                    )
-                                }
-                            }
-                        }
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                            // Address Input
+                            Column(Modifier.padding(horizontal = 24.dp))
+                            {
+                                Text(
+                                    text = "Address",
+                                    color = Color.Black,
+                                    fontSize = nameTextSize,
+                                    fontWeight = FontWeight(500),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
 
-                        // Address Input
-                        Column(Modifier.padding(horizontal = 10.dp))
-                        {
-                            Text(
-                                text = "Address",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White)
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                            ) {
-                                TextField(
-                                    value = address,
-                                    onValueChange = { address = it },
-                                    modifier = Modifier.fillMaxWidth()
-                                        .background(Color.White),
-                                    placeholder = { Text(text = "Enter your Address") },
-                                    maxLines = 3,
-
-
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.White,
-                                        unfocusedContainerColor = Color.White,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = Color.Black,
-                                        unfocusedTextColor = Color.Black,
-                                        cursorColor = Color.Black
-                                    ),
-                                    )
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = "Mobile Number",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF5F5F5))
-                            ) {
-                                Column {
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 6.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color.White)
+                                        .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                                ) {
                                     TextField(
-                                        value = phoneNumber,
-                                        onValueChange = { phoneNumber = it
-                                            isValid = phoneNumber.isNotEmpty() && !phoneRegex.matches(phoneNumber)                                                        }, // Invalid if it doesn't match the regex
+                                        value = address,
+                                        onValueChange = { address = it },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .background(Color.White),
-                                        placeholder = { Text(text = "+63 | Enter Mobile Number") },
-                                        maxLines = 1,
-                                        keyboardOptions = KeyboardOptions.Default.copy(
-                                            keyboardType = KeyboardType.Phone
-                                        ),
-                                        isError = isValid, // Shows error if the length is not 11
+                                        placeholder = { Text(text = "eg. 123 Street Name, Barangay, City") },
+                                        maxLines = 3,
+
+
                                         colors = TextFieldDefaults.colors(
                                             focusedContainerColor = Color.White,
                                             unfocusedContainerColor = Color.White,
@@ -312,120 +286,191 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                             unfocusedIndicatorColor = Color.Transparent,
                                             focusedTextColor = Color.Black,
                                             unfocusedTextColor = Color.Black,
-                                            cursorColor = Color.Black,
-                                            errorIndicatorColor = Color.Red // Error indicator color when invalid
+                                            cursorColor = Color.Black
                                         ),
                                     )
-
-                                    if (isValid) {
-                                        Text(
-                                            text = "Please enter a valid phone number starting with 09",
-                                            color = Color.Red,
-                                            style = TextStyle(fontSize = 12.sp),
-                                            modifier = Modifier.padding(top = 4.dp, start = 4.dp ) // Adding some space between the text and TextField
-                                        )
-                                    }
                                 }
-                            }
 
-                            Spacer(Modifier.height(16.dp))
-                            Text(
-                                text = "Select a Date for Your Booking",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-                            DatePickerWithRestrictions(selectedDate) { date ->
-                                selectedDate = date // ✅ Update selectedDate in ConfirmBook
-                            }
-                            Log.d("DatePickerWithRestrictions", "Selected Date: $selectedDate")
-                            Spacer(Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            Text(
-                                text = "Optional Details",
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF5F5F5))
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                            ) {
-                                TextField(
-                                    value = taskDescription,
-                                    onValueChange = { taskDescription = it },
-                                    modifier = Modifier.fillMaxWidth()
-                                        .background(Color.White),
-
-                                    placeholder = { Text(text = " Add any special requests or details for the trades person...") },
-                                    maxLines = 3,
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.White,
-                                        unfocusedContainerColor = Color.White,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = Color.Black,
-                                        unfocusedTextColor = Color.Black,
-                                        cursorColor = Color.Black
-
-
-                                    ),
-                                )
-                            }
-                            Spacer(Modifier.height(10.dp))
-                            Row(
-                                Modifier.fillMaxWidth()
-                                    .padding(vertical = 10.dp)
-                            ) {
-                                Button(
-                                    onClick = {
-
-                                        resume.specialty?.let {
-                                            bookingTradesmanViewModel.BookTradesman(phoneNumber,address,
-                                                it,taskDescription,selectedDate,TradesmanId)
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonColors(
-                                        Color(0xFF42C2AE), Color.White,
-                                        Color(0xFF42C2AE), Color.White
+                                    Text(
+                                        text = "Mobile Number",
+                                        color = Color.Black,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight(500),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
                                     )
-                                ) {
-                                    Text(text = "Confirm")
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 6.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                                            .background(Color(0xFFF5F5F5))
+                                    ) {
+                                            TextField(
+                                                value = phoneNumber,
+                                                onValueChange = {
+                                                    phoneNumber = it
+                                                    isValid =
+                                                        phoneNumber.isNotEmpty() && !phoneRegex.matches(
+                                                            phoneNumber
+                                                        )
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .background(Color.White),
+                                                placeholder = { Text(text = "eg. 09123456789") },
+                                                maxLines = 1,
+                                                keyboardOptions = KeyboardOptions.Default.copy(
+                                                    keyboardType = KeyboardType.Phone
+                                                ),
+                                                isError = isValid, // Shows error if the length is not 11
+                                                colors = TextFieldDefaults.colors(
+                                                    focusedContainerColor = Color.White,
+                                                    unfocusedContainerColor = Color.White,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                    focusedTextColor = Color.Black,
+                                                    unfocusedTextColor = Color.Black,
+                                                    cursorColor = Color.Black,
+                                                    errorIndicatorColor = Color.Red // Error indicator color when invalid
+                                                ),
+
+                                            )
+
+
+
+                                    }
+                                if (isValid) {
+                                    Text(
+                                        text = "Phone number must start with 09 and 11 numbers only",
+                                        color = Color.Red,
+                                        style = TextStyle(fontSize = 12.sp),
+                                        modifier = Modifier.padding(
+                                            top = 4.dp,
+                                            start = 4.dp
+                                        )
+                                    )
                                 }
-                                LaunchedEffect(bookingState) {
-                                    when (val bookingstate =bookingState) {
-                                        is BooktradesmanViewModel.BookTradesmanState.Success -> {
-                                            Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
-                                            bookingTradesmanViewModel.resetState() // Reset state to prevent re-triggering
+
+
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Select a Date for Your Booking",
+                                    color = Color.Black,
+                                    fontSize = nameTextSize,
+                                    fontWeight = FontWeight(500),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                )
+                                DatePickerWithRestrictions(selectedDate) { date ->
+                                    selectedDate = date // ✅ Update selectedDate in ConfirmBook
+                                }
+                                Log.d("DatePickerWithRestrictions", "Selected Date: $selectedDate")
+                                Spacer(Modifier.height(16.dp))
+
+                                Text(
+                                    text = "Optional Details",
+                                    color = Color.Black,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(500),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 6.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color(0xFFF5F5F5))
+                                        .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                                ) {
+                                    TextField(
+                                        value = taskDescription,
+                                        onValueChange = { taskDescription = it },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color.White),
+                                        placeholder = { Text(text = "Add special requests, details, or preferred time...") },
+                                        maxLines = 3,
+                                        colors = TextFieldDefaults.colors(
+                                            focusedContainerColor = Color.White,
+                                            unfocusedContainerColor = Color.White,
+                                            focusedIndicatorColor = Color.Transparent,
+                                            unfocusedIndicatorColor = Color.Transparent,
+                                            focusedTextColor = Color.Black,
+                                            unfocusedTextColor = Color.Black,
+                                            cursorColor = Color.Black
+
+
+                                        ),
+                                    )
+                                }
+                                Spacer(Modifier.height(10.dp))
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 10.dp)
+                                ) {
+                                    Button(
+                                        onClick = {
+
+                                            resume.specialty?.let {
+                                                bookingTradesmanViewModel.BookTradesman(
+                                                    phoneNumber, address,
+                                                    it, taskDescription, selectedDate, TradesmanId
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonColors(
+                                            Color(0xFF42C2AE), Color.White,
+                                            Color(0xFF42C2AE), Color.White
+                                        )
+                                    ) {
+                                        Text(text = "Confirm", fontSize = taskTextSize, color = Color.White)
+                                    }
+                                    LaunchedEffect(bookingState) {
+                                        when (val bookingstate = bookingState) {
+                                            is BooktradesmanViewModel.BookTradesmanState.Success -> {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Booking Successful",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                bookingTradesmanViewModel.resetState() // Reset state to prevent re-triggering
+                                            }
+
+                                            is BooktradesmanViewModel.BookTradesmanState.Error -> {
+                                                val errorMessage = bookingstate.message
+                                                Toast.makeText(
+                                                    context,
+                                                    "Error: $errorMessage",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                Log.e(
+                                                    "BookTradesman",
+                                                    "Error: $errorMessage"
+                                                ) // Debugging
+                                                bookingTradesmanViewModel.resetState() // Reset state to prevent repeated error
+                                            }
+
+                                            else -> Unit
                                         }
-                                        is BooktradesmanViewModel.BookTradesmanState.Error -> {
-                                            val errorMessage = bookingstate.message
-                                            Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
-                                            Log.e("BookTradesman", "Error: $errorMessage") // Debugging
-                                            bookingTradesmanViewModel.resetState() // Reset state to prevent repeated error
-                                        }
-                                        else -> Unit
                                     }
                                 }
                             }
+
+
                         }
-
-
                     }
-                }
 
+                }
             }
         }
         is ViewResumeViewModel.ViewResumeState.Error -> {
@@ -457,14 +502,15 @@ fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) ->
     }
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 5.dp)
+        modifier = Modifier.padding(top = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
         Button(
             onClick = { datePickerDialog.show() },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
+                .height(55.dp),
 
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(

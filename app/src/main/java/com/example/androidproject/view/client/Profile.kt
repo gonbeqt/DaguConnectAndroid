@@ -73,6 +73,8 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.ServicePosting
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
@@ -94,8 +96,23 @@ fun ProfileScreen(
     val profileState by getClientProfileViewModel.getProfileState.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
-    var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
+    val windowSize = rememberWindowSizeClass()
 
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     LaunchedEffect(Unit) {
         getClientProfileViewModel.getClientProfile()
     }
@@ -105,7 +122,7 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
+        Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
 
@@ -178,11 +195,11 @@ fun ProfileScreen(
                                 Text(
                                     text = profile.fullname,
                                     color = Color.Black,
-                                    fontSize = 18.sp,
+                                    fontSize = nameTextSize,
                                     fontWeight = FontWeight.Bold
                                 )
-                                Text(text = profile.email, color = Color.Gray)
-                                Text(text = profile.address, color = Color.Gray)
+                                Text(text = profile.email, color = Color.Gray, fontSize = taskTextSize)
+                                Text(text = profile.address, color = Color.Gray, fontSize = taskTextSize)
                             }
                         }
                     }
@@ -232,26 +249,10 @@ fun ProfileScreen(
                 .padding(top = 2.dp) // Separation from the white background
         ) {
             when (selectedTabIndex) {
-                0 -> MyPostsTab(getMyJobsViewModel) // Pass postsList
+                0 -> MyPostsTab(getMyJobsViewModel,postJobViewModel) // Pass postsList
                 1 -> SettingsScreen(navController, logoutViewModel)
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                Log.d("fab", "fab")
-                FabPosting(
-                    onPostNewService = { newPost ->
-                        postsList = postsList + newPost
-                    },
-                    onDeadlineChange = { deadline ->
-                        println("Selected Deadline: $deadline")
-                    },
-                    postJobViewModel
-                )
-            }
+
 
         }
 
@@ -265,8 +266,9 @@ fun ProfileScreen(
 
 
 @Composable
-fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel) {
+fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel,postJobViewModel: PostJobViewModel) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
 
     // Refresh when entering this screen again
     LaunchedEffect(Unit) {
@@ -291,6 +293,23 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel) {
             }
         }
     }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Log.d("fab", "fab")
+        FabPosting(
+            onPostNewService = { newPost ->
+                postsList = postsList + newPost
+            },
+            onDeadlineChange = { deadline ->
+                println("Selected Deadline: $deadline")
+            },
+            postJobViewModel
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -300,6 +319,24 @@ fun PostsCard(
     onApplicantsClick: () -> Unit,
     getJobs: GetJobs
 ) {
+
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -338,7 +375,7 @@ fun PostsCard(
 
                     Text(
                         text = "Looking for ${editableTitle}",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
                     TextButton(
@@ -355,7 +392,7 @@ fun PostsCard(
                             Text(
                                 "Edit Post",
                                 color = Color.Black,
-                                fontSize = 14.sp,
+                                fontSize = taskTextSize,
                                 modifier = Modifier.padding(start = 8.dp, end = 2.dp),
                                 textAlign = TextAlign.Start
                             )
@@ -363,30 +400,54 @@ fun PostsCard(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit Icon",
                                 tint = Color.Black,
-                                modifier = Modifier.padding(end = 8.dp).size(15.dp)
+                                modifier = Modifier.padding(end = 8.dp).size(14.dp)
                             )
                         }
                     }
                 }
 
-
                 Text(
                     text = editableDescription,
-                    fontSize = 16.sp,
+                    fontSize = taskTextSize,
+                    color = Color.Black,
                     fontWeight = FontWeight.Normal
                 )
-                Text(text = "Job Address: $editableLocation", fontSize = 16.sp)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                    Text(text = "Job Address:",
+                        fontWeight = FontWeight.Bold, color = Color.Gray, fontSize =taskTextSize)
+                    Text(text = editableLocation, fontSize = smallTextSize,fontWeight = FontWeight.Bold, color = Color.Black,)
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                    Text(
+                        text = "Budget:",
+                        fontSize = taskTextSize,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(text = "$editableRate pesos",fontSize = smallTextSize,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "Service Type:",
+                        fontSize = taskTextSize,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray
 
-                Text(
-                    text = "Budget: $editableRate pesos",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal
-                )
-                Text(
-                    text = "Service Type: ${getJobs.jobType}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                )
+                    )
+                    Text(
+                        text = getJobs.jobType,
+                        fontSize = smallTextSize,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+
+
+
+
                 Text(
                     text = "Applicants: ${getJobs.totalApplicants}",
                     fontSize = 16.sp,
@@ -413,7 +474,8 @@ fun PostsCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(8.dp))
+                    .verticalScroll(rememberScrollState()),
                 colors = CardDefaults.cardColors(Color.White)
             ) {
                 Column(
