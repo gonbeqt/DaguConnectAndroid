@@ -581,7 +581,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
-                    model = resumes.profilepic,
+                    model = resumes.profilePic,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(cardHeight - 20.dp)
@@ -599,7 +599,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = resumes.tradesmanfullname,
+                            text = resumes.tradesmanFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -647,7 +647,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 )
                         ) {
                             Text(
-                                text = "P${resumes.workfee}/hr",
+                                text = "P${resumes.workFee}/hr",
                                 fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )

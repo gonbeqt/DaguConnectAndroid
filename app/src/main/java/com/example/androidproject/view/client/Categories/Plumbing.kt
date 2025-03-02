@@ -308,8 +308,8 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController,reportViewMo
         ) {
             // Profile Picture
             AsyncImage(
-                model = plumber.profilepic,
-                contentDescription = plumber.tradesmanfullname,
+                model = plumber.profilePic,
+                contentDescription = plumber.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -322,7 +322,7 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController,reportViewMo
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = plumber.tradesmanfullname,
+                        text = plumber.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -370,7 +370,7 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController,reportViewMo
                             )
                     ) {
                         Text(
-                            text = "P${plumber.workfee}/hr",
+                            text = "P${plumber.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -392,7 +392,7 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController,reportViewMo
                         )
                         Text(
                             when {
-                                plumber.ratings == null || plumber.ratings == 0f -> "0"
+                                plumber.ratings == 0f -> "0"
                                 else -> String.format("%.1f", plumber.ratings)
                             },
                             fontSize = smallTextSize,

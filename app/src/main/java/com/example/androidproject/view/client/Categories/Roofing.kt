@@ -303,8 +303,8 @@ fun RoofingItem(roofing: resumesItem, navController: NavController,reportViewMod
         ) {
             // Profile Picture
             AsyncImage(
-                model = roofing.profilepic,
-                contentDescription = roofing.tradesmanfullname,
+                model = roofing.profilePic,
+                contentDescription = roofing.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -317,7 +317,7 @@ fun RoofingItem(roofing: resumesItem, navController: NavController,reportViewMod
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = roofing.tradesmanfullname,
+                        text = roofing.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -365,7 +365,7 @@ fun RoofingItem(roofing: resumesItem, navController: NavController,reportViewMod
                             )
                     ) {
                         Text(
-                            text = "P${roofing.workfee}/hr",
+                            text = "P${roofing.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -387,7 +387,7 @@ fun RoofingItem(roofing: resumesItem, navController: NavController,reportViewMod
                         )
                         Text(
                             when {
-                                roofing.ratings == null || roofing.ratings == 0f -> "0"
+                                roofing.ratings == 0f -> "0"
                                 else -> String.format("%.1f", roofing.ratings)
                             },
                             fontSize = smallTextSize,

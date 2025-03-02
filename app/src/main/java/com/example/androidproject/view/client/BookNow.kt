@@ -71,360 +71,358 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
         }
         is ViewResumeViewModel.ViewResumeState.Success -> {
             val resume = state.data
-            if (resume!= null) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Main Content Area (Scrollable)
+
+                // Header Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(myGradient3)
+                        .verticalScroll(rememberScrollState()),
+                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
                 ) {
-                    // Main Content Area (Scrollable)
 
-                    // Header Card
-                    Card(
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .background(myGradient3)
-                            .verticalScroll(rememberScrollState()),
-                        shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
+                            .fillMaxWidth()
+                            .size(100.dp)
+                            .padding(top = 20.dp)
                     ) {
-
-                        Column(
-                            modifier = Modifier
-                                .background(myGradient3)
-                                .fillMaxWidth()
-                                .size(100.dp)
-                                .padding(top = 20.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBackIosNew,
-                                    contentDescription = "Arrow Back",
-                                    Modifier.clickable { navController.popBackStack() }
-                                        .padding(16.dp)
-                                    ,
-                                    tint = Color.White
-                                )
+                            Icon(
+                                imageVector = Icons.Default.ArrowBackIosNew,
+                                contentDescription = "Arrow Back",
+                                Modifier.clickable { navController.popBackStack() }
+                                    .padding(16.dp)
+                                ,
+                                tint = Color.White
+                            )
 
 
-                                Text(
-                                    text = "Expert Details",
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .padding(top = 15.dp, end = 50.dp)
-                                        .weight(1f) // Ensures the text takes available space and is centered
-                                )
-                            }
-
-                        }
-
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(myGradient3),
-                            shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
-                        ) {
-                            Column(
+                            Text(
+                                text = "Expert Details",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color(0xFFF9F9F9))
-                            ) {
-
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    AsyncImage(
-                                        model = resume.profilepic,
-                                        contentDescription = "Tradesman Image",
-                                        modifier = Modifier
-                                            .size(100.dp)
-                                            .padding(start = 10.dp)
-                                    )
-
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(start = 15.dp)
-                                    ) {
-                                        Text(
-                                            text = resume.tradesmanfullname,
-                                            color = Color.Black,
-                                            fontWeight = FontWeight(500),
-                                            fontSize = 20.sp,
-                                            modifier = Modifier.padding(top = 10.dp)
-                                        )
-                                        resume.specialty?.let {
-                                            BoxRow(specialties = it
-
-                                            )
-                                        }
-                                        resume.preferedworklocation?.let {
-                                            Text(
-                                                text = it,
-                                                color = Color.Black,
-                                                fontSize = 16.sp
-                                            )
-                                        }
-
-
-                                    }
-
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                color = Color(0xFFFFF2DD),
-                                                shape = RoundedCornerShape(12.dp)
-                                            )
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Star,
-                                                contentDescription = "Star Icon",
-                                                tint = Color(0xFFFFA500),
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.size(4.dp))
-                                            Text(
-                                                when {
-                                                    resume.ratings == null || resume.ratings == 0f -> "0"
-                                                    else -> String.format("%.1f", resume.ratings)
-                                                },
-                                                fontSize = 14.sp
-                                            )
-                                        }
-                                    }
-                                }
-
-                                // Additional Sections
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Column(Modifier.padding(horizontal = 10.dp)) {
-                                    Text(
-                                        text = "About Me",
-                                        color = Color.Black,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(500),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                    )
-                                    Text(
-                                        text = resume.aboutme,
-                                        modifier = Modifier.padding(horizontal = 8.dp),
-                                        fontWeight = FontWeight(500),
-                                        color = Color.Black,
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(
-                                            text = "Preferred Location",
-                                            color = Color.Black,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight(500))
-
-                                        resume.preferedworklocation?.let {
-                                            Text(
-                                                text = it,
-                                                color = Color.Black,
-                                                fontSize = 16.sp,
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(
-                                            text = "Est. Rate",
-                                            color = Color.Black,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight(500))
-
-                                        Text(
-                                            text =  "₱${resume.workfee}",
-                                            color = Color.Black,
-                                            fontSize = 16.sp
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(
-                                            text = "Trade Credential",
-                                            color = Color.Black,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight(500))
-
-                                        Text(
-                                            text = "View File",
-                                            color = Color.Black,
-                                            fontSize = 16.sp,
-                                            modifier = Modifier
-                                                .clickable {
-
-                                                    val fileUrl = resume.documents // Assuming this is the URL to the file
-                                                    val fileName = "trade_credential_${resume.tradesmanfullname}.pdf" // Customize the file name as needed
-                                                    if (fileUrl != null) {
-                                                        downloadFile(context, fileUrl, fileName)
-                                                    }
-                                                }
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                        Text(
-                                            text = "Contact Information",
-                                            color = Color.Black,
-                                            fontSize = 18.sp,
-                                            modifier = Modifier.padding(horizontal = 10.dp),
-                                            fontWeight = FontWeight(500))
-
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(
-                                            text = "Phone Number",
-                                            color = Color.Black,
-                                            fontSize = 18.sp,
-                                        )
-
-                                        Text(
-                                            text = resume.phonenumber?: "N/A",
-                                            color = Color.Black,
-                                            fontSize = 16.sp
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(
-                                            text = "Email",
-                                            color = Color.Black,
-                                            fontSize = 18.sp,
-                                        )
-
-                                        Text(
-                                            text = resume.email,
-                                            color = Color.Black,
-                                            fontSize = 16.sp
-                                        )
-                                    }
-
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Text(
-                                        text = "Ratings And Testimonials",
-                                        color = Color.Black,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(500),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                    )
-
-                                    Text(
-                                        text = "Feedback from satisfied clients",
-                                        color = Color.Black,
-                                        fontSize = 14.sp,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                    )
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .background(Color(0xFFF9F9F9)),
-                                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        FeedbackItem(viewRatingsViewModel,resume.userid)
-                                    }
-                                }
-                            }
+                                    .padding(top = 15.dp, end = 50.dp)
+                                    .weight(1f) // Ensures the text takes available space and is centered
+                            )
                         }
-                        // Tradesman Details Section
-
 
                     }
 
-                    // Fixed Buttons at the Bottom
-                    Row(
+
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .align(Alignment.BottomCenter)
-                            .background(Color.Transparent)
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
+                            .background(myGradient3),
+                        shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
                     ) {
-                        Box(
+                        Column(
                             modifier = Modifier
-                                .clickable { navController.navigate("message_screen") }
-                                .background(
-                                    color = Color(0xFF42C2AE),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp) )
-                                .width(150.dp)
-                                .padding(8.dp),
-                            contentAlignment = Alignment.Center
+                                .fillMaxSize()
+                                .background(Color(0xFFF9F9F9))
                         ) {
+
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Message,
-                                    contentDescription = "Message Icon",
-                                    tint = Color.White
+                                AsyncImage(
+                                    model = resume.profilePic,
+                                    contentDescription = "Tradesman Image",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(start = 10.dp)
                                 )
-                                Text(text = "Chat Me", color = Color.White)
-                            }
-                        }
 
-                        Box(
-                            modifier = Modifier
-                                .clickable {navController.navigate("confirmbook/${resume.id}/${resume.userid}") }
-                                .background(
-                                    color = Color(0xFF42C2AE),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .width(150.dp)
-                                .padding(8.dp),contentAlignment = Alignment.Center
-
-
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.Center,
-
-
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 15.dp)
                                 ) {
-                                Icon(
-                                    imageVector = Icons.Default.AddShoppingCart,
-                                    contentDescription = "Add to Cart Icon",
-                                    tint = Color.White
+                                    Text(
+                                        text = resume.tradesmanFullName,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight(500),
+                                        fontSize = 20.sp,
+                                        modifier = Modifier.padding(top = 10.dp)
+                                    )
+                                    resume.specialty?.let {
+                                        BoxRow(specialties = it
+
+                                        )
+                                    }
+                                    resume.preferredWorkLocation?.let {
+                                        Text(
+                                            text = it,
+                                            color = Color.Black,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+
+
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = Color(0xFFFFF2DD),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "Star Icon",
+                                            tint = Color(0xFFFFA500),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.size(4.dp))
+                                        Text(
+                                            when {
+                                                resume.ratings == 0f -> "0"
+                                                else -> String.format("%.1f", resume.ratings)
+                                            },
+                                            fontSize = 14.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Additional Sections
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Column(Modifier.padding(horizontal = 10.dp)) {
+                                Text(
+                                    text = "About Me",
+                                    color = Color.Black,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(500),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
                                 )
                                 Text(
-                                    text = "Book Now",
-                                    textAlign = TextAlign.Center,
-                                    color = Color.White
+                                    text = resume.aboutMe,
+                                    modifier = Modifier.padding(horizontal = 8.dp),
+                                    fontWeight = FontWeight(500),
+                                    color = Color.Black,
                                 )
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Row (Modifier.fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween){
+                                    Text(
+                                        text = "Preferred Location",
+                                        color = Color.Black,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight(500))
+
+                                    resume.preferredWorkLocation?.let {
+                                        Text(
+                                            text = it,
+                                            color = Color.Black,
+                                            fontSize = 16.sp,
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Row (Modifier.fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween){
+                                    Text(
+                                        text = "Est. Rate",
+                                        color = Color.Black,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight(500))
+
+                                    Text(
+                                        text =  "₱${resume.workFee}",
+                                        color = Color.Black,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Row (Modifier.fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween){
+                                    Text(
+                                        text = "Trade Credential",
+                                        color = Color.Black,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight(500))
+
+                                    Text(
+                                        text = "View File",
+                                        color = Color.Black,
+                                        fontSize = 16.sp,
+                                        modifier = Modifier
+                                            .clickable {
+
+                                                val fileUrl = resume.documents // Assuming this is the URL to the file
+                                                val fileName = "trade_credential_${resume.tradesmanFullName}.pdf" // Customize the file name as needed
+                                                if (fileUrl != null) {
+                                                    downloadFile(context, fileUrl, fileName)
+                                                }
+                                            }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Contact Information",
+                                        color = Color.Black,
+                                        fontSize = 18.sp,
+                                        modifier = Modifier.padding(horizontal = 10.dp),
+                                        fontWeight = FontWeight(500))
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Row (Modifier.fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween){
+                                    Text(
+                                        text = "Phone Number",
+                                        color = Color.Black,
+                                        fontSize = 18.sp,
+                                    )
+
+                                    Text(
+                                        text = resume.phoneNumber?: "N/A",
+                                        color = Color.Black,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Row (Modifier.fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween){
+                                    Text(
+                                        text = "Email",
+                                        color = Color.Black,
+                                        fontSize = 18.sp,
+                                    )
+
+                                    Text(
+                                        text = resume.email,
+                                        color = Color.Black,
+                                        fontSize = 16.sp
+                                    )
+                                }
+
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(
+                                    text = "Ratings And Testimonials",
+                                    color = Color.Black,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight(500),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
+                                )
+
+                                Text(
+                                    text = "Feedback from satisfied clients",
+                                    color = Color.Black,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .background(Color(0xFFF9F9F9)),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    FeedbackItem(viewRatingsViewModel,resume.userid)
+                                }
                             }
+                        }
+                    }
+                    // Tradesman Details Section
+
+
+                }
+
+                // Fixed Buttons at the Bottom
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .background(Color.Transparent)
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("message_screen") }
+                            .background(
+                                color = Color(0xFF42C2AE),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp) )
+                            .width(150.dp)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Message,
+                                contentDescription = "Message Icon",
+                                tint = Color.White
+                            )
+                            Text(text = "Chat Me", color = Color.White)
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable {navController.navigate("confirmbook/${resume.id}/${resume.userid}") }
+                            .background(
+                                color = Color(0xFF42C2AE),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .width(150.dp)
+                            .padding(8.dp),contentAlignment = Alignment.Center
+
+
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+
+
+                            ) {
+                            Icon(
+                                imageVector = Icons.Default.AddShoppingCart,
+                                contentDescription = "Add to Cart Icon",
+                                tint = Color.White
+                            )
+                            Text(
+                                text = "Book Now",
+                                textAlign = TextAlign.Center,
+                                color = Color.White
+                            )
                         }
                     }
                 }

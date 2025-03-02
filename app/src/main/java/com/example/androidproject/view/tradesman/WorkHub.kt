@@ -292,9 +292,7 @@ fun PendingBookingsTradesmanContent(navController: NavController,getTradesmanBoo
     ) {
         items(bookingPending.size) { index ->
             val Pending = bookingPending[index]
-            if (Pending != null) {
-                PendingTradesmanItem(Pending,navController)
-            }
+            PendingTradesmanItem(Pending,navController)
         }
     }
 }
@@ -319,9 +317,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
     ) {
         items(declinedBookings.size) { index ->
             val declined = declinedBookings[index]
-            if (declined != null) {
-                DeclinedTradesmanItem(declined,navController)
-            }
+            DeclinedTradesmanItem(declined,navController)
         }
     }
 }
@@ -346,7 +342,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
     ) {
         items(activeBookings.size) { index ->
             val active = activeBookings[index]
-            if (active != null) ActiveTradesmanItem(active, navController)
+            ActiveTradesmanItem(active, navController)
         }
     }
 }
@@ -372,9 +368,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
     ) {
         items(completedBooking.size) { index ->
             val Pending = completedBooking[index]
-            if (Pending != null) {
-                CompletedItem(Pending, navController )
-            }
+            CompletedItem(Pending, navController )
         }
     }
 }
@@ -400,9 +394,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
     ) {
         items(cancelledBookings.size) { index ->
             val cancel = cancelledBookings[index]
-            if (cancel != null) {
-                CancelledItem(cancel, navController )
-            }
+            CancelledItem(cancel, navController )
         }
     }
 }

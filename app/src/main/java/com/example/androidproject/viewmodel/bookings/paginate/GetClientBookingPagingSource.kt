@@ -5,7 +5,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.client.GetClientsBooking
-import com.example.androidproject.model.client.resumesItem
 
 class GetClientBookingPagingSource(private val apiService: ApiService) : PagingSource<Int, GetClientsBooking>() {
 

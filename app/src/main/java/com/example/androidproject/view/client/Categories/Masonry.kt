@@ -299,8 +299,8 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
         ) {
             // Profile Picture
             AsyncImage(
-                model = masonry.profilepic,
-                contentDescription = masonry.tradesmanfullname,
+                model = masonry.profilePic,
+                contentDescription = masonry.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -313,7 +313,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
             ) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
-                        text = masonry.tradesmanfullname,
+                        text = masonry.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -360,7 +360,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                             )
                     ) {
                         Text(
-                            text = "P${masonry.workfee}/hr",
+                            text = "P${masonry.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -382,7 +382,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                         )
                         Text(
                             when {
-                                masonry.ratings == null || masonry.ratings == 0f -> "0"
+                                masonry.ratings == 0f -> "0"
                                 else -> String.format("%.1f", masonry.ratings)
                             },
                             fontSize = smallTextSize,

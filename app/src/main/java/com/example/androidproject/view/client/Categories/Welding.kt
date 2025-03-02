@@ -221,7 +221,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                             } else {
                                 items(filteredList.size) { index ->
                                     val weldingList = filteredList[index]
-                                    if (weldingList != null && weldingList.id !in dismissedResumes) { // Filter directly
+                                    if (weldingList.id !in dismissedResumes) { // Filter directly
                                         WeldingItem(weldingList, navController,reportViewModel){
                                             getResumesViewModel.dismissResume(weldingList.id)
                                         }
@@ -301,8 +301,8 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
         ) {
             // Profile Picture
             AsyncImage(
-                model = welding.profilepic,
-                contentDescription = welding.tradesmanfullname,
+                model = welding.profilePic,
+                contentDescription = welding.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -315,7 +315,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = welding.tradesmanfullname,
+                        text = welding.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -363,7 +363,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
                             )
                     ) {
                         Text(
-                            text = "P${welding.workfee}/hr",
+                            text = "P${welding.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )

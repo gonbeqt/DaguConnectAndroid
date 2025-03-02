@@ -201,7 +201,7 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = ACRepairList.itemSnapshotList.items.filter { it.specialty.contains("ACRepair") && it.id !in dismissedResumes }
+                            val filteredList = ACRepairList.itemSnapshotList.items.filter { it.specialty.contains("Ac_Repair") && it.id !in dismissedResumes }
                             if (filteredList.isEmpty()) {
                                 item {
                                     Box(
@@ -304,8 +304,8 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
         ) {
             // Profile Picture
             AsyncImage(
-                model = ACRepair.profilepic,
-                contentDescription = ACRepair.tradesmanfullname,
+                model = ACRepair.profilePic,
+                contentDescription = ACRepair.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -319,7 +319,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                 Row (Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = ACRepair.tradesmanfullname,
+                        text = ACRepair.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -370,7 +370,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                             )
                     ) {
                         Text(
-                            text = "P${ACRepair.workfee}/hr",
+                            text = "P${ACRepair.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -392,7 +392,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                         )
                         Text(
                             text =   when {
-                                ACRepair.ratings == null || ACRepair.ratings == 0f -> "0"
+                                ACRepair.ratings == 0f -> "0"
                                 else -> String.format("%.1f", ACRepair.ratings)
                             },
                             fontSize = smallTextSize,

@@ -294,8 +294,8 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
         ) {
             // Profile Picture
             AsyncImage(
-                model = cleaning.profilepic,
-                contentDescription = cleaning.tradesmanfullname,
+                model = cleaning.profilePic,
+                contentDescription = cleaning.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp))
@@ -308,7 +308,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = cleaning.tradesmanfullname,
+                        text = cleaning.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -356,7 +356,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
                             )
                     ) {
                         Text(
-                            text = "P${cleaning.workfee}/hr",
+                            text = "P${cleaning.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -378,7 +378,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
                         )
                         Text(
                             when {
-                                cleaning.ratings == null || cleaning.ratings == 0f -> "0"
+                                cleaning.ratings == 0f -> "0"
                                 else -> String.format("%.1f", cleaning.ratings)
                             },
                             fontSize = smallTextSize,

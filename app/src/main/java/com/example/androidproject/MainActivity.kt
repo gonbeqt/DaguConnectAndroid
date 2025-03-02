@@ -6,6 +6,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -148,7 +153,7 @@ class MainActivity : ComponentActivity() {
         val getResumesVMFactory = GetResumesViewModelFactory(apiService,this)
         val getResumesViewModel = ViewModelProvider(this, getResumesVMFactory)[GetResumesViewModel::class.java]
 
-        val viewResumesVMFactory = ViewResumeViewModelFactory(apiService,this)
+        val viewResumesVMFactory = ViewResumeViewModelFactory(apiService)
         val viewResumeViewModel = ViewModelProvider(this, viewResumesVMFactory)[ViewResumeViewModel::class.java]
 
         val logoutVMFactory = LogoutViewModelFactory(apiService)
@@ -234,7 +239,7 @@ class MainActivity : ComponentActivity() {
                         LogInScreen(navController,loginViewModel)
 
                     }
-                    composable("main_screen"){
+                    composable("main_screen") {
                         MainScreen(
                             navController,
                             logoutViewModel,
@@ -253,7 +258,9 @@ class MainActivity : ComponentActivity() {
                             putJobApplicationStatusViewModel,
                             getMyJobApplicantsViewModel,
                             viewJobApplicationViewModel,
-                            getTradesmanBookingViewModel)
+                            getTradesmanBookingViewModel,
+                            { loadingUI() } // Pass LoadingUI here
+                        )
                     }
                     composable("message_screen") {
                         MessageScreen(modifier=Modifier, navController, getChatsViewModel)
@@ -373,7 +380,7 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel)
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel, { loadingUI() })
                     }
                     composable("manageprofile") {
                         ManageProfile(modifier = Modifier, navController)
@@ -396,6 +403,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+}
+@Composable
+fun loadingUI() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator() // You can customize this with your LoadingTradesmanUI design
     }
 }
 
