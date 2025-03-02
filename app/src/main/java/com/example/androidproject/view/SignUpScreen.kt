@@ -712,6 +712,29 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
 @Composable
 fun RegistrationButton(navController: NavController, viewModel: RegisterViewModel, firstName: String, lastName: String, userName: String, email: String, birthdate: String, isClient: Boolean, password: String, confirmPassword: String, registerState: RegisterViewModel.RegisterState, modifier: Modifier = Modifier){
     val context = LocalContext.current
+
+    when (registerState) {
+        is RegisterViewModel.RegisterState.Loading -> {
+            // Do nothing
+        }
+
+        is RegisterViewModel.RegisterState.Success -> {
+            Toast.makeText(context, registerState.data?.message, Toast.LENGTH_SHORT)
+                .show()
+            navController.navigate("login")
+        }
+
+        is RegisterViewModel.RegisterState.Error -> {
+            Toast.makeText(context, registerState.message, Toast.LENGTH_SHORT)
+                .show()
+            Log.i("Register screen error", "Register error $registerState.message")
+        }
+
+        RegisterViewModel.RegisterState.Idle -> {
+            // Do nothing
+        }
+    }
+
     Column(modifier = modifier) {
 
             Button(
@@ -726,28 +749,6 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
                         password,
                         confirmPassword
                     )
-                    when (registerState) {
-                        is RegisterViewModel.RegisterState.Loading -> {
-                            // Do nothing
-                        }
-
-                        is RegisterViewModel.RegisterState.Success -> {
-                            Toast.makeText(context, registerState.data?.message, Toast.LENGTH_SHORT)
-                                .show()
-                            navController.navigate("login")
-                        }
-
-                        is RegisterViewModel.RegisterState.Error -> {
-                            Toast.makeText(context, registerState.message, Toast.LENGTH_SHORT)
-                                .show()
-                            Log.i("Register screen error", "Register error $registerState.message")
-                        }
-
-                        RegisterViewModel.RegisterState.Idle -> {
-                            // Do nothing
-                        }
-                    }
-
                 },
                 modifier = Modifier
                     .fillMaxWidth()

@@ -6,6 +6,7 @@ import com.example.androidproject.model.GetJobApplicantsData
 import com.example.androidproject.model.GetJobApplicationData
 import com.example.androidproject.model.GetMessages
 import com.example.androidproject.model.GetMyJobs
+import com.example.androidproject.model.GetNotification
 import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.JobsResponse
@@ -17,6 +18,8 @@ import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
+import com.example.androidproject.model.UpdateJob
+import com.example.androidproject.model.UpdateJobResponse
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
 import com.example.androidproject.model.ViewJobApplicationData
@@ -168,4 +171,10 @@ interface ApiService {
 
     @GET("/user/tradesman/getbooking")
     suspend fun getTradesmanBooking(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10) : Response <GetTradesmanBookingResponse>
+
+    @PUT("/client/jobs/update/{jobId}")
+    suspend fun updateJob(@Path("jobId") jobId: Int, @Body request: UpdateJob): Response<UpdateJobResponse>
+
+    @GET("/user/notification")
+    suspend fun getNotifications(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetNotification>
 }

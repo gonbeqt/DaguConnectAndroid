@@ -13,5 +13,4 @@ class PostJobViewModelFactory(private val apiService: ApiService, private val co
         }
             throw IllegalArgumentException("Unknown ViewModel class")
     }
-
 }
