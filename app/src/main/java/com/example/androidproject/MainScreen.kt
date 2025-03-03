@@ -153,6 +153,10 @@ fun MainScreen(
                                 navigationStack.add(selectedItem)
                             }
                             selectedItem = index
+                            // Reset selectedTab to 0 when clicking Bookings screen (index 1)
+                            if (index == 1) {
+                                navController.currentBackStackEntry?.savedStateHandle?.set("selectedTab", 0)
+                            }
                         },
                         icon = {
                             Icon(imageVector = item.icon, contentDescription = "Icon")
