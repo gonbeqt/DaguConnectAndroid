@@ -1,4 +1,4 @@
-package com.example.androidproject.view.client
+package com.example.androidproject.view.tradesman
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -38,13 +38,12 @@ import java.io.ByteArrayOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountSettings(navController: NavController) {
+fun AccountSettingsTradesman(navController: NavController) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var contactNumber by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
 
@@ -53,13 +52,12 @@ fun AccountSettings(navController: NavController) {
     ) { uri: Uri? ->
         if (uri != null) {
             profileImageUri = uri
-            val mimeType = com.example.androidproject.view.tradesman.getImageMimeType(context, uri)
+            val mimeType = getImageMimeType(context, uri)
             println("Selected image type: $mimeType")
 
             // Convert to JPEG if needed
             if (mimeType != "image/jpeg") {
-                val jpegBytes =
-                    com.example.androidproject.view.tradesman.convertImageToJpeg(context, uri)
+                val jpegBytes = convertImageToJpeg(context, uri)
                 println("Image converted to JPEG, size: ${jpegBytes.size} bytes")
             }
         }
@@ -193,21 +191,7 @@ fun AccountSettings(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
-                    value = location,
-                    onValueChange = { location = it },
-                    label = { Text("Location") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
-                    maxLines = 3,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Blue,
-                        unfocusedBorderColor = Color.Gray,
-                        focusedLabelColor = Color.Black,
-                        containerColor = Color.White
 
-                    )
-                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

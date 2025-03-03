@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -140,14 +141,24 @@ fun ProfileScreen(
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Medium
                 )
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color.Black,
-                    modifier = Modifier
-                        .size(35.dp)
-                        .clickable { navController.navigate("notification") }
-                )
+                Row (){
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications Icon",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable { navController.navigate("notification") }
+                    )
+                    Icon(imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings Icon",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable { navController.navigate("accountsettings") }
+                    )
+                }
+
             }
         }
 
