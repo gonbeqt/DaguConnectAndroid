@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,10 +47,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
@@ -59,6 +64,22 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
     val viewResumeState by viewResumeViewModel.viewResumeState.collectAsState()
     val ResumeId = resumeId.toIntOrNull() ?: return
     val context = LocalContext.current
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
@@ -85,25 +106,27 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
                 ) {
 
-                    Column(
-                        modifier = Modifier
-                            .background(myGradient3)
-                            .fillMaxWidth()
-                            .size(100.dp)
-                            .padding(top = 20.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
+                        Column(
+                            modifier = Modifier
+                                .background(myGradient3)
+                                .fillMaxWidth()
+                                .size(70.dp)
+                                .padding(top = 5.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBackIosNew,
-                                contentDescription = "Arrow Back",
-                                Modifier.clickable { navController.popBackStack() }
-                                    .padding(16.dp)
-                                ,
-                                tint = Color.White
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBackIosNew,
+                                    contentDescription = "Arrow Back",
+                                    Modifier.clickable ( indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) { navController.popBackStack() }
+                                        .padding(16.dp)
+                                    ,
+                                    tint = Color.White
+                                )
 
 
                             Text(
@@ -157,7 +180,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                         text = resume.tradesmanFullName,
                                         color = Color.Black,
                                         fontWeight = FontWeight(500),
-                                        fontSize = 20.sp,
+                                        fontSize = nameTextSize,
                                         modifier = Modifier.padding(top = 10.dp)
                                     )
 
@@ -172,7 +195,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                         Text(
                                             text = it,
                                             color = Color.Black,
-                                            fontSize = 16.sp
+                                            fontSize = taskTextSize
                                         )
                                     }
 
@@ -200,7 +223,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                                 resume.ratings == 0f -> "0"
                                                 else -> String.format("%.1f", resume.ratings)
                                             },
-                                            fontSize = 14.sp
+                                            fontSize = smallTextSize
                                         )
                                     }
                                 }
@@ -212,7 +235,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                 Text(
                                     text = "About Me",
                                     color = Color.Black,
-                                    fontSize = 18.sp,
+                                    fontSize = nameTextSize,
                                     fontWeight = FontWeight(500),
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -221,7 +244,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                 Text(
                                     text = resume.aboutMe,
                                     modifier = Modifier.padding(horizontal = 8.dp),
-                                    fontWeight = FontWeight(500),
+                                    fontSize = taskTextSize,
                                     color = Color.Black,
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -232,51 +255,55 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     Text(
                                         text = "Preferred Location",
                                         color = Color.Black,
-                                        fontSize = 18.sp,
+                                        fontSize = nameTextSize,
                                         fontWeight = FontWeight(500))
 
                                     resume.preferredWorkLocation?.let {
                                         Text(
                                             text = it,
                                             color = Color.Black,
-                                            fontSize = 16.sp,
+                                            fontSize = taskTextSize,
+                                            fontWeight = FontWeight(500)
                                         )
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
 
-                                Row (Modifier.fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween){
-                                    Text(
-                                        text = "Est. Rate",
-                                        color = Color.Black,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(500))
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Est. Rate",
+                                            color = Color.Gray,
+                                            fontSize = nameTextSize,
+                                            fontWeight = FontWeight(500))
 
                                     Text(
                                         text =  "₱${resume.workFee}",
                                         color = Color.Black,
-                                        fontSize = 16.sp
+                                        fontWeight = FontWeight(500),
+                                        fontSize = taskTextSize
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
 
-                                Row (Modifier.fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween){
-                                    Text(
-                                        text = "Trade Credential",
-                                        color = Color.Black,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight(500))
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Trade Credential",
+                                            color = Color.Gray,
+                                            fontSize = nameTextSize,
+                                            fontWeight = FontWeight(500))
 
-                                    Text(
-                                        text = "View File",
-                                        color = Color.Black,
-                                        fontSize = 16.sp,
+                                        Text(
+                                            text = "View File",
+                                            color = Color.Blue,
+                                            fontSize = 16.sp,
+                                            textDecoration = TextDecoration.Underline,
+                                            fontWeight = FontWeight(500),
                                         modifier = Modifier
-                                            .clickable {
+                                                .clickable {
 
                                                 val fileUrl = resume.documents // Assuming this is the URL to the file
                                                 val fileName = "trade_credential_${resume.tradesmanFullName}.pdf" // Customize the file name as needed
@@ -290,7 +317,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     Text(
                                         text = "Contact Information",
                                         color = Color.Black,
-                                        fontSize = 18.sp,
+                                        fontSize = nameTextSize,
                                         modifier = Modifier.padding(horizontal = 10.dp),
                                         fontWeight = FontWeight(500))
 
@@ -301,103 +328,107 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     horizontalArrangement = Arrangement.SpaceBetween){
                                     Text(
                                         text = "Phone Number",
-                                        color = Color.Black,
-                                        fontSize = 18.sp,
+                                        color = Color.Gray,
+                                        fontSize = nameTextSize,
+                                        fontWeight = FontWeight(500)
                                     )
 
                                     Text(
                                         text = resume.phoneNumber?: "N/A",
                                         color = Color.Black,
-                                        fontSize = 16.sp
+                                        fontSize = taskTextSize,
+                                        fontWeight = FontWeight(500)
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
 
-                                Row (Modifier.fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween){
-                                    Text(
-                                        text = "Email",
-                                        color = Color.Black,
-                                        fontSize = 18.sp,
-                                    )
+                                    Row (Modifier.fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(
+                                            text = "Email",
+                                            color = Color.Gray,
+                                            fontSize = nameTextSize,
+                                            fontWeight = FontWeight(500)
+                                        )
 
-                                    Text(
-                                        text = resume.email,
-                                        color = Color.Black,
-                                        fontSize = 16.sp
-                                    )
-                                }
+                                        Text(
+                                            text = resume.email,
+                                            color = Color.Black,
+                                            fontSize = taskTextSize,
+                                            fontWeight = FontWeight(500
+                                            ))
+                                    }
 
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                Text(
-                                    text = "Ratings And Testimonials",
-                                    color = Color.Black,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight(500),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp)
-                                )
+                                    Text(
+                                        text = "Ratings",
+                                        color = Color.Black,
+                                        fontSize = nameTextSize,
+                                        fontWeight = FontWeight(500),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp)
+                                    )
 
-                                Text(
-                                    text = "Feedback from satisfied clients",
-                                    color = Color.Black,
-                                    fontSize = 14.sp,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp)
-                                )
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .background(Color(0xFFF9F9F9)),
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    FeedbackItem(viewRatingsViewModel,resume.userid)
+                                    Text(
+                                        text = "Feedback from satisfied clients",
+                                        color = Color.Black,
+                                        fontSize = taskTextSize,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp)
+                                    )
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .background(Color(0xFFF9F9F9)),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        FeedbackItem(viewRatingsViewModel,resume.userid)
+                                    }
                                 }
                             }
                         }
-                    }
-                    // Tradesman Details Section
+                        // Tradesman Details Section
 
 
                 }
 
-                // Fixed Buttons at the Bottom
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .background(Color.Transparent)
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Box(
+                    // Fixed Buttons at the Bottom
+                    Row(
                         modifier = Modifier
-                            .clickable { navController.navigate("message_screen") }
-                            .background(
-                                color = Color(0xFF42C2AE),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp) )
-                            .width(150.dp)
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .background(Color.Transparent)
                             .padding(8.dp),
-                        contentAlignment = Alignment.Center
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        Box(
+                            modifier = Modifier
+                                .clickable { navController.navigate("message_screen") }
+                                .background(
+                                    color = Color(0xFF42C2AE),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp) )
+                                .width(150.dp)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Message,
-                                contentDescription = "Message Icon",
-                                tint = Color.White
-                            )
-                            Text(text = "Chat Me", color = Color.White)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Message,
+                                    contentDescription = "Message Icon",
+                                    tint = Color.White
+                                )
+                                Text(text = "Chat Me", color = Color.White, fontSize = nameTextSize)
+                            }
                         }
-                    }
 
                     Box(
                         modifier = Modifier
@@ -410,9 +441,9 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                             .padding(8.dp),contentAlignment = Alignment.Center
 
 
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
 
 
                             ) {
@@ -424,7 +455,8 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                             Text(
                                 text = "Book Now",
                                 textAlign = TextAlign.Center,
-                                color = Color.White
+                                color = Color.White,
+                                fontSize = nameTextSize
                             )
                         }
                     }
@@ -445,6 +477,14 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 
 @Composable
 fun BoxRow(specialties: String) {
+    val windowSize = rememberWindowSizeClass()
+
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+
     Text(
         text = specialties,
         color = Color.Black,

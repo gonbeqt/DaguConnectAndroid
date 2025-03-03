@@ -53,7 +53,6 @@ import com.example.androidproject.view.client.NotificationScreen
 import com.example.androidproject.view.client.RateAndReviews
 import com.example.androidproject.view.tradesman.AvailabilityStatus
 import com.example.androidproject.view.tradesman.BookingsTradesman
-import com.example.androidproject.view.tradesman.BookmarkedTradesman
 import com.example.androidproject.view.tradesman.CancelTradesmanNow
 import com.example.androidproject.view.tradesman.HiringDetails
 import com.example.androidproject.view.tradesman.HomeTradesman
@@ -64,6 +63,8 @@ import com.example.androidproject.view.tradesman.ProfileVerification
 import com.example.androidproject.view.tradesman.ScheduleTradesman
 import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
+import com.example.androidproject.view.tradesman.AccountSettingsTradesman
+import com.example.androidproject.view.tradesman.UpdateResume
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
@@ -349,7 +350,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("accountsettings"){
                         AccountSettings(navController)
-                    }                    //Pang CANCEL
+                    }
 
 
                     //CANCELLED DETAILS
@@ -373,9 +374,6 @@ class MainActivity : ComponentActivity() {
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
                     }
-                    composable("bookmarkedtradesman") {
-                        BookmarkedTradesman(modifier = Modifier,navController)
-                    }
                     composable("scheduletradesman") {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
@@ -398,6 +396,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("myjobapplicationdetails") {
                         MyJobApplicationDetails(navController)
+                    }
+                    composable("accountsettingstradesman"){
+                        AccountSettingsTradesman(navController)
+                    }
+                    composable("updateresume"){
+                        UpdateResume(navController)
                     }
 
                 }

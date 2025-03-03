@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
@@ -67,8 +70,22 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
     var otherReason by remember { mutableStateOf("") }
     val workStatusstate by updateWorkStatusViewModel.workStatusState.collectAsState()
     val context = LocalContext.current
-
-
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val reasons = listOf(
         "Change of Mind",
         "Found a Different Service Provider",
@@ -143,8 +160,8 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                         modifier = Modifier
                             .background(Color.White)
                             .fillMaxWidth()
-                            .size(100.dp)
-                            .padding(top = 20.dp)
+                            .size(70.dp)
+                            .padding(top = 5.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -154,7 +171,9 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Arrow Back",
                                 Modifier
-                                    .clickable { navController.popBackStack() }
+                                    .clickable ( indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ){ navController.popBackStack() }
                                     .padding(16.dp),
                                 tint = Color(0xFF81D796)
                             )
@@ -196,7 +215,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                         ) {
                             Text(
                                 text = "Your appointment is ${bookingstatus}",
-                                fontSize = 20.sp,
+                                fontSize = nameTextSize,
                                 color = Color.White,
                             )
                         }
@@ -241,16 +260,15 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                         text = viewclientbooking.tradesmanFullName,
                                         color = Color.Black,
                                         fontWeight = FontWeight(500),
-                                        fontSize = 20.sp,
+                                        fontSize = nameTextSize,
                                         modifier = Modifier.padding(top = 10.dp)
                                     )
                                     Text(
                                         text = viewclientbooking.taskType,
                                         color = Color.Black,
-                                        fontSize = 16.sp,
+                                        fontSize = taskTextSize,
                                     )
                                     Row(
-                                        modifier = Modifier.padding(top = 10.dp),
                                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -293,7 +311,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                                 Spacer(modifier = Modifier.size(4.dp))
                                                 Text(
                                                     text = "4.5",
-                                                    fontSize = 14.sp
+                                                    fontSize = smallTextSize
                                                 )
                                             }
                                         }
@@ -301,13 +319,13 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     Text(
                                         text = "Weekdays Selected",
                                         color = Color.Black,
-                                        fontSize = 16.sp,
+                                        fontSize = taskTextSize,
 
                                         )
                                     Text(
                                         text = getbookdate,
                                         color = Color.Gray,
-                                        fontSize = 14.sp,
+                                        fontSize = smallTextSize,
 
                                         )
                                 }
@@ -361,27 +379,25 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                             .weight(1f)
                                             .padding(start = 10.dp)
                                     ) {
-                                        Row(Modifier.fillMaxWidth()) {
                                             Text(
                                                 text = viewclientbooking.clientFullName,
                                                 color = Color.Black,
                                                 fontWeight = FontWeight(500),
-                                                fontSize = 18.sp,
+                                                fontSize = nameTextSize,
                                                 modifier = Modifier.padding(top = 10.dp)
                                             )
+
                                             Text(
                                                 text = viewclientbooking.phoneNumber,
                                                 color = Color.Gray,
                                                 fontWeight = FontWeight(500),
-                                                fontSize = 12.sp,
-                                                modifier = Modifier.padding(top = 10.dp)
+                                                fontSize = smallTextSize,
                                             )
-                                        }
 
                                         Text(
                                             text = viewclientbooking.address,
                                             color = Color.Black,
-                                            fontSize = 16.sp,
+                                            fontSize = taskTextSize,
                                         )
                                     }
                                 }

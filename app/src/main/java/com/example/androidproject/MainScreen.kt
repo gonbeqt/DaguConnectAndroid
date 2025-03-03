@@ -148,7 +148,7 @@ fun MainScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar(containerColor = Color.White, modifier = Modifier.shadow(5.dp)) {
+            NavigationBar(containerColor = Color.White, modifier = Modifier.shadow(16.dp)) {
                 navItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         selected = selectedItem == index,

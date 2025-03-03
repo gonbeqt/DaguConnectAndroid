@@ -59,6 +59,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -185,8 +186,8 @@ fun CategoryScrollIndicator(scrollState: LazyListState, itemCount: Int, visibleI
         }
     }
 
-    val trackWidth = 150.dp
-    val handleWidth = 30.dp
+    val trackWidth = 100.dp
+    val handleWidth = 15.dp
 
     Box(
         modifier = Modifier
@@ -438,7 +439,7 @@ fun ExploreNow(windowSize: WindowSize) {
 
                 Box(
                     modifier = Modifier
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
                         .background(Color.Transparent)
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 ) {
@@ -602,7 +603,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             text = resumes.tradesmanFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
-                            fontSize = nameTextSize,
+                            fontSize = taskTextSize,
                         )
 
                         // Menu Icon
@@ -622,7 +623,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 modifier = Modifier.background(Color.White)
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Report") },
+                                    text = { Text("Report", textAlign = TextAlign.Center) },
                                     onClick = {
                                         showMenu = false
                                         showReportDialog = true
