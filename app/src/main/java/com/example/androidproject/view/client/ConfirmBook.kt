@@ -227,7 +227,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                 Box(
                                     modifier = Modifier
                                         .background(
-                                            color = Color(0xFFFFF2DD),
+                                            color = Color(0xFFF5F5F5),
                                             shape = RoundedCornerShape(12.dp)
                                         )
                                         .padding(horizontal = 12.dp, vertical = 6.dp)
