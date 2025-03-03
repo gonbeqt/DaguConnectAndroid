@@ -26,6 +26,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
@@ -116,6 +118,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
         // Card with adaptive size and padding
         Card(
             modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .offset(y = cardOffsetY.value.dp)
                 .align(Alignment.BottomCenter)
                 .size(
