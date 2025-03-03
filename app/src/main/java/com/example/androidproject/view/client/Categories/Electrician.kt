@@ -194,7 +194,7 @@ fun Electrician(navController: NavController,getResumesViewModel: GetResumesView
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = electricianList.itemSnapshotList.items.filter {it.specialty.contains("Electrician") && it.id !in dismissedResumes  }
+                            val filteredList = electricianList.itemSnapshotList.items.filter {it.specialty.contains("Electrical_work") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {
@@ -295,8 +295,8 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController,repor
         ) {
             // Profile Picture
             AsyncImage(
-                model = electrician.profilepic,
-                contentDescription = electrician.tradesmanfullname,
+                model = electrician.profilePic,
+                contentDescription = electrician.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -309,7 +309,7 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController,repor
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = electrician.tradesmanfullname,
+                        text = electrician.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -357,7 +357,7 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController,repor
                             )
                     ) {
                         Text(
-                            text = "P${electrician.workfee}/hr",
+                            text = "P${electrician.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -379,7 +379,7 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController,repor
                         )
                         Text(
                             when {
-                                electrician.ratings == null || electrician.ratings == 0f -> "0"
+                                electrician.ratings == 0f -> "0"
                                 else -> String.format("%.1f", electrician.ratings)
                             },
                             fontSize = smallTextSize,

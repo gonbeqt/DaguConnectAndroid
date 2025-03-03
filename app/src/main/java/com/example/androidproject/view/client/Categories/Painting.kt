@@ -301,8 +301,8 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
         ) {
             // Profile Picture
             AsyncImage(
-                model = painter.profilepic,
-                contentDescription = painter.tradesmanfullname,
+                model = painter.profilePic,
+                contentDescription = painter.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -315,7 +315,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = painter.tradesmanfullname,
+                        text = painter.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -363,7 +363,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
                             )
                     ) {
                         Text(
-                            text = "P${painter.workfee}/hr",
+                            text = "P${painter.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -385,7 +385,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
                         )
                         Text(
                             when {
-                                painter.ratings == null || painter.ratings == 0f -> "0"
+                                painter.ratings == 0f -> "0"
                                 else -> String.format("%.1f", painter.ratings)
                             },
                             fontSize =smallTextSize,

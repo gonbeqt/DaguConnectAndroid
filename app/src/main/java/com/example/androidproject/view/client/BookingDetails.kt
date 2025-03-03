@@ -59,7 +59,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
         }
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
             val clientbooking = viewClientBooking.data
-            val getbookdate = ViewModelSetups.formatDateTime(clientbooking.bookingdate)
+            val getbookdate = ViewModelSetups.formatDateTime(clientbooking.bookingDate)
             Column( // Change Box to Column
                 modifier = Modifier
                     .fillMaxSize()
@@ -160,7 +160,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                             ) {
                                 // Tradesman image
                                 AsyncImage(
-                                    model = clientbooking.tradesmanprofile,
+                                    model = clientbooking.tradesmanProfile,
                                     contentDescription = "Tradesman Image",
                                     modifier = Modifier
                                         .size(120.dp)
@@ -174,14 +174,14 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                         .padding(start = 20.dp)
                                 ) {
                                     Text(
-                                        text = clientbooking.tradesmanfullname,
+                                        text = clientbooking.tradesmanFullName,
                                         color = Color.Black,
                                         fontWeight = FontWeight(500),
                                         fontSize = 20.sp,
                                         modifier = Modifier.padding(top = 10.dp)
                                     )
                                     Text(
-                                        text = clientbooking.tasktype,
+                                        text = clientbooking.taskType,
                                         color = Color.Black,
                                         fontSize = 16.sp,
                                     )
@@ -202,7 +202,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                                         ) {
                                             Text(
-                                                text = "P${clientbooking.workfee}/hr",
+                                                text = "P${clientbooking.workFee}/hr",
                                                 fontSize = 14.sp,
                                                 modifier = Modifier.padding(horizontal = 4.dp)
                                             )
@@ -299,14 +299,14 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                     ) {
                                         Row(Modifier.fillMaxWidth()) {
                                             Text(
-                                                text =clientbooking.clientfullname,
+                                                text =clientbooking.clientFullName,
                                                 color = Color.Black,
                                                 fontWeight = FontWeight(500),
                                                 fontSize = 18.sp,
                                                 modifier = Modifier.padding(top = 10.dp)
                                             )
                                             Text(
-                                                text = clientbooking.phonenumber,
+                                                text = clientbooking.phoneNumber,
                                                 color = Color.Gray,
                                                 fontWeight = FontWeight(500),
                                                 fontSize = 12.sp,

@@ -163,7 +163,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
                         } else {
                             items(filteredList.size) { index ->
                                 val resume = filteredList[index]
-                                if (resume != null && resume.id !in dismissedResumes) { // Filter directly
+                                if (resume.id !in dismissedResumes) { // Filter directly
                                     AllTradesmanItem (resume,navController, cardHeight,reportViewModel) {
                                         getResumes.dismissResume(resume.id)
                                     }
@@ -246,7 +246,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
-                    model = resumes.profilepic,
+                    model = resumes.profilePic,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(cardHeight - 20.dp)
@@ -264,7 +264,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = resumes.tradesmanfullname,
+                            text = resumes.tradesmanFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -320,7 +320,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                                 )
                         ) {
                             Text(
-                                text = "P${resumes.workfee}/hr",
+                                text = "P${resumes.workFee}/hr",
                                 fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )
@@ -342,7 +342,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                             )
                             Text(
                                 when {
-                                    resumes.ratings == null || resumes.ratings == 0f -> "0"
+                                    resumes.ratings == 0f -> "0"
                                     else -> String.format("%.1f", resumes.ratings)
                                 },
                                 fontSize = smallTextSize,

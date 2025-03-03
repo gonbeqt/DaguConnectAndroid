@@ -2,6 +2,9 @@ package com.example.androidproject.view.client
 
 import LogoutViewModel
 import android.app.DatePickerDialog
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -25,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -78,11 +82,13 @@ import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewM
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ProfileScreen(
@@ -94,13 +100,35 @@ fun ProfileScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     putJobs: PutJobViewModel
 ) {
+    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
+
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    // State to trigger refresh/recomposition
+    var refreshTrigger by remember { mutableStateOf(0) }
+
+    // State to track loading during retry
+    var isLoading by remember { mutableStateOf(false) }
+
     val profileState by getClientProfileViewModel.getProfileState.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
     var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshTrigger) {
+        isLoading = true // Set loading state before fetching
         getClientProfileViewModel.getClientProfile()
+        delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
+        isLoading = false // Set loading state before fetching
     }
 
     Column(
@@ -108,11 +136,15 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .shadow(1.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-
-        )  {
+        ) {
             Row(
                 modifier = Modifier
                     .padding(horizontal = 25.dp)
@@ -137,123 +169,172 @@ fun ProfileScreen(
             }
         }
 
-        // Profile Info Section
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-        ) {
-            Box(modifier = Modifier.padding(10.dp)) {
-                when (val state = profileState) {
-                    is GetClientProfileViewModel.ClientProfileState.Success -> {
-                        val profile = state.data
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
-                                        start = Offset(0f, 1f),
-                                        end = Offset(1f, 1f)
-                                    ), shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .background(Color.White, RoundedCornerShape(30.dp))
-                            ) {
-                                // Profile Icon
-                                AsyncImage(
-                                    model = profile.profilePicture, // Use URL here
-                                    contentDescription = "Profile Image",
-                                    modifier = Modifier
-                                        .size(62.dp)
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.Crop
-                                )
+        // Handle different states based on connectivity and data loading
+        if (!isConnected.value) {
+            // No internet connection
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "No Internet Connection",
+                        fontSize = 18.sp,
+                        color = Color.Red,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Please check your internet and try again.",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Retry button (only fetch data when clicked)
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                // Re-check network connectivity
+                                isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                if (isConnected.value) {
+                                    // Show loading state and trigger data fetch
+                                    isLoading = true
+                                    refreshTrigger++
+                                } else {
+                                    // Optionally show a toast if still no internet
+                                    Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                }
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    text = profile.fullname,
-                                    color = Color.Black,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(text = profile.email, color = Color.Gray)
-                                Text(text = profile.address, color = Color.Gray)
-                            }
-                        }
+                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "Retry",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-
+                }
+            }
+        } else {
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                when (val state = profileState) {
                     is GetClientProfileViewModel.ClientProfileState.Loading -> {
                         Text(text = "Loading...", color = Color.Gray)
                     }
+                    is GetClientProfileViewModel.ClientProfileState.Success -> {
+                        val profile = state.data
+                        // Profile Info Section
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp)
+                                        .background(
+                                            brush = Brush.linearGradient(
+                                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
+                                                start = Offset(0f, 1f),
+                                                end = Offset(1f, 1f)
+                                            ), shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .background(Color.White, RoundedCornerShape(30.dp))
+                                    ) {
+                                        // Profile Icon
+                                        AsyncImage(
+                                            model = profile.profilePicture, // Use URL here
+                                            contentDescription = "Profile Image",
+                                            modifier = Modifier
+                                                .size(62.dp)
+                                                .clip(CircleShape),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Column {
+                                        Text(
+                                            text = profile.fullname,
+                                            color = Color.Black,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(text = profile.email, color = Color.Gray)
+                                        Text(text = profile.address, color = Color.Gray)
+                                    }
+                                }
+                            }
 
+                            // Tabs and Content
+                            TabRow(
+                                selectedTabIndex = selectedTabIndex,
+                                modifier = Modifier.fillMaxWidth(),
+                                indicator = { tabPositions ->
+                                    TabRowDefaults.Indicator(
+                                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                        color = Color(0xFF3CC0B0)
+                                    )
+                                }
+                            ) {
+                                tabNames.forEachIndexed { index, title ->
+                                    Tab(
+                                        selected = selectedTabIndex == index,
+                                        onClick = { selectedTabIndex = index },
+                                        text = {
+                                            Text(
+                                                title, fontSize = 14.sp,
+                                                color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else Color.Black
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+
+                            // Content based on selected tab
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.BottomEnd
+                            ) {
+                                when (selectedTabIndex) {
+                                    0 -> MyPostsTab(getMyJobsViewModel, putJobs)
+                                    1 -> SettingsScreen(navController, logoutViewModel)
+                                }
+
+                                FabPosting(
+                                    onPostNewService = { newPost ->
+                                        postsList = postsList + newPost
+                                    },
+                                    onDeadlineChange = { deadline ->
+                                        println("Selected Deadline: $deadline")
+                                    },
+                                    postJobViewModel
+                                )
+                            }
+                        }
+                    }
                     is GetClientProfileViewModel.ClientProfileState.Error -> {
                         Text(text = "Error: ${state.message}", color = Color.Red)
                     }
-
                     else -> {
                         Text(text = "No profile data available")
                     }
                 }
-            }
-        }
-
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            modifier = Modifier.fillMaxWidth(),
-            indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
-                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                    color = Color(0xFF3CC0B0)
-                )
-            }
-        ) {
-            tabNames.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
-                    text = {
-                        Text(
-                            title, fontSize = 14.sp,
-                            color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else Color.Black
-                        )
-                    },
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 2.dp) // Separation from the white background
-        ) {
-            when (selectedTabIndex) {
-                0 -> MyPostsTab(getMyJobsViewModel, putJobs) // Pass postsList
-                1 -> SettingsScreen(navController, logoutViewModel)
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                Log.d("fab", "fab")
-                FabPosting(
-                    onPostNewService = { newPost ->
-                        postsList = postsList + newPost
-                    },
-                    onDeadlineChange = { deadline ->
-                        println("Selected Deadline: $deadline")
-                    },
-                    postJobViewModel
-                )
             }
 
         }

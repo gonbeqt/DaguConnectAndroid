@@ -152,7 +152,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = booking.tradesmanprofile,
+                            model = booking.tradesmanProfile,
                             contentDescription = "Tradesman Image",
                             modifier = Modifier
                                 .size(150.dp)
@@ -162,13 +162,13 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = booking.tradesmanfullname,
+                            text = booking.tradesmanFullName,
                             fontSize = 24.sp,
                             color = Color.Black
                         )
 
                         Text(
-                            text = booking.tasktype,
+                            text = booking.taskType,
                             fontSize = 20.sp,
                             color = Color.Gray
                         )

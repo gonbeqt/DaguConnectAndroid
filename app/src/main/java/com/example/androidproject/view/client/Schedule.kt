@@ -64,10 +64,10 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
-            .filter { it.bookingstatus == "Active" } // Filter for Active bookings
+            .filter { it.bookingStatus == "Active" } // Filter for Active bookings
             .mapNotNull { booking ->
                 try {
-                    LocalDate.parse(booking.bookingdate, dateFormatter)
+                    LocalDate.parse(booking.bookingDate, dateFormatter)
                 } catch (e: Exception) {
                     null
                 }
@@ -77,8 +77,8 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
             try {
-                val bookingDate = LocalDate.parse(it.bookingdate, dateFormatter)
-                bookingDate.isEqual(selectedClientDate) && it.bookingstatus == "Active"
+                val bookingDate = LocalDate.parse(it.bookingDate, dateFormatter)
+                bookingDate.isEqual(selectedClientDate) && it.bookingStatus == "Active"
             } catch (e: Exception) {
                 false
             }
@@ -113,13 +113,13 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                 allBookingDates = allBookingDates,
                 tradesmen = if (selectedFilter == "My Clients") filteredClients.map {
                     Tradesmandate(
-                        it.tradesmanprofile,
-                        it.tradesmanfullname,
-                        it.tasktype,
-                        "P${it.workfee}",
+                        it.tradesmanProfile,
+                        it.tradesmanFullName,
+                        it.taskType,
+                        "P${it.workFee}",
                         it.ratings,
                         R.drawable.bookmark,
-                        it.bookingdate
+                        it.bookingDate
                     )
                 } else applicants
             )
@@ -200,10 +200,10 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
-            .filter { it.bookingstatus == "Active" } // Filter for Active bookingStatus
+            .filter { it.bookingStatus == "Active" } // Filter for Active bookingStatus
             .mapNotNull { booking ->
                 try {
-                    LocalDate.parse(booking.bookingdate, dateFormatter)
+                    LocalDate.parse(booking.bookingDate, dateFormatter)
                 } catch (e: Exception) {
                     null
                 }
@@ -213,8 +213,8 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
             try {
-                val bookingDate = LocalDate.parse(it.bookingdate, dateFormatter)
-                bookingDate.isEqual(selectedDate) && it.bookingstatus == "Active" // Filter for Active bookingStatus
+                val bookingDate = LocalDate.parse(it.bookingDate, dateFormatter)
+                bookingDate.isEqual(selectedDate) && it.bookingStatus == "Active" // Filter for Active bookingStatus
             } catch (e: Exception) {
                 false // Skip invalid dates
             }
@@ -493,7 +493,7 @@ fun MyClientsItem(Clients: GetClientsBooking) {
         ) {
 
             AsyncImage(
-                model = Clients.tradesmanprofile,
+                model = Clients.tradesmanProfile,
                 contentDescription = "Tradesman Image",
                 modifier = Modifier
                     .size(120.dp, 120.dp)
@@ -507,20 +507,20 @@ fun MyClientsItem(Clients: GetClientsBooking) {
                 Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
                         modifier = Modifier.padding( top = 5.dp),
-                        text = Clients.tradesmanfullname,
+                        text = Clients.tradesmanFullName,
                         color = Color.Black,
                         fontSize = nameTextSize
                     )
                     Text(
                         modifier = Modifier.padding( top = 5.dp, end = 15.dp),
-                        text = Clients.bookingstatus,
+                        text = Clients.bookingStatus,
                         color = Color.Black,
                         fontSize = smallTextSize
                     )
                 }
 
                 Text(
-                    text = Clients.tasktype,
+                    text = Clients.taskType,
                     color = Color.Gray,
                     fontSize = taskTextSize
                 )
@@ -539,7 +539,7 @@ fun MyClientsItem(Clients: GetClientsBooking) {
                          {
                             Text(
                                 modifier = Modifier.padding(5.dp),
-                                text = "P${Clients.workfee}",
+                                text = "P${Clients.workFee}",
                                 fontSize = smallTextSize
                             )
                         }
@@ -587,7 +587,7 @@ fun MyClientsItem(Clients: GetClientsBooking) {
 
                         )
                         Text(
-                            text = Clients.bookingdate,
+                            text = Clients.bookingDate,
                             fontSize = smallTextSize
                         )
                     }

@@ -4,12 +4,10 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
-import com.example.androidproject.model.client.resumesItem
-import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel.ViewResumeState
+import com.example.androidproject.model.client.viewResume
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import viewResume
 
 class ViewTradesmanProfileViewModel(private val ApiService: ApiService, private val context: Context) : ViewModel() {
     val _viewTradesmanProfileResumeState = MutableStateFlow<ViewTradesmanProfileState>(ViewTradesmanProfileState.Idle)

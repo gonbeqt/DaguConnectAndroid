@@ -22,12 +22,9 @@ import com.example.androidproject.model.UpdateJob
 import com.example.androidproject.model.UpdateJobResponse
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
-import com.example.androidproject.model.ViewJobApplicationData
 import com.example.androidproject.model.ViewJobApplicationResponse
 import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
-
-import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.model.client.GetClientsBookingResponse
 import com.example.androidproject.model.client.GetTradesmanBookingResponse
 import com.example.androidproject.model.client.ReportRequest
@@ -38,13 +35,11 @@ import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.rateTradesmanRequest
 import com.example.androidproject.model.client.rateTradesmanResponse
 import com.example.androidproject.model.client.ratingsItem
-import com.example.androidproject.model.client.resumesItem
+import com.example.androidproject.model.client.viewResume
 import com.example.androidproject.model.client.workstatusRequest
 import com.example.androidproject.model.client.workstatusResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-
-
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Response
@@ -55,7 +50,6 @@ import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
-import viewResume
 
 interface ApiService {
 

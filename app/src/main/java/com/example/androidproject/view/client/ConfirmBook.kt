@@ -167,7 +167,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                         ) {
                             // Tradesman image
                             AsyncImage(
-                                model = resume.profilepic,
+                                model = resume.profilePic,
                                 contentDescription = "Tradesman Image",
                                 modifier = Modifier
                                     .size(100.dp)
@@ -180,13 +180,13 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     .padding(start = 10.dp)
                             ) {
                                 Text(
-                                    text = resume.tradesmanfullname,
+                                    text = resume.tradesmanFullName,
                                     color = Color.Black,
                                     fontWeight = FontWeight(500),
                                     fontSize = 20.sp,
                                     modifier = Modifier.padding(top = 10.dp)
                                 )
-                                resume.preferedworklocation?.let {
+                                resume.preferredWorkLocation?.let {
                                     Text(
                                         text = it,
                                         color = Color.Black,

@@ -196,7 +196,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = mechanicsList.itemSnapshotList.items.filter {it.specialty.contains("Mechanics") && it.id !in dismissedResumes  }
+                            val filteredList = mechanicsList.itemSnapshotList.items.filter {it.specialty.contains("Mechanic") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {
@@ -297,8 +297,8 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
         ) {
             // Profile Picture
             AsyncImage(
-                model = mechanics.profilepic,
-                contentDescription = mechanics.tradesmanfullname,
+                model = mechanics.profilePic,
+                contentDescription = mechanics.tradesmanFullName,
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -311,7 +311,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = mechanics.tradesmanfullname,
+                        text = mechanics.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -359,7 +359,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                             )
                     ) {
                         Text(
-                            text = "P${mechanics.workfee}/hr",
+                            text = "P${mechanics.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -381,7 +381,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                         )
                         Text(
                             when {
-                                mechanics.ratings == null || mechanics.ratings == 0f -> "0"
+                                mechanics.ratings == 0f -> "0"
                                 else -> String.format("%.1f", mechanics.ratings)
                             },
                             fontSize = smallTextSize,

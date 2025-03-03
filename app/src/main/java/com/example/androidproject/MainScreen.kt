@@ -5,6 +5,7 @@ import android.app.Activity
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,6 +28,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -80,7 +83,8 @@ fun MainScreen(
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
-    getTradesmanBooking : GetTradesmanBookingViewModel
+    getTradesmanBooking : GetTradesmanBookingViewModel,
+    loadingUI : @Composable () -> Unit // Add this parameter
     ) {
     val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
@@ -197,7 +201,8 @@ fun MainScreen(
             putJobApplicationStatusViewModel,
             getMyJobApplicantsViewModel,
             viewJobsApplication,
-            getTradesmanBooking
+            getTradesmanBooking,
+            loadingUI
             )
     }
 }
@@ -223,7 +228,8 @@ fun ContentScreen(
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
-    getTradesmanBooking : GetTradesmanBookingViewModel
+    getTradesmanBooking : GetTradesmanBookingViewModel,
+    loadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -242,9 +248,11 @@ fun ContentScreen(
             1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,loadingUI)
         }
     }
 }
+
+
 
 

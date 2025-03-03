@@ -10,15 +10,10 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.androidproject.api.ApiService
-import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.client.GetClientsBooking
-import com.example.androidproject.model.client.resumesItem
-import com.example.androidproject.viewmodel.Resumes.paginate.GetResumePagingSource
 import com.example.androidproject.viewmodel.bookings.paginate.GetClientBookingPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class GetClientBookingViewModel(private val apiService: ApiService, private val context: Context) : ViewModel() {
 

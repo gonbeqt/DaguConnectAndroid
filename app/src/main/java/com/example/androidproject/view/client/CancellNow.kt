@@ -122,7 +122,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
 
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
             val viewclientbooking = viewClientBooking.data
-            val getbookdate = ViewModelSetups.formatDateTime(viewclientbooking.bookingdate)
+            val getbookdate = ViewModelSetups.formatDateTime(viewclientbooking.bookingDate)
             Column( // Change Box to Column
                 modifier = Modifier
                     .fillMaxSize()
@@ -224,7 +224,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                             ) {
                                 // Tradesman image
                                 AsyncImage(
-                                    model = viewclientbooking.tradesmanprofile,
+                                    model = viewclientbooking.tradesmanProfile,
                                     contentDescription = "Tradesman Image",
                                     modifier = Modifier
                                         .size(120.dp)
@@ -238,14 +238,14 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                         .padding(start = 20.dp)
                                 ) {
                                     Text(
-                                        text = viewclientbooking.tradesmanfullname,
+                                        text = viewclientbooking.tradesmanFullName,
                                         color = Color.Black,
                                         fontWeight = FontWeight(500),
                                         fontSize = 20.sp,
                                         modifier = Modifier.padding(top = 10.dp)
                                     )
                                     Text(
-                                        text = viewclientbooking.tasktype,
+                                        text = viewclientbooking.taskType,
                                         color = Color.Black,
                                         fontSize = 16.sp,
                                     )
@@ -266,7 +266,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                                         ) {
                                             Text(
-                                                text = "P${viewclientbooking.workfee}/hr",
+                                                text = "P${viewclientbooking.workFee}/hr",
                                                 fontSize = 14.sp,
                                                 modifier = Modifier.padding(horizontal = 4.dp)
                                             )
@@ -363,14 +363,14 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     ) {
                                         Row(Modifier.fillMaxWidth()) {
                                             Text(
-                                                text = viewclientbooking.clientfullname,
+                                                text = viewclientbooking.clientFullName,
                                                 color = Color.Black,
                                                 fontWeight = FontWeight(500),
                                                 fontSize = 18.sp,
                                                 modifier = Modifier.padding(top = 10.dp)
                                             )
                                             Text(
-                                                text = viewclientbooking.phonenumber,
+                                                text = viewclientbooking.phoneNumber,
                                                 color = Color.Gray,
                                                 fontWeight = FontWeight(500),
                                                 fontSize = 12.sp,
