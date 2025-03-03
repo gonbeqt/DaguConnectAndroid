@@ -190,8 +190,9 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
                     modifier = Modifier.constrainAs(forgotPassword) {
                         top.linkTo(passwordField.bottom, margin = 16.dp)
                         end.linkTo(verticalGuideline2)
-                    }
-                )
+                    },
+                    navController = navController
+                    )
 
                 // Login Button
                 LoginButton(
@@ -336,7 +337,7 @@ fun PasswordField(password: String,
     }
 }
 @Composable
-fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier) {
+fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier,navController: NavController) {
     Text(
         text = "Forgot Password?",
         color = Color.Gray,
@@ -344,7 +345,7 @@ fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier) {
             WindowType.SMALL -> 12.sp
             else -> 14.sp
         },
-        modifier = modifier.clickable { /* Handle forgot password */ }
+        modifier = modifier.clickable { navController.navigate("forgotpassword")}
     )
 }
 @Composable
