@@ -72,10 +72,12 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
+import com.example.androidproject.model.UpdateJob
 import com.example.androidproject.view.ServicePosting
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
+import com.example.androidproject.viewmodel.jobs.PutJobViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -89,7 +91,8 @@ fun ProfileScreen(
     logoutViewModel: LogoutViewModel,
     postJobViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
-    getClientProfileViewModel: GetClientProfileViewModel
+    getClientProfileViewModel: GetClientProfileViewModel,
+    putJobs: PutJobViewModel
 ) {
     val profileState by getClientProfileViewModel.getProfileState.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -232,7 +235,7 @@ fun ProfileScreen(
                 .padding(top = 2.dp) // Separation from the white background
         ) {
             when (selectedTabIndex) {
-                0 -> MyPostsTab(getMyJobsViewModel) // Pass postsList
+                0 -> MyPostsTab(getMyJobsViewModel, putJobs) // Pass postsList
                 1 -> SettingsScreen(navController, logoutViewModel)
             }
             Box(
@@ -265,12 +268,24 @@ fun ProfileScreen(
 
 
 @Composable
-fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel) {
+fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, putJobs: PutJobViewModel) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
-
+    val putJobState by putJobs.putJobState.collectAsState()
     // Refresh when entering this screen again
     LaunchedEffect(Unit) {
         getMyJobsViewModel.refreshJobs()
+    }
+
+    when (putJobState){
+        is PutJobViewModel.PutJobState.Success -> {
+            Toast.makeText(LocalContext.current, "Job updated successfully", Toast.LENGTH_SHORT).show()
+        } is PutJobViewModel.PutJobState.Error -> {
+            Toast.makeText(LocalContext.current, (putJobState as PutJobViewModel.PutJobState.Error).message, Toast.LENGTH_SHORT).show()
+            Log.e("PutJobViewModel", "Error: $putJobState")
+        }
+        is PutJobViewModel.PutJobState.Loading -> {}
+        is PutJobViewModel.PutJobState.Idle -> {}
+        else -> {}
     }
 
     LazyColumn( // Make it scrollable
@@ -281,12 +296,16 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel) {
             val job = jobsList[index]
             if (job != null) {
                 PostsCard(
-                    onEditClick = { title, description, rate, deadline ->
-                        // Handle edit functionality here if needed
+                    onEditClick = { rate, description, location, deadline ->
+                        val update = UpdateJob(rate, description, location, deadline)
+                        putJobs.updateJobApplicationStatus(
+                            job.id,
+                            update
+                        )
                     },
                     onApplicantsClick = { /* Handle applicants click */ },
-                    job
-
+                    job,
+                    putJobs
                 )
             }
         }
@@ -298,8 +317,10 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel) {
 fun PostsCard(
     onEditClick: (String, String, String,String) -> Unit,
     onApplicantsClick: () -> Unit,
-    getJobs: GetJobs
+    getJobs: GetJobs,
+    putJobs: PutJobViewModel
 ) {
+    val putJobState by putJobs.putJobState.collectAsState()
     val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
     var isDialogVisible by remember { mutableStateOf(false) }
@@ -607,8 +628,12 @@ fun PostsCard(
                         Button(onClick = {
                             // Save the new values
                             isDialogVisible = false
-                            onEditClick(editableTitle, editableDescription,
-                                editableRate.toString(),editableDeadline)
+                            onEditClick(
+                                editableRate.toString(),
+                                editableDescription,
+                                editableLocation,
+                                editableDeadline
+                            )
                         }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))) {
                             Text("Save")
                         }

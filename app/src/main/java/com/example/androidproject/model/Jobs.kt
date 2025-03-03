@@ -90,7 +90,7 @@ data class GetMyJobs(
 )
 
 data class UpdateJob(
-    val salary: Double,
+    val salary: String,
     @SerializedName("job_description")
     val jobDescription: String,
     val address: String,
