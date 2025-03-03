@@ -603,9 +603,8 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 //Design for activeItems
 @Composable
 fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,updateWorkStatusViewModel:UpdateWorkStatusViewModel) {
-    val updateworkstatusstate by updateWorkStatusViewModel.workStatusState.collectAsState()
+    val updateWorkState by updateWorkStatusViewModel.workStatusState.collectAsState()
     val  context = LocalContext.current
-    var isCompleted by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 380.dp to 260.dp
@@ -628,12 +627,19 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
         WindowType.LARGE -> 16.sp
     }
 
-    LaunchedEffect(updateworkstatusstate) {
-        when (val updateWorkStatusState= updateworkstatusstate) {
+    LaunchedEffect(updateWorkState) {
+        when (val updateWorkStatusState= updateWorkState) {
             is UpdateWorkStatusViewModel.UpdateWorkStatus.Success -> {
                 Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
-                isCompleted = true
                 updateWorkStatusViewModel.resetState()
+                navController.currentBackStackEntry?.savedStateHandle?.apply {
+                    set("selectedItem", 1) // Bookings tab
+                    set("selectedTab", 4)  // Completed tab
+                }
+                navController.navigate("main_screen") {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                    launchSingleTop = true
+                }
             }
             is UpdateWorkStatusViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = updateWorkStatusState.message
@@ -643,7 +649,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
             else -> Unit
         }
     }
-    if(!isCompleted){
+
         val bookingDate = ViewModelSetups.formatDateTime(activeBooking.bookingDate)
 
         Card(
@@ -795,6 +801,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                                             "Completed",
                                             NULL.toString(),
                                             activeBooking.id
+
                                         )
                                     }
                                     .background(
@@ -817,7 +824,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                 }
             }
         }
-    }
+
 
 
 }

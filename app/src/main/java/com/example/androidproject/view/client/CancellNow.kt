@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,7 +67,7 @@ import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 @Composable
 fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBookingViewModel: ViewClientBookingViewModel,navController: NavController,resumeId: String,bookingstatus: String, bookingId: String) {
     var Cancel by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     val workStatusstate by updateWorkStatusViewModel.workStatusState.collectAsState()
     val context = LocalContext.current
@@ -115,8 +116,13 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                 ).show()
                 updateWorkStatusViewModel.resetState()
                 // Pass result to MainScreen to switch to Bookings tab with Cancelled selected
-                navController.previousBackStackEntry?.savedStateHandle?.set("selectedTab", 5)
-                navController.popBackStack("main_screen", inclusive = false)
+                navController.navigate(
+                    "main_screen?selectedItem=1&selectedTab=5"
+                ) {
+                    // Clear the backstack up to main_screen
+                    popUpTo("main_screen") { inclusive = true }
+                    launchSingleTop = true // Avoid creating multiple instances of MainScreen
+                }
             }
             is UpdateWorkStatusViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = workState.message

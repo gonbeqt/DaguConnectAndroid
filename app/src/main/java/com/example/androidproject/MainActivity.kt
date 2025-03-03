@@ -13,9 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.AccountManager
@@ -240,7 +242,19 @@ class MainActivity : ComponentActivity() {
                         LogInScreen(navController,loginViewModel)
 
                     }
-                    composable("main_screen") {
+                    composable(
+                        route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}",
+                        arguments = listOf(
+                            navArgument("selectedItem") {
+                                type = NavType.IntType
+                                defaultValue = 0
+                            },
+                            navArgument("selectedTab") {
+                                type = NavType.IntType
+                                defaultValue = 0
+                            }
+                        )
+                    ) { backStackEntry ->
                         MainScreen(
                             navController,
                             logoutViewModel,
@@ -292,7 +306,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("booking") {
-                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
+                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel )
                     }
                     composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
@@ -372,7 +386,7 @@ class MainActivity : ComponentActivity() {
                         HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
+                        BookingsTradesman(modifier = Modifier,navController, updateWorkStatusViewModel,getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
                     }
                     composable("scheduletradesman") {
                         ScheduleTradesman(modifier = Modifier,navController)

@@ -438,7 +438,15 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                     when (val bookingstate =bookingState) {
                                         is BooktradesmanViewModel.BookTradesmanState.Success -> {
                                             Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
-                                            bookingTradesmanViewModel.resetState() // Reset state to prevent re-triggering
+                                            bookingTradesmanViewModel.resetState()
+                                            // Navigate to MainScreen with arguments instead of popping back
+                                            navController.navigate(
+                                                "main_screen?selectedItem=1&selectedTab=1"
+                                            ) {
+                                                // Clear the backstack up to main_screen
+                                                popUpTo("main_screen") { inclusive = true }
+                                                launchSingleTop = true // Avoid creating multiple instances of MainScreen
+                                            }
                                         }
                                         is BooktradesmanViewModel.BookTradesmanState.Error -> {
                                             val errorMessage = bookingstate.message

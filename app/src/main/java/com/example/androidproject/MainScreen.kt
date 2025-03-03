@@ -71,29 +71,28 @@ fun MainScreen(
     getClientsBooking: GetClientBookingViewModel,
     getResumesViewModel: GetResumesViewModel,
     modifier: Modifier = Modifier,
-    viewModel:GetChatViewModel,
+    viewModel: GetChatViewModel,
     reportViewModel: ReportViewModel,
     postJobsViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
-    updateWorkStatusViewModel : UpdateWorkStatusViewModel,
+    updateWorkStatusViewModel: UpdateWorkStatusViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel,
-    viewTradesmanProfileViewModel : ViewTradesmanProfileViewModel,
+    viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
     getMyJobApplications: GetMyJobApplicationViewModel,
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
-    getTradesmanBooking : GetTradesmanBookingViewModel,
-    LoadingUI : @Composable () -> Unit // Add this parameter
-    ) {
+    getTradesmanBooking: GetTradesmanBookingViewModel,
+    LoadingUI: @Composable () -> Unit
+) {
     val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
     val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home),
-        if(role == true){
+        if (role == true) {
             NavigationItem("Hiring Hub", Icons.Default.ListAlt)
-        }
-        else{
+        } else {
             NavigationItem("Work Hub", Icons.Default.ListAlt)
         },
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
@@ -101,28 +100,27 @@ fun MainScreen(
         NavigationItem("Profile", Icons.Default.Person)
     )
 
-    // Track the selected item for bottom navigation
-    var selectedItem by remember { mutableStateOf(0) }
+    // Extract arguments from the current destination
+    val arguments = navController.currentBackStackEntry?.arguments
+    val initialSelectedItem = arguments?.getInt("selectedItem") ?: 0
+    val initialSelectedTab = arguments?.getInt("selectedTab") ?: 0
 
-    // Observe the selectedTab from savedStateHandle
-    val selectedTabState = navController.currentBackStackEntry
-        ?.savedStateHandle
-        ?.getLiveData<Int>("selectedTab")
-        ?.observeAsState()
+    // Initialize selectedItem with the argument value
+    var selectedItem by remember { mutableStateOf(initialSelectedItem) }
 
-    // Extract the value from the State object, default to 0 if null
-    val selectedTab = selectedTabState?.value ?: 0
+    // Observe selectedTab changes (still useful for SavedStateHandle updates if needed)
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val selectedTabState = savedStateHandle?.getLiveData<Int>("selectedTab")?.observeAsState()
+    val selectedTab = selectedTabState?.value ?: initialSelectedTab
 
-    // Update selectedItem and clear the result when a tab is received
+    // Update selectedItem when selectedTab changes (optional, for compatibility with SavedStateHandle)
     LaunchedEffect(selectedTab) {
-        if (selectedTab == 5) {
+        if (selectedTab in 1..5) {
             selectedItem = 1 // Switch to Bookings tab
-            navController.currentBackStackEntry?.savedStateHandle?.remove<Int>("selectedTab") // Clear the result
-        }else if(selectedTab == 4){
-            selectedItem = 1 // Switch to Bookings tab
-            navController.currentBackStackEntry?.savedStateHandle?.remove<Int>("selectedTab") // Clear the result
+            savedStateHandle?.remove<Int>("selectedTab") // Clear after use
         }
     }
+
     // Track the navigation history using a stack
     val navigationStack = remember { mutableStateListOf<Int>() }
 
@@ -131,16 +129,13 @@ fun MainScreen(
 
     // Handle back press or swipe gesture
     BackHandler(enabled = true) {
-        Log.d("BackHandler", "Selected Item: $selectedItem")
+        Log.d("BackHandler", "Selected Item: $selectedItem, Stack: $navigationStack")
         if (selectedItem == 0) {
-            // Close the app if on the home screen (selectedItem == 0 corresponds to HomeScreen or HomeTradesman)
             (context as? Activity)?.finishAffinity()
         } else if (navigationStack.isNotEmpty()) {
-            // Pop the last item from the stack to get the previous selected item
             val previousItem = navigationStack.removeAt(navigationStack.size - 1)
             selectedItem = previousItem
         } else {
-            // If the stack is empty and not on the home screen, navigate back to the home screen
             selectedItem = 0
         }
     }
@@ -153,20 +148,17 @@ fun MainScreen(
                     NavigationBarItem(
                         selected = selectedItem == index,
                         onClick = {
-                            // Remove the old entry of the clicked item from the stack (if it exists)
                             navigationStack.removeAll { it == index }
-                            // Add the current selected item to the stack before updating it
                             if (selectedItem != index) {
                                 navigationStack.add(selectedItem)
                             }
-                            // Update the selected item
                             selectedItem = index
                         },
                         icon = {
                             Icon(imageVector = item.icon, contentDescription = "Icon")
                         },
                         label = {
-                            (Text(text = item.nav_label, fontSize = 10.sp))
+                            Text(text = item.nav_label, fontSize = 10.sp)
                         },
                         colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.White,
@@ -203,7 +195,7 @@ fun MainScreen(
             viewJobsApplication,
             getTradesmanBooking,
             LoadingUI
-            )
+        )
     }
 }
 @Composable
@@ -245,7 +237,7 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication)
+            1 -> BookingsTradesman(modifier = Modifier, navController,updateWorkStatusViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,LoadingUI)
