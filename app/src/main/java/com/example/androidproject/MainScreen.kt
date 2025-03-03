@@ -100,43 +100,34 @@ fun MainScreen(
         NavigationItem("Profile", Icons.Default.Person)
     )
 
-    // Extract arguments from the current destination
     val arguments = navController.currentBackStackEntry?.arguments
     val initialSelectedItem = arguments?.getInt("selectedItem") ?: 0
     val initialSelectedTab = arguments?.getInt("selectedTab") ?: 0
 
-    // Initialize selectedItem with the argument value
     var selectedItem by remember { mutableStateOf(initialSelectedItem) }
-
-    // Observe selectedTab changes (still useful for SavedStateHandle updates if needed)
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val selectedTabState = savedStateHandle?.getLiveData<Int>("selectedTab")?.observeAsState()
     val selectedTab = selectedTabState?.value ?: initialSelectedTab
 
-    // Update selectedItem when selectedTab changes (optional, for compatibility with SavedStateHandle)
     LaunchedEffect(selectedTab) {
         if (selectedTab in 1..5) {
-            selectedItem = 1 // Switch to Bookings tab
-            savedStateHandle?.remove<Int>("selectedTab") // Clear after use
+            selectedItem = 1
+            savedStateHandle?.remove<Int>("selectedTab")
         }
     }
 
-    // Track the navigation history using a stack
     val navigationStack = remember { mutableStateListOf<Int>() }
-
     val activity = LocalContext.current as ComponentActivity
     val getJobsViewModel = remember { ViewModelSetups.setupGetJobsViewModel(activity) }
 
-    // Handle back press or swipe gesture
     BackHandler(enabled = true) {
-        Log.d("BackHandler", "Selected Item: $selectedItem, Stack: $navigationStack")
-        if (selectedItem == 0) {
-            (context as? Activity)?.finishAffinity()
-        } else if (navigationStack.isNotEmpty()) {
+        if (navController.previousBackStackEntry != null) {
+            navController.popBackStack()
+        } else if (selectedItem != 0 && navigationStack.isNotEmpty()) {
             val previousItem = navigationStack.removeAt(navigationStack.size - 1)
             selectedItem = previousItem
         } else {
-            selectedItem = 0
+            (context as? Activity)?.finishAffinity()
         }
     }
 
@@ -148,14 +139,16 @@ fun MainScreen(
                     NavigationBarItem(
                         selected = selectedItem == index,
                         onClick = {
-                            navigationStack.removeAll { it == index }
                             if (selectedItem != index) {
-                                navigationStack.add(selectedItem)
-                            }
-                            selectedItem = index
-                            // Reset selectedTab to 0 when clicking Bookings screen (index 1)
-                            if (index == 1) {
-                                navController.currentBackStackEntry?.savedStateHandle?.set("selectedTab", 0)
+                                if (selectedItem != -1) {
+                                    navigationStack.add(selectedItem)
+                                }
+                                selectedItem = index
+                                navController.navigate("main_screen?selectedItem=$index&selectedTab=0") {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                                    launchSingleTop = true
+                                }
+                                Log.d("Navigation", "Stack: $navigationStack, Selected: $selectedItem")
                             }
                         },
                         icon = {
