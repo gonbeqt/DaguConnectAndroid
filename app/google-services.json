@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "609522681084",
+    "project_id": "daguconnect-e020b",
+    "storage_bucket": "daguconnect-e020b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609522681084:android:b42026436338d838ca4379",
+        "android_client_info": {
+          "package_name": "com.mycompany.daguconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHZUsIeMu1nio2zeOxv963rIVfKMWkOSs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

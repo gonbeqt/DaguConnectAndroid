@@ -10,12 +10,10 @@ class GetMessagesPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GetMessages> {
         val page = params.key ?: 1
-
         return try {
-            val response = apiService.getConversation(chatId)
+            val response = apiService.getConversation(chatId, page, params.loadSize)
             if (response.isSuccessful) {
-                val responseBody = response.body()
-                val messages = responseBody?: emptyList()
+                val messages = response.body() ?: emptyList()
                 LoadResult.Page(
                     data = messages,
                     prevKey = if (page == 1) null else page - 1,

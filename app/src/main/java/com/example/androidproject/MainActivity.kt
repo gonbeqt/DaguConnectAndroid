@@ -97,7 +97,9 @@ import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFacto
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetRecentJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.PutJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
+import com.example.androidproject.viewmodel.factories.messeges.GetMessageViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
 import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
@@ -113,7 +115,9 @@ import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
+import com.example.androidproject.viewmodel.jobs.PutJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
+import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
@@ -210,7 +214,6 @@ class MainActivity : ComponentActivity() {
         val submitResumeVMFactory = SubmitResumeViewModelFactory(apiService, this)
         val submitResumeViewModel = ViewModelProvider(this, submitResumeVMFactory)[SubmitResumeViewModel::class.java]
 
-
         val putJobApplicationStatusViewModelFactory = PutJobApplicationStatusViewModelFactory(apiService, this)
         val putJobApplicationStatusViewModel = ViewModelProvider(this, putJobApplicationStatusViewModelFactory)[PutJobApplicationStatusViewModel::class.java]
 
@@ -222,6 +225,13 @@ class MainActivity : ComponentActivity() {
 
         val getTradesmanBookingVMFactory = GetTradesmanViewModelFactory(apiService)
         val getTradesmanBookingViewModel = ViewModelProvider(this, getTradesmanBookingVMFactory)[GetTradesmanBookingViewModel::class.java]
+
+        val putJobViewModelFactory = PutJobViewModelFactory(apiService)
+        val putJobViewModel = ViewModelProvider(this, putJobViewModelFactory)[PutJobViewModel::class.java]
+
+        val chatId = intent.extras?.getInt("chatId") ?: 0
+        val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId)
+        val getMessageViewModel = ViewModelProvider(this, getMessagesViewModelFactory)[GetMessagesViewModel::class.java]
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -259,6 +269,7 @@ class MainActivity : ComponentActivity() {
                             getMyJobApplicantsViewModel,
                             viewJobApplicationViewModel,
                             getTradesmanBookingViewModel,
+                            putJobViewModel,
                             { loadingUI() } // Pass LoadingUI here
                         )
                     }

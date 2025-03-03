@@ -61,6 +61,7 @@ import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobAp
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
+import com.example.androidproject.viewmodel.jobs.PutJobViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
 
@@ -84,6 +85,7 @@ fun MainScreen(
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     getTradesmanBooking : GetTradesmanBookingViewModel,
+    putJobViewModel: PutJobViewModel,
     loadingUI : @Composable () -> Unit // Add this parameter
     ) {
     val role = AccountManager.getAccount()?.isClient
@@ -202,6 +204,7 @@ fun MainScreen(
             getMyJobApplicantsViewModel,
             viewJobsApplication,
             getTradesmanBooking,
+            putJobViewModel,
             loadingUI
             )
     }
@@ -229,6 +232,7 @@ fun ContentScreen(
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     getTradesmanBooking : GetTradesmanBookingViewModel,
+    putJobViewModel: PutJobViewModel,
     loadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
@@ -239,7 +243,13 @@ fun ContentScreen(
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileScreen(
-                modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel
+                modifier = modifier.padding(bottom = 0.1.dp),
+                navController,
+                logoutViewModel,
+                postJobsViewModel,
+                getMyJobsViewModel,
+                getClientProfileViewModel,
+                putJobViewModel
             )
         }
     } else {

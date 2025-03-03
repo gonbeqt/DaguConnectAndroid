@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -712,16 +713,18 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
 @Composable
 fun RegistrationButton(navController: NavController, viewModel: RegisterViewModel, firstName: String, lastName: String, userName: String, email: String, birthdate: String, isClient: Boolean, password: String, confirmPassword: String, registerState: RegisterViewModel.RegisterState, modifier: Modifier = Modifier){
     val context = LocalContext.current
-
+    var ifToast by remember { mutableStateOf(true) }
     when (registerState) {
         is RegisterViewModel.RegisterState.Loading -> {
-            // Do nothing
+            CircularProgressIndicator()
         }
-
         is RegisterViewModel.RegisterState.Success -> {
-            Toast.makeText(context, registerState.data?.message, Toast.LENGTH_SHORT)
-                .show()
-            navController.navigate("login")
+            if (ifToast){
+                Toast.makeText(context, registerState.data?.message, Toast.LENGTH_SHORT)
+                    .show()
+                navController.navigate("login")
+                ifToast = false
+            }
         }
 
         is RegisterViewModel.RegisterState.Error -> {
