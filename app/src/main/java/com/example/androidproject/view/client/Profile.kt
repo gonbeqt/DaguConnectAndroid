@@ -262,7 +262,10 @@ fun ProfileScreen(
                                         .height(100.dp)
                                         .background(
                                             brush = Brush.linearGradient(
-                                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
+                                                colors = listOf(
+                                                    Color(0xFF81D796),
+                                                    Color(0xFF39BFB1)
+                                                ),
                                                 start = Offset(0f, 1f),
                                                 end = Offset(1f, 1f)
                                             ), shape = RoundedCornerShape(8.dp)
@@ -317,7 +320,9 @@ fun ProfileScreen(
                                         text = {
                                             Text(
                                                 title, fontSize = 14.sp,
-                                                color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else Color.Black
+                                                color = if (selectedTabIndex == index) Color(
+                                                    0xFF3CC0B0
+                                                ) else Color.Black
                                             )
                                         }
                                     )
@@ -331,14 +336,15 @@ fun ProfileScreen(
                                     .padding(top = 2.dp)
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> MyPostsTab(getMyJobsViewModel,postJobViewModel)
+                                    0 -> MyPostsTab(getMyJobsViewModel, postJobViewModel)
                                     1 -> SettingsScreen(navController, logoutViewModel)
                                 }
 
-                         }
                             }
+                        }
 
                     }
+
                     is GetClientProfileViewModel.ClientProfileState.Error -> {
                         Text(text = "Error: ${state.message}", color = Color.Red)
                     }

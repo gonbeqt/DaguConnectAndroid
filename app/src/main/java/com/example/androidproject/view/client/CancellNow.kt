@@ -365,9 +365,9 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Tradesman image
-                                    Image(
-                                        painter = painterResource(R.drawable.pfp),
+                                    // client image
+                                    AsyncImage(
+                                        model = viewclientbooking.clientProfile,
                                         contentDescription = "Tradesman Image",
                                         modifier = Modifier
                                             .size(100.dp)

@@ -201,7 +201,7 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = paintingList.itemSnapshotList.items.filter {it.specialty.contains("Painting") && it.id !in dismissedResumes  }
+                            val filteredList = paintingList.itemSnapshotList.items.filter {it.specialty.contains("Painter") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {

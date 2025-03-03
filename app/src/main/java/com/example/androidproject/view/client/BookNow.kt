@@ -1,10 +1,14 @@
 package com.example.androidproject.view.client
 
 import android.app.DownloadManager
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,10 +40,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +62,7 @@ import coil.compose.AsyncImage
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.view.tradesman.downloadFileTradesman
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 
@@ -83,6 +91,9 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
+
+    var downloadId by remember { mutableStateOf<Long?>(null) }
+
 
 
 
@@ -307,9 +318,17 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
 
                                                 val fileUrl = resume.documents // Assuming this is the URL to the file
                                                 val fileName = "trade_credential_${resume.tradesmanFullName}.pdf" // Customize the file name as needed
-                                                if (fileUrl != null) {
-                                                    downloadFile(context, fileUrl, fileName)
-                                                }
+
+                                                    if (fileUrl != null) {
+                                                        try {
+                                                            downloadId = downloadFileTradesman(context, fileUrl, fileName)
+                                                            Toast.makeText(context, "Download success", Toast.LENGTH_SHORT).show()
+                                                        } catch (e: Exception) {
+                                                            Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                                        }
+                                                    } else {
+                                                        Toast.makeText(context, "No file available", Toast.LENGTH_SHORT).show()
+                                                    }
                                             }
                                     )
                                 }
@@ -589,19 +608,4 @@ fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
 }
 
 
-
-fun downloadFile(context: Context, fileUrl: String, fileName: String) {
-    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val uri = Uri.parse(fileUrl)
-
-    val request = DownloadManager.Request(uri)
-        .setTitle(fileName)
-        .setDescription("Downloading")
-        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-        .setAllowedOverMetered(true)
-        .setAllowedOverRoaming(true)
-
-    downloadManager.enqueue(request)
-}
 

@@ -312,7 +312,7 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
         getClientBooking.invalidatePagingSource()
     }
     // Filter the bookings to get only those with status "Pending"
-    val pendingBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
+    val pendingBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -342,7 +342,7 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
     }
 
     // Filter the bookings to get only those with status "Declined"
-    val declinedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
+    val declinedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -644,7 +644,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
         }
     }
     if(!isCompleted){
-        val bookingDate = ViewModelSetups.formatDateTime(activeBooking.bookingdate)
+        val bookingDate = ViewModelSetups.formatDateTime(activeBooking.bookingDate)
 
         Card(
             modifier = Modifier

@@ -5,11 +5,12 @@ import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.Context
+
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
-import android.content.Context
+
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
@@ -83,7 +84,7 @@ import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.WindowType
-import com.example.androidproject.view.client.downloadFile
+
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
@@ -401,26 +402,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
     val context = LocalContext.current
     var downloadId by remember { mutableStateOf<Long?>(null) }
 
-    // Broadcast receiver for download completion
-    val downloadReceiver = remember {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                if (id == downloadId) {
-                    Toast.makeText(context, "Download completed", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
-    // Register and unregister the receiver
-    DisposableEffect(Unit) {
-        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        context.registerReceiver(downloadReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        onDispose {
-            context.unregisterReceiver(downloadReceiver)
-        }
-    }
         val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
         WindowType.MEDIUM -> 20.sp
@@ -513,7 +495,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         fontWeight = FontWeight.Bold
                     )
                         Text(
-                            text = displayDetails.specialty?.takeIf { it != "null" } ?: "N/A",
+                            text = displayDetails.specialty?.replace("_"," ").takeIf { it != "null" } ?: "N/A",
                             color = Color.Black,
                             fontSize = taskTextSize,
                             fontWeight = FontWeight.Bold,
@@ -567,7 +549,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Preferred Location : ${displayDetails.preferredWorkLocation ?: "N/A"}",
+                        text = "Preferred Location :",
                         color = Color.Gray,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
@@ -586,13 +568,13 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Est. Rate : ${displayDetails.workFee?.takeIf { it != 0 }?.toString() ?: "N/A"}",
+                        text = "Est. Rate :",
                         fontSize = nameTextSize,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = displayDetails.workfee?.takeIf { it != 0 }?.let { "₱ $it /hr" } ?: "N/A",
+                        text = displayDetails.workFee?.takeIf { it != 0 }?.let { "₱ $it /hr" } ?: "N/A",
                         fontSize = taskTextSize,
                         color = Color.Black,
                         fontWeight = FontWeight.Bold
@@ -621,11 +603,11 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                             modifier = Modifier
                                 .clickable {
                                     val fileUrl = tradesmanDetails.documents
-                                    val fileName = "trade_credential_${tradesmanDetails.tradesmanfullname}.pdf"
+                                    val fileName = "trade_credential_${tradesmanDetails.tradesmanFullName}.pdf"
                                     if (fileUrl != null) {
                                         try {
                                             downloadId = downloadFileTradesman(context, fileUrl, fileName)
-                                            Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "Download success", Toast.LENGTH_SHORT).show()
                                         } catch (e: Exception) {
                                             Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
                                         }
