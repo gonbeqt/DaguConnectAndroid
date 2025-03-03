@@ -160,11 +160,14 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                         fontSize = 20.sp,
                                         modifier = Modifier.padding(top = 10.dp)
                                     )
+
                                     resume.specialty?.let {
                                         BoxRow(specialties = it
+                                            .replace("_"," ")
 
                                         )
                                     }
+
                                     resume.preferredWorkLocation?.let {
                                         Text(
                                             text = it,

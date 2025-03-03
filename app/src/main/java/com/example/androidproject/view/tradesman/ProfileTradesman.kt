@@ -80,7 +80,7 @@ fun ProfileTradesman(
     navController: NavController,
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
-    loadingUI :  @Composable () -> Unit // Add this parameter
+    LoadingUI :  @Composable () -> Unit // Add this parameter
 
 ) {
     // Function to check network connectivity using NetworkCapabilities (modern approach)
@@ -203,7 +203,7 @@ fun ProfileTradesman(
             }
         } else {
             if (isLoading){
-                loadingUI()
+                LoadingUI()
             }else{
                 when (val profilestate =viewTradesmanProfilestate){
                     is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {

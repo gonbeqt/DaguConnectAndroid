@@ -195,7 +195,8 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
                                 }
                                 resume.specialty?.let {
                                     Text(
-                                        text = it,
+                                        text = it
+                                            .replace("_"," "),
                                         color = Color.Black,
                                         fontSize = 16.sp,
                                     )
@@ -393,7 +394,7 @@ fun ConfirmBook(viewResumeViewModel: ViewResumeViewModel, navController: NavCont
 
                                         resume.specialty?.let {
                                             bookingTradesmanViewModel.BookTradesman(phoneNumber,address,
-                                                it,taskDescription,selectedDate,TradesmanId)
+                                                it.replace(" ","_"),taskDescription,selectedDate,TradesmanId)
                                         }
                                     },
                                     modifier = Modifier.fillMaxWidth(),

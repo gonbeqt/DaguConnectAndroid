@@ -259,7 +259,7 @@ class MainActivity : ComponentActivity() {
                             getMyJobApplicantsViewModel,
                             viewJobApplicationViewModel,
                             getTradesmanBookingViewModel,
-                            { loadingUI() } // Pass LoadingUI here
+                            { LoadingUI() } // Pass LoadingUI here
                         )
                     }
                     composable("message_screen") {
@@ -380,7 +380,7 @@ class MainActivity : ComponentActivity() {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel, { loadingUI() })
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel, { LoadingUI() })
                     }
                     composable("manageprofile") {
                         ManageProfile(modifier = Modifier, navController)
@@ -406,7 +406,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 @Composable
-fun loadingUI() {
+fun LoadingUI() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator() // You can customize this with your LoadingTradesmanUI design
     }

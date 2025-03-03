@@ -632,7 +632,8 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         }
                     }
                     Text(
-                        text = resumes.specialty,
+                        text = resumes.specialty
+                            .replace("_", " "),
                         color = Color.Black,
                         fontSize = taskTextSize,
                         )
@@ -669,7 +670,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             )
                             Text(
                                 when {
-                                    resumes.ratings == null || resumes.ratings == 0f -> "0"
+                                    resumes.ratings == 0f -> "0"
                                     else -> String.format("%.1f", resumes.ratings)
                                 },
                                 fontSize = smallTextSize,

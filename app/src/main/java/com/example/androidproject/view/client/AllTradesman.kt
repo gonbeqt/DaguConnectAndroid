@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -188,7 +189,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
 }
 @Composable
 fun         AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
@@ -305,7 +306,8 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                         }
                     }
                     Text(
-                        text = resumes.specialty,  // Remove closing bracket ,
+                        text = resumes.specialty
+                            .replace("_"," "),  // Remove closing bracket ,
                         color = Color.Black,
                         fontSize = taskTextSize,
                     )

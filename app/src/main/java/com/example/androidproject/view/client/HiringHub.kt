@@ -519,7 +519,8 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
                         fontSize = nameTextSize,
                     )
                     Text(
-                        text = allBooking.taskType,
+                        text = allBooking.taskType
+                            .replace("_"," "),
                         color = Color.Black,
                         fontSize =taskTextSize,
                     )
@@ -695,7 +696,8 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                                 modifier = Modifier.padding(top = 10.dp)
                             )
                             Text(
-                                text = activeBooking.taskType,
+                                text = activeBooking.taskType
+                                    .replace("_"," "),
                                 color = Color.Black,
                                 fontSize = taskTextSize,
                             )
@@ -888,7 +890,8 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = pendingBooking.taskType,
+                            text = pendingBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )
@@ -1069,7 +1072,8 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = declineBooking.taskType,
+                            text = declineBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )
@@ -1234,7 +1238,8 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = completedBooking.taskType,
+                            text = completedBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )
@@ -1417,7 +1422,8 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = cancelledBooking.taskType,
+                            text = cancelledBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )

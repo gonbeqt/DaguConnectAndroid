@@ -84,7 +84,7 @@ fun MainScreen(
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     getTradesmanBooking : GetTradesmanBookingViewModel,
-    loadingUI : @Composable () -> Unit // Add this parameter
+    LoadingUI : @Composable () -> Unit // Add this parameter
     ) {
     val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
@@ -202,7 +202,7 @@ fun MainScreen(
             getMyJobApplicantsViewModel,
             viewJobsApplication,
             getTradesmanBooking,
-            loadingUI
+            LoadingUI
             )
     }
 }
@@ -229,7 +229,7 @@ fun ContentScreen(
     getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     getTradesmanBooking : GetTradesmanBookingViewModel,
-    loadingUI : @Composable () -> Unit // Add this parameter
+    LoadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -248,7 +248,7 @@ fun ContentScreen(
             1 -> BookingsTradesman(modifier = Modifier, navController, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,loadingUI)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,LoadingUI)
         }
     }
 }

@@ -284,8 +284,8 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     // Tradesman image
-                                    Image(
-                                        painter = painterResource(R.drawable.pfp),
+                                    AsyncImage(
+                                        model = clientbooking.clientProfile,
                                         contentDescription = "Tradesman Image",
                                         modifier = Modifier
                                             .size(100.dp)
