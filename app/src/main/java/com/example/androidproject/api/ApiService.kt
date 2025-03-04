@@ -1,6 +1,8 @@
 package com.example.androidproject.api
 
 import com.example.androidproject.model.ClientProfile
+import com.example.androidproject.model.ForgotPasswordRequest
+import com.example.androidproject.model.ForgotPasswordResponse
 import com.example.androidproject.model.GetChats
 import com.example.androidproject.model.GetJobApplicantsData
 import com.example.androidproject.model.GetJobApplicationData
@@ -17,6 +19,8 @@ import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
+import com.example.androidproject.model.ResetPasswordRequest
+import com.example.androidproject.model.ResetPasswordResponse
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
 import com.example.androidproject.model.ViewJobApplicationResponse
@@ -166,4 +170,10 @@ interface ApiService {
 
     @GET("/user/tradesman/getbooking")
     suspend fun getTradesmanBooking(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10) : Response <GetTradesmanBookingResponse>
+
+    @POST("/user/forgot/otpsend")
+    suspend fun forgotPass(@Body Request: ForgotPasswordRequest) : Response <ForgotPasswordResponse>
+
+    @PUT("/user/forgot/resetpassword")
+    suspend fun resetPass(@Body Request : ResetPasswordRequest) : Response <ResetPasswordResponse>
 }

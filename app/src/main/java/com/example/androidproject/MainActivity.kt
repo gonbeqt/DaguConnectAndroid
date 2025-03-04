@@ -56,6 +56,7 @@ import com.example.androidproject.view.client.ReportProblem
 import com.example.androidproject.view.LandingPage2
 import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
+import com.example.androidproject.view.ResetPassword
 import com.example.androidproject.view.SignUpScreen
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.client.AccountSettings
@@ -84,8 +85,10 @@ import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.view.tradesman.AccountSettingsTradesman
 import com.example.androidproject.view.tradesman.UpdateResume
+import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
+import com.example.androidproject.viewmodel.ResetPassViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
@@ -98,9 +101,11 @@ import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewM
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.factories.ForgotPassViewModelFactory
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
+import com.example.androidproject.viewmodel.factories.ResetPassViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.ViewTradesmaProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
@@ -237,18 +242,24 @@ class MainActivity : ComponentActivity() {
         val submitResumeVMFactory = SubmitResumeViewModelFactory(apiService, this)
         val submitResumeViewModel = ViewModelProvider(this, submitResumeVMFactory)[SubmitResumeViewModel::class.java]
 
-
         val putJobApplicationStatusViewModelFactory = PutJobApplicationStatusViewModelFactory(apiService, this)
         val putJobApplicationStatusViewModel = ViewModelProvider(this, putJobApplicationStatusViewModelFactory)[PutJobApplicationStatusViewModel::class.java]
 
         val getMyJobApplicantsViewModelFactory = GetMyJobApplicantsViewModelFactory(apiService, this)
         val getMyJobApplicantsViewModel = ViewModelProvider(this, getMyJobApplicantsViewModelFactory)[GetMyJobApplicantsViewModel::class.java]
 
-        val viewJobApplicationViewModelFactory = ViewJobApplicationViewModelFactory(apiService, this)
+        val viewJobApplicationViewModelFactory = ViewJobApplicationViewModelFactory(apiService)
         val viewJobApplicationViewModel = ViewModelProvider(this, viewJobApplicationViewModelFactory)[ViewJobApplicationViewModel::class.java]
 
         val getTradesmanBookingVMFactory = GetTradesmanViewModelFactory(apiService)
         val getTradesmanBookingViewModel = ViewModelProvider(this, getTradesmanBookingVMFactory)[GetTradesmanBookingViewModel::class.java]
+
+        val forgotPassVMFactory = ForgotPassViewModelFactory(apiService)
+        val forgotPassViewModel = ViewModelProvider(this, forgotPassVMFactory)[ForgotPassViewModel::class.java]
+
+        val resetPassVMFactory = ResetPassViewModelFactory(apiService)
+        val resetPassViewModel = ViewModelProvider(this, resetPassVMFactory)[ResetPassViewModel::class.java]
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -266,9 +277,11 @@ class MainActivity : ComponentActivity() {
                         LogInScreen(navController,loginViewModel)
 
                     }
-                    composable("forgotpassword"){
-                        ForgotPassword(navController)
+
+                    composable("resetpassword") {
+                        ResetPassword(navController,forgotPassViewModel,resetPassViewModel)
                     }
+
                     composable(
                         route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}",
                         arguments = listOf(

@@ -26,11 +26,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.androidproject.viewmodel.ForgotPassViewModel
+import com.example.androidproject.viewmodel.ResetPassViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun ForgotPassword(navController: NavController) {
+fun ResetPassword(
+    navController: NavController,
+    forgotPass: ForgotPassViewModel,
+    resetPass: ResetPassViewModel,
+) {
+    val forgotPassState by forgotPass.forgotPasswordState.collectAsState()
+    val resetPassState by resetPass.resetPassState.collectAsState()
+
     var email by remember { mutableStateOf("") }
     var otp by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
@@ -42,8 +51,10 @@ fun ForgotPassword(navController: NavController) {
     var passwordError by remember { mutableStateOf<String?>(null) }
     var lengthError by remember { mutableStateOf<String?>(null) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) } // Added loading state
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
     // Countdown logic
     LaunchedEffect(showOtpDialog) {
         if (showOtpDialog) {
@@ -55,6 +66,75 @@ fun ForgotPassword(navController: NavController) {
                 }
                 showOtpDialog = false
             }
+        }
+    }
+
+
+    // Reset all state when navigating back to login
+    DisposableEffect(navController) {
+        onDispose {
+            // Reset all state variables
+            email = ""
+            otp = ""
+            newPassword = ""
+            confirmPassword = ""
+            showOtpDialog = false
+            countdown = 60
+            isOtpVerified = false
+            newPasswordVisible = false
+            passwordError = null
+            lengthError = null
+            confirmPasswordVisible = false
+            isLoading = false
+
+            // Reset ViewModel states if needed
+            forgotPass.resetState()
+            resetPass.resetState()
+        }
+    }
+
+    LaunchedEffect(resetPassState) {
+        when (val resetPassword = resetPassState) {
+            is ResetPassViewModel.ResetPassState.Loading -> {
+                isLoading = true // Show loading UI
+            }
+            is ResetPassViewModel.ResetPassState.Success -> {
+                resetPass.resetState()
+                Toast.makeText(context, "Password Reset Successfully", Toast.LENGTH_SHORT).show()
+                // Navigate to the "login" screen and clear the back stack
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    isLoading = false // Hide loading UI
+                }
+            }
+            is ResetPassViewModel.ResetPassState.Error -> {
+                isLoading = false // Hide loading UI
+                val error = resetPassword.message
+                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+            }
+            else -> Unit
+        }
+    }
+
+    // Handle ForgotPassState changes
+    LaunchedEffect(forgotPassState) {
+        when (val state = forgotPassState) {
+            is ForgotPassViewModel.ForgotPasswordState.Loading -> {
+                isLoading = true // Show loading UI
+            }
+            is ForgotPassViewModel.ForgotPasswordState.Success -> {
+                isLoading = false // Hide loading UI
+                Toast.makeText(context, "OTP Sent", Toast.LENGTH_SHORT).show()
+                showOtpDialog = true // Show OTP dialog
+            }
+            is ForgotPassViewModel.ForgotPasswordState.Error -> {
+                isLoading = false // Hide loading UI
+                val error = state.message
+                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+            }
+            else -> Unit
         }
     }
 
@@ -101,6 +181,7 @@ fun ForgotPassword(navController: NavController) {
                     }
                 }
             }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -124,7 +205,7 @@ fun ForgotPassword(navController: NavController) {
                             // Email input section
                             Text(
                                 text = "Email",
-                                fontSize =18.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight(500),
                                 color = Color.Black
                             )
@@ -146,9 +227,11 @@ fun ForgotPassword(navController: NavController) {
                                             color = Color(0xFF122826),
                                             shape = RoundedCornerShape(8.dp)
                                         )
-                                        .clickable { showOtpDialog = true }
+                                        .clickable {
+                                            isLoading = true // Set loading state to true
+                                            forgotPass.forgotPassword(email)
+                                        }
                                         .padding(horizontal = 16.dp, vertical = 8.dp),
-
                                 ) {
                                     Text(
                                         text = "Send OTP",
@@ -204,11 +287,11 @@ fun ForgotPassword(navController: NavController) {
                             Spacer(modifier = Modifier.height(24.dp))
                             Button(
                                 onClick = {
-                                    navController.navigate("login") // Example navigation
+                                    resetPass.resetPassword(otp.toInt(), newPassword)
+                                    isLoading =true
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
-
                             ) {
                                 Text("Confirm")
                             }
@@ -217,62 +300,96 @@ fun ForgotPassword(navController: NavController) {
                 }
             }
 
-            // OTP Dialog
-            if (showOtpDialog) {
-                Dialog(onDismissRequest = { /* Prevent dismissal by clicking outside */ }) {
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.padding(16.dp),
-                        colors = CardDefaults.cardColors(Color.White)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .width(280.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Enter OTP",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedTextField(
-                                value = otp.replace(" ", ""),
-                                onValueChange = { otp = it },
-                                label = { Text("OTP") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Time remaining: $countdown seconds",
-                                fontSize = 14.sp,
-                                color = if (countdown <= 10) Color.Red else Color.Gray
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    //IF OTP IS CORRECT
-                                    if (otp == "1234") {
-                                        isOtpVerified = true
-                                        showOtpDialog = false
-                                        Toast.makeText(context, "OTP Verified", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                      Toast.makeText(context, "Invalid OTP", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
-
+            when (val forgotPassVerification = forgotPassState) {
+                is ForgotPassViewModel.ForgotPasswordState.Success -> {
+                    val verification = forgotPassVerification.data
+                    // OTP Dialog
+                    if (showOtpDialog) {
+                        Dialog(onDismissRequest = { /* Prevent dismissal by clicking outside */ }) {
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.padding(16.dp),
+                                colors = CardDefaults.cardColors(Color.White)
                             ) {
-                                Text("Verify")
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .width(280.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Enter OTP",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    OutlinedTextField(
+                                        value = otp.replace(" ", ""),
+                                        onValueChange = { otp = it },
+                                        label = { Text("OTP") },
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Time remaining: $countdown seconds",
+                                        fontSize = 14.sp,
+                                        color = if (countdown <= 10) Color.Red else Color.Gray
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(
+                                        onClick = {
+                                            //IF OTP IS CORRECT
+                                            if(otp.isEmpty()){
+                                                Toast.makeText(context, "Please enter OTP", Toast.LENGTH_SHORT).show()
+                                                return@Button
+                                            }
+                                            if (verification != null) {
+                                                if (otp.toInt() == verification.token) {
+                                                    isOtpVerified = true
+                                                    showOtpDialog = false
+                                                    Toast.makeText(context, "OTP Verified", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(context, "Invalid OTP", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
+                                    ) {
+                                        Text("Verify")
+                                    }
+                                }
                             }
                         }
                     }
                 }
+                else -> Unit
             }
+        }
+
+        // Place LoadingUI here, outside the Column but inside the Box
+        if (isLoading) {
+            LoadingUI()
+        }
+    }
+}
+
+
+
+
+@Composable
+fun LoadingUI() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // CircularProgressIndicator
+            CircularProgressIndicator()
         }
     }
 }

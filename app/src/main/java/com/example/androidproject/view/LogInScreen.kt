@@ -348,7 +348,7 @@ fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier,navCont
             WindowType.SMALL -> 12.sp
             else -> 14.sp
         },
-        modifier = modifier.clickable { navController.navigate("forgotpassword")}
+        modifier = modifier.clickable { navController.navigate("resetpassword")}
     )
 }
 @Composable
