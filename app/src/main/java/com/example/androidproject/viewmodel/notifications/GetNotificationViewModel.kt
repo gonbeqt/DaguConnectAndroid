@@ -25,6 +25,7 @@ class GetNotificationViewModel(private val apiService: ApiService):ViewModel() {
             ),
             pagingSourceFactory = { GetNotificationPagingSource(apiService).also { _pagingSource.value =it } }
         ).flow.cachedIn(viewModelScope)
+
     fun refreshNotification() {
         refreshTrigger.value = Unit
     }

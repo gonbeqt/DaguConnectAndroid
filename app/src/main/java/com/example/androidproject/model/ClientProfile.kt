@@ -15,3 +15,20 @@ data class ClientProfile(
     @SerializedName("created_at")
     val createdAt: String
 )
+
+data class UpdateProfilePicture(
+    @SerializedName("profile_picture")
+    val profilePicture: String
+)
+
+data class UpdateProfilePictureResponse(
+    val message: String
+)
+
+data class UpdateAddress(
+    val address: String
+)
+
+data class UpdateAddressResponse(
+    val message: String
+)

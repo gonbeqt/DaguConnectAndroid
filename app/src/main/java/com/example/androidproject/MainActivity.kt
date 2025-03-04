@@ -77,6 +77,8 @@ import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.client_profile.UpdateClientProfileAddressViewModel
+import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
@@ -88,6 +90,8 @@ import com.example.androidproject.viewmodel.factories.bookings.UpdateWorkStatusV
 import com.example.androidproject.viewmodel.factories.bookings.ViewClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
 import com.example.androidproject.viewmodel.factories.client_profile.GetClientProfileViewModelFactory
+import com.example.androidproject.viewmodel.factories.client_profile.UpdateClientProfileAddressViewModelFactory
+import com.example.androidproject.viewmodel.factories.client_profile.UpdateClientProfilePictureViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.PostJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.PutJobApplicationStatusViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.ViewJobApplicationViewModelFactory
@@ -145,16 +149,16 @@ class MainActivity : ComponentActivity() {
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 
-        val reportVMFactory = ReportViewModelFactory(apiService,this)
+        val reportVMFactory = ReportViewModelFactory(apiService)
         val reportViewModel = ViewModelProvider(this, reportVMFactory)[ReportViewModel::class.java]
 
-        val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService,this)
+        val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService)
         val getClientBookingViewModel = ViewModelProvider(this,getClientsBookingVMFactory)[GetClientBookingViewModel::class.java]
 
-        val viewClientBookingVMFactory = ViewClientBookingViewModelFactory(apiService,this)
+        val viewClientBookingVMFactory = ViewClientBookingViewModelFactory(apiService)
         val viewClientBookingViewModel = ViewModelProvider(this, viewClientBookingVMFactory)[ViewClientBookingViewModel::class.java]
 
-        val getResumesVMFactory = GetResumesViewModelFactory(apiService,this)
+        val getResumesVMFactory = GetResumesViewModelFactory(apiService)
         val getResumesViewModel = ViewModelProvider(this, getResumesVMFactory)[GetResumesViewModel::class.java]
 
         val viewResumesVMFactory = ViewResumeViewModelFactory(apiService)
@@ -169,7 +173,7 @@ class MainActivity : ComponentActivity() {
         val viewModelFactory = LoginViewModelFactory(apiService, this)
         val loginViewModel = ViewModelProvider(this, viewModelFactory)[LoginViewModel::class.java]
 
-        val getJobsViewModelFactory = GetJobsViewModelFactory(apiService, this)
+        val getJobsViewModelFactory = GetJobsViewModelFactory(apiService)
         val getJobsViewModel = ViewModelProvider(this, getJobsViewModelFactory)[GetJobsViewModel::class.java]
 
         val viewJobViewModelFactory = ViewJobViewModelFactory(apiService, this)
@@ -232,6 +236,14 @@ class MainActivity : ComponentActivity() {
         val chatId = intent.extras?.getInt("chatId") ?: 0
         val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId)
         val getMessageViewModel = ViewModelProvider(this, getMessagesViewModelFactory)[GetMessagesViewModel::class.java]
+
+        val updateClientProfilePictureViewModelFactory = UpdateClientProfilePictureViewModelFactory(apiService)
+        val updateClientProfileAddressViewModel = ViewModelProvider(this, updateClientProfilePictureViewModelFactory)[UpdateClientProfilePictureViewModel::class.java]
+
+        val updateClientProfileAddress = UpdateClientProfileAddressViewModelFactory(apiService)
+        val updateClientProfileAddressViewModelFactory = ViewModelProvider(this, updateClientProfileAddress)[UpdateClientProfileAddressViewModel::class.java]
+
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()

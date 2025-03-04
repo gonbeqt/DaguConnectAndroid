@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class GetResumesViewModel(private val apiService: ApiService, private val context: Context) : ViewModel() {
+class GetResumesViewModel(private val apiService: ApiService) : ViewModel() {
     private val _pagingSource = MutableStateFlow<GetResumePagingSource?>(null)
     private val _dismissedResumes = mutableStateOf(setOf<Int>())
     val dismissedResumes: State<Set<Int>> = _dismissedResumes

@@ -371,7 +371,6 @@ fun ProfileTradesman(
                 }
             }
             // Handle different states including loading, success, error, and initial state
-
         }
     }
 }
@@ -451,7 +450,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Specialty : ${displayDetails.specialty?.takeIf { it != "null" } ?: "N/A"}",
+                        text = "Specialty : ${tradesmanDetails.specialty?.takeIf { it != "null" } ?: "N/A"}",
                         color = Color.Gray,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -465,7 +464,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "About Me:",
+                            text = "About Me :",
                             fontSize = 16.sp,
                             color = Color.Gray,
                             fontWeight = FontWeight.Bold

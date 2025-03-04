@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
-class GetJobsViewModel (private val apiService: ApiService, private val context: Context): ViewModel(){
+class GetJobsViewModel (private val apiService: ApiService): ViewModel(){
     private val refreshTrigger = MutableStateFlow(Unit)
 
     val jobsPagingData: Flow<PagingData<GetJobs>> = refreshTrigger.flatMapLatest {

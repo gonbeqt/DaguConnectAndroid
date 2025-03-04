@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.ViewModelSetups
-import com.example.androidproject.view.extras.LoadingTradesmanUI
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 
@@ -104,7 +104,7 @@ fun TradesmanApply(
         // Main Content Based on ViewJobState
         when (viewJobState) {
             is ViewJobViewModel.JobState.Loading -> {
-                LoadingTradesmanUI()
+                LoadingUI()
             }
 
             is ViewJobViewModel.JobState.Success -> {

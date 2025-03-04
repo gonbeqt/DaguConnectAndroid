@@ -405,15 +405,15 @@ fun PostsCard(
     val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
     var isDialogVisible by remember { mutableStateOf(false) }
-    var editableTitle by remember { mutableStateOf(getJobs.jobType) }
+    var editableJobType by remember { mutableStateOf(getJobs.jobType) }
     var editableDescription by remember { mutableStateOf(getJobs.jobDescription) }
     var editableLocation by remember { mutableStateOf(getJobs.address) }
     var editableDeadline by remember { mutableStateOf(getJobs.deadline) } // Added deadline
-    var editableRate by remember { mutableDoubleStateOf(getJobs.salary) }
+    var editableBudget by remember { mutableDoubleStateOf(getJobs.salary) }
 
-    val originalTitle = remember { mutableStateOf("") }
+    val originalJobType = remember { mutableStateOf("") }
     val originalDescription = remember { mutableStateOf("") }
-    val originalRate = remember { mutableDoubleStateOf(0.0) }
+    val originalBudget = remember { mutableDoubleStateOf(0.0) }
     val originalDeadline = remember { mutableStateOf("") }
 
     var selectedCategories = remember { mutableStateListOf<String>() }
@@ -439,7 +439,7 @@ fun PostsCard(
                 ) {
 
                     Text(
-                        text = "Looking for ${editableTitle}",
+                        text = "Looking for $editableJobType",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -480,7 +480,7 @@ fun PostsCard(
                 Text(text = "Job Address: $editableLocation", fontSize = 16.sp)
 
                 Text(
-                    text = "Budget: $editableRate pesos",
+                    text = "Budget: $editableBudget pesos",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal
                 )
@@ -538,9 +538,9 @@ fun PostsCard(
                     // Title TextField with Border
 
                         OutlinedTextField(
-                            value = editableTitle,
-                            onValueChange = { editableTitle = it },
-                            label = { Text("Title") },
+                            value = editableJobType,
+                            onValueChange = { editableJobType = it },
+                            label = { Text("Job type") },
                             shape = RoundedCornerShape(16.dp),
                             singleLine = true,
                             modifier = Modifier
@@ -601,8 +601,8 @@ fun PostsCard(
                     // Rate TextField with Border
 
                         OutlinedTextField(
-                            value = editableRate.toString(),
-                            onValueChange = { editableRate = it.toDoubleOrNull() ?: 0.0 },
+                            value = editableBudget.toString(),
+                            onValueChange = { editableBudget = it.toDoubleOrNull() ?: 0.0 },
                             label = { Text("Estimated Budget") },
                             shape = RoundedCornerShape(16.dp),
                             singleLine = true,
@@ -669,7 +669,6 @@ fun PostsCard(
                                 "Mechanic",
                                 "Cleaner"
                             )
-
                             categories.forEach { category ->
                                 val isSelected = selectedCategories.contains(category)
                                 Box(
@@ -688,17 +687,15 @@ fun PostsCard(
                             }
                         }
                     }
-
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
                         Button(onClick = {
                             // Restore the original values if cancel is clicked
-                            editableTitle = originalTitle.value
+                            editableJobType = originalJobType.value
                             editableDescription = originalDescription.value
-                            editableRate = originalRate.doubleValue
+                            editableBudget = originalBudget.doubleValue
                             editableDeadline = originalDeadline.value
                             isDialogVisible = false
                         }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
@@ -710,7 +707,7 @@ fun PostsCard(
                             // Save the new values
                             isDialogVisible = false
                             onEditClick(
-                                editableRate.toString(),
+                                editableBudget.toString(),
                                 editableDescription,
                                 editableLocation,
                                 editableDeadline

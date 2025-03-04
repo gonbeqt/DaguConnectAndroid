@@ -18,8 +18,12 @@ import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
+import com.example.androidproject.model.UpdateAddress
+import com.example.androidproject.model.UpdateAddressResponse
 import com.example.androidproject.model.UpdateJob
 import com.example.androidproject.model.UpdateJobResponse
+import com.example.androidproject.model.UpdateProfilePicture
+import com.example.androidproject.model.UpdateProfilePictureResponse
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
 import com.example.androidproject.model.ViewJobApplicationResponse
@@ -171,4 +175,10 @@ interface ApiService {
 
     @GET("/user/notification")
     suspend fun getNotifications(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetNotification>
+
+    @POST("/client/update/profile_picture")
+    suspend fun updateClientProfilePicture(@Body request: UpdateProfilePicture): Response<UpdateProfilePictureResponse>
+
+    @PUT("/client/update/profile_address")
+    suspend fun updateClientAddress(@Body request: UpdateAddress): Response<UpdateAddressResponse>
 }

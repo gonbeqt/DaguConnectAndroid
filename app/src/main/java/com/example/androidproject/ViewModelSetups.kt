@@ -16,7 +16,7 @@ class ViewModelSetups {
     companion object {
         fun setupGetJobsViewModel(owner: ViewModelStoreOwner): GetJobsViewModel {
             val apiService = RetrofitInstance.create(ApiService::class.java)
-            val viewModelFactory = GetJobsViewModelFactory(apiService, owner as Context)
+            val viewModelFactory = GetJobsViewModelFactory(apiService)
             return ViewModelProvider(owner, viewModelFactory)[GetJobsViewModel::class.java]
         }
 

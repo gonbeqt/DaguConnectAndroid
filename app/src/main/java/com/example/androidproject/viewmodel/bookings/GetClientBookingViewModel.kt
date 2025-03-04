@@ -15,7 +15,7 @@ import com.example.androidproject.viewmodel.bookings.paginate.GetClientBookingPa
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class GetClientBookingViewModel(private val apiService: ApiService, private val context: Context) : ViewModel() {
+class GetClientBookingViewModel(private val apiService: ApiService) : ViewModel() {
 
     private val _pagingSource = MutableStateFlow<GetClientBookingPagingSource?>(null)
     private val _dismissedBookings = mutableStateOf(setOf<Int>())

@@ -1559,7 +1559,6 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
 fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
-
     val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
 
     LazyColumn(
@@ -2124,7 +2123,6 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                             buttonSubmit = true
                             showDeclineReasons = false
                             putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Cancelled", selectedReason)
-
                         },
                         enabled = selectedReason != null,
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
