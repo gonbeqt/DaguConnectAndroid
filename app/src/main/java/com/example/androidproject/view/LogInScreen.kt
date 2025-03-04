@@ -363,7 +363,9 @@ fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: 
                 Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
             } else if (password.length < 8) {
                 Toast.makeText(context, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
-            } else {
+            }
+
+            else {
                 viewModel.login(email, password)
             }
         },
