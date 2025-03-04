@@ -3,6 +3,7 @@ package com.example.androidproject.view.client
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 
@@ -48,7 +51,22 @@ import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navController: NavController,resumeId: String) {
     val resumeId = resumeId.toIntOrNull()?: return
     val viewClientBookingstate by viewClientBookingViewModel.viewClientBookingState.collectAsState()
-
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     LaunchedEffect(Unit) {
         viewClientBookingViewModel.viewClientBooking(resumeId)
     }
@@ -80,8 +98,8 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                         modifier = Modifier
                             .background(Color.White)
                             .fillMaxWidth()
-                            .size(100.dp)
-                            .padding(top = 20.dp)
+                            .size(70.dp)
+                            .padding(top = 5.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -91,7 +109,9 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Arrow Back",
                                 Modifier
-                                    .clickable { navController.popBackStack() }
+                                    .clickable  ( indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ){ navController.popBackStack() }
                                     .padding(16.dp),
                                 tint = Color(0xFF81D796)
                             )
@@ -116,7 +136,8 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp) // Padding to separate it from the top content
+                        .padding(10.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     Card(
                         modifier = Modifier
@@ -131,8 +152,8 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                             contentAlignment = Alignment.Center // Ensure padding is inside the gradient box
                         ) {
                             Text(
-                                text = "Your appointment is Pending Approval",
-                                fontSize = 20.sp,
+                                text = "Your appointment is Pending",
+                                fontSize = nameTextSize,
                                 color = Color.White,
                             )
                         }
@@ -177,16 +198,15 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                         text = clientbooking.tradesmanFullName,
                                         color = Color.Black,
                                         fontWeight = FontWeight(500),
-                                        fontSize = 20.sp,
+                                        fontSize = nameTextSize,
                                         modifier = Modifier.padding(top = 10.dp)
                                     )
                                     Text(
                                         text = clientbooking.taskType,
                                         color = Color.Black,
-                                        fontSize = 16.sp,
+                                        fontSize = taskTextSize,
                                     )
                                     Row(
-                                        modifier = Modifier.padding(top = 10.dp),
                                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -229,7 +249,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                                 Spacer(modifier = Modifier.size(4.dp))
                                                 Text(
                                                     text = "4.5",
-                                                    fontSize = 14.sp
+                                                    fontSize = smallTextSize
                                                 )
                                             }
                                         }
@@ -237,13 +257,13 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                     Text(
                                         text = "Date Selected",
                                         color = Color.Black,
-                                        fontSize = 16.sp,
+                                        fontSize = taskTextSize,
 
                                         )
                                     Text(
                                         text = getbookdate,
                                         color = Color.Gray,
-                                        fontSize = 14.sp,
+                                        fontSize = smallTextSize,
 
                                         )
                                 }
@@ -284,8 +304,8 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     // Tradesman image
-                                    Image(
-                                        painter = painterResource(R.drawable.pfp),
+                                    AsyncImage(
+                                        model = clientbooking.clientProfile,
                                         contentDescription = "Tradesman Image",
                                         modifier = Modifier
                                             .size(100.dp)
@@ -297,27 +317,26 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                             .weight(1f)
                                             .padding(start = 10.dp)
                                     ) {
-                                        Row(Modifier.fillMaxWidth()) {
                                             Text(
                                                 text =clientbooking.clientFullName,
                                                 color = Color.Black,
                                                 fontWeight = FontWeight(500),
-                                                fontSize = 18.sp,
+                                                fontSize = nameTextSize,
                                                 modifier = Modifier.padding(top = 10.dp)
                                             )
                                             Text(
                                                 text = clientbooking.phoneNumber,
                                                 color = Color.Gray,
                                                 fontWeight = FontWeight(500),
-                                                fontSize = 12.sp,
+                                                fontSize = smallTextSize,
                                                 modifier = Modifier.padding(top = 10.dp)
                                             )
-                                        }
+
 
                                         Text(
                                             text = clientbooking.address,
                                             color = Color.Black,
-                                            fontSize = 16.sp,
+                                            fontSize = taskTextSize,
                                         )
                                     }
                                 }

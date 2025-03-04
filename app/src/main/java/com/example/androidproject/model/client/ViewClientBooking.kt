@@ -12,6 +12,8 @@ data class ViewClientBooking(
     val cancelReason: Any,
     @SerializedName("client_fullname")
     val clientFullName: String,
+    @SerializedName("client_profile")
+    val clientProfile : String,
     @SerializedName("created_at")
     val createdAt: String,
     val id: Int,

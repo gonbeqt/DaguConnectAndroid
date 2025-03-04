@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -105,11 +106,11 @@ fun BookingsScreen(
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-          Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
+            Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically
 
-          )  {
+          ){
               Row(
                   modifier = Modifier
                       .padding(horizontal = 25.dp)
@@ -450,9 +451,9 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 470.dp to 210.dp
-        WindowType.MEDIUM -> 480.dp to 220.dp
-        WindowType.LARGE -> 490.dp to 230.dp
+        WindowType.SMALL -> 470.dp to 240.dp
+        WindowType.MEDIUM -> 480.dp to 250.dp
+        WindowType.LARGE -> 490.dp to 260.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -478,8 +479,7 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
     }
     Card(
         modifier = Modifier
-            .size(cardHeight.first,cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
+            .size(cardHeight.first,cardHeight.second),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
 
@@ -519,7 +519,8 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
                         fontSize = nameTextSize,
                     )
                     Text(
-                        text = allBooking.taskType,
+                        text = allBooking.taskType
+                            .replace("_"," "),
                         color = Color.Black,
                         fontSize =taskTextSize,
                     )
@@ -602,17 +603,43 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 //Design for activeItems
 @Composable
 fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,updateWorkStatusViewModel:UpdateWorkStatusViewModel) {
-    val updateworkstatusstate by updateWorkStatusViewModel.workStatusState.collectAsState()
+    val updateWorkState by updateWorkStatusViewModel.workStatusState.collectAsState()
     val  context = LocalContext.current
-    var isCompleted by remember { mutableStateOf(false) }
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp to 260.dp
+        WindowType.MEDIUM -> 390.dp to 270.dp
+        WindowType.LARGE -> 400.dp to 280.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
 
-
-    LaunchedEffect(updateworkstatusstate) {
-        when (val updateWorkStatusState= updateworkstatusstate) {
+    LaunchedEffect(updateWorkState) {
+        when (val updateWorkStatusState= updateWorkState) {
             is UpdateWorkStatusViewModel.UpdateWorkStatus.Success -> {
                 Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
-                isCompleted = true
                 updateWorkStatusViewModel.resetState()
+                navController.currentBackStackEntry?.savedStateHandle?.apply {
+                    set("selectedItem", 1) // Bookings tab
+                    set("selectedTab", 4)  // Completed tab
+                }
+                navController.navigate("main_screen") {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                    launchSingleTop = true
+                }
             }
             is UpdateWorkStatusViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = updateWorkStatusState.message
@@ -622,33 +649,13 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
             else -> Unit
         }
     }
-    if(!isCompleted){
+
         val bookingDate = ViewModelSetups.formatDateTime(activeBooking.bookingDate)
-        val windowSize = rememberWindowSizeClass()
-        val cardHeight = when (windowSize.width) {
-            WindowType.SMALL -> 380.dp to 240.dp
-            WindowType.MEDIUM -> 390.dp to 250.dp
-            WindowType.LARGE -> 400.dp to 260.dp
-        }
-        val nameTextSize = when (windowSize.width) {
-            WindowType.SMALL -> 18.sp
-            WindowType.MEDIUM -> 20.sp
-            WindowType.LARGE -> 22.sp
-        }
-        val taskTextSize = when (windowSize.width) {
-            WindowType.SMALL -> 14.sp
-            WindowType.MEDIUM -> 16.sp
-            WindowType.LARGE -> 18.sp
-        }
-        val smallTextSize = when (windowSize.width) {
-            WindowType.SMALL -> 12.sp
-            WindowType.MEDIUM -> 14.sp
-            WindowType.LARGE -> 16.sp
-        }
+
         Card(
             modifier = Modifier
                 .size(cardHeight.first,cardHeight.second)
-                .clickable { },
+               ,
             shape = RoundedCornerShape(8.dp),
             elevation = CardDefaults.cardElevation(2.dp)
 
@@ -695,7 +702,8 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                                 modifier = Modifier.padding(top = 10.dp)
                             )
                             Text(
-                                text = activeBooking.taskType,
+                                text = activeBooking.taskType
+                                    .replace("_"," "),
                                 color = Color.Black,
                                 fontSize = taskTextSize,
                             )
@@ -765,53 +773,58 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                         }
 
                     }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.End
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .clickable { navController.navigate("cancelnow/${activeBooking.resumeId}/${activeBooking.bookingStatus}/${activeBooking.id}") }
-                                .background(
-                                    color = Color(0xFFC51B1B),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .weight(1f)
-                                .padding(8.dp),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .clickable { navController.navigate("cancelnow/${activeBooking.resumeId}/${activeBooking.bookingStatus}/${activeBooking.id}") }
+                                    .background(
+                                        color = Color(0xFFC51B1B),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
 
 
-                            Text(text = "Cancel", fontSize = smallTextSize, color = Color.White)
+                                Text(text = "Cancel", fontSize = smallTextSize, color = Color.White)
 
-                        }
+                            }
 
-                        Box(
-                            modifier = Modifier
-                                .clickable {
-                                    updateWorkStatusViewModel.updateWorkStatus("Completed", NULL.toString(),activeBooking.id)
-                                }
-                                .background(
-                                    color = Color(0xFF42C2AE),
-                                    shape = RoundedCornerShape(12.dp)
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        updateWorkStatusViewModel.updateWorkStatus(
+                                            "Completed",
+                                            NULL.toString(),
+                                            activeBooking.id
+
+                                        )
+                                    }
+                                    .background(
+                                        color = Color(0xFF42C2AE),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+
+                                Text(
+                                    text = "Completed",
+                                    color = Color.White,
+                                    fontSize = smallTextSize
                                 )
-                                .weight(1f)
-                                .padding(8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-
-                            Text(
-                                text = "Completed",
-                                color = Color.White,
-                                fontSize = smallTextSize
-                            )
+                            }
                         }
                     }
 
                 }
             }
         }
-    }
+
 
 
 }
@@ -888,12 +901,12 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = pendingBooking.taskType,
+                            text = pendingBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )
                         Row(
-                            modifier = Modifier.padding(top = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -957,43 +970,57 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                 // Spacer between text and buttons
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                Row(Modifier.fillMaxWidth()
+                    ,horizontalArrangement = Arrangement.End
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("cancelnow/${pendingBooking.resumeId}/${pendingBooking.bookingStatus}/${pendingBooking.id}") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .clickable (indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        )
+                        { navController.navigate("cancelnow/${pendingBooking.resumeId}/${pendingBooking.bookingStatus}/${pendingBooking.id}")
+                                }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
 
 
                             Text(text = "Cancel Appointment", fontSize = smallTextSize)
 
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("bookingdetails/${pendingBooking.resumeId}") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                            Text(text = "Booking Details", color = Color(0xFFECAB1E), fontSize = smallTextSize)
                         }
+
+                        Box(
+                            modifier = Modifier
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
+                                    navController.navigate("bookingdetails/${pendingBooking.resumeId}")
+                                }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+
+                            Text(
+                                text = "Booking Details",
+                                color = Color(0xFFECAB1E),
+                                fontSize = smallTextSize
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -1069,12 +1096,12 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = declineBooking.taskType,
+                            text = declineBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )
                         Row(
-                            modifier = Modifier.padding(top = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -1133,7 +1160,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                         Text(
                             text = bookingDate,
                             color = Color.Gray,
-                            fontSize =smallTextSize,
+                            fontSize = smallTextSize,
                         )
                     }
 
@@ -1143,23 +1170,33 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                 Spacer(modifier = Modifier.height(20.dp))
 
 
-
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End // Aligns content to the end
+                ) {
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("booknow/${declineBooking.resumeId}") }
+                            .wrapContentWidth()
+                            .clickable  ( indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ){ navController.navigate("booknow/${declineBooking.resumeId}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .padding(vertical = 6.dp, horizontal = 56.dp),
                         contentAlignment = Alignment.Center
                     ) {
 
-                        Text(text = "Book Again", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                        Text(
+                            text = "Book Again",
+                            color = Color.Gray,
+                            fontSize = smallTextSize
+                        )
                     }
                 }
+            }
         }
     }
 }
@@ -1234,7 +1271,8 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = completedBooking.taskType,
+                            text = completedBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )
@@ -1303,42 +1341,42 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                 // Spacer between text and buttons
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.End
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("booknow/${completedBooking.resumeId}")}
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .clickable { navController.navigate("booknow/${completedBooking.resumeId}") }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                .padding(vertical = 8.dp, horizontal = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
 
 
-                        Text(text = "Book Again", fontSize = smallTextSize)
+                            Text(text = "Book Again", fontSize = smallTextSize)
 
-                    }
+                        }
 
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clickable { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}") }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                                .padding(vertical = 8.dp, horizontal = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
 
-                        Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                            Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                        }
                     }
                 }
             }
@@ -1417,7 +1455,8 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                             modifier = Modifier.padding(top = 10.dp)
                         )
                         Text(
-                            text = cancelledBooking.taskType,
+                            text = cancelledBooking.taskType
+                                .replace("_"," "),
                             color = Color.Black,
                             fontSize = taskTextSize,
                         )
@@ -1486,36 +1525,42 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                    Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("cancellationdetails")}
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+
                     ) {
-                        Text(text = "Cancellation  Details", fontSize = smallTextSize)
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("booknow/${cancelledBooking.resumeId}") }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
+                        Box(
+                            modifier = Modifier
+                                .clickable { navController.navigate("cancellationdetails") }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                .padding(vertical = 8.dp, horizontal = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Cancellation  Details", fontSize = smallTextSize)
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clickable { navController.navigate("booknow/${cancelledBooking.resumeId}") }
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                                .padding(vertical = 8.dp, horizontal = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Book Again",
+                                color = Color(0xFFECAB1E),
+                                fontSize = smallTextSize
                             )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Book Again", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                        }
                     }
                 }
             }
@@ -1682,18 +1727,15 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
 //Design For Items
 @Composable
 fun AllApplicantsItem(myJob: JobApplicantData) {
-
     var jobType = myJob.jobType
-
     if (jobType == "Electrical_work") {
         jobType = "Electrical Work"
     }
-
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 170.dp
-        WindowType.MEDIUM -> 410.dp to 180.dp
-        WindowType.LARGE -> 420.dp to 190.dp
+        WindowType.SMALL -> 400.dp to 220.dp
+        WindowType.MEDIUM -> 410.dp to 230.dp
+        WindowType.LARGE -> 420.dp to 240.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -1705,15 +1747,17 @@ fun AllApplicantsItem(myJob: JobApplicantData) {
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
     }
-    val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
+    val statusColor = when (myJob.status.lowercase()) {
+        "pending" -> Color(0xFFECAB1E)
+        "cancelled", "declined" -> Color.Red
+        "completed" -> Color.Blue
+        "active" -> Color.Green
+        else -> Color.Gray // Default color
     }
     Card(
         modifier = Modifier
             .size(cardHeight.first, cardHeight.second),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        shape =RoundedCornerShape(8.dp),
     ) {
         Box(
             modifier = Modifier
@@ -1750,7 +1794,7 @@ fun AllApplicantsItem(myJob: JobApplicantData) {
                             fontWeight = FontWeight.Bold,
                             fontSize = nameTextSize
                         )
-                        Text(text = myJob.status, fontSize = taskTextSize)
+                        Text(text = myJob.status, fontSize = taskTextSize, color = statusColor)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -1813,19 +1857,12 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
         }
     }
 
-    val reasons = listOf(
-        "Change of Mind",
-        "Found a Different Service Provider",
-        "No Longer Needed",
-        "Scheduled Time Conflict",
-        "Personal Reasons",
-        "Others"
-    )
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 280.dp
+        WindowType.MEDIUM -> 410.dp to 290.dp
+        WindowType.LARGE -> 420.dp to 300.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -1840,7 +1877,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
     Card(
         modifier = Modifier
             .size(cardHeight.first, cardHeight.second),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(8.dp),
     ) {
         Box(
             modifier = Modifier
@@ -1926,7 +1963,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "Cancel Job ", fontSize = nameTextSize)
+                            Text(text = "Cancel Job ", fontSize = taskTextSize)
                         }
 
                         Box(
@@ -1944,7 +1981,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                             Text(
                                 text = " Accept Job",
                                 color = Color(0xFFECAB1E),
-                                fontSize = nameTextSize
+                                fontSize = taskTextSize
                             )
                         }
                     }
@@ -1955,6 +1992,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
         }
         if (showApproveDialog) {
             AlertDialog(
+                containerColor = Color.White,
+
                 onDismissRequest = { showApproveDialog = false },
                 title = {
                     Row(
@@ -2002,10 +2041,12 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 
         if (showDeclineDialog) {
             AlertDialog(
+                containerColor = Color.White,
                 onDismissRequest = { showDeclineDialog = false },
                 title = {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            ,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
@@ -2042,12 +2083,13 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                     ) {
                         Text("Cancel", color = Color.White)
                     }
-                }
+                },
             )
         }
 
         if (showJobApproveDialog) {
             AlertDialog(
+                containerColor = Color.White,
                 onDismissRequest = { showJobApproveDialog = false },
                 icon = {
                     Image(
@@ -2087,6 +2129,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
             )
 
             AlertDialog(
+                containerColor = Color.White,
                 onDismissRequest = { showDeclineReasons = false },
                 title = {
                     Text(
@@ -2138,119 +2181,6 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 
 }
 @Composable
-fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
-    val windowSize = rememberWindowSizeClass()
-    val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
-    }
-    val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
-    }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
-    Card(
-        modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
-            .clickable { }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    // Tradesman image
-                    AsyncImage(
-                        model = myJob.clientProfilePicture, // Use URL here
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .size(62.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                    // Tradesman details
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 12.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = myJob.tradesmanFullname,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Service: ${myJob.jobType}",
-                            color = Color.Black,
-                            fontSize = taskTextSize
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Applied on: ${myJob.createdAt}",
-                            color = Color.Black,
-                            fontSize = taskTextSize
-                        )
-                        Text(
-                            text = "Submission Deadline: ${myJob.jobDeadline}",
-                            color = Color.Black,
-                            fontSize = taskTextSize
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Address: ${myJob.jobAddress}",
-                            color = Color.Black,
-                            fontSize = taskTextSize
-                        )
-                    }
-                }
-
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End // Aligns content to the end
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .clickable { navController.navigate("canceljobapplicationsdetails")}
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp, horizontal = 56.dp), // Added horizontal padding for spacing
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Details", fontSize = nameTextSize, color =  Color.Black)
-                    }
-                }
-            }
-        }
-    }
-}
-@Composable
 fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     var cancel by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(-1) }
@@ -2267,9 +2197,9 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
     )
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 280.dp
+        WindowType.MEDIUM -> 410.dp to 290.dp
+        WindowType.LARGE -> 420.dp to 300.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -2363,7 +2293,9 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                     ) {
                         Box(
                             modifier = Modifier
-                                .clickable { cancel = true }
+                                .clickable( indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) { cancel = true }
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -2372,11 +2304,13 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "Cancel Job ", fontSize = nameTextSize)
+                            Text(text = "Cancel Job ", fontSize = taskTextSize)
                         }
                         Box(
                             modifier = Modifier
-                                .clickable { }
+                                .clickable ( indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ){ }
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -2533,12 +2467,126 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
     }
 }
 @Composable
+fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 400.dp to 280.dp
+        WindowType.MEDIUM -> 410.dp to 290.dp
+        WindowType.LARGE -> 420.dp to 300.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    Card(
+        modifier = Modifier
+            .size(cardHeight.first, cardHeight.second)
+            .clickable { }, // Add implementation for click if needed
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    // Tradesman image
+                    AsyncImage(
+                        model = myJob.clientProfilePicture, // Use URL here
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(62.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = myJob.tradesmanFullname,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = nameTextSize
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Service: ${myJob.jobType}",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Applied on: ${myJob.createdAt}",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                        Text(
+                            text = "Submission Deadline: ${myJob.jobDeadline}",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Address: ${myJob.jobAddress}",
+                            color = Color.Black,
+                            fontSize = taskTextSize
+                        )
+                    }
+                }
+
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End // Aligns content to the end
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .clickable { navController.navigate("canceljobapplicationsdetails")}
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .padding(vertical = 8.dp, horizontal = 36.dp), // Added horizontal padding for spacing
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Declined Details", fontSize = taskTextSize, color =  Color.Black)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 280.dp
+        WindowType.MEDIUM -> 410.dp to 290.dp
+        WindowType.LARGE -> 420.dp to 300.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -2636,10 +2684,10 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                             )
 
                             .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp, horizontal = 56.dp), // Added horizontal padding for spacing
+                            .padding(vertical = 8.dp, horizontal = 36.dp), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Rate", fontSize = nameTextSize, color = Color(0xFFECAB1E))
+                        Text(text = "Rate", fontSize = taskTextSize, color = Color(0xFFECAB1E))
                     }
                 }
             }
@@ -2653,9 +2701,9 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
 fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 400.dp to 250.dp
-        WindowType.MEDIUM -> 410.dp to 260.dp
-        WindowType.LARGE -> 420.dp to 270.dp
+        WindowType.SMALL -> 400.dp to 280.dp
+        WindowType.MEDIUM -> 410.dp to 290.dp
+        WindowType.LARGE -> 420.dp to 300.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -2754,10 +2802,10 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                             )
 
                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp, horizontal = 56.dp), // Added horizontal padding for spacing
+                            .padding(vertical = 8.dp, horizontal = 36.dp), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Details", fontSize = nameTextSize, color =  Color.Black)
+                        Text(text = "Cancelled Details", fontSize = taskTextSize, color =  Color.Black)
                     }
                 }
             }

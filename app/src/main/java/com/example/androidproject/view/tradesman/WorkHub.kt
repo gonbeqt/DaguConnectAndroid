@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -65,18 +66,21 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
+import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel,getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController,updateWorkStatusViewModel: UpdateWorkStatusViewModel, getMyJobApplications: GetMyJobApplicationViewModel,getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    var selectedTabIndex by remember { mutableStateOf(0) }
+
+
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedSection by remember { mutableStateOf("My Jobs") }
 
     // Define tab titles based on selected section
@@ -160,7 +164,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                         when (selectedSection) {
                             "My Jobs" -> when (selectedTabIndex) {
                                 0 -> AllBookingsTradesmanContent(getTradesmanBooking)
-                                1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking)
+                                1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateWorkStatusViewModel)
                                 2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
                                 3 -> ActiveBookingsTradesmanContent(navController,getTradesmanBooking)
                                 4 -> CompletedBookingsTradesmanContent(navController,getTradesmanBooking)
@@ -273,7 +277,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
     }
 }
 @Composable
-fun PendingBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
+fun PendingBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel, updateWorkStatusViewModel: UpdateWorkStatusViewModel) {
     val bookingPendingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -292,7 +296,7 @@ fun PendingBookingsTradesmanContent(navController: NavController,getTradesmanBoo
     ) {
         items(bookingPending.size) { index ->
             val Pending = bookingPending[index]
-            PendingTradesmanItem(Pending,navController)
+            PendingTradesmanItem(Pending,navController,updateWorkStatusViewModel)
         }
     }
 }
@@ -522,7 +526,8 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
 
 
 @Composable
-fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavController) {
+fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavController, updateWorkStatusViewModel :  UpdateWorkStatusViewModel) {
+
     var showApproveDialog by remember { mutableStateOf(false) }
     var showDeclineDialog by remember { mutableStateOf(false) }
     var showJobApproveDialog by remember { mutableStateOf(false) }
@@ -1469,13 +1474,8 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
     }
 }
 
-//MY SUBMISSION
-//MY SUBMISSION
-//MY SUBMISSION
-//MY SUBMISSION
-//MY SUBMISSION
-//MY SUBMISSION
-//MY SUBMISSION
+
+
 @Composable
 fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationViewModel) {
     val myJobs = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()

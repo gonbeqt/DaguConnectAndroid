@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -199,7 +201,7 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = paintingList.itemSnapshotList.items.filter {it.specialty.contains("Painting") && it.id !in dismissedResumes  }
+                            val filteredList = paintingList.itemSnapshotList.items.filter {it.specialty.contains("Painter") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {
@@ -401,7 +403,9 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -78,6 +79,8 @@ import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.UpdateJob
 import com.example.androidproject.view.ServicePosting
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
@@ -122,7 +125,23 @@ fun ProfileScreen(
     val profileState by getClientProfileViewModel.getProfileState.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabNames = listOf("My Posts", "General")
-    var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
 
     LaunchedEffect(refreshTrigger) {
         isLoading = true // Set loading state before fetching
@@ -136,12 +155,7 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(70.dp)
-                .shadow(1.dp),
+        Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -151,21 +165,30 @@ fun ProfileScreen(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-
             ) {
                 Text(
                     text = "Profile",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Medium
                 )
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color.Black,
-                    modifier = Modifier
-                        .size(35.dp)
-                        .clickable { navController.navigate("notification") }
-                )
+                Row (){
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications Icon",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable { navController.navigate("notification") }
+                    )
+                    Icon(imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings Icon",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable { navController.navigate("accountsettings") }
+                    )
+                }
+
             }
         }
 
@@ -242,7 +265,10 @@ fun ProfileScreen(
                                         .height(100.dp)
                                         .background(
                                             brush = Brush.linearGradient(
-                                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1)),
+                                                colors = listOf(
+                                                    Color(0xFF81D796),
+                                                    Color(0xFF39BFB1)
+                                                ),
                                                 start = Offset(0f, 1f),
                                                 end = Offset(1f, 1f)
                                             ), shape = RoundedCornerShape(8.dp)
@@ -297,7 +323,9 @@ fun ProfileScreen(
                                         text = {
                                             Text(
                                                 title, fontSize = 14.sp,
-                                                color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else Color.Black
+                                                color = if (selectedTabIndex == index) Color(
+                                                    0xFF3CC0B0
+                                                ) else Color.Black
                                             )
                                         }
                                     )
@@ -308,26 +336,18 @@ fun ProfileScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.BottomEnd
+                                    .padding(top = 2.dp)
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> MyPostsTab(getMyJobsViewModel, putJobs)
+                                    0 -> MyPostsTab(getMyJobsViewModel, postJobViewModel, putJobs)
                                     1 -> SettingsScreen(navController, logoutViewModel)
                                 }
 
-                                FabPosting(
-                                    onPostNewService = { newPost ->
-                                        postsList = postsList + newPost
-                                    },
-                                    onDeadlineChange = { deadline ->
-                                        println("Selected Deadline: $deadline")
-                                    },
-                                    postJobViewModel
-                                )
                             }
                         }
+
                     }
+
                     is GetClientProfileViewModel.ClientProfileState.Error -> {
                         Text(text = "Error: ${state.message}", color = Color.Red)
                     }
@@ -336,11 +356,7 @@ fun ProfileScreen(
                     }
                 }
             }
-
         }
-
-
-
     }
 }
 
@@ -349,8 +365,10 @@ fun ProfileScreen(
 
 
 @Composable
-fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, putJobs: PutJobViewModel) {
+fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel,postJobViewModel: PostJobViewModel, putJobs: PutJobViewModel) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
+
     val putJobState by putJobs.putJobState.collectAsState()
     // Refresh when entering this screen again
     LaunchedEffect(Unit) {
@@ -391,6 +409,23 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, putJobs: PutJobViewModel)
             }
         }
     }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Log.d("fab", "fab")
+        FabPosting(
+            onPostNewService = { newPost ->
+                postsList = postsList + newPost
+            },
+            onDeadlineChange = { deadline ->
+                println("Selected Deadline: $deadline")
+            },
+            postJobViewModel
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -401,6 +436,24 @@ fun PostsCard(
     getJobs: GetJobs,
     putJobs: PutJobViewModel
 ) {
+
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val putJobState by putJobs.putJobState.collectAsState()
     val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
@@ -440,7 +493,7 @@ fun PostsCard(
 
                     Text(
                         text = "Looking for $editableJobType",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
                     TextButton(
@@ -457,7 +510,7 @@ fun PostsCard(
                             Text(
                                 "Edit Post",
                                 color = Color.Black,
-                                fontSize = 14.sp,
+                                fontSize = taskTextSize,
                                 modifier = Modifier.padding(start = 8.dp, end = 2.dp),
                                 textAlign = TextAlign.Start
                             )
@@ -465,30 +518,44 @@ fun PostsCard(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit Icon",
                                 tint = Color.Black,
-                                modifier = Modifier.padding(end = 8.dp).size(15.dp)
+                                modifier = Modifier.padding(end = 8.dp).size(14.dp)
                             )
                         }
                     }
                 }
 
-
                 Text(
                     text = editableDescription,
-                    fontSize = 16.sp,
+                    fontSize = taskTextSize,
+                    color = Color.Black,
                     fontWeight = FontWeight.Normal
                 )
-                Text(text = "Job Address: $editableLocation", fontSize = 16.sp)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                    Text(text = "Job Address: $editableLocation",
+                        fontWeight = FontWeight.Bold, color = Color.Gray, fontSize =taskTextSize)
+                    Text(text = editableLocation, fontSize = smallTextSize,fontWeight = FontWeight.Bold, color = Color.Black,)
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                    Text(
+                        text = "Budget: $editableRate pesos",
+                        fontSize = taskTextSize,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = "Service Type: ${getJobs.jobType}",
+                        fontSize = taskTextSize,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray
 
-                Text(
-                    text = "Budget: $editableBudget pesos",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal
-                )
-                Text(
-                    text = "Service Type: ${getJobs.jobType}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                )
+                    )
+                }
+
+
+
+
                 Text(
                     text = "Applicants: ${getJobs.totalApplicants}",
                     fontSize = 16.sp,
@@ -515,7 +582,8 @@ fun PostsCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(8.dp))
+                    .verticalScroll(rememberScrollState()),
                 colors = CardDefaults.cardColors(Color.White)
             ) {
                 Column(
@@ -601,8 +669,8 @@ fun PostsCard(
                     // Rate TextField with Border
 
                         OutlinedTextField(
-                            value = editableBudget.toString(),
-                            onValueChange = { editableBudget = it.toDoubleOrNull() ?: 0.0 },
+                            value = editableRate.toString(),
+                            onValueChange = { editableRate = it.toDoubleOrNull() ?: 0.0 },
                             label = { Text("Estimated Budget") },
                             shape = RoundedCornerShape(16.dp),
                             singleLine = true,
@@ -669,6 +737,7 @@ fun PostsCard(
                                 "Mechanic",
                                 "Cleaner"
                             )
+
                             categories.forEach { category ->
                                 val isSelected = selectedCategories.contains(category)
                                 Box(
@@ -687,6 +756,8 @@ fun PostsCard(
                             }
                         }
                     }
+
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End

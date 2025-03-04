@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,19 +58,43 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 
+
 @Composable
-fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBookingViewModel: ViewClientBookingViewModel,navController: NavController,resumeId: String,bookingstatus: String, bookingId: String) {
+fun CancelNow(
+    updateWorkStatusViewModel: UpdateWorkStatusViewModel,
+    viewClientBookingViewModel: ViewClientBookingViewModel,
+    navController: NavController,
+    resumeId: String,
+    bookingstatus: String,
+    bookingId: String
+) {
     var Cancel by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     val workStatusstate by updateWorkStatusViewModel.workStatusState.collectAsState()
     val context = LocalContext.current
-
-
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val reasons = listOf(
         "Change of Mind",
         "Found a Different Service Provider",
@@ -91,60 +117,49 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                 // Do nothing
             }
             is UpdateWorkStatusViewModel.UpdateWorkStatus.Success -> {
-                Toast.makeText(
-                    context,
-                    "Appointment Cancelled successfully",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "Appointment Cancelled successfully", Toast.LENGTH_SHORT).show()
                 updateWorkStatusViewModel.resetState()
-                // Pass result to MainScreen to switch to Bookings tab with Cancelled selected
-                navController.previousBackStackEntry?.savedStateHandle?.set("selectedTab", 5)
-                navController.popBackStack("main_screen", inclusive = false)
+                navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
+                }
             }
             is UpdateWorkStatusViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = workState.message
-                Toast.makeText(
-                    context,
-                    "Error: $errorMessage",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
                 updateWorkStatusViewModel.resetState()
             }
             else -> Unit
         }
     }
 
-
     when (val viewClientBooking = viewClientBookingstate) {
         is ViewClientBookingViewModel.ViewClientBookings.Loading -> {
-            //do nothing
+            // Do nothing
         }
-
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
             val viewclientbooking = viewClientBooking.data
             val getbookdate = ViewModelSetups.formatDateTime(viewclientbooking.bookingDate)
-            Column( // Change Box to Column
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0xFFD9D9D9))
             ) {
-                // Main Content Area (Scrollable)
-
-                // Header Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White)
                         .verticalScroll(rememberScrollState()),
-                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
+                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
                 ) {
-
                     Column(
                         modifier = Modifier
                             .background(Color.White)
                             .fillMaxWidth()
-                            .size(100.dp)
-                            .padding(top = 20.dp)
+                            .size(70.dp)
+                            .padding(top = 5.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -154,12 +169,13 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Arrow Back",
                                 Modifier
-                                    .clickable { navController.popBackStack() }
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) { navController.popBackStack() }
                                     .padding(16.dp),
                                 tint = Color(0xFF81D796)
                             )
-
-
                             Text(
                                 text = "Bookings Details",
                                 fontSize = 24.sp,
@@ -167,15 +183,12 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                 textAlign = TextAlign.Left,
                                 modifier = Modifier
                                     .padding(top = 15.dp)
-                                    .weight(1f) // Ensures the text takes available space and is centered
+                                    .weight(1f)
                             )
                         }
                     }
                 }
-
-                Spacer(Modifier.height(8.dp)) // Space between the two columns
-
-                // Second Column with Card and content
+                Spacer(Modifier.height(8.dp))
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -183,20 +196,19 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                         .verticalScroll(rememberScrollState())
                 ) {
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp) // Keep card shape
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(brush = myGradient3) // Apply gradient background here
+                                .background(brush = myGradient3)
                                 .padding(16.dp),
-                            contentAlignment = Alignment.Center // Ensure padding is inside the gradient box
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "Your appointment is ${bookingstatus}",
-                                fontSize = 20.sp,
+                                fontSize = nameTextSize,
                                 color = Color.White,
                             )
                         }
@@ -206,8 +218,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                             .fillMaxWidth()
                             .size(200.dp),
                         colors = CardDefaults.cardColors(Color.White),
-
-                        shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp) // Keep card shape
+                        shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp)
                     ) {
                         Box(
                             modifier = Modifier
@@ -222,7 +233,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Tradesman image
                                 AsyncImage(
                                     model = viewclientbooking.tradesmanProfile,
                                     contentDescription = "Tradesman Image",
@@ -230,8 +240,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                         .size(120.dp)
                                         .padding(start = 10.dp)
                                 )
-
-                                // Tradesman details
                                 Column(
                                     modifier = Modifier
                                         .weight(1f)
@@ -241,27 +249,23 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                         text = viewclientbooking.tradesmanFullName,
                                         color = Color.Black,
                                         fontWeight = FontWeight(500),
-                                        fontSize = 20.sp,
+                                        fontSize = nameTextSize,
                                         modifier = Modifier.padding(top = 10.dp)
                                     )
                                     Text(
                                         text = viewclientbooking.taskType,
                                         color = Color.Black,
-                                        fontSize = 16.sp,
+                                        fontSize = taskTextSize,
                                     )
                                     Row(
-                                        modifier = Modifier.padding(top = 10.dp),
                                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        // Rate Box
                                         Box(
                                             modifier = Modifier
                                                 .background(
                                                     color = (Color(0xFFFFF2DD)),
-                                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                                        12.dp
-                                                    )
+                                                    shape = RoundedCornerShape(12.dp)
                                                 )
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                                         ) {
@@ -271,15 +275,11 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                                 modifier = Modifier.padding(horizontal = 4.dp)
                                             )
                                         }
-
-                                        // Reviews Box
                                         Box(
                                             modifier = Modifier
                                                 .background(
                                                     color = (Color(0xFFFFF2DD)),
-                                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                                        12.dp
-                                                    )
+                                                    shape = RoundedCornerShape(12.dp)
                                                 )
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                                         ) {
@@ -293,7 +293,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                                 Spacer(modifier = Modifier.size(4.dp))
                                                 Text(
                                                     text = "4.5",
-                                                    fontSize = 14.sp
+                                                    fontSize = smallTextSize
                                                 )
                                             }
                                         }
@@ -301,33 +301,23 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     Text(
                                         text = "Weekdays Selected",
                                         color = Color.Black,
-                                        fontSize = 16.sp,
-
-                                        )
+                                        fontSize = taskTextSize,
+                                    )
                                     Text(
                                         text = getbookdate,
                                         color = Color.Gray,
-                                        fontSize = 14.sp,
-
-                                        )
+                                        fontSize = smallTextSize,
+                                    )
                                 }
-
                             }
                         }
                     }
                     Spacer(Modifier.height(16.dp))
-
-                    // Second Column with Card and content
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Card(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-
+                            modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(Color.White),
-                            shape = RoundedCornerShape(15.dp) // Keep card shape
+                            shape = RoundedCornerShape(15.dp)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -347,64 +337,45 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Tradesman image
-                                    Image(
-                                        painter = painterResource(R.drawable.pfp),
+                                    AsyncImage(
+                                        model = viewclientbooking.clientProfile,
                                         contentDescription = "Tradesman Image",
-                                        modifier = Modifier
-                                            .size(100.dp)
+                                        modifier = Modifier.size(100.dp)
                                     )
-
-                                    // Tradesman details
                                     Column(
                                         modifier = Modifier
                                             .weight(1f)
                                             .padding(start = 10.dp)
                                     ) {
-                                        Row(Modifier.fillMaxWidth()) {
-                                            Text(
-                                                text = viewclientbooking.clientFullName,
-                                                color = Color.Black,
-                                                fontWeight = FontWeight(500),
-                                                fontSize = 18.sp,
-                                                modifier = Modifier.padding(top = 10.dp)
-                                            )
-                                            Text(
-                                                text = viewclientbooking.phoneNumber,
-                                                color = Color.Gray,
-                                                fontWeight = FontWeight(500),
-                                                fontSize = 12.sp,
-                                                modifier = Modifier.padding(top = 10.dp)
-                                            )
-                                        }
-
+                                        Text(
+                                            text = viewclientbooking.clientFullName,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight(500),
+                                            fontSize = nameTextSize,
+                                            modifier = Modifier.padding(top = 10.dp)
+                                        )
+                                        Text(
+                                            text = viewclientbooking.phoneNumber,
+                                            color = Color.Gray,
+                                            fontWeight = FontWeight(500),
+                                            fontSize = smallTextSize,
+                                        )
                                         Text(
                                             text = viewclientbooking.address,
                                             color = Color.Black,
-                                            fontSize = 16.sp,
+                                            fontSize = taskTextSize,
                                         )
                                     }
                                 }
-
                             }
-
                         }
-
-
                     }
-                    Spacer(Modifier.height(16.dp)) // Space between the two columns
-
-                    // Third Column with Card and content
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
+                    Spacer(Modifier.height(16.dp))
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Card(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-
+                            modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(Color.White),
-                            shape = RoundedCornerShape(15.dp) // Keep card shape
+                            shape = RoundedCornerShape(15.dp)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -412,7 +383,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     .fillMaxWidth()
                             ) {
                                 Text(
-
                                     text = "Support Center",
                                     fontSize = 18.sp,
                                     color = Color.Black
@@ -423,12 +393,11 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                         .padding(horizontal = 10.dp, vertical = 10.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Row() {
+                                    Row {
                                         Icon(
                                             imageVector = Icons.Default.Message,
                                             contentDescription = "Message Icon",
-                                            modifier = Modifier
-                                                .size(32.dp)
+                                            modifier = Modifier.size(32.dp)
                                         )
                                         Text(
                                             text = "Contact Tradesman",
@@ -438,8 +407,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     Icon(
                                         imageVector = Icons.Default.KeyboardArrowRight,
                                         contentDescription = "Arrow Right Icon",
-                                        modifier = Modifier
-                                            .size(32.dp)
+                                        modifier = Modifier.size(32.dp)
                                     )
                                 }
                                 Spacer(Modifier.height(10.dp))
@@ -449,12 +417,11 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                         .padding(horizontal = 10.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Row() {
+                                    Row {
                                         Icon(
                                             imageVector = Icons.Default.Help,
                                             contentDescription = "Help Icon",
-                                            modifier = Modifier
-                                                .size(32.dp)
+                                            modifier = Modifier.size(32.dp)
                                         )
                                         Text(
                                             text = "Help",
@@ -464,17 +431,11 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     Icon(
                                         imageVector = Icons.Default.KeyboardArrowRight,
                                         contentDescription = "Arrow Right Icon",
-                                        modifier = Modifier
-                                            .size(32.dp)
+                                        modifier = Modifier.size(32.dp)
                                     )
                                 }
-
-
                             }
-
                         }
-
-
                     }
                     Spacer(Modifier.height(10.dp))
                     Row(
@@ -484,7 +445,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-
                         Box(
                             modifier = Modifier
                                 .clickable { Cancel = true }
@@ -497,7 +457,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                 .size(300.dp, 30.dp),
                             contentAlignment = Alignment.Center
                         ) {
-
                             Text(
                                 text = "Cancel Appointment",
                                 color = Color.Black,
@@ -506,24 +465,19 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                             )
                         }
                     }
-
                 }
-
             }
         }
-
         is ViewClientBookingViewModel.ViewClientBookings.Error -> {
-
+            // Handle error case if needed
         }
-
         else -> Unit
     }
 
     if (Cancel) {
         Dialog(onDismissRequest = { Cancel = false }) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -532,7 +486,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                         .padding(16.dp)
                         .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
                     Column(
@@ -547,7 +501,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                             color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
-
                         Column(modifier = Modifier.padding(top = 16.dp)) {
                             reasons.forEachIndexed { index, reason ->
                                 Row(
@@ -557,8 +510,7 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                     Checkbox(
                                         checked = selectedIndex == index,
                                         onCheckedChange = {
-                                            selectedIndex =
-                                                if (selectedIndex == index) -1 else index
+                                            selectedIndex = if (selectedIndex == index) -1 else index
                                         },
                                         colors = CheckboxDefaults.colors(
                                             uncheckedColor = Color.Black,
@@ -575,7 +527,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                                 }
                             }
                         }
-
                         if (selectedIndex == reasons.lastIndex) {
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
@@ -599,7 +550,6 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                             )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth()
@@ -607,51 +557,28 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                             Button(
                                 onClick = { Cancel = false },
                                 modifier = Modifier.size(110.dp, 45.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
-                                )
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
                             ) {
                                 Text("Cancel", color = Color.White)
                             }
                             Button(
                                 onClick = {
                                     if (selectedIndex == -1) {
-                                        // Show a message to the user indicating that they need to select a reason
-                                        Toast.makeText(
-                                            context,
-                                            "Please select a reason for cancellation",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(context, "Please select a reason for cancellation", Toast.LENGTH_SHORT).show()
                                     } else if (selectedIndex == reasons.lastIndex && otherReason.isEmpty()) {
-                                        // Show a message if "Others" is selected but no reason is provided
-                                        Toast.makeText(
-                                            context,
-                                            "Please type a reason for cancellation",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(context, "Please type a reason for cancellation", Toast.LENGTH_SHORT).show()
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
-                                            // If "Others" is selected, use the value from the otherReason field
                                             otherReason
                                         } else {
-                                            // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        updateWorkStatusViewModel.updateWorkStatus(
-                                            "Cancelled",
-                                            selectedReason,
-                                            bookingId
-                                        )
+                                        updateWorkStatusViewModel.updateWorkStatus("Cancelled", selectedReason, bookingId)
                                         Cancel = false
-
                                     }
                                 },
                                 modifier = Modifier.size(110.dp, 45.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF42C2AE)
-                                )
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
                             ) {
                                 Text("Submit", color = Color.White)
                             }
@@ -660,7 +587,5 @@ fun CancelNow( updateWorkStatusViewModel: UpdateWorkStatusViewModel,viewClientBo
                 }
             }
         }
-
     }
 }
-

@@ -13,9 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.AccountManager
@@ -53,7 +55,6 @@ import com.example.androidproject.view.client.NotificationScreen
 import com.example.androidproject.view.client.RateAndReviews
 import com.example.androidproject.view.tradesman.AvailabilityStatus
 import com.example.androidproject.view.tradesman.BookingsTradesman
-import com.example.androidproject.view.tradesman.BookmarkedTradesman
 import com.example.androidproject.view.tradesman.CancelTradesmanNow
 import com.example.androidproject.view.tradesman.HiringDetails
 import com.example.androidproject.view.tradesman.HomeTradesman
@@ -64,6 +65,8 @@ import com.example.androidproject.view.tradesman.ProfileVerification
 import com.example.androidproject.view.tradesman.ScheduleTradesman
 import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
+import com.example.androidproject.view.tradesman.AccountSettingsTradesman
+import com.example.androidproject.view.tradesman.UpdateResume
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
@@ -218,6 +221,7 @@ class MainActivity : ComponentActivity() {
         val submitResumeVMFactory = SubmitResumeViewModelFactory(apiService, this)
         val submitResumeViewModel = ViewModelProvider(this, submitResumeVMFactory)[SubmitResumeViewModel::class.java]
 
+
         val putJobApplicationStatusViewModelFactory = PutJobApplicationStatusViewModelFactory(apiService, this)
         val putJobApplicationStatusViewModel = ViewModelProvider(this, putJobApplicationStatusViewModelFactory)[PutJobApplicationStatusViewModel::class.java]
 
@@ -261,7 +265,19 @@ class MainActivity : ComponentActivity() {
                         LogInScreen(navController,loginViewModel)
 
                     }
-                    composable("main_screen") {
+                    composable(
+                        route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}",
+                        arguments = listOf(
+                            navArgument("selectedItem") {
+                                type = NavType.IntType
+                                defaultValue = 0
+                            },
+                            navArgument("selectedTab") {
+                                type = NavType.IntType
+                                defaultValue = 0
+                            }
+                        )
+                    ) { backStackEntry ->
                         MainScreen(
                             navController,
                             logoutViewModel,
@@ -282,7 +298,7 @@ class MainActivity : ComponentActivity() {
                             viewJobApplicationViewModel,
                             getTradesmanBookingViewModel,
                             putJobViewModel,
-                            { loadingUI() } // Pass LoadingUI here
+                            { LoadingUI() } // Pass LoadingUI here
                         )
                     }
                     composable("message_screen") {
@@ -314,7 +330,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("booking") {
-                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
+                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel )
                     }
                     composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
@@ -372,7 +388,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("accountsettings"){
                         AccountSettings(navController)
-                    }                    //Pang CANCEL
+                    }
 
 
                     //CANCELLED DETAILS
@@ -394,16 +410,13 @@ class MainActivity : ComponentActivity() {
                         HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController, getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
-                    }
-                    composable("bookmarkedtradesman") {
-                        BookmarkedTradesman(modifier = Modifier,navController)
+                        BookingsTradesman(modifier = Modifier,navController, updateWorkStatusViewModel,getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
                     }
                     composable("scheduletradesman") {
                         ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel, { loadingUI() })
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel, { LoadingUI() })
                     }
                     composable("manageprofile") {
                         ManageProfile(modifier = Modifier, navController)
@@ -422,6 +435,12 @@ class MainActivity : ComponentActivity() {
                     composable("myjobapplicationdetails") {
                         MyJobApplicationDetails(navController)
                     }
+                    composable("accountsettingstradesman"){
+                        AccountSettingsTradesman(navController)
+                    }
+                    composable("updateresume"){
+                        UpdateResume(navController)
+                    }
 
                 }
             }
@@ -429,7 +448,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 @Composable
-fun loadingUI() {
+fun LoadingUI() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator() // You can customize this with your LoadingTradesmanUI design
     }

@@ -1,7 +1,16 @@
 package com.example.androidproject.view.tradesman
 
 import LogoutViewModel
+import android.app.DownloadManager
+import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
 import android.content.Context
+
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
+import android.os.Environment
+
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
@@ -30,9 +39,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +56,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,6 +82,9 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.view.WindowType
+
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import kotlinx.coroutines.delay
@@ -80,7 +96,7 @@ fun ProfileTradesman(
     navController: NavController,
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
-    loadingUI :  @Composable () -> Unit // Add this parameter
+    LoadingUI :  @Composable () -> Unit // Add this parameter
 
 ) {
     // Function to check network connectivity using NetworkCapabilities (modern approach)
@@ -203,7 +219,7 @@ fun ProfileTradesman(
             }
         } else {
             if (isLoading){
-                loadingUI()
+                LoadingUI()
             }else{
                 when (val profilestate =viewTradesmanProfilestate){
                     is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
@@ -371,6 +387,7 @@ fun ProfileTradesman(
                 }
             }
             // Handle different states including loading, success, error, and initial state
+
         }
     }
 }
@@ -380,7 +397,26 @@ fun ProfileTradesman(
 @Composable
 fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
     var scale by remember { mutableStateOf(1f) }
+    val windowSize = rememberWindowSizeClass()
+    val context = LocalContext.current
+    var downloadId by remember { mutableStateOf<Long?>(null) }
 
+
+        val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val animatedScale by animateFloatAsState(
         targetValue = if (scale == 1f) 1.1f else 1f,
         animationSpec = infiniteRepeatable(
@@ -444,28 +480,56 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
+
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Specialty : ${tradesmanDetails.specialty?.takeIf { it != "null" } ?: "N/A"}",
+                        text = "Specialty : ",
                         color = Color.Gray,
-                        fontSize = 16.sp,
+                        fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
+                        Text(
+                            text = displayDetails.specialty?.replace("_"," ").takeIf { it != "null" } ?: "N/A",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(1.dp,Color.Gray, shape = RoundedCornerShape(12.dp))
+                                .background(Color.White)
+                                .clickable { navController.navigate("updateresume") },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Icon",
+                                tint = Color.Black,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Column {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "About Me :",
-                            fontSize = 16.sp,
+                            text = "About Me:",
+                            fontSize = nameTextSize,
                             color = Color.Gray,
                             fontWeight = FontWeight.Bold
                         )
@@ -473,55 +537,92 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     Text(
                         text = displayDetails.aboutMe ?: "N/A",
                         fontSize = 16.sp,
-                        color = Color.Gray,
+                        color = Color.Black,
                         fontWeight = FontWeight.Normal
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Preferred Location : ${displayDetails.preferredWorkLocation ?: "N/A"}",
+                        text = "Preferred Location :",
                         color = Color.Gray,
-                        fontSize = 16.sp,
+                        fontSize = nameTextSize,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text =  displayDetails.preferredWorkLocation ?: "N/A",
+                        color = Color.Black,
+                        fontSize = taskTextSize,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Est. Rate : ${displayDetails.workFee?.takeIf { it != 0 }?.toString() ?: "N/A"}",
-                        fontSize = 16.sp,
+                        text = "Est. Rate :",
+                        fontSize = nameTextSize,
                         color = Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = displayDetails.workFee?.takeIf { it != 0 }?.let { "₱ $it /hr" } ?: "N/A",
+                        fontSize = taskTextSize,
+                        color = Color.Black,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
+
                 ) {
                     Text(
-                        text = "Trade Credential :",
-                        fontSize = 16.sp,
+                        text = "Trades Credential:" ,
+                                fontSize = nameTextSize,
                         color = Color.Gray,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight(500)
                     )
+
+                        Text(
+                            text = "View File",
+                            color = Color.Blue,
+                            fontSize = taskTextSize,
+                            textDecoration = TextDecoration.Underline,
+                            fontWeight = FontWeight(500),
+                            modifier = Modifier
+                                .clickable {
+                                    val fileUrl = tradesmanDetails.documents
+                                    val fileName = "trade_credential_${tradesmanDetails.tradesmanFullName}.pdf"
+                                    if (fileUrl != null) {
+                                        try {
+                                            downloadId = downloadFileTradesman(context, fileUrl, fileName)
+                                            Toast.makeText(context, "Download success", Toast.LENGTH_SHORT).show()
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                        }
+                                    } else {
+                                        Toast.makeText(context, "No file available", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                        )
+
                 }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Ratings and Testimonials", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(text = "Feedback from satisfied clients", fontSize = 14.sp, color = Color.Gray)
+            Text(text = "Ratings", fontSize = nameTextSize, fontWeight = FontWeight.Bold)
+            Text(text = "Feedback from satisfied clients", fontSize = taskTextSize, color = Color.Gray)
             Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
@@ -739,5 +840,21 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
             }
         }
     }
+}
+
+fun downloadFileTradesman(context: Context, fileUrl: String, fileName: String): Long {
+    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val uri = Uri.parse(fileUrl)
+
+    val request = DownloadManager.Request(uri).apply {
+        setTitle(fileName)
+        setDescription("Downloading tradesman credential")
+        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+        setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+        setMimeType("application/pdf")
+    }
+
+    return downloadManager.enqueue(request)
 }
 

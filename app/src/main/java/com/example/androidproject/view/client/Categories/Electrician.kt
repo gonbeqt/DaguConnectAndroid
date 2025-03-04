@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -46,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -216,7 +219,7 @@ fun Electrician(navController: NavController,getResumesViewModel: GetResumesView
                             } else {
                                 items(filteredList.size) { index ->
                                     val electricianList = filteredList[index]
-                                    if (electricianList != null && electricianList.id !in dismissedResumes) {
+                                    if (electricianList.id !in dismissedResumes) {
                                         ElectricianItem(electricianList, navController,reportViewModel){
                                             getResumesViewModel.dismissResume(electricianList.id)
                                         }
@@ -245,7 +248,7 @@ fun Electrician(navController: NavController,getResumesViewModel: GetResumesView
 
 @Composable
 fun ElectricianItem(electrician: resumesItem, navController: NavController,reportViewModel:ReportViewModel,onUninterested: () -> Unit) {
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
@@ -395,7 +398,9 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController,repor
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(
