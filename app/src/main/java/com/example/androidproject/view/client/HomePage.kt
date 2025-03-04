@@ -644,7 +644,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 .size(70.dp, 50.dp)
                                 .padding(top = 15.dp, end = 5.dp)
                                 .background(
-                                    color = (Color(0xFFFFF2DD)),
+                                    color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
@@ -659,7 +659,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 .size(70.dp, 50.dp)
                                 .padding(top = 15.dp, start = 10.dp, end = 10.dp)
                                 .background(
-                                    color = (Color(0xFFFFF2DD)),
+                                    color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                         ) {

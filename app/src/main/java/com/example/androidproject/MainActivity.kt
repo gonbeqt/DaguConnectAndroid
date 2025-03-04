@@ -33,12 +33,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
+import com.example.androidproject.view.ForgotPassword
 import com.example.androidproject.view.client.AllTradesman
 import com.example.androidproject.view.client.Categories.ACRepair
 import com.example.androidproject.view.client.Categories.Cleaning
@@ -251,7 +251,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination) {
+                NavHost(navController = navController, startDestination = startDestination ) {
                     composable("landing_page") {
                         LandingPageScreen(navController)
                     }
@@ -264,6 +264,9 @@ class MainActivity : ComponentActivity() {
                     composable("login") {
                         LogInScreen(navController,loginViewModel)
 
+                    }
+                    composable("forgotpassword"){
+                        ForgotPassword(navController)
                     }
                     composable(
                         route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}",

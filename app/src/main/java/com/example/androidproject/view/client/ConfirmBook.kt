@@ -127,6 +127,7 @@ fun ConfirmBook(
                         .verticalScroll(rememberScrollState()),
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
                 ) {
+
                     Column(
                         modifier = Modifier
                             .background(myGradient3)
@@ -161,7 +162,7 @@ fun ConfirmBook(
                             )
                         }
                     }
-                }
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -214,10 +215,12 @@ fun ConfirmBook(
                                     )
                                 }
                             }
+
+                            // Tradesman Reviews Box
                             Box(
                                 modifier = Modifier
                                     .background(
-                                        color = Color(0xFFFFF2DD),
+                                        color = Color(0xFFF5F5F5),
                                         shape = RoundedCornerShape(12.dp)
                                     )
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -237,14 +240,20 @@ fun ConfirmBook(
                                 }
                             }
                         }
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        Column(Modifier.padding(horizontal = 24.dp)) {
+
+                        // Address Input
+                        Column(Modifier.padding(horizontal = 24.dp))
+                        {
                             Text(
                                 text = "Address",
                                 color = Color.Black,
                                 fontSize = nameTextSize,
                                 fontWeight = FontWeight(500),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+
                             )
                             Box(
                                 modifier = Modifier
@@ -262,6 +271,8 @@ fun ConfirmBook(
                                         .background(Color.White),
                                     placeholder = { Text(text = "eg. 123 Street Name, Barangay, City") },
                                     maxLines = 3,
+
+
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.White,
                                         unfocusedContainerColor = Color.White,
@@ -273,14 +284,18 @@ fun ConfirmBook(
                                     ),
                                 )
                             }
+
                             Spacer(modifier = Modifier.height(16.dp))
+
                             Text(
                                 text = "Mobile Number",
                                 color = Color.Black,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight(500),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
                             )
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -293,7 +308,10 @@ fun ConfirmBook(
                                     value = phoneNumber,
                                     onValueChange = {
                                         phoneNumber = it
-                                        isValid = phoneNumber.isNotEmpty() && !phoneRegex.matches(phoneNumber)
+                                        isValid =
+                                            phoneNumber.isNotEmpty() && !phoneRegex.matches(
+                                                phoneNumber
+                                            )
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -303,7 +321,7 @@ fun ConfirmBook(
                                     keyboardOptions = KeyboardOptions.Default.copy(
                                         keyboardType = KeyboardType.Phone
                                     ),
-                                    isError = isValid,
+                                    isError = isValid, // Shows error if the length is not 11
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.White,
                                         unfocusedContainerColor = Color.White,
@@ -312,38 +330,51 @@ fun ConfirmBook(
                                         focusedTextColor = Color.Black,
                                         unfocusedTextColor = Color.Black,
                                         cursorColor = Color.Black,
-                                        errorIndicatorColor = Color.Red
+                                        errorIndicatorColor = Color.Red // Error indicator color when invalid
                                     ),
-                                )
+
+                                    )
+
+
                             }
                             if (isValid) {
                                 Text(
                                     text = "Phone number must start with 09 and 11 numbers only",
                                     color = Color.Red,
                                     style = TextStyle(fontSize = 12.sp),
-                                    modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+                                    modifier = Modifier.padding(
+                                        top = 4.dp,
+                                        start = 4.dp
+                                    )
                                 )
                             }
+
+
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "Select a Date for Your Booking",
                                 color = Color.Black,
                                 fontSize = nameTextSize,
                                 fontWeight = FontWeight(500),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
                             )
                             DatePickerWithRestrictions(selectedDate) { date ->
-                                selectedDate = date
+                                selectedDate = date // ✅ Update selectedDate in ConfirmBook
                             }
                             Log.d("DatePickerWithRestrictions", "Selected Date: $selectedDate")
                             Spacer(Modifier.height(16.dp))
+
                             Text(
                                 text = "Optional Details",
                                 color = Color.Black,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight(500),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+
                             )
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -368,6 +399,8 @@ fun ConfirmBook(
                                         focusedTextColor = Color.Black,
                                         unfocusedTextColor = Color.Black,
                                         cursorColor = Color.Black
+
+
                                     ),
                                 )
                             }
@@ -379,10 +412,15 @@ fun ConfirmBook(
                             ) {
                                 Button(
                                     onClick = {
+
                                         resume.specialty?.let {
                                             bookingTradesmanViewModel.BookTradesman(
-                                                phoneNumber, address,
-                                                it.replace(" ", "_"), taskDescription, selectedDate, TradesmanId
+                                                phoneNumber,
+                                                address,
+                                                it.replace(" ", "_"),
+                                                taskDescription,
+                                                selectedDate,
+                                                TradesmanId
                                             )
                                         }
                                     },
@@ -392,7 +430,11 @@ fun ConfirmBook(
                                         Color(0xFF42C2AE), Color.White
                                     )
                                 ) {
-                                    Text(text = "Confirm", fontSize = taskTextSize, color = Color.White)
+                                    Text(
+                                        text = "Confirm",
+                                        fontSize = taskTextSize,
+                                        color = Color.White
+                                    )
                                 }
                                 LaunchedEffect(bookingState) {
                                     when (val bookingstate = bookingState) {
@@ -406,18 +448,23 @@ fun ConfirmBook(
                                                 launchSingleTop = true
                                             }
                                         }
+
                                         is BooktradesmanViewModel.BookTradesmanState.Error -> {
                                             val errorMessage = bookingstate.message
                                             Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
                                             Log.e("BookTradesman", "Error: $errorMessage")
                                             bookingTradesmanViewModel.resetState()
                                         }
+
                                         else -> Unit
                                     }
                                 }
                             }
+
+
                         }
                     }
+                }
                 }
             }
         }

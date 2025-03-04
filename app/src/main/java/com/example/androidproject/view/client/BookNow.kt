@@ -31,14 +31,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -216,7 +220,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                 Box(
                                     modifier = Modifier
                                         .background(
-                                            color = Color(0xFFFFF2DD),
+                                            color = Color(0xFFF5F5F5),
                                             shape = RoundedCornerShape(12.dp)
                                         )
                                         .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -515,10 +519,11 @@ fun BoxRow(specialties: String) {
 @Composable
 fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
     val viewRatingState by viewRatingsViewModel.viewRatingsState.collectAsState()
-
+    var showDialog by remember { mutableStateOf(false) }
     LaunchedEffect(tradesmanId) {  // Use tradesmanId as key to re-fetch when it changes
         viewRatingsViewModel.viewRatings(tradesmanId)
     }
+
 
     when (val viewratings = viewRatingState) {
         is ViewRatingsViewModel.ViewRatingsState.Loading -> {
@@ -526,12 +531,14 @@ fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
         }
         is ViewRatingsViewModel.ViewRatingsState.Success -> {
             val ratingsList = viewratings.data
+
             if (ratingsList.isEmpty()) {
                 // Ensure the text is properly centered
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp), // Add some padding for better appearance
+                        .padding(16.dp)
+                        ,
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -548,7 +555,9 @@ fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(120.dp)
-                                .padding(8.dp),
+                                .padding(8.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { showDialog = true },
                             colors = CardDefaults.cardColors(
                                 containerColor = Color.White
                             ),
@@ -583,9 +592,120 @@ fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
                                 )
                             }
                         }
+                        if (showDialog) {
+                            AlertDialog(
+                                containerColor = Color.White,
+                                onDismissRequest = { showDialog = false },
+                                title = {
+
+                                        Text(
+                                            text = "Feedback Details",
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+
+                                },
+                                text = {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp).verticalScroll(
+                                            rememberScrollState()
+                                        )
+                                    ) {
+                                        // Profile Section
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        ) {
+                                            AsyncImage(
+                                                model = ratings.client_profile,
+                                                contentDescription = "Profile Picture",
+                                                modifier = Modifier
+                                                    .size(75.dp)
+                                                    .clip(CircleShape)
+                                                    .border(1.dp, Color.Gray, CircleShape)
+                                            )
+                                            Column {
+                                                Text(
+                                                    text = ratings?.client_name ?: "Unknown",
+                                                    modifier = Modifier.padding(start = 8.dp),
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 20.sp
+                                                )
+                                                Row(
+                                                    modifier = Modifier.padding(bottom = 8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Star,
+                                                        contentDescription = "Rating",
+                                                        tint = Color.Yellow
+                                                    )
+                                                    Text(
+                                                        text = "${ratings?.ratings ?: 0} stars",
+                                                        modifier = Modifier.padding(start = 4.dp)
+                                                    )
+                                                }
+                                            }
+
+                                        }
+
+                                        // Ratings Section
+
+
+                                        // Comments Section
+                                        Text(
+                                            text = "Comments:",
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            fontSize = 20.sp
+                                        )
+
+                                        // Add state for showing full text
+                                        var showFullText by remember { mutableStateOf(false) }
+                                        val message = ratings?.message ?: "No comments available"
+                                        val maxPreviewLength = 100 // Adjust this value as needed
+
+                                        if (message.length > maxPreviewLength) {
+                                            Column {
+                                                Text(
+                                                    text = if (showFullText) message else "${message.take(maxPreviewLength)}......",
+                                                    modifier = Modifier.padding(top = 4.dp),
+                                                    fontSize = 16.sp,
+                                                    color = if (message.isEmpty()) Color.Gray else Color.Black
+                                                )
+                                                TextButton(
+                                                    onClick = { showFullText = !showFullText },
+                                                    modifier = Modifier
+                                                        .align(Alignment.End)
+                                                        .padding(top = 4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = if (showFullText) "See Less" else "See More",
+                                                        color = Color.Blue,
+                                                        fontSize = 14.sp
+                                                    )
+                                                }
+                                            }
+                                        } else {
+                                            Text(
+                                                text = message,
+                                                modifier = Modifier.padding(top = 4.dp),
+                                                fontSize = 16.sp,
+                                                color = if (message.isEmpty()) Color.Gray else Color.Black
+                                            )
+                                        }
+                                    }
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = { showDialog = false }) {
+                                        Text("Close", fontSize = 16.sp, color = Color.Black)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
+
         }
         is ViewRatingsViewModel.ViewRatingsState.Error -> {
             // Show error message
