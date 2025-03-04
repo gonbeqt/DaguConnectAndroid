@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class UpdateBookingClientViewModel(private val apiService: ApiService): ViewModel() {
+class UpdateBookingClientViewModel(private val apiService: ApiService) : ViewModel() {
     private val _clientWorkStatusState = MutableStateFlow<UpdateClientWorkStatus>(UpdateClientWorkStatus.Idle)
     val clientWorkStatusState = _clientWorkStatusState.asStateFlow()
 
@@ -19,15 +19,18 @@ class UpdateBookingClientViewModel(private val apiService: ApiService): ViewMode
         viewModelScope.launch {
             _clientWorkStatusState.value = UpdateClientWorkStatus.Loading
             try {
-                val response = apiService.updateBookingClientStatus(ClientWorkStatusRequest(book_status,cancel_reason),bookingId)
-                    if (response.isSuccessful){
-                        val body = response.body()
-                            if(body!=null){
-                                _clientWorkStatusState.value = UpdateClientWorkStatus.Success(body,book_status)
-                                }else{
-                                    _clientWorkStatusState.value = UpdateClientWorkStatus.Error("Failed to update work status.")
+                val response = apiService.updateBookingClientStatus(
+                    ClientWorkStatusRequest(book_status, cancel_reason),
+                    bookingId
+                )
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null) {
+                        _clientWorkStatusState.value = UpdateClientWorkStatus.Success(body, book_status)
+                    } else {
+                        _clientWorkStatusState.value = UpdateClientWorkStatus.Error("Failed to update work status.")
                     }
-                }else{
+                } else {
                     // Handle error response
                     val errorJson = response.errorBody()?.string()
                     val errorMessage = JsonErrorParser.extractField(errorJson, "message") ?: "Unknown error"
@@ -42,12 +45,11 @@ class UpdateBookingClientViewModel(private val apiService: ApiService): ViewMode
     fun resetState() {
         _clientWorkStatusState.value = UpdateClientWorkStatus.Idle // Add an idle state
     }
+
     sealed class UpdateClientWorkStatus {
         object Idle : UpdateClientWorkStatus()
         object Loading : UpdateClientWorkStatus()
         data class Success(val data: ClientWorkStatusResponse?, val status: String) : UpdateClientWorkStatus()
         data class Error(val message: String) : UpdateClientWorkStatus()
     }
-
-
 }
