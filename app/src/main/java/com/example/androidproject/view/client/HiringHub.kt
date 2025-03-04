@@ -738,7 +738,10 @@ fun ActiveItems(activeBooking: GetClientsBooking, navController:NavController, u
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = if (activeBooking.ratings == 0f) "0" else String.format("%.1f", activeBooking.ratings),
+                                        text = if (activeBooking.ratings == 0f) "0" else String.format(
+                                            "%.1f",
+                                            activeBooking.ratings
+                                        ),
                                         fontSize = smallTextSize
                                     )
                                 }
@@ -1054,7 +1057,10 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController: NavController
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = if (declineBooking.ratings == 0f) "0" else String.format("%.1f", declineBooking.ratings),
+                                    text = if (declineBooking.ratings == 0f) "0" else String.format(
+                                        "%.1f",
+                                        declineBooking.ratings
+                                    ),
                                     fontSize = smallTextSize
                                 )
                             }
@@ -1088,7 +1094,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController: NavController
                     border = BorderStroke(1.dp, Color(0xFFECAB1E)),
                     modifier = Modifier.padding(end = 8.dp),
 
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
                 ) {
                     Text("Declined Details", fontSize = smallTextSize)
                 }
@@ -1099,10 +1105,10 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController: NavController
                 ) {
                     Text("Book Again", fontSize = smallTextSize)
                 }
-                }
-                }
-                }
-                }
+            }
+}
+                    }
+}
 
 @Composable
 fun CompletedItem(completedBooking: GetClientsBooking, navController: NavController) {
@@ -1205,7 +1211,10 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController: NavControl
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = if (completedBooking.ratings == 0f) "0" else String.format("%.1f", completedBooking.ratings),
+                                    text = if (completedBooking.ratings == 0f) "0" else String.format(
+                                        "%.1f",
+                                        completedBooking.ratings
+                                    ),
                                     fontSize = smallTextSize
                                 )
                             }
@@ -1355,7 +1364,10 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController: NavControl
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = if (cancelledBooking.ratings == 0f) "0" else String.format("%.1f", cancelledBooking.ratings),
+                                    text = if (cancelledBooking.ratings == 0f) "0" else String.format(
+                                        "%.1f",
+                                        cancelledBooking.ratings
+                                    ),
                                     fontSize = smallTextSize
                                 )
                             }
@@ -1408,7 +1420,10 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController: NavControl
 //MY APPLICANTS
 //MY APPLICANTS
 @Composable
-fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun AllApplicantsContent(
+    getMyJobApplicant: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
+) {
     val myJobs = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1419,9 +1434,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
+            .background(Color(0xFFD9D9D9)),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -1437,7 +1450,12 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
 
 
 @Composable
-fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
+fun PendingApplicantsContent(
+    navController: NavController,
+    getMyJobApplicant: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel,
+    putJobApplicationStatus: PutJobApplicationStatusViewModel
+) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
 
@@ -1447,9 +1465,7 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
+            .background(Color(0xFFD9D9D9)),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -1459,8 +1475,13 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
         }
     }
 }
+
 @Composable
-fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun DeclinedApplicantsContent(
+    navController: NavController,
+    getMyJobApplicant: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
+) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
@@ -1468,9 +1489,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
+            .background(Color(0xFFD9D9D9)),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -1482,7 +1501,11 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
 }
 
 @Composable
-fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun ActiveApplicantsContent(
+    navController: NavController,
+    getMyJobApplicant: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
+) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1494,9 +1517,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
+            .background(Color(0xFFD9D9D9)),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -1508,7 +1529,11 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
 }
 
 @Composable
-fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun CompletedApplicantsContent(
+    navController: NavController,
+    getMyJobApplicant: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
+) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1521,20 +1546,23 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
+            .background(Color(0xFFD9D9D9)),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(completedApplication.size) { index ->
             val completedJobs = completedApplication[index]
-            CompletedApplicantsItem(completedJobs, navController )
+            CompletedApplicantsItem(completedJobs, navController)
         }
     }
 }
+
 @Composable
-fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun CancelledApplicantsContent(
+    navController: NavController,
+    getMyJobApplicant: GetMyJobApplicantsViewModel,
+    viewJobsApplication: ViewJobApplicationViewModel
+) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1547,18 +1575,16 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
+            .background(Color(0xFFD9D9D9)),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(cancelledApplication.size) { index ->
             val cancelledJobs = cancelledApplication[index]
-            CancelledApplicantsItem(cancelledJobs, navController )
+            CancelledApplicantsItem(cancelledJobs, navController)
         }
     }
 }
-
 
 
 //Design For Items
@@ -1594,7 +1620,7 @@ fun AllApplicantsItem(myJob: JobApplicantData) {
     Card(
         modifier = Modifier
             .size(cardHeight.first, cardHeight.second),
-        shape =RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(8.dp),
     ) {
         Box(
             modifier = Modifier
@@ -1624,7 +1650,7 @@ fun AllApplicantsItem(myJob: JobApplicantData) {
                         .padding(start = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
                             text = myJob.tradesmanFullname,
                             color = Color.Black,
@@ -1663,16 +1689,19 @@ fun AllApplicantsItem(myJob: JobApplicantData) {
 }
 
 
-
 @Composable
-fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
+fun PendingApplicantsItem(
+    myJob: JobApplicantData,
+    navController: NavController,
+    putJobApplicationStatus: PutJobApplicationStatusViewModel
+) {
     val putJob by putJobApplicationStatus.putJobApplicationState.collectAsState()
     var showApproveDialog by remember { mutableStateOf(false) }
     var showDeclineDialog by remember { mutableStateOf(false) }
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
     var buttonSubmit by remember { mutableStateOf(false) }
-    when(putJob) {
+    when (putJob) {
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
 
         }
@@ -1687,7 +1716,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
             if (buttonSubmit) {
-                Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
+                Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT)
+                    .show()
                 putJobApplicationStatus.resetState()
                 navController.navigate("main_screen")
             }
@@ -1784,7 +1814,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                         )
                     }
                 }
-                Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.End
+                Row(
+                    Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -1805,7 +1836,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 
                         Box(
                             modifier = Modifier
-                                .clickable { showApproveDialog = true}
+                                .clickable { showApproveDialog = true }
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -1857,7 +1888,11 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                         onClick = {
                             showApproveDialog = false
                             showJobApproveDialog = true
-                            putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Active", "")
+                            putJobApplicationStatus.updateJobApplicationStatus(
+                                myJob.id,
+                                "Active",
+                                ""
+                            )
 
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
@@ -1882,8 +1917,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 onDismissRequest = { showDeclineDialog = false },
                 title = {
                     Row(
-                        modifier = Modifier.fillMaxWidth()
-                            ,
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
@@ -1939,7 +1973,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 text = { Text("Reach out to the client for more project details.") },
                 confirmButton = {
                     Button(
-                        onClick = { showJobApproveDialog = false
+                        onClick = {
+                            showJobApproveDialog = false
                             buttonSubmit = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
@@ -2002,7 +2037,11 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                         onClick = {
                             buttonSubmit = true
                             showDeclineReasons = false
-                            putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Cancelled", selectedReason)
+                            putJobApplicationStatus.updateJobApplicationStatus(
+                                myJob.id,
+                                "Cancelled",
+                                selectedReason
+                            )
 
                         },
                         enabled = selectedReason != null,
@@ -2018,6 +2057,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
     }
 
 }
+
 @Composable
 fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     var cancel by remember { mutableStateOf(false) }
@@ -2131,7 +2171,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                     ) {
                         Box(
                             modifier = Modifier
-                                .clickable( indication = null,
+                                .clickable(indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) { cancel = true }
                                 .background(
@@ -2146,9 +2186,9 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                         }
                         Box(
                             modifier = Modifier
-                                .clickable ( indication = null,
+                                .clickable(indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
-                                ){ }
+                                ) { }
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -2304,6 +2344,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
         }
     }
 }
+
 @Composable
 fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
@@ -2400,17 +2441,24 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
                     Box(
                         modifier = Modifier
                             .wrapContentWidth()
-                            .clickable { navController.navigate("canceljobapplicationsdetails")}
+                            .clickable { navController.navigate("canceljobapplicationsdetails") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
 
                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp, horizontal = 36.dp), // Added horizontal padding for spacing
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = 36.dp
+                            ), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Declined Details", fontSize = taskTextSize, color =  Color.Black)
+                        Text(
+                            text = "Declined Details",
+                            fontSize = taskTextSize,
+                            color = Color.Black
+                        )
                     }
                 }
             }
@@ -2522,7 +2570,10 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                             )
 
                             .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp, horizontal = 36.dp), // Added horizontal padding for spacing
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = 36.dp
+                            ), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = "Rate", fontSize = taskTextSize, color = Color(0xFFECAB1E))
@@ -2610,7 +2661,7 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                         Text(
                             text = "Applied on: ${myJob.createdAt}",
                             color = Color.Black,
-                            fontSize =taskTextSize
+                            fontSize = taskTextSize
                         )
                         Text(
                             text = "Submission Deadline: ${myJob.jobDeadline}",
@@ -2633,17 +2684,20 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                     Box(
                         modifier = Modifier
                             .wrapContentWidth()
-                            .clickable {navController.navigate("canceljobapplicationsdetails") }
+                            .clickable { navController.navigate("canceljobapplicationsdetails") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
 
                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp, horizontal = 36.dp), // Added horizontal padding for spacing
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = 36.dp
+                            ), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Cancelled Details", fontSize = taskTextSize, color =  Color.Black)
+                    Text(text = "Cancelled Details", fontSize = taskTextSize, color =  Color.Black)
                     }
                 }
             }

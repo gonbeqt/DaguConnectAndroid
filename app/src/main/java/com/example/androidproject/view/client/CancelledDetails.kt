@@ -36,8 +36,6 @@ fun CancelledDetails(trade: Tradesman, navController: NavController) {
         // Content Section
         ContentSection(trade)
 
-        // Book Again Button
-        BookAgainButton()
     }
 }
 
@@ -185,7 +183,6 @@ fun TradesmanDetailsCard(trade: Tradesman) {
 fun ClientDetails() {
     Card(colors = CardDefaults.cardColors(Color.White)){
         Column(modifier = Modifier.padding(20.dp)) {
-            LabelValuePair(label = "Requested by", value = "Client")
             Spacer(modifier = Modifier.height(8.dp))
             LabelValuePair(label = "Request date and time", value = "26-01-25 10:59")
             Spacer(modifier = Modifier.height(8.dp))
@@ -195,36 +192,6 @@ fun ClientDetails() {
 
 }
 
-@Composable
-fun BookAgainButton() {
-    Spacer(Modifier.height(150.dp))
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .size(80.dp)
-            .background(Color.White),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-
-        Box(
-            modifier = Modifier
-                .clickable {  }
-                .background(
-                    color = Color.Transparent,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                .padding(8.dp)
-                .size(300.dp, 30.dp),
-            contentAlignment = Alignment.Center
-        ) {
-
-            Text(text = "Book Again", color = Color(0xFFECAB1E), fontSize = 14.sp, fontWeight = FontWeight(500))
-        }
-    }
-
-}
 
 @Composable
 fun LabelValuePair(label: String, value: String) {
