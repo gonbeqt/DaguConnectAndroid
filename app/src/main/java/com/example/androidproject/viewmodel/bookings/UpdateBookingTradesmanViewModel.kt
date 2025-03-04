@@ -5,13 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.JsonErrorParser
-import com.example.androidproject.model.client.workstatusRequest
-import com.example.androidproject.model.client.workstatusResponse
+import com.example.androidproject.model.client.TradesmanWorkStatusRequest
+import com.example.androidproject.model.client.TradesmanWorkStatusResponse
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class UpdateWorkStatusViewModel(private val apiService: ApiService,context : Context): ViewModel() {
+class UpdateBookingTradesmanViewModel(private val apiService: ApiService, context : Context): ViewModel() {
     private val _workStatusState = MutableStateFlow<UpdateWorkStatus>(UpdateWorkStatus.Idle)
     val workStatusState = _workStatusState.asStateFlow()
 
@@ -19,7 +20,7 @@ class UpdateWorkStatusViewModel(private val apiService: ApiService,context : Con
         viewModelScope.launch {
             _workStatusState.value = UpdateWorkStatus.Loading
             try{
-                val response = apiService.updateworkStatus(workstatusRequest(work_status,cancel_reason),bookingId)
+                val response = apiService.updateBookingTradesmanStatus(TradesmanWorkStatusRequest(work_status,cancel_reason),bookingId)
                 if(response.isSuccessful){
                     val body = response.body()
                     if(body!=null){
@@ -49,7 +50,7 @@ class UpdateWorkStatusViewModel(private val apiService: ApiService,context : Con
     sealed class UpdateWorkStatus{
         object Idle : UpdateWorkStatus()
         object Loading : UpdateWorkStatus()
-        data class Success(val data: workstatusResponse?): UpdateWorkStatus()
+        data class Success(val data: TradesmanWorkStatusResponse?): UpdateWorkStatus()
         data class Error(val message: String): UpdateWorkStatus()
     }
 }

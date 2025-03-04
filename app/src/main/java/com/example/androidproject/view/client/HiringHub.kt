@@ -68,7 +68,7 @@ import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
-import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
+import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
@@ -80,7 +80,7 @@ fun BookingsScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     getClientsBooking: GetClientBookingViewModel,
-    updateWorkStatusViewModel: UpdateWorkStatusViewModel,
+    updateBookingTradesmanViewModel: UpdateBookingTradesmanViewModel,
     getMyJobApplicants: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     putJobApplicationStatus: PutJobApplicationStatusViewModel,
@@ -179,7 +179,7 @@ fun BookingsScreen(
                             0 -> AllBookingsContent(getClientsBooking, navController)
                             1 -> PendingBookingsContent(getClientsBooking, navController)
                             2 -> DeclinedBookingsContent(getClientsBooking, navController)
-                            3 -> ActiveBookingsContent(getClientsBooking, navController, updateWorkStatusViewModel)
+                            3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
                             4 -> CompletedBookingsContent(getClientsBooking, navController)
                             5 -> CancelledBookingsContent(getClientsBooking, navController)
                         }
@@ -363,7 +363,7 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
 }
 
 @Composable
-fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navController:NavController,updateWorkStatusViewModel:UpdateWorkStatusViewModel) {
+fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController, updateBookingTradesmanViewModel:UpdateBookingTradesmanViewModel) {
     val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -382,7 +382,7 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
     ) {
         items(activeBooking.size) { index ->
             val activebooking = activeBooking[index]
-            ActiveItems(activebooking,navController,updateWorkStatusViewModel)
+            ActiveItems(activebooking,navController,updateBookingTradesmanViewModel)
         }
     }
 
@@ -602,8 +602,8 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 
 //Design for activeItems
 @Composable
-fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,updateWorkStatusViewModel:UpdateWorkStatusViewModel) {
-    val updateWorkState by updateWorkStatusViewModel.workStatusState.collectAsState()
+fun ActiveItems(activeBooking: GetClientsBooking, navController:NavController, updateBookingTradesmanViewModel:UpdateBookingTradesmanViewModel) {
+    val updateWorkState by updateBookingTradesmanViewModel.workStatusState.collectAsState()
     val  context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -629,9 +629,9 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
 
     LaunchedEffect(updateWorkState) {
         when (val updateWorkStatusState= updateWorkState) {
-            is UpdateWorkStatusViewModel.UpdateWorkStatus.Success -> {
+            is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
                 Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
-                updateWorkStatusViewModel.resetState()
+                updateBookingTradesmanViewModel.resetState()
                 navController.currentBackStackEntry?.savedStateHandle?.apply {
                     set("selectedItem", 1) // Bookings tab
                     set("selectedTab", 4)  // Completed tab
@@ -641,10 +641,10 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                     launchSingleTop = true
                 }
             }
-            is UpdateWorkStatusViewModel.UpdateWorkStatus.Error -> {
+            is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = updateWorkStatusState.message
                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                updateWorkStatusViewModel.resetState()
+                updateBookingTradesmanViewModel.resetState()
             }
             else -> Unit
         }
@@ -797,7 +797,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                             Box(
                                 modifier = Modifier
                                     .clickable {
-                                        updateWorkStatusViewModel.updateWorkStatus(
+                                        updateBookingTradesmanViewModel.updateWorkStatus(
                                             "Completed",
                                             NULL.toString(),
                                             activeBooking.id

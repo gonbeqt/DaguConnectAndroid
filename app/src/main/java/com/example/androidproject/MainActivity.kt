@@ -6,13 +6,29 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -76,7 +92,8 @@ import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfi
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
-import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
+import com.example.androidproject.viewmodel.bookings.UpdateBookingClientViewModel
+import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
@@ -87,6 +104,7 @@ import com.example.androidproject.viewmodel.factories.Tradesman_Profile.ViewTrad
 import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetTradesmanViewModelFactory
+import com.example.androidproject.viewmodel.factories.bookings.UpdateBookingClientViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.UpdateWorkStatusViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.ViewClientBookingViewModelFactory
 import com.example.androidproject.viewmodel.factories.chats.GetChatViewModelFactory
@@ -192,8 +210,13 @@ class MainActivity : ComponentActivity() {
         val getClientProfileViewModelFactory = GetClientProfileViewModelFactory(apiService, this)
         val getClientProfileViewModel = ViewModelProvider(this, getClientProfileViewModelFactory)[GetClientProfileViewModel::class.java]
 
-        val UpdateWorkStatusVMFactory = UpdateWorkStatusViewModelFactory(apiService, this)
-        val updateWorkStatusViewModel = ViewModelProvider(this, UpdateWorkStatusVMFactory)[UpdateWorkStatusViewModel::class.java]
+        //client will update the status if the booking finish or not
+        val updateWorkStatusVMFactory = UpdateWorkStatusViewModelFactory(apiService, this)
+        val updateBookingTradesmanViewModel = ViewModelProvider(this, updateWorkStatusVMFactory)[UpdateBookingTradesmanViewModel::class.java]
+
+        // tradesman will update the status if the booking is accepted or not
+        val updateClientWorkStatusVMFactory = UpdateBookingClientViewModelFactory(apiService)
+        val updateBookingClientViewModel = ViewModelProvider(this, updateClientWorkStatusVMFactory)[UpdateBookingClientViewModel::class.java]
 
         val ratetradesManVMfactory = RateTradesmanViewModelFactory(apiService, this)
         val rateTradesmanViewModel = ViewModelProvider(this, ratetradesManVMfactory)[RateTradesmanViewModel::class.java]
@@ -266,7 +289,7 @@ class MainActivity : ComponentActivity() {
                             postJobsViewModel,
                             getMyJobsViewModel,
                             getClientProfileViewModel,
-                            updateWorkStatusViewModel,
+                            updateBookingTradesmanViewModel,
                             getRecentJobsViewModel,
                             viewTradesmanProfileViewModel,
                             getMyJobApplicationViewModel,
@@ -274,6 +297,7 @@ class MainActivity : ComponentActivity() {
                             getMyJobApplicantsViewModel,
                             viewJobApplicationViewModel,
                             getTradesmanBookingViewModel,
+                            updateBookingClientViewModel,
                             { LoadingUI() } // Pass LoadingUI here
                         )
                     }
@@ -302,11 +326,11 @@ class MainActivity : ComponentActivity() {
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
                         val bookingStatus = backStackEntry.arguments?.getString("bookingstatus")?: ""
                         val bookingId = backStackEntry.arguments?.getString("bookingId")?: ""
-                        CancelNow(updateWorkStatusViewModel,viewClientBookingViewModel,navController,resumeId,bookingStatus,bookingId)
+                        CancelNow(updateBookingTradesmanViewModel,viewClientBookingViewModel,navController,resumeId,bookingStatus,bookingId)
                     }
 
                     composable("booking") {
-                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateWorkStatusViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel )
+                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel )
                     }
                     composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
                         val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
@@ -386,7 +410,7 @@ class MainActivity : ComponentActivity() {
                         HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
                     }
                     composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController, updateWorkStatusViewModel,getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
+                        BookingsTradesman(modifier = Modifier,navController, updateBookingClientViewModel,getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
                     }
                     composable("scheduletradesman") {
                         ScheduleTradesman(modifier = Modifier,navController)
@@ -425,8 +449,30 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun LoadingUI() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator() // You can customize this with your LoadingTradesmanUI design
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // CircularProgressIndicator
+            CircularProgressIndicator()
+
+            // Spacer to add some vertical space between the indicator and the text
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Loading text
+            Text(
+                text = "Loading, please wait",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontSize = 20.sp,
+                    color = Color(0xFF6200EE) // Purple text
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 }
 

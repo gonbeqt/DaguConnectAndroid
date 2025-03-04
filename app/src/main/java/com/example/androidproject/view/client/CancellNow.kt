@@ -1,7 +1,6 @@
 package com.example.androidproject.view.client
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,18 +54,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
-import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel
+import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 
 
 @Composable
 fun CancelNow(
-    updateWorkStatusViewModel: UpdateWorkStatusViewModel,
+    updateBookingTradesmanViewModel: UpdateBookingTradesmanViewModel,
     viewClientBookingViewModel: ViewClientBookingViewModel,
     navController: NavController,
     resumeId: String,
@@ -77,7 +74,7 @@ fun CancelNow(
     var Cancel by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
-    val workStatusstate by updateWorkStatusViewModel.workStatusState.collectAsState()
+    val workStatusstate by updateBookingTradesmanViewModel.workStatusState.collectAsState()
     val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -105,7 +102,7 @@ fun CancelNow(
     )
     val resumeId = resumeId.toIntOrNull() ?: return
     val bookingId = bookingId.toIntOrNull() ?: return
-    val viewClientBookingstate by viewClientBookingViewModel.viewClientBookingState.collectAsState()
+    val viewClientBookingState by viewClientBookingViewModel.viewClientBookingState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewClientBookingViewModel.viewClientBooking(resumeId)
@@ -113,12 +110,12 @@ fun CancelNow(
 
     LaunchedEffect(workStatusstate) {
         when (val workState = workStatusstate) {
-            is UpdateWorkStatusViewModel.UpdateWorkStatus.Loading -> {
+            is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Loading -> {
                 // Do nothing
             }
-            is UpdateWorkStatusViewModel.UpdateWorkStatus.Success -> {
+            is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
                 Toast.makeText(context, "Appointment Cancelled successfully", Toast.LENGTH_SHORT).show()
-                updateWorkStatusViewModel.resetState()
+                updateBookingTradesmanViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = false
@@ -126,16 +123,16 @@ fun CancelNow(
                     launchSingleTop = true
                 }
             }
-            is UpdateWorkStatusViewModel.UpdateWorkStatus.Error -> {
+            is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = workState.message
                 Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
-                updateWorkStatusViewModel.resetState()
+                updateBookingTradesmanViewModel.resetState()
             }
             else -> Unit
         }
     }
 
-    when (val viewClientBooking = viewClientBookingstate) {
+    when (val viewClientBooking = viewClientBookingState) {
         is ViewClientBookingViewModel.ViewClientBookings.Loading -> {
             // Do nothing
         }
@@ -573,7 +570,7 @@ fun CancelNow(
                                         } else {
                                             reasons[selectedIndex]
                                         }
-                                        updateWorkStatusViewModel.updateWorkStatus("Cancelled", selectedReason, bookingId)
+                                        updateBookingTradesmanViewModel.updateWorkStatus("Cancelled", selectedReason, bookingId)
                                         Cancel = false
                                     }
                                 },

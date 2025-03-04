@@ -378,11 +378,7 @@ fun ProfileTradesman(
                     else -> {
                         // Default case (e.g., initial state or unexpected state)
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "Loading...",
-                                fontSize = 18.sp,
-                                color = Color.Gray
-                            )
+                            LoadingUI()
                         }
                     }
                 }

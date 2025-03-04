@@ -7,8 +7,6 @@ import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.JsonErrorParser
 import com.example.androidproject.model.client.rateTradesmanRequest
 import com.example.androidproject.model.client.rateTradesmanResponse
-import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel.BookTradesmanState
-import com.example.androidproject.viewmodel.bookings.UpdateWorkStatusViewModel.UpdateWorkStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
