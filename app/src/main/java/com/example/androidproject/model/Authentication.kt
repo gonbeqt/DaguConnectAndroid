@@ -49,3 +49,33 @@ data class RegisterRequest (
 data class RegisterResponse (
     var message: String
 )
+
+
+data class ForgotPasswordRequest(
+    val email: String
+)
+data class ForgotPasswordResponse(
+    val message: String,
+    val email: String,
+    val token: Int
+)
+
+
+data class ResetPasswordRequest(
+    val token: Int,
+    @SerializedName("new_password")
+    val newPassword : String,
+)
+
+
+data class ResetPasswordResponse(
+    val message: String
+)
+
+data class ChangePasswordRequest(
+    val current_password : String,
+    val new_password : String
+)
+data class ChangePasswordResponse(
+    val message: String
+)
