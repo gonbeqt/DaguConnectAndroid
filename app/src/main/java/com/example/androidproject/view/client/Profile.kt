@@ -537,7 +537,7 @@ fun PostsCard(
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)){
                     Text(
-                        text = "Budget: $editableRate pesos",
+                        text = "Budget: $editableBudget pesos",
                         fontSize = taskTextSize,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold
@@ -669,8 +669,8 @@ fun PostsCard(
                     // Rate TextField with Border
 
                         OutlinedTextField(
-                            value = editableRate.toString(),
-                            onValueChange = { editableRate = it.toDoubleOrNull() ?: 0.0 },
+                            value = editableBudget.toString(),
+                            onValueChange = { editableBudget = it.toDoubleOrNull() ?: 0.0 },
                             label = { Text("Estimated Budget") },
                             shape = RoundedCornerShape(16.dp),
                             singleLine = true,
@@ -687,8 +687,6 @@ fun PostsCard(
                                 cursorColor = Color.Black
                             )
                         )
-
-
                         OutlinedTextField(
                             value = editableDeadline,
                             onValueChange = { editableDeadline = it },
