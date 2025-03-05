@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -34,13 +35,13 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
         it?.createdAt?.let { createdAt -> isNotToday(createdAt) } == false
     }
 
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF2F2F2)) // Light gray background
     ) {
-        NotificationTopSection(navController)
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
@@ -52,8 +53,51 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        NotificationSection(title = "Today", notifications = todayNotifications)
-        NotificationSection(title = "Previous", notifications = previousNotifications)
+
+        Text(
+            text = "Today"
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxHeight()
+                .size(320.dp)
+                .background(Color(0xFFD9D9D9))
+
+            ,
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+
+            if (todayNotifications != null) {
+                items(todayNotifications.size) { index ->
+                    val today = todayNotifications[index]
+                    if (today != null) {
+                        NotificationCardToday()
+                    } }
+            }
+        }
+        Text(
+            text = "Previous"
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxHeight()
+                .size(420.dp)
+                .background(Color(0xFFD9D9D9))
+
+            ,
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+
+            if (previousNotifications != null) {
+                items(previousNotifications.size) { index ->
+                    val previous = previousNotifications[index]
+                    if (previous != null) {
+                        NotificationCardPrevious()
+                    } }
+            }
+        }
     }
 }
 
@@ -111,31 +155,14 @@ fun NotificationTopSection(navController: NavController) {
                         textAlign = TextAlign.Center)
                 }
 
-
             }
-        }
-        }
-}
-
-@Composable
-fun NotificationSection(title: String, notifications: List<NotificationItem>) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        notifications.forEach { notification ->
-            NotificationCard(notification)
         }
     }
 }
 
+
 @Composable
-fun NotificationCard(notification: NotificationItem) {
+fun NotificationCardToday() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,20 +172,20 @@ fun NotificationCard(notification: NotificationItem) {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                text = notification.title,
+                text ="title",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = notification.color
+                color = Color.Black
             )
 
             Text(
-                text = notification.message,
+                text = "message",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
 
             Text(
-                text = notification.time,
+                text = "time",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
@@ -167,44 +194,35 @@ fun NotificationCard(notification: NotificationItem) {
     }
 }
 
-val todayNotifications = listOf(
-    NotificationItem(
-        title = "New Booking Alert!!",
-        message = "Client's name has approved your application.",
-        time = "Just Now",
-        color = Color(0xFF81D796)
-    ),
-    NotificationItem(
-        title = "New Booking Alert!!",
-        message = "Client's name has approved your application.",
-        time = "3 min",
-        color = Color(0xFF81D796)
-    )
-)
+@Composable
+fun NotificationCardPrevious() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text ="title",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
 
-val previousNotifications = listOf(
-    NotificationItem(
-        title = " New Booking Alert!",
-        message = "Client's name has scheduled a job with you.",
-        time = "Feb 1",
-        color = Color(0xFFFFA726)
-    ),
-    NotificationItem(
-        title = " New Booking Alert!",
-        message = "Client's name has scheduled a job with you.",
-        time = "Jan 28",
-        color = Color(0xFFFFA726)
-    ),
-    NotificationItem(
-        title = " Application Completed",
-        message = "Your application status is declined.",
-        time = "Jan 28",
-        color = Color(0xFFE57373)
-    ),
-    NotificationItem(
-        title = " Application Update",
-        message = "Your application status is declined.",
-        time = "Jan 28",
-        color = Color(0xFFE57373)
-    )
-)
+            Text(
+                text = "message",
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+
+            Text(
+                text = "time",
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+
+        }
+    }
+}

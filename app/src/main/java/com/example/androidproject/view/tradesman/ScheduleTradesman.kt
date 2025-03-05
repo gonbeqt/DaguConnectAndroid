@@ -431,7 +431,7 @@ fun CalendarSectionTradesman(
                                         )
                                     }
                                 } else {
-                                    Spacer(modifier = Modifier.size(20.dp)) // Empty spaces for alignment
+                                    Spacer(modifier = Modifier.size(20.dp))
                                 }
                                 day++
                             }

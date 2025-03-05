@@ -151,6 +151,7 @@ import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
+import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
