@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -70,6 +71,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -167,9 +169,9 @@ fun ProfileTradesman(
                 )
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = "User Account",
+                    contentDescription = "User Account Settings",
                     tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp).clickable { navController.navigate("accountsettingstradesman") }
                 )
             }
         }
@@ -254,9 +256,10 @@ fun ProfileTradesman(
                                     AsyncImage(
                                         model = tradesmanDetails.profilePic ?: "N/A",
                                         contentDescription = "Tradesman Image",
+                                        contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .size(100.dp)
-                                            .padding(start = 10.dp)
+                                            .clip(RoundedCornerShape(50.dp))
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column(modifier = Modifier.padding(top = 5.dp)) {
@@ -508,7 +511,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                                 .clip(RoundedCornerShape(12.dp))
                                 .border(1.dp,Color.Gray, shape = RoundedCornerShape(12.dp))
                                 .background(Color.White)
-                                .clickable { navController.navigate("updateresume") },
+                                .clickable { navController.navigate("manageprofile") },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(

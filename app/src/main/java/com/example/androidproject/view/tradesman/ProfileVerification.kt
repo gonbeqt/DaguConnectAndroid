@@ -613,7 +613,10 @@ fun JobSelectionDropdown(
     label: String,
     options: List<String>,
     selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors()
+
 ) {
     var expanded by remember { mutableStateOf(false) }
 
