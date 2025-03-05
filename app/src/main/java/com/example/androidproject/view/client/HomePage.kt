@@ -513,6 +513,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportViewModels: ReportViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }

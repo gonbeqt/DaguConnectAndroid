@@ -645,7 +645,6 @@ fun ActiveItems(activeBooking: GetClientsBooking, navController:NavController, u
 
                 navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
                     popUpTo(navController.graph.startDestinationId)  { inclusive = false }
-                    launchSingleTop = true
                 }
             }
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {
@@ -735,7 +734,8 @@ fun ActiveItems(activeBooking: GetClientsBooking, navController:NavController, u
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = if (activeBooking.ratings == 0f) "0" else String.format(
+                                        text = if (activeBooking.ratings == 0f) "0" else
+                                            String.format(
                                             "%.1f",
                                             activeBooking.ratings
                                         ),

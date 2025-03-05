@@ -35,12 +35,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.model.client.GetTradesmanBooking
 import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.Tradesmandate
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -49,11 +51,11 @@ import java.util.Locale
 
 
 @Composable
-fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavController, getClientsBooking: GetClientBookingViewModel) {
-    val clientBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel) {
+    val tradesmanBooking = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientsBooking.invalidatePagingSource()
+        getTradesmanBooking.invalidatePagingSource()
     }
     Log.i("Screen", "ScheduleScreen")
 
@@ -68,8 +70,8 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
     )
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val allBookingDates = remember(clientBooking) {
-        clientBooking.itemSnapshotList.filterNotNull()
+    val allBookingDates = remember(tradesmanBooking) {
+        tradesmanBooking.itemSnapshotList.filterNotNull()
             .filter { it.bookingStatus == "Active" } // Filter for Active bookings
             .mapNotNull { booking ->
                 try {
@@ -80,7 +82,7 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
             }.toSet()
     }
 
-    val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
+    val filteredClients = tradesmanBooking.itemSnapshotList.filterNotNull()
         .filter {
             try {
                 val bookingDate = LocalDate.parse(it.bookingDate, dateFormatter)
@@ -90,7 +92,7 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
             }
         }
 
-    val selectedDate = if (selectedFilter == "My Clients") selectedClientDate else selectedApplicantDate
+    val selectedDate = if (selectedFilter == "My Jobs") selectedClientDate else selectedApplicantDate
 
     Box(
         Modifier
@@ -134,7 +136,7 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
             FilterSectionTradesman(selectedDate, selectedFilter) { selectedFilter = it }
 
             if (selectedFilter == "My Jobs") {
-                MyJobsList(clientBooking, selectedClientDate)
+                MyJobsList(tradesmanBooking, selectedClientDate)
             } else {
                 MySubmissionList(applicants, selectedApplicantDate)
             }
@@ -214,10 +216,10 @@ fun FilterSectionTradesman(
 }
 
 @Composable
-fun MyJobsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: LocalDate) {
+fun MyJobsList(tradesmanBooking: LazyPagingItems<GetTradesmanBooking>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val allBookingDates = remember(clientBooking) {
-        clientBooking.itemSnapshotList.filterNotNull()
+    val allBookingDates = remember(tradesmanBooking) {
+        tradesmanBooking.itemSnapshotList.filterNotNull()
             .filter { it.bookingStatus == "Active" } // Filter for Active bookingStatus
             .mapNotNull { booking ->
                 try {
@@ -228,7 +230,7 @@ fun MyJobsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: 
             }.toSet()
     }
 
-    val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
+    val filteredClients = tradesmanBooking.itemSnapshotList.filterNotNull()
         .filter {
             try {
                 val bookingDate = LocalDate.parse(it.bookingDate, dateFormatter)
@@ -262,8 +264,8 @@ fun MyJobsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: 
                 .padding(bottom = 70.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(filteredClients) { client ->
-                MyJobItem(client)
+            items(filteredClients) { tradesman ->
+                MyJobItem(tradesman)
             }
         }
     }
@@ -481,7 +483,7 @@ fun ScheduleTradesmanTopSection(navController: NavController){
 
 
 @Composable
-fun MyJobItem(Clients: GetClientsBooking) {
+fun MyJobItem(Tradesman: GetTradesmanBooking) {
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -515,7 +517,7 @@ fun MyJobItem(Clients: GetClientsBooking) {
         ) {
 
             AsyncImage(
-                model = Clients.tradesmanProfile,
+                model = Tradesman.tradesmanProfile,
                 contentDescription = "Tradesman Image",
                 modifier = Modifier
                     .size(120.dp, 120.dp)
@@ -529,20 +531,20 @@ fun MyJobItem(Clients: GetClientsBooking) {
                 Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
                         modifier = Modifier.padding( top = 5.dp),
-                        text = Clients.tradesmanFullName,
+                        text = Tradesman.tradesmanFullName,
                         color = Color.Black,
                         fontSize = nameTextSize
                     )
                     Text(
                         modifier = Modifier.padding( top = 5.dp, end = 15.dp),
-                        text = Clients.bookingStatus,
+                        text = Tradesman.bookingStatus,
                         color = Color.Black,
                         fontSize = smallTextSize
                     )
                 }
 
                 Text(
-                    text = Clients.taskType,
+                    text = Tradesman.taskType,
                     color = Color.Gray,
                     fontSize = taskTextSize
                 )
@@ -561,7 +563,7 @@ fun MyJobItem(Clients: GetClientsBooking) {
                         {
                             Text(
                                 modifier = Modifier.padding(5.dp),
-                                text = "P${Clients.workFee}",
+                                text = "P${Tradesman.workFee}",
                                 fontSize = smallTextSize
                             )
                         }
@@ -587,7 +589,7 @@ fun MyJobItem(Clients: GetClientsBooking) {
 
                                 )
                             Text(
-                                text = "${Clients.ratings}",
+                                text = "${Tradesman.ratings}",
                                 fontSize = smallTextSize
 
                             )
@@ -609,20 +611,8 @@ fun MyJobItem(Clients: GetClientsBooking) {
 
                         )
                         Text(
-                            text = Clients.bookingDate,
+                            text = Tradesman.bookingDate,
                             fontSize = smallTextSize
-                        )
-                    }
-                    Column {
-                        Text(
-                            text = "Time",
-                            fontSize = taskTextSize
-
-                        )
-                        Text(
-                            text = "8:00 AM",
-                            fontSize = smallTextSize
-
                         )
                     }
                 }

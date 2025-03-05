@@ -287,7 +287,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
     LaunchedEffect(Unit) {
         getTradesmanBooking.invalidatePagingSource()
     }
-    val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
+    val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
     LazyColumn(
         modifier = Modifier
             .padding(bottom = 80.dp)
@@ -312,7 +312,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
         getTradesmanBooking.invalidatePagingSource()
     }
 
-    val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
+    val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
 
     LazyColumn(
         modifier = Modifier
@@ -337,7 +337,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
     LaunchedEffect(Unit) {
         getTradesmanBooking.invalidatePagingSource()
     }
-    val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Active" }
+    val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Active" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -362,7 +362,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
     LaunchedEffect(Unit) {
         getTradesmanBooking.invalidatePagingSource()
     }
-    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
+    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
 
     LazyColumn(
         modifier = Modifier
@@ -388,7 +388,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
         getTradesmanBooking.invalidatePagingSource()
     }
 
-    val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Cancelled" }
+    val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }
 
     LazyColumn(
         modifier = Modifier
@@ -412,7 +412,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
 //Design For Items
 @Composable
 fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
-    val date = ViewModelSetups.formatDateTime(allBooking.bookingdate)
+    val date = ViewModelSetups.formatDateTime(allBooking.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 470.dp to 210.dp
@@ -472,7 +472,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                         .padding(start = 10.dp)
                 ) {
                     Text(
-                        text = allBooking.clientfullname,
+                        text = allBooking.clientFullName,
                         color = Color.Black,
                         fontWeight = FontWeight(500),
                         fontSize = nameTextSize,
@@ -497,6 +497,16 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.size(4.dp))
+                            Text(
+                                text =
+                                when {
+                                    allBooking.ratings == 0f -> "0"
+                                    else -> String.format("%.1f",allBooking.ratings)
+                                },
+
+                                color = Color(0xFFFFA500),
+                                fontSize = 14.sp
+                            )
                         }
                     }
                     Text(
@@ -514,7 +524,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                 }
 
                 Text(
-                    text = allBooking.bookingstatus,
+                    text = allBooking.bookingStatus,
                     fontSize = smallTextSize,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray,
@@ -537,7 +547,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     var showDeclineDialog by remember { mutableStateOf(false) }
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
-    val date = ViewModelSetups.formatDateTime(pending.bookingdate)
+    val date = ViewModelSetups.formatDateTime(pending.bookingDate)
 
     LaunchedEffect(updateWorkStatus) {
         when (val updateStatus = updateWorkStatus) {
@@ -631,7 +641,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = pending.clientfullname,
+                            text = pending.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -662,6 +672,16 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text =
+                                        when {
+                                            pending.ratings == 0f -> "0"
+                                            else -> String.format("%.1f",pending.ratings)
+                                        },
+
+                                        color = Color(0xFFFFA500),
+                                        fontSize = 14.sp
+                                    )
                                 }
                             }
                         }
@@ -917,7 +937,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
 
     @Composable
 fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(declined.bookingdate)
+    val date = ViewModelSetups.formatDateTime(declined.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1014,6 +1034,16 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text =
+                                        when {
+                                            declined.ratings == 0f -> "0"
+                                            else -> String.format("%.1f",declined.ratings)
+                                        },
+
+                                        color = Color(0xFFFFA500),
+                                        fontSize = 14.sp
+                                    )
                                 }
                             }
                         }
@@ -1060,7 +1090,7 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
 
 @Composable
 fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(active.bookingdate)
+    val date = ViewModelSetups.formatDateTime(active.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1122,7 +1152,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = active.clientfullname,
+                            text = active.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -1159,6 +1189,16 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text =
+                                        when {
+                                            active.ratings == 0f -> "0"
+                                            else -> String.format("%.1f",active.ratings)
+                                        },
+
+                                        color = Color(0xFFFFA500),
+                                        fontSize = 14.sp
+                                    )
                                 }
                             }
                         }
@@ -1222,7 +1262,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
 }
 @Composable
 fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(completed.bookingdate)
+    val date = ViewModelSetups.formatDateTime(completed.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1284,7 +1324,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = completed.clientfullname,
+                            text = completed.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -1316,8 +1356,14 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "4",
-                                        fontSize = smallTextSize
+                                        text =
+                                        when {
+                                            completed.ratings == 0f -> "0"
+                                            else -> String.format("%.1f",completed.ratings)
+                                        },
+
+                                        color = Color(0xFFFFA500),
+                                        fontSize = 14.sp
                                     )
                                 }
                             }
@@ -1382,7 +1428,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
 
 @Composable
 fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(cancel.bookingdate)
+    val date = ViewModelSetups.formatDateTime(cancel.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1444,7 +1490,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = cancel.clientfullname,
+                            text = cancel.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -1476,6 +1522,16 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
+                                    Text(
+                                        text =
+                                        when {
+                                            cancel.ratings == 0f -> "0"
+                                            else -> String.format("%.1f",cancel.ratings)
+                                        },
+
+                                        color = Color(0xFFFFA500),
+                                        fontSize = 14.sp
+                                    )
 
                                 }
                             }
