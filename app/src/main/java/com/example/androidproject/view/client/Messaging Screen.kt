@@ -1,10 +1,10 @@
 package com.example.androidproject.view.client
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
@@ -17,11 +17,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 
-@Composable
+// Data class to represent a message with a sender/receiver flag
+data class Message(val text: String, val isSent: Boolean)
+
 @OptIn(ExperimentalMaterial3Api::class)
-fun MessagingScreen(messages: List<String>) {
+@Composable
+fun MessagingScreen(initialMessages: List<Message> = emptyList(),navController: NavController) {
+    // Mutable state to hold the list of messages
+    val messages = remember { mutableStateListOf(*initialMessages.toTypedArray()) }
+
     Scaffold(
+        modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues()),
         topBar = {
             TopAppBar(
                 title = {
@@ -29,8 +39,9 @@ fun MessagingScreen(messages: List<String>) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            modifier = Modifier.size(24.dp)
-
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable { navController.navigate("main_screen")}
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -45,7 +56,10 @@ fun MessagingScreen(messages: List<String>) {
             )
         },
         bottomBar = {
-            BottomInputBar()
+            BottomInputBar(onSend = { newMessage ->
+                // Add the new message as "Sent" (isSent = true)
+                messages.add(Message(newMessage, true))
+            })
         }
     ) { padding ->
         Box(
@@ -64,15 +78,14 @@ fun MessagingScreen(messages: List<String>) {
                     textAlign = TextAlign.Center
                 )
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()) // Enable scrolling
+                        .padding(8.dp)
                 ) {
-                    items(messages) { message ->
-                        MessageBubble(
-                            message = message,
-                            isSent = messages.indexOf(message) % 2 == 0
-                        )
+                    messages.forEach { message ->
+                        MessageComposable(message = message.text, isSent = message.isSent)
                     }
                 }
             }
@@ -82,7 +95,9 @@ fun MessagingScreen(messages: List<String>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomInputBar() {
+fun BottomInputBar(onSend: (String) -> Unit) {
+    var messageText by remember { mutableStateOf("") }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -91,12 +106,12 @@ fun BottomInputBar() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
-            value = "",
-            onValueChange = {},
+            value = messageText,
+            onValueChange = { messageText = it },
             placeholder = { Text("Say Something...") },
             modifier = Modifier
                 .weight(1f)
-                .height(48.dp),
+                .height(56.dp),
             shape = RoundedCornerShape(24.dp),
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = Color.White,
@@ -106,46 +121,82 @@ fun BottomInputBar() {
         )
         Spacer(modifier = Modifier.width(8.dp))
         IconButton(
-            onClick = { /* Handle send action */ },
+            onClick = {
+                if (messageText.isNotBlank()) {
+                    onSend(messageText) // Send the message
+                    messageText = ""    // Clear the input field
+                }
+            },
             modifier = Modifier.size(48.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Send,
                 contentDescription = "Send",
-                tint = Color.Gray
+                tint = Color(0xFF39BFB1)
             )
         }
     }
 }
 
 @Composable
-fun MessageBubble(message: String, isSent: Boolean) {
+fun MessageComposable(message: String, isSent: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 2.dp),
         horizontalArrangement = if (isSent) Arrangement.End else Arrangement.Start
     ) {
         Box(
             modifier = Modifier
+                .widthIn(max = 280.dp)
                 .background(
-                    color = if (isSent) Color(0xFFE0E0E0) else Color(0xFFF5F5F5),
-                    shape = RoundedCornerShape(16.dp)
+                    color = if (isSent) Color(0xFFDCF8C6) else Color(0xFFF5F5F5), // Sender: light green, Receiver: light gray
+                    shape = RoundedCornerShape(
+                        topStart = 16.dp,
+                        topEnd = 16.dp,
+                        bottomStart = if (isSent) 16.dp else 4.dp, // Sender: rounded, Receiver: tail-like
+                        bottomEnd = if (isSent) 4.dp else 16.dp // Sender: tail-like, Receiver: rounded
+                    )
                 )
                 .padding(12.dp)
         ) {
-            Text(text = message)
+            Text(
+                text = message,
+                color = Color.Black,
+                fontSize = 16.sp
+            )
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun MessagingScreenPreview() {
     MessagingScreen(
-        messages = listOf(
-            "Hello!", "Hi, how are you?",
-            "I'm doing well, thanks!", "That's great to hear!"
-        )
+        initialMessages = listOf(
+            Message("Hello!", true),              // Sent (right)
+            Message("Hi, how are you?", false),   // Received (left)
+            Message("I'm doing well!", true),     // Sent (right)
+            Message("Great to hear!", false),     // Received (left)
+            Message("I have a lot to say...", false), // Received (left)
+            Message("Like, a lot!", false),       // Received (left)
+            Message("Keep going!", false),        // Received (left)
+            Message("Cool, I'm listening!", true) // Sent (right)
+        ),
+                navController = NavController(LocalContext.current)
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MessageComposablePreview() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        MessageComposable(message = "Hi there!", isSent = false) // Receiver (left)
+        MessageComposable(message = "Hey, how's it going?", isSent = true) // Sender (right)
+    }
 }
