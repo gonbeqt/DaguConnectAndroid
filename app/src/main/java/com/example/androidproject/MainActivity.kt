@@ -133,6 +133,7 @@ import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFacto
 import com.example.androidproject.viewmodel.factories.jobs.PutJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.messeges.GetMessageViewModelFactory
+import com.example.androidproject.viewmodel.factories.notification.GetNotificationViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
 import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
@@ -288,7 +289,8 @@ class MainActivity : ComponentActivity() {
         val updateClientProfileAddress = UpdateClientProfileAddressViewModelFactory(apiService)
         val updateClientProfileAddressViewModelFactory = ViewModelProvider(this, updateClientProfileAddress)[UpdateClientProfileAddressViewModel::class.java]
 
-
+        val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
+        val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -431,7 +433,7 @@ class MainActivity : ComponentActivity() {
                         ReportProblem(navController)
                     }
                     composable("notification"){
-                        NotificationScreen(navController)
+                        NotificationScreen(navController, getNotificationViewModel)
                     }
                     composable("accountsettings"){
                         AccountSettings(navController,getClientProfileViewModel)

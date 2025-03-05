@@ -42,6 +42,12 @@ class ViewModelSetups {
             }
         }
 
+        fun getDateOnly(datetimeStr: String): String {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val dateTime = LocalDateTime.parse(datetimeStr, formatter)
+            return dateTime.toLocalDate().toString()
+        }
+
         fun isToday(createdAt: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Boolean {
             return try {
                 val formatter = DateTimeFormatter.ofPattern(pattern)

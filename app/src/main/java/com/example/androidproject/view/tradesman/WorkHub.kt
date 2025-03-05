@@ -1535,6 +1535,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
     LaunchedEffect(Unit) {
         getMyJobApplications.invalidatePagingSource()
     }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()

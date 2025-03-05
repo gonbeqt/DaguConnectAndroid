@@ -18,8 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.ViewModelSetups.Companion.isNotToday
 import com.example.androidproject.ViewModelSetups.Companion.isToday
+import com.example.androidproject.model.Notification
 import com.example.androidproject.view.NotificationItem
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 
@@ -28,20 +30,23 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
     val notifications = getNotification.getNotificationPagingData.collectAsLazyPagingItems()
 
     val todayNotifications = notifications.itemSnapshotList?.filter {
-        it?.createdAt?.let { createdAt -> isToday(createdAt) } == true
+        it?.createdAt?.let { createdAt -> isToday(ViewModelSetups.getDateOnly(createdAt)) } == true
     }
 
     val previousNotifications = notifications.itemSnapshotList?.filter {
-        it?.createdAt?.let { createdAt -> isNotToday(createdAt) } == false
+        it?.createdAt?.let { createdAt -> isNotToday(ViewModelSetups.getDateOnly(createdAt)) } == false
     }
 
-
+    LaunchedEffect(notifications) {
+        getNotification.refreshNotification()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF2F2F2)) // Light gray background
     ) {
+        NotificationTopSection(navController)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
@@ -59,8 +64,8 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
         )
         LazyColumn(
             modifier = Modifier
-                .fillMaxHeight()
-                .size(320.dp)
+                .fillMaxWidth()
+                .size(200.dp)
                 .background(Color(0xFFD9D9D9))
 
             ,
@@ -69,11 +74,14 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
         ) {
 
             if (todayNotifications != null) {
-                items(todayNotifications.size) { index ->
-                    val today = todayNotifications[index]
+
+                items(notifications.itemCount) { index ->
+                    Log.d("NotificationScreen", ViewModelSetups.getDateOnly(notifications[index]?.createdAt.toString()))
+                    val today = notifications[index]
                     if (today != null) {
-                        NotificationCardToday()
-                    } }
+                        NotificationCardToday(today)
+                    }
+                }
             }
         }
         Text(
@@ -94,7 +102,7 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
                 items(previousNotifications.size) { index ->
                     val previous = previousNotifications[index]
                     if (previous != null) {
-                        NotificationCardPrevious()
+                        NotificationCardPrevious(previous)
                     } }
             }
         }
@@ -154,15 +162,14 @@ fun NotificationTopSection(navController: NavController) {
                         color = Color.Gray,
                         textAlign = TextAlign.Center)
                 }
-
             }
         }
     }
 }
 
-
 @Composable
-fun NotificationCardToday() {
+fun NotificationCardToday(notification: Notification) {
+    val createdAt = ViewModelSetups.formatDateTime(notification.createdAt)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -172,20 +179,20 @@ fun NotificationCardToday() {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                text ="title",
+                text ="${notification.notificationTitle}",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
 
             Text(
-                text = "message",
+                text = "${notification.message}",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
 
             Text(
-                text = "time",
+                text = "$createdAt",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
@@ -195,7 +202,9 @@ fun NotificationCardToday() {
 }
 
 @Composable
-fun NotificationCardPrevious() {
+fun NotificationCardPrevious(notification: Notification) {
+    val createdAt = ViewModelSetups.formatDateTime(notification.createdAt)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -205,24 +214,23 @@ fun NotificationCardPrevious() {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                text ="title",
+                text ="${notification.notificationTitle}",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
 
             Text(
-                text = "message",
+                text = "${notification.message}",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
 
             Text(
-                text = "time",
+                text = "$createdAt",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
-
         }
     }
 }
