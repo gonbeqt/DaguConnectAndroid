@@ -68,7 +68,9 @@ import com.example.androidproject.view.client.CancelledDetails
 import com.example.androidproject.view.client.CancelledJobApplicationDetails
 import com.example.androidproject.view.client.Categories.Carpentry
 import com.example.androidproject.view.client.ConfirmBook
+import com.example.androidproject.view.client.Message
 import com.example.androidproject.view.client.MessageScreen
+import com.example.androidproject.view.client.MessagingScreen
 import com.example.androidproject.view.client.NotificationScreen
 import com.example.androidproject.view.client.RateAndReviews
 import com.example.androidproject.view.tradesman.AvailabilityStatus
@@ -291,6 +293,16 @@ class MainActivity : ComponentActivity() {
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
+        val initialMessages = listOf(
+            Message("Hello!", true),              // Sent (right)
+            Message("Hi, how are you?", false),   // Received (left)
+            Message("I'm doing well!", true),     // Sent (right)
+            Message("Great to hear!", false),     // Received (left)
+            Message("I have a lot to say...", false), // Received (left)
+            Message("Like, a lot!", false),       // Received (left)
+            Message("Keep going!", false),        // Received (left)
+            Message("Cool, I'm listening!", true) // Sent (right)
+        )
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -443,6 +455,9 @@ class MainActivity : ComponentActivity() {
                     //CANCELLED DETAILS
                     composable("canceljobapplicationsdetails") {
                         CancelledJobApplicationDetails(navController, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
+                    }
+                    composable("messaging"){
+                        MessagingScreen(initialMessages,navController)
                     }
 
                     //Tradesman Routes
