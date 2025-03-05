@@ -49,12 +49,13 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
         } == true
     } ?: emptyList()
 
-    
+    Log.d("NotificationScreen", "Today Notifications: $todayNotifications")
+
+    Log.d("NotificationScreen", "Previous Notifications: $previousNotifications")
 
     LaunchedEffect(Unit) {
         getNotification.refreshNotification()
     }
-
 
     Column(
         modifier = Modifier
@@ -82,7 +83,6 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
                 .fillMaxWidth()
                 .size(200.dp)
                 .background(Color(0xFFD9D9D9))
-
             ,
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

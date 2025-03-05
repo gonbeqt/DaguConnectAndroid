@@ -1604,6 +1604,9 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
 fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
+    LaunchedEffect(Unit) {
+        myJob.refresh()
+    }
 
     val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
 
@@ -1626,6 +1629,10 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
 @Composable
 fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        myJob.refresh()
+    }
 
     val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
     LazyColumn(
@@ -1650,7 +1657,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplicant.invalidatePagingSource()
+        myJob.refresh()
     }
 
     val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }
@@ -1676,7 +1683,7 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplicant.invalidatePagingSource()
+        myJob.refresh()
     }
 
     val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }
@@ -1702,7 +1709,7 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplicant.invalidatePagingSource()
+        myJob.refresh()
     }
 
     val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }
