@@ -26,6 +26,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
@@ -116,6 +118,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
         // Card with adaptive size and padding
         Card(
             modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .offset(y = cardOffsetY.value.dp)
                 .align(Alignment.BottomCenter)
                 .size(
@@ -345,7 +348,7 @@ fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier,navCont
             WindowType.SMALL -> 12.sp
             else -> 14.sp
         },
-        modifier = modifier.clickable { navController.navigate("forgotpassword")}
+        modifier = modifier.clickable { navController.navigate("resetpassword")}
     )
 }
 @Composable
@@ -360,7 +363,9 @@ fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: 
                 Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
             } else if (password.length < 8) {
                 Toast.makeText(context, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
-            } else {
+            }
+
+            else {
                 viewModel.login(email, password)
             }
         },

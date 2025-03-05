@@ -14,6 +14,8 @@ import android.os.Environment
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
@@ -61,6 +63,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -99,7 +102,8 @@ fun ProfileTradesman(
     navController: NavController,
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
-    LoadingUI :  @Composable () -> Unit // Add this parameter
+    LoadingUI :  @Composable () -> Unit, // Add this parameter
+    initialTabIndex: Int = 0 // Default to 0 if not provided
 
 ) {
     // Function to check network connectivity using NetworkCapabilities (modern approach)
@@ -121,9 +125,21 @@ fun ProfileTradesman(
     // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var isAvailable by remember { mutableStateOf(true) } // State to track availability
+
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
     val tabNames = listOf("Job Profile", "General")
     val viewTradesmanProfilestate by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it  // Update the local state with the new image URI
+            //Here ata iimplement ung viewmodel
+        }
+    }
 
     // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
@@ -252,15 +268,36 @@ fun ProfileTradesman(
                                         )
                                         .padding(16.dp),
                                 ) {
-                                    // Tradesman image
-                                    AsyncImage(
-                                        model = tradesmanDetails.profilePic ?: "N/A",
-                                        contentDescription = "Tradesman Image",
-                                        contentScale = ContentScale.Crop,
+                                    Box(
                                         modifier = Modifier
                                             .size(100.dp)
-                                            .clip(RoundedCornerShape(50.dp))
-                                    )
+
+                                            .background(Color.White, RoundedCornerShape(50.dp))
+                                    ) {
+                                        // Tradesman image
+                                        AsyncImage(
+                                            model = selectedImageUri ?: tradesmanDetails.profilePic,
+                                            contentDescription = "Tradesman Image",
+                                            modifier = Modifier
+                                                .size(100.dp)
+                                                .clip(CircleShape),
+                                            contentScale = ContentScale.Crop
+
+
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit Profile Picture",
+                                            tint = Color.Gray,
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .align(Alignment.TopEnd)
+                                                .background(Color.White, CircleShape)
+                                                .clickable {
+                                                    imageLauncher.launch("image/*")
+                                                }
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column(modifier = Modifier.padding(top = 5.dp)) {
                                         Text(
@@ -284,7 +321,10 @@ fun ProfileTradesman(
                                                 .width(100.dp)
                                                 .height(30.dp)
                                                 .clip(RoundedCornerShape(50.dp))
-                                                .background(Color.White),
+                                                .background(Color.White)
+                                                .clickable {
+                                                    isAvailable = !isAvailable // Toggle state on click
+                                                },
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Row(
@@ -293,13 +333,13 @@ fun ProfileTradesman(
                                             ) {
                                                 Icon(
                                                     Icons.Default.Circle,
-                                                    contentDescription = "Active",
-                                                    tint = Color.Yellow,
+                                                    contentDescription = if (isAvailable) "Available" else "Unavailable",
+                                                    tint = if (isAvailable) Color.Green else Color.Red, // Change color based on state
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
-                                                    text = "Available",
+                                                    text = if (isAvailable) "Available" else "Unavailable",
                                                     color = Color.Black,
                                                     style = TextStyle(fontSize = 14.sp)
                                                 )
@@ -381,11 +421,7 @@ fun ProfileTradesman(
                     else -> {
                         // Default case (e.g., initial state or unexpected state)
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "Loading...",
-                                fontSize = 18.sp,
-                                color = Color.Gray
-                            )
+                            LoadingUI()
                         }
                     }
                 }
@@ -511,7 +547,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                                 .clip(RoundedCornerShape(12.dp))
                                 .border(1.dp,Color.Gray, shape = RoundedCornerShape(12.dp))
                                 .background(Color.White)
-                                .clickable { navController.navigate("manageprofile") },
+                                .clickable { navController.navigate("updateresume") },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(

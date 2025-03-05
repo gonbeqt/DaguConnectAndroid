@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ViewJobApplicationViewModel (private val apiService: ApiService, context: Context) : ViewModel() {
+class ViewJobApplicationViewModel (private val apiService: ApiService) : ViewModel() {
     private val _viewJobApplicationState = MutableStateFlow<ViewJobApplicationState>(ViewJobApplicationState.Idle)
     val viewApplicationState = _viewJobApplicationState.asStateFlow()
 

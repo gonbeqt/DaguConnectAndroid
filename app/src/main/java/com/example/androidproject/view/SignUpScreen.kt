@@ -31,6 +31,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.res.painterResource
@@ -126,7 +128,9 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(myGradient),
+            .background(myGradient)
+            .verticalScroll(rememberScrollState())
+        ,
         contentAlignment = Alignment.Center
     ) {
         // Set an image as the background

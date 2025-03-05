@@ -25,18 +25,41 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.androidproject.viewmodel.ChangePasswordViewModel
 
 @Composable
-fun ChangePassword(navController: NavController) {
+fun ChangePassword(navController: NavController,changePassword: ChangePasswordViewModel, LoadingUI :@Composable ()-> Unit) {
+    val changePasswordState by changePassword.changePassState.collectAsState()
     var oldPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var oldPasswordVisible by remember { mutableStateOf(false) }
     var newPasswordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    val isLoading by remember { mutableStateOf(false) } // Added loading state
     var passwordError by remember { mutableStateOf<String?>(null) }
     var lengthError by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
+    LaunchedEffect(changePasswordState) {
+        when (val changePass =changePasswordState){
+
+            is ChangePasswordViewModel.ChangePassState.Success->{
+                changePassword.resetState()
+                Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
+                // Navigate to the "login" screen and clear the back stack
+                navController.navigate("main_screen?selectedItem=4&selectedTab=1") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            }
+            is ChangePasswordViewModel.ChangePassState.Error -> {
+                Toast.makeText(context, changePass.message, Toast.LENGTH_SHORT).show()
+            }
+          else -> Unit
+        }
+    }
     Box(
         Modifier
             .fillMaxSize()
@@ -200,7 +223,8 @@ fun ChangePassword(navController: NavController) {
                                 passwordError = if (newPassword != confirmPassword) "Passwords do not match" else null
                                 lengthError = if (newPassword.length < 8) "Password must be at least 8 characters" else null
                                 if (passwordError == null && lengthError == null) {
-                                    navController.navigate("main_screen")
+                                    changePassword.changePassword(oldPassword, newPassword)
+
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
@@ -214,6 +238,9 @@ fun ChangePassword(navController: NavController) {
                     }
                 }
             }
+        }
+        if (isLoading) {
+            LoadingUI()
         }
     }
 }
