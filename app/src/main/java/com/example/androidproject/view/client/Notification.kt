@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.ViewModelSetups.Companion.getDateOnly
 import com.example.androidproject.ViewModelSetups.Companion.isNotToday
 import com.example.androidproject.ViewModelSetups.Companion.isToday
 import com.example.androidproject.model.Notification
@@ -29,17 +30,31 @@ import com.example.androidproject.viewmodel.notifications.GetNotificationViewMod
 fun NotificationScreen(navController: NavController, getNotification: GetNotificationViewModel) {
     val notifications = getNotification.getNotificationPagingData.collectAsLazyPagingItems()
 
-    val todayNotifications = notifications.itemSnapshotList?.filter {
-        it?.createdAt?.let { createdAt -> isToday(ViewModelSetups.getDateOnly(createdAt)) } == true
-    }
+    // Filter with additional logging
+    val todayNotifications = notifications.itemSnapshotList?.filter { item ->
+        Log.d("NotificationScreen", "Processing item: $item")
+        item?.createdAt?.let { createdAt ->
+            val result = isToday(createdAt)
+            Log.d("NotificationScreen", "isToday result for $createdAt: $result")
+            result
+        } == true
+    } ?: emptyList()
 
-    val previousNotifications = notifications.itemSnapshotList?.filter {
-        it?.createdAt?.let { createdAt -> isNotToday(ViewModelSetups.getDateOnly(createdAt)) } == false
-    }
+    val previousNotifications = notifications.itemSnapshotList?.filter { item ->
+        Log.d("NotificationScreen", "Processing item: $item")
+        item?.createdAt?.let { createdAt ->
+            val result = isNotToday(createdAt)
+            Log.d("NotificationScreen", "isNotToday result for $createdAt: $result")
+            result
+        } == true
+    } ?: emptyList()
 
-    LaunchedEffect(notifications) {
+    
+
+    LaunchedEffect(Unit) {
         getNotification.refreshNotification()
     }
+
 
     Column(
         modifier = Modifier
@@ -50,7 +65,7 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "You have 2 notifications today",
+            text = "You have ${notifications.itemCount} notifications today",
             fontSize = 14.sp,
             color = Color.Gray,
             modifier = Modifier.padding(start = 16.dp)
@@ -74,11 +89,10 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
         ) {
 
             if (todayNotifications != null) {
-
-                items(notifications.itemCount) { index ->
-                    Log.d("NotificationScreen", ViewModelSetups.getDateOnly(notifications[index]?.createdAt.toString()))
-                    val today = notifications[index]
+                items(todayNotifications.size) { index ->
+                    val today = todayNotifications[index]
                     if (today != null) {
+                        Log.d("NotificationScreen", "Today Notification: ${todayNotifications}")
                         NotificationCardToday(today)
                     }
                 }

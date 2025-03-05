@@ -1,6 +1,7 @@
 package com.example.androidproject
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.example.androidproject.api.ApiService
@@ -42,29 +43,42 @@ class ViewModelSetups {
             }
         }
 
-        fun getDateOnly(datetimeStr: String): String {
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            val dateTime = LocalDateTime.parse(datetimeStr, formatter)
-            return dateTime.toLocalDate().toString()
+        fun getDateOnly(datetimeStr: String?): String? {
+            // Return null if input is null or "null" string
+            if (datetimeStr.isNullOrBlank() || datetimeStr == "null") return null
+
+            return try {
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                val dateTime = LocalDateTime.parse(datetimeStr, formatter)
+                dateTime.toLocalDate().toString()
+            } catch (e: DateTimeParseException) {
+                // Handle invalid date format - return null or a default value
+                null
+            }
         }
 
         fun isToday(createdAt: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Boolean {
             return try {
-                val formatter = DateTimeFormatter.ofPattern(pattern)
-                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE) // Extracts "yyyy-MM-dd"
-                date == LocalDate.now()
+                Log.d("NotificationScreenView", "Raw createdAt: $createdAt")
+                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE)
+                val today = LocalDate.now()
+                Log.d("NotificationScreenView", "Parsed date: $date, Today's date: $today")
+                date == today
             } catch (e: Exception) {
-                false // Handle parsing errors
+                Log.e("NotificationScreenView", "Error parsing date $createdAt: ${e.message}")
+                false
             }
         }
 
         fun isNotToday(createdAt: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Boolean {
             return try {
-                val formatter = DateTimeFormatter.ofPattern(pattern)
-                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE) // Extract "yyyy-MM-dd"
-                date.isBefore(LocalDate.now()) // Checks if the date is before today
+                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE)
+                val today = LocalDate.now()
+                Log.d("NotificationScreenView", "Checking if $date is before $today")
+                date.isBefore(today)
             } catch (e: Exception) {
-                false // Handle parsing errors
+                Log.e("NotificationScreenView", "Error parsing date $createdAt: ${e.message}")
+                false
             }
         }
     }
