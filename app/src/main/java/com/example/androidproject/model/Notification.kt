@@ -13,13 +13,21 @@ data class GetNotification(
 
 data class Notification(
     val id: Int,
+    @SerializedName("user_id")
     val userId: Int,
+    @SerializedName("notification_title")
     val notificationTitle: String,
+    @SerializedName("notification_type")
     val notificationType: String,
     val message: String,
+    @SerializedName("job_id")
     val jobId: Int?,
+    @SerializedName("chat_id")
     val chatId: Int?,
+    @SerializedName("report_id")
     val reportId: Int?,
+    @SerializedName("is_read")
     val isRead: Boolean,
+    @SerializedName("created_at")
     val createdAt: String
 )
