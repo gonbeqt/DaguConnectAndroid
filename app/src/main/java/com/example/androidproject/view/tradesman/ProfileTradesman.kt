@@ -60,6 +60,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -97,7 +98,8 @@ fun ProfileTradesman(
     navController: NavController,
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
-    LoadingUI :  @Composable () -> Unit // Add this parameter
+    LoadingUI :  @Composable () -> Unit, // Add this parameter
+    initialTabIndex: Int = 0 // Default to 0 if not provided
 
 ) {
     // Function to check network connectivity using NetworkCapabilities (modern approach)
@@ -119,7 +121,7 @@ fun ProfileTradesman(
     // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
     val tabNames = listOf("Job Profile", "General")
     val viewTradesmanProfilestate by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
 

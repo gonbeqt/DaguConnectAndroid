@@ -1,5 +1,7 @@
 package com.example.androidproject.api
 
+import com.example.androidproject.model.ChangePasswordRequest
+import com.example.androidproject.model.ChangePasswordResponse
 import com.example.androidproject.model.ClientProfile
 import com.example.androidproject.model.ForgotPasswordRequest
 import com.example.androidproject.model.ForgotPasswordResponse
@@ -172,8 +174,11 @@ interface ApiService {
     suspend fun getTradesmanBooking(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10) : Response <GetTradesmanBookingResponse>
 
     @POST("/user/forgot/otpsend")
-    suspend fun forgotPass(@Body Request: ForgotPasswordRequest) : Response <ForgotPasswordResponse>
+    suspend fun forgotPass(@Body request: ForgotPasswordRequest) : Response <ForgotPasswordResponse>
 
     @PUT("/user/forgot/resetpassword")
-    suspend fun resetPass(@Body Request : ResetPasswordRequest) : Response <ResetPasswordResponse>
+    suspend fun resetPass(@Body request : ResetPasswordRequest) : Response <ResetPasswordResponse>
+
+    @PUT("/user/change/password")
+    suspend fun updatePass(@Body request : ChangePasswordRequest) : Response <ChangePasswordResponse>
 }

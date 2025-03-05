@@ -36,6 +36,7 @@ fun ResetPassword(
     navController: NavController,
     forgotPass: ForgotPassViewModel,
     resetPass: ResetPassViewModel,
+    LoadingUI : @Composable () -> Unit
 ) {
     val forgotPassState by forgotPass.forgotPasswordState.collectAsState()
     val resetPassState by resetPass.resetPassState.collectAsState()
@@ -377,19 +378,3 @@ fun ResetPassword(
 }
 
 
-
-
-@Composable
-fun LoadingUI() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // CircularProgressIndicator
-            CircularProgressIndicator()
-        }
-    }
-}

@@ -546,19 +546,17 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
             }
             is UpdateBookingClientViewModel.UpdateClientWorkStatus.Success -> {
                 updateBookingClientViewModel.resetState()
-                navController.currentBackStackEntry?.savedStateHandle?.apply {
-                    set("selectedItem", 1) // Bookings tab
-                    // Set the selectedTab based on the work status
-                    if (updateStatus.status == "Accepted") {
-                        set("selectedTab", 3)  // Active tab
-                    } else if (updateStatus.status == "Declined") {
-                        set("selectedTab", 2)  // Declined tab
+                // Set the selectedTab based on the work status
+                if (updateStatus.status == "Accepted") {
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=3") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                    }
+                } else if (updateStatus.status == "Declined") {
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=2") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
                     }
                 }
-                navController.navigate("main_screen") {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                    launchSingleTop = true
-                }
+
 
             }
 

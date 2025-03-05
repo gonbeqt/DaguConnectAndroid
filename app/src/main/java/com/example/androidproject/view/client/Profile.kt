@@ -49,6 +49,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -98,7 +99,8 @@ fun ProfileScreen(
     logoutViewModel: LogoutViewModel,
     postJobViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
-    getClientProfileViewModel: GetClientProfileViewModel
+    getClientProfileViewModel: GetClientProfileViewModel,
+    initialTabIndex: Int = 0 // Default to 0 if not provided
 ) {
     // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
@@ -116,11 +118,13 @@ fun ProfileScreen(
     // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableStateOf(0) }
 
+
+
     // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
     val profileState by getClientProfileViewModel.getProfileState.collectAsState()
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
     val tabNames = listOf("My Posts", "General")
     val windowSize = rememberWindowSizeClass()
 

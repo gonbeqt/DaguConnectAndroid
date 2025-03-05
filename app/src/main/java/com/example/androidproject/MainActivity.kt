@@ -85,6 +85,7 @@ import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.view.tradesman.AccountSettingsTradesman
 import com.example.androidproject.view.tradesman.UpdateResume
+import com.example.androidproject.viewmodel.ChangePasswordViewModel
 import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
@@ -101,6 +102,7 @@ import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewM
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.factories.ChangePasswordViewModelFactory
 import com.example.androidproject.viewmodel.factories.ForgotPassViewModelFactory
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
@@ -260,6 +262,9 @@ class MainActivity : ComponentActivity() {
         val resetPassVMFactory = ResetPassViewModelFactory(apiService)
         val resetPassViewModel = ViewModelProvider(this, resetPassVMFactory)[ResetPassViewModel::class.java]
 
+        val changePasswordVMFactor = ChangePasswordViewModelFactory(apiService)
+        val changePasswordViewModel = ViewModelProvider(this, changePasswordVMFactor)[ChangePasswordViewModel::class.java]
+
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -279,7 +284,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("resetpassword") {
-                        ResetPassword(navController,forgotPassViewModel,resetPassViewModel)
+                        ResetPassword(navController,forgotPassViewModel,resetPassViewModel,{ LoadingUI() })
                     }
 
                     composable(
@@ -392,7 +397,7 @@ class MainActivity : ComponentActivity() {
                         EmailVerification(navController)
                     }
                     composable("changepassword"){
-                        ChangePassword(navController)
+                        ChangePassword(navController,changePasswordViewModel,{ LoadingUI() })
                     }
                     composable("aboutus"){
                         AboutUs(navController)
@@ -475,20 +480,6 @@ fun LoadingUI() {
         ) {
             // CircularProgressIndicator
             CircularProgressIndicator()
-
-            // Spacer to add some vertical space between the indicator and the text
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Loading text
-            Text(
-                text = "Loading, please wait",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontSize = 20.sp,
-                    color = Color(0xFF6200EE) // Purple text
-                ),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(8.dp)
-            )
         }
     }
 }
