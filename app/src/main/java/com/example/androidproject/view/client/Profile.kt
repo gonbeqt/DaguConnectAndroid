@@ -1,12 +1,17 @@
 package com.example.androidproject.view.client
 
 import LogoutViewModel
+import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -102,6 +107,7 @@ fun ProfileScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     initialTabIndex: Int = 0 // Default to 0 if not provided
 ) {
+
     // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
@@ -142,6 +148,16 @@ fun ProfileScreen(
         WindowType.SMALL -> 12.sp
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
+    }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it  // Update the local state with the new image URI
+            //Here ata iimplement ung viewmodel
+        }
     }
 
     LaunchedEffect(refreshTrigger) {
@@ -263,7 +279,7 @@ fun ProfileScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(100.dp)
+                                        .height(130.dp)
                                         .background(
                                             brush = Brush.linearGradient(
                                                 colors = listOf(
@@ -279,29 +295,40 @@ fun ProfileScreen(
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(60.dp)
-                                            .background(Color.White, RoundedCornerShape(30.dp))
+                                            .size(100.dp)
+                                            .background(Color.White, RoundedCornerShape(50.dp))
                                     ) {
                                         // Profile Icon
                                         AsyncImage(
-                                            model = profile.profilePicture, // Use URL here
-                                            contentDescription = "Profile Image",
+                                            model = selectedImageUri ?: profile.profilePicture,                                            contentDescription = "Profile Image",
                                             modifier = Modifier
-                                                .size(62.dp)
+                                                .size(100.dp)
                                                 .clip(CircleShape),
                                             contentScale = ContentScale.Crop
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit Profile Picture",
+                                            tint = Color.Gray,
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .align(Alignment.TopEnd)
+                                                .background(Color.White, CircleShape)
+                                                .clickable {
+                                                    imageLauncher.launch("image/*")
+                                                }
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
                                         Text(
                                             text = profile.fullname,
-                                            color = Color.Black,
+                                            color = Color.White,
                                             fontSize = 18.sp,
                                             fontWeight = FontWeight.Bold
                                         )
-                                        Text(text = profile.email, color = Color.Gray)
-                                        Text(text = profile.address, color = Color.Gray)
+                                        Text(text = profile.email, color = Color.White)
+                                        Text(text = profile.address, color = Color.White)
                                     }
                                 }
                             }

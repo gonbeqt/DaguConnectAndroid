@@ -14,6 +14,8 @@ import android.os.Environment
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
@@ -34,6 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -71,6 +74,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -121,9 +125,21 @@ fun ProfileTradesman(
     // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
+    var isAvailable by remember { mutableStateOf(true) } // State to track availability
+
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
     val tabNames = listOf("Job Profile", "General")
     val viewTradesmanProfilestate by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it  // Update the local state with the new image URI
+            //Here ata iimplement ung viewmodel
+        }
+    }
 
     // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
@@ -252,14 +268,36 @@ fun ProfileTradesman(
                                         )
                                         .padding(16.dp),
                                 ) {
-                                    // Tradesman image
-                                    AsyncImage(
-                                        model = tradesmanDetails.profilePic ?: "N/A",
-                                        contentDescription = "Tradesman Image",
+                                    Box(
                                         modifier = Modifier
                                             .size(100.dp)
-                                            .padding(start = 10.dp)
-                                    )
+
+                                            .background(Color.White, RoundedCornerShape(50.dp))
+                                    ) {
+                                        // Tradesman image
+                                        AsyncImage(
+                                            model = selectedImageUri ?: tradesmanDetails.profilePic,
+                                            contentDescription = "Tradesman Image",
+                                            modifier = Modifier
+                                                .size(100.dp)
+                                                .clip(CircleShape),
+                                            contentScale = ContentScale.Crop
+
+
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit Profile Picture",
+                                            tint = Color.Gray,
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .align(Alignment.TopEnd)
+                                                .background(Color.White, CircleShape)
+                                                .clickable {
+                                                    imageLauncher.launch("image/*")
+                                                }
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column(modifier = Modifier.padding(top = 5.dp)) {
                                         Text(
@@ -283,7 +321,10 @@ fun ProfileTradesman(
                                                 .width(100.dp)
                                                 .height(30.dp)
                                                 .clip(RoundedCornerShape(50.dp))
-                                                .background(Color.White),
+                                                .background(Color.White)
+                                                .clickable {
+                                                    isAvailable = !isAvailable // Toggle state on click
+                                                },
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Row(
@@ -292,13 +333,13 @@ fun ProfileTradesman(
                                             ) {
                                                 Icon(
                                                     Icons.Default.Circle,
-                                                    contentDescription = "Active",
-                                                    tint = Color.Yellow,
+                                                    contentDescription = if (isAvailable) "Available" else "Unavailable",
+                                                    tint = if (isAvailable) Color.Green else Color.Red, // Change color based on state
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
-                                                    text = "Available",
+                                                    text = if (isAvailable) "Available" else "Unavailable",
                                                     color = Color.Black,
                                                     style = TextStyle(fontSize = 14.sp)
                                                 )

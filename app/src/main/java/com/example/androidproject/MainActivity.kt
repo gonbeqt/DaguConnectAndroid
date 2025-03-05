@@ -409,7 +409,7 @@ class MainActivity : ComponentActivity() {
                         NotificationScreen(navController)
                     }
                     composable("accountsettings"){
-                        AccountSettings(navController)
+                        AccountSettings(navController,getClientProfileViewModel)
                     }
 
 
@@ -433,9 +433,6 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("bookingstradesman") {
                         BookingsTradesman(modifier = Modifier,navController, updateBookingClientViewModel,getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
-                    }
-                    composable("scheduletradesman") {
-                        ScheduleTradesman(modifier = Modifier,navController)
                     }
                     composable("profiletradesman") {
                          ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel, { LoadingUI() })

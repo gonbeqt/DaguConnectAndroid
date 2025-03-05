@@ -88,7 +88,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
 
     val categories = listOf(    
         Categories(R.drawable.carpentry, "Carpentry"),
-        Categories(R.drawable.painting, "Painting"),
+        Categories(R.drawable.painting, "Painter"),
         Categories(R.drawable.welding, "Welding"),
         Categories(R.drawable.electrician, "Electrician"),
         Categories(R.drawable.plumbing, "Plumbing"),
@@ -264,7 +264,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
                         "AC Repair" -> navController.navigate("acrepair")
                         "Masonry" -> navController.navigate("masonry")
                         "Mechanics" -> navController.navigate("mechanics")
-                        "Painting" -> navController.navigate("painting")
+                        "Painter" -> navController.navigate("painting")
                         "Roofing" -> navController.navigate("roofing")
                         "Welding" -> navController.navigate("welding")
                     }
@@ -691,6 +691,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                 ,
                 contentAlignment = Alignment.Center
             ) {
@@ -710,7 +711,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Report",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

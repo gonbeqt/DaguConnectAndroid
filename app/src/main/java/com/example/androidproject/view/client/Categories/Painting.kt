@@ -425,7 +425,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

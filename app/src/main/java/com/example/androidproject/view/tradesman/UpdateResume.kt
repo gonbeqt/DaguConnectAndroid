@@ -140,6 +140,33 @@ fun UpdateResume(navController: NavController){
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Column {
+                        Text(
+                            text = "Trade Credentials",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Black
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                                .background(Color.White)
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "pdf",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
                         Spacer(modifier = Modifier.height(12.dp))
                         Column(Modifier.fillMaxWidth()) {
                             Text(
@@ -218,31 +245,7 @@ fun UpdateResume(navController: NavController){
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Column {
-                        Text(
-                            text = "Trade Credentials",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Black
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
-                                .background(Color.White)
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = "pdf",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.Gray
-                            )
-                        }
-                    }
 
 
                     Spacer(modifier = Modifier.height(16.dp))

@@ -764,7 +764,6 @@ fun ActiveItems(activeBooking: GetClientsBooking, navController:NavController, u
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.End
                 ) {
                     Button(
                         onClick = { navController.navigate("cancelnow/${activeBooking.resumeId}/${activeBooking.bookingStatus}/${activeBooking.id}") },
@@ -773,10 +772,11 @@ fun ActiveItems(activeBooking: GetClientsBooking, navController:NavController, u
                             containerColor = Color(0xFFC51B1B),
                             contentColor = Color.White
                         ),
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.weight(1f)
                     ) {
                         Text("Cancel", fontSize = smallTextSize)
                     }
+                    Spacer(Modifier.width(16.dp))
                     Button(
                         onClick = {
                             updateBookingTradesmanViewModel.updateWorkStatus(
@@ -789,7 +789,10 @@ fun ActiveItems(activeBooking: GetClientsBooking, navController:NavController, u
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF42C2AE),
                             contentColor = Color.White
-                        )
+                        ),
+                        modifier = Modifier.weight(1f)
+
+
                     ) {
                         Text("Completed", fontSize = smallTextSize)
                     }
@@ -936,15 +939,18 @@ fun PendingItem(pendingBooking: GetClientsBooking, navController: NavController)
                     onClick = { navController.navigate("cancelnow/${pendingBooking.resumeId}/${pendingBooking.bookingStatus}/${pendingBooking.id}") },
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color.Gray),
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text("Cancel Appointment", fontSize = smallTextSize)
+                    Text("Cancel", fontSize = smallTextSize, color = Color.Black)
                 }
+                Spacer(Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = { navController.navigate("bookingdetails/${pendingBooking.resumeId}") },
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color(0xFFECAB1E)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
+                    modifier = Modifier.weight(1f),
+
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
                 ) {
                     Text("Booking Details", fontSize = smallTextSize)
                 }
@@ -1088,19 +1094,22 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController: NavController
                 OutlinedButton(
                     onClick = { navController.navigate("cancelleddetails") },
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color(0xFFECAB1E)),
-                    modifier = Modifier.padding(end = 8.dp),
+                    border = BorderStroke(1.dp, Color.Gray),
+                    modifier = Modifier.weight(1f),
 
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
                 ) {
-                    Text("Declined Details", fontSize = smallTextSize)
+                    Text("Declined Details", fontSize = smallTextSize, color = Color.Black)
                 }
+                Spacer(Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = { navController.navigate("booknow/${declineBooking.resumeId}") },
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color.Gray),
+                    border = BorderStroke(1.dp, Color(0xFFECAB1E)),
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
+
                 ) {
-                    Text("Book Again", fontSize = smallTextSize)
+                    Text("Book Again", fontSize = smallTextSize, color = Color(0xFFECAB1E) )
                 }
             }
 }
@@ -1243,17 +1252,20 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController: NavControl
                     onClick = { navController.navigate("booknow/${completedBooking.resumeId}") },
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color.Gray),
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.weight(1f),
                 ) {
-                    Text("Book Again", fontSize = smallTextSize)
+                    Text("Book Again", fontSize = smallTextSize, color = Color.Black)
                 }
+                Spacer(Modifier.width(16.dp))
                 OutlinedButton(
                     onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}") },
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color(0xFFECAB1E)),
+                    modifier = Modifier.weight(1f),
+
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
                 ) {
-                    Text("Rate", fontSize = smallTextSize)
+                    Text("Rate", fontSize = smallTextSize, color =  Color(0xFFECAB1E) )
                 }
             }
         }
@@ -1396,14 +1408,16 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController: NavControl
                     onClick = { navController.navigate("cancelleddetails") },
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color.Gray),
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.weight(1f),
                 ) {
-                    Text("Cancelled Details", fontSize = smallTextSize)
+                    Text("Cancelled Details", fontSize = smallTextSize, color = Color.Black)
                 }
+                Spacer(Modifier.width( 16.dp))
                 OutlinedButton(
                     onClick = { navController.navigate("booknow/${cancelledBooking.resumeId}") },
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color(0xFFECAB1E)),
+                    modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
                 ) {
                     Text("Book Again", fontSize = smallTextSize)
@@ -1825,7 +1839,8 @@ fun PendingApplicantsItem(
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                                .padding(8.dp),
+                                .padding(8.dp)
+                                .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "Cancel Job ", fontSize = taskTextSize)
@@ -1839,7 +1854,8 @@ fun PendingApplicantsItem(
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                                .padding(8.dp),
+                                .padding(8.dp)
+                                 .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
 
@@ -2176,7 +2192,8 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                                .padding(8.dp),
+                                .padding(8.dp)
+                                .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "Cancel Job ", fontSize = taskTextSize)
@@ -2191,7 +2208,8 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                                .padding(8.dp),
+                                .padding(8.dp)
+                                .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
 
@@ -2433,7 +2451,7 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
 
                 Row(
                     Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End // Aligns content to the end
+                    horizontalArrangement = Arrangement.Center // Aligns content to the end
                 ) {
                     Box(
                         modifier = Modifier
@@ -2555,7 +2573,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                 }
                 Row(
                     Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End // Aligns content to the end
+                    horizontalArrangement = Arrangement.Center // Aligns content to the end
                 ) {
                     Box(
                         modifier = Modifier
@@ -2569,7 +2587,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                             .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
                             .padding(
                                 vertical = 8.dp,
-                                horizontal = 36.dp
+                                horizontal = 56.dp
                             ), // Added horizontal padding for spacing
                         contentAlignment = Alignment.Center
                     ) {
@@ -2676,7 +2694,7 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
 
                 Row(
                     Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End // Aligns content to the end
+                    horizontalArrangement = Arrangement.Center // Aligns content to the end
                 ) {
                     Box(
                         modifier = Modifier

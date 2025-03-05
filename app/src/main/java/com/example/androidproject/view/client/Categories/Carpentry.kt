@@ -425,7 +425,7 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController,reportVie
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold
