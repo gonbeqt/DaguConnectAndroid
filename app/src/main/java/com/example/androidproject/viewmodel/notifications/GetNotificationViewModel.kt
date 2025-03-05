@@ -15,7 +15,7 @@ import com.example.androidproject.api.ApiService
 class GetNotificationViewModel(private val apiService: ApiService):ViewModel() {
     private val refreshTrigger = MutableStateFlow(Unit)
     private val _pagingSource = MutableStateFlow<GetNotificationPagingSource?>(null)
-    val getChatsPagingData: Flow<PagingData<Notification>> =
+    val getNotificationPagingData: Flow<PagingData<Notification>> =
         Pager(
             config = PagingConfig(
                 pageSize = 10,

@@ -16,10 +16,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.androidproject.ViewModelSetups.Companion.isNotToday
+import com.example.androidproject.ViewModelSetups.Companion.isToday
 import com.example.androidproject.view.NotificationItem
+import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 
 @Composable
-fun NotificationScreen(navController: NavController) {
+fun NotificationScreen(navController: NavController, getNotification: GetNotificationViewModel) {
+    val notifications = getNotification.getNotificationPagingData.collectAsLazyPagingItems()
+
+    val todayNotifications = notifications.itemSnapshotList?.filter {
+        it?.createdAt?.let { createdAt -> isToday(createdAt) } == true
+    }
+
+    val previousNotifications = notifications.itemSnapshotList?.filter {
+        it?.createdAt?.let { createdAt -> isNotToday(createdAt) } == false
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

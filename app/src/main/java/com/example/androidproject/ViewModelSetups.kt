@@ -41,5 +41,25 @@ class ViewModelSetups {
                 }
             }
         }
+
+        fun isToday(createdAt: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Boolean {
+            return try {
+                val formatter = DateTimeFormatter.ofPattern(pattern)
+                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE) // Extracts "yyyy-MM-dd"
+                date == LocalDate.now()
+            } catch (e: Exception) {
+                false // Handle parsing errors
+            }
+        }
+
+        fun isNotToday(createdAt: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Boolean {
+            return try {
+                val formatter = DateTimeFormatter.ofPattern(pattern)
+                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE) // Extract "yyyy-MM-dd"
+                date.isBefore(LocalDate.now()) // Checks if the date is before today
+            } catch (e: Exception) {
+                false // Handle parsing errors
+            }
+        }
     }
 }

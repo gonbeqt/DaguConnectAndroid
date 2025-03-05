@@ -59,6 +59,7 @@ import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobAp
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
+import com.example.androidproject.viewmodel.jobs.PutJobViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
 
