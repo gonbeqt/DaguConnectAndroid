@@ -42,9 +42,10 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
     val context = LocalContext.current
 
     LaunchedEffect(changePasswordState) {
-        when (changePasswordState){
+        when (val changePass =changePasswordState){
 
             is ChangePasswordViewModel.ChangePassState.Success->{
+                changePassword.resetState()
                 Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
                 // Navigate to the "login" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=1") {
@@ -52,6 +53,9 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                         inclusive = true
                     }
                 }
+            }
+            is ChangePasswordViewModel.ChangePassState.Error -> {
+                Toast.makeText(context, changePass.message, Toast.LENGTH_SHORT).show()
             }
           else -> Unit
         }
