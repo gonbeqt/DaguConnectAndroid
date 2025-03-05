@@ -16,7 +16,7 @@ class ViewModelSetups {
     companion object {
         fun setupGetJobsViewModel(owner: ViewModelStoreOwner): GetJobsViewModel {
             val apiService = RetrofitInstance.create(ApiService::class.java)
-            val viewModelFactory = GetJobsViewModelFactory(apiService, owner as Context)
+            val viewModelFactory = GetJobsViewModelFactory(apiService)
             return ViewModelProvider(owner, viewModelFactory)[GetJobsViewModel::class.java]
         }
 
@@ -39,6 +39,32 @@ class ViewModelSetups {
                 } catch (e: DateTimeParseException) {
                     "Invalid Date"
                 }
+            }
+        }
+
+        fun getDateOnly(datetimeStr: String): String {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val dateTime = LocalDateTime.parse(datetimeStr, formatter)
+            return dateTime.toLocalDate().toString()
+        }
+
+        fun isToday(createdAt: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Boolean {
+            return try {
+                val formatter = DateTimeFormatter.ofPattern(pattern)
+                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE) // Extracts "yyyy-MM-dd"
+                date == LocalDate.now()
+            } catch (e: Exception) {
+                false // Handle parsing errors
+            }
+        }
+
+        fun isNotToday(createdAt: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Boolean {
+            return try {
+                val formatter = DateTimeFormatter.ofPattern(pattern)
+                val date = LocalDate.parse(createdAt.substring(0, 10), DateTimeFormatter.ISO_DATE) // Extract "yyyy-MM-dd"
+                date.isBefore(LocalDate.now()) // Checks if the date is before today
+            } catch (e: Exception) {
+                false // Handle parsing errors
             }
         }
     }

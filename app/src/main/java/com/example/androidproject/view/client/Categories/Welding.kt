@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -221,7 +223,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                             } else {
                                 items(filteredList.size) { index ->
                                     val weldingList = filteredList[index]
-                                    if (weldingList != null && weldingList.id !in dismissedResumes) { // Filter directly
+                                    if (weldingList.id !in dismissedResumes) { // Filter directly
                                         WeldingItem(weldingList, navController,reportViewModel){
                                             getResumesViewModel.dismissResume(weldingList.id)
                                         }
@@ -287,7 +289,9 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable {  navController.navigate("booknow/${welding.id}") },
+
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -301,8 +305,8 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
         ) {
             // Profile Picture
             AsyncImage(
-                model = welding.profilepic,
-                contentDescription = welding.tradesmanfullname,
+                model = welding.profilePic,
+                contentDescription = welding.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -315,7 +319,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = welding.tradesmanfullname,
+                        text = welding.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -358,12 +362,12 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
                             .size(80.dp, 45.dp)
                             .padding(top = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Text(
-                            text = "P${welding.workfee}/hr",
+                            text = "P${welding.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -373,7 +377,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
                             .size(70.dp, 45.dp)
                             .padding(top = 10.dp, start = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -401,7 +405,9 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -420,7 +426,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

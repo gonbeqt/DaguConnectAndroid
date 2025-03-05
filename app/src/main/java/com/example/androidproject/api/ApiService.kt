@@ -1,11 +1,16 @@
 package com.example.androidproject.api
 
+import com.example.androidproject.model.ChangePasswordRequest
+import com.example.androidproject.model.ChangePasswordResponse
 import com.example.androidproject.model.ClientProfile
+import com.example.androidproject.model.ForgotPasswordRequest
+import com.example.androidproject.model.ForgotPasswordResponse
 import com.example.androidproject.model.GetChats
 import com.example.androidproject.model.GetJobApplicantsData
 import com.example.androidproject.model.GetJobApplicationData
 import com.example.androidproject.model.GetMessages
 import com.example.androidproject.model.GetMyJobs
+import com.example.androidproject.model.GetNotification
 import com.example.androidproject.model.Job
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.JobsResponse
@@ -17,31 +22,36 @@ import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
+import com.example.androidproject.model.UpdateAddress
+import com.example.androidproject.model.UpdateAddressResponse
+import com.example.androidproject.model.UpdateJob
+import com.example.androidproject.model.UpdateJobResponse
+import com.example.androidproject.model.UpdateProfilePicture
+import com.example.androidproject.model.UpdateProfilePictureResponse
+import com.example.androidproject.model.ResetPasswordRequest
+import com.example.androidproject.model.ResetPasswordResponse
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
-import com.example.androidproject.model.ViewJobApplicationData
 import com.example.androidproject.model.ViewJobApplicationResponse
 import com.example.androidproject.model.client.BookTradesmanRequest
 import com.example.androidproject.model.client.BookTradesmanResponse
-
-import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.model.client.ClientWorkStatusRequest
+import com.example.androidproject.model.client.ClientWorkStatusResponse
 import com.example.androidproject.model.client.GetClientsBookingResponse
 import com.example.androidproject.model.client.GetTradesmanBookingResponse
 import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.SubmitResumeResponse
+import com.example.androidproject.model.client.TradesmanWorkStatusRequest
+import com.example.androidproject.model.client.TradesmanWorkStatusResponse
 import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.rateTradesmanRequest
 import com.example.androidproject.model.client.rateTradesmanResponse
 import com.example.androidproject.model.client.ratingsItem
-import com.example.androidproject.model.client.resumesItem
-import com.example.androidproject.model.client.workstatusRequest
-import com.example.androidproject.model.client.workstatusResponse
+import com.example.androidproject.model.client.viewResume
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-
-
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Response
@@ -52,7 +62,6 @@ import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
-import viewResume
 
 interface ApiService {
 
@@ -74,7 +83,7 @@ interface ApiService {
         @Query("limit") limit: Int = 10
     ): Response<JobsResponse>
 
-    @GET("/user/jobs")
+    @GET("/client/jobs/view/my_jobs")
     suspend fun getJobsByUserId(
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 10
@@ -124,7 +133,9 @@ interface ApiService {
     suspend fun getRatingsById(@Path("tradesmanId") resumeId: Int): Response<List<ratingsItem>>
 
     @PUT("/user/client/work/status/{booking_id}")
-    suspend fun updateworkStatus(@Body request : workstatusRequest, @Path("booking_id") bookingId: Int): Response<workstatusResponse>
+    suspend fun updateBookingTradesmanStatus(@Body request : TradesmanWorkStatusRequest, @Path("booking_id") bookingId: Int): Response<TradesmanWorkStatusResponse>
+    @PUT("/user/tradesman/bookings/status/{booking_id}")
+    suspend fun updateBookingClientStatus(@Body request : ClientWorkStatusRequest, @Path("booking_id") bookingId: Int): Response<ClientWorkStatusResponse>
 
     @POST("/user/client/rate/tradesman/{tradesman_id}")
     suspend fun ratetradesman(@Body request : rateTradesmanRequest, @Path("tradesman_id") bookingId: Int): Response<rateTradesmanResponse>
@@ -145,7 +156,7 @@ interface ApiService {
     suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicantsData>
 
     @GET("/user/message/{chatId}")
-    suspend fun getConversation(@Path("chatId") chatId: Int): Response<List<GetMessages>>
+    suspend fun getConversation(@Path("chatId") chatId: Int, @Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<List<GetMessages>>
 
     @GET("/user/tradesman/getResume/Details")
     suspend fun getTradesmanResume(): Response<viewResume>
@@ -168,4 +179,25 @@ interface ApiService {
 
     @GET("/user/tradesman/getbooking")
     suspend fun getTradesmanBooking(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10) : Response <GetTradesmanBookingResponse>
+
+    @POST("/user/forgot/otpsend")
+    suspend fun forgotPass(@Body request: ForgotPasswordRequest) : Response <ForgotPasswordResponse>
+
+    @PUT("/user/forgot/resetpassword")
+    suspend fun resetPass(@Body request : ResetPasswordRequest) : Response <ResetPasswordResponse>
+
+    @PUT("/user/change/password")
+    suspend fun updatePass(@Body request : ChangePasswordRequest) : Response <ChangePasswordResponse>
+
+    @PUT("/client/jobs/update/{jobId}")
+    suspend fun updateJob(@Path("jobId") jobId: Int, @Body request: UpdateJob): Response<UpdateJobResponse>
+
+    @GET("/user/notification")
+    suspend fun getNotifications(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetNotification>
+
+    @POST("/client/update/profile_picture")
+    suspend fun updateClientProfilePicture(@Body request: UpdateProfilePicture): Response<UpdateProfilePictureResponse>
+
+    @PUT("/client/update/profile_address")
+    suspend fun updateClientAddress(@Body request: UpdateAddress): Response<UpdateAddressResponse>
 }

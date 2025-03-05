@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -201,7 +203,7 @@ fun ACRepair(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = ACRepairList.itemSnapshotList.items.filter { it.specialty.contains("ACRepair") && it.id !in dismissedResumes }
+                            val filteredList = ACRepairList.itemSnapshotList.items.filter { it.specialty.contains("Ac_Repair") && it.id !in dismissedResumes }
                             if (filteredList.isEmpty()) {
                                 item {
                                     Box(
@@ -290,7 +292,8 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable {  navController.navigate("booknow/${ACRepair.id}")  },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -304,8 +307,8 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
         ) {
             // Profile Picture
             AsyncImage(
-                model = ACRepair.profilepic,
-                contentDescription = ACRepair.tradesmanfullname,
+                model = ACRepair.profilePic,
+                contentDescription = ACRepair.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -319,7 +322,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                 Row (Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = ACRepair.tradesmanfullname,
+                        text = ACRepair.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -365,12 +368,12 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                             .size(80.dp, 45.dp)
                             .padding(top = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Text(
-                            text = "P${ACRepair.workfee}/hr",
+                            text = "P${ACRepair.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -380,7 +383,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                             .size(70.dp, 45.dp)
                             .padding(top = 10.dp, start = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -392,7 +395,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                         )
                         Text(
                             text =   when {
-                                ACRepair.ratings == null || ACRepair.ratings == 0f -> "0"
+                                ACRepair.ratings == 0f -> "0"
                                 else -> String.format("%.1f", ACRepair.ratings)
                             },
                             fontSize = smallTextSize,
@@ -408,7 +411,9 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -427,7 +432,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

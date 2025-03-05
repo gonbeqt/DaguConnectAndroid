@@ -1,15 +1,17 @@
 package com.example.androidproject.viewmodel.factories.messeges
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.androidproject.api.ApiService
-import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
+import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
 
-class GetMessageViewModelFactory(private val apiService: ApiService, private val context: Context): ViewModelProvider.Factory  {
-    override fun <T: ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(GetMessageViewModelFactory::class.java)) {
-            return  GetMessageViewModelFactory(apiService, context) as T
+class GetMessageViewModelFactory(
+    private val apiService: ApiService,
+    private val chatId: Int
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(GetMessagesViewModel::class.java)) {
+            return GetMessagesViewModel(apiService, chatId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel Class")
     }

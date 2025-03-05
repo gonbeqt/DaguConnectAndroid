@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -196,7 +198,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = mechanicsList.itemSnapshotList.items.filter {it.specialty.contains("Mechanics") && it.id !in dismissedResumes  }
+                            val filteredList = mechanicsList.itemSnapshotList.items.filter {it.specialty.contains("Mechanic") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {
@@ -283,7 +285,9 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .padding(vertical = 8.dp),
+                .padding(vertical = 8.dp)
+                .clickable {  navController.navigate("booknow/${mechanics.id}") },
+
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(Color.White),
             elevation = CardDefaults.cardElevation(2.dp)
@@ -297,8 +301,8 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
         ) {
             // Profile Picture
             AsyncImage(
-                model = mechanics.profilepic,
-                contentDescription = mechanics.tradesmanfullname,
+                model = mechanics.profilePic,
+                contentDescription = mechanics.tradesmanFullName,
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -311,7 +315,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = mechanics.tradesmanfullname,
+                        text = mechanics.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -354,12 +358,12 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                             .size(80.dp, 45.dp)
                             .padding(top = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Text(
-                            text = "P${mechanics.workfee}/hr",
+                            text = "P${mechanics.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -369,7 +373,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                             .size(70.dp, 45.dp)
                             .padding(top = 10.dp, start = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -381,7 +385,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                         )
                         Text(
                             when {
-                                mechanics.ratings == null || mechanics.ratings == 0f -> "0"
+                                mechanics.ratings == 0f -> "0"
                                 else -> String.format("%.1f", mechanics.ratings)
                             },
                             fontSize = smallTextSize,
@@ -397,7 +401,9 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -416,7 +422,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

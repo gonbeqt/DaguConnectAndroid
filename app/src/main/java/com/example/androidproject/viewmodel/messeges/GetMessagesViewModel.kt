@@ -13,7 +13,7 @@ import com.example.androidproject.model.GetMessages
 import com.example.androidproject.viewmodel.jobs.paginate.GetJobsPagingSource
 import kotlinx.coroutines.flow.Flow
 
-class GetMessagesViewModel(private val apiService: ApiService, private val context: Context, private val chatId: Int):ViewModel() {
+class GetMessagesViewModel(private val apiService: ApiService, private val chatId: Int):ViewModel() {
     val messegesPagingData: Flow<PagingData<GetMessages>> = Pager(
         config = PagingConfig(
             pageSize = 10, // Keep it consistent with API

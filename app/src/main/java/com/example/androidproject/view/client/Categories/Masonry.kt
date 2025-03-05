@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -285,7 +287,9 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable {  navController.navigate("booknow/${masonry.id}") },
+
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -299,8 +303,8 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
         ) {
             // Profile Picture
             AsyncImage(
-                model = masonry.profilepic,
-                contentDescription = masonry.tradesmanfullname,
+                model = masonry.profilePic,
+                contentDescription = masonry.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -313,7 +317,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
             ) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
-                        text = masonry.tradesmanfullname,
+                        text = masonry.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -355,12 +359,12 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                             .size(80.dp, 45.dp)
                             .padding(top = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Text(
-                            text = "P${masonry.workfee}/hr",
+                            text = "P${masonry.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -370,7 +374,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                             .size(70.dp, 45.dp)
                             .padding(top = 10.dp, start = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -382,7 +386,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                         )
                         Text(
                             when {
-                                masonry.ratings == null || masonry.ratings == 0f -> "0"
+                                masonry.ratings == 0f -> "0"
                                 else -> String.format("%.1f", masonry.ratings)
                             },
                             fontSize = smallTextSize,
@@ -398,7 +402,9 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -417,7 +423,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

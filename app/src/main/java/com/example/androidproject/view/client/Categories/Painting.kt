@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -199,7 +201,7 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
                                 .background(Color.White),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            val filteredList = paintingList.itemSnapshotList.items.filter {it.specialty.contains("Painting") && it.id !in dismissedResumes  }
+                            val filteredList = paintingList.itemSnapshotList.items.filter {it.specialty.contains("Painter") && it.id !in dismissedResumes  }
 
                             if (filteredList.isEmpty()) {
                                 item {
@@ -287,7 +289,8 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable { navController.navigate("booknow/${painter.id}") },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -301,8 +304,8 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
         ) {
             // Profile Picture
             AsyncImage(
-                model = painter.profilepic,
-                contentDescription = painter.tradesmanfullname,
+                model = painter.profilePic,
+                contentDescription = painter.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp)) // Apply rounded corners
@@ -315,7 +318,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = painter.tradesmanfullname,
+                        text = painter.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -358,12 +361,12 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
                             .size(80.dp, 45.dp)
                             .padding(top = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Text(
-                            text = "P${painter.workfee}/hr",
+                            text = "P${painter.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -373,7 +376,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
                             .size(70.dp, 45.dp)
                             .padding(top = 10.dp, start = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -385,7 +388,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
                         )
                         Text(
                             when {
-                                painter.ratings == null || painter.ratings == 0f -> "0"
+                                painter.ratings == 0f -> "0"
                                 else -> String.format("%.1f", painter.ratings)
                             },
                             fontSize =smallTextSize,
@@ -401,7 +404,9 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -420,7 +425,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController,reportViewM
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

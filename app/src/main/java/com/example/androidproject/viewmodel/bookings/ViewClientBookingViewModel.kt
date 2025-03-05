@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ViewClientBookingViewModel(private val  apiService: ApiService, private val context: Context):ViewModel() {
+class ViewClientBookingViewModel(private val  apiService: ApiService):ViewModel() {
     private val _viewClientBooking = MutableStateFlow<ViewClientBookings>(ViewClientBookings.Idle)
     val viewClientBookingState = _viewClientBooking.asStateFlow()
 

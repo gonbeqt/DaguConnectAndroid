@@ -7,10 +7,10 @@ import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 
 
-class GetClientBookingViewModelFactory(private val apiService: ApiService,private val context : Context) :ViewModelProvider.Factory{
+class GetClientBookingViewModelFactory(private val apiService: ApiService) :ViewModelProvider.Factory{
     override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GetClientBookingViewModel::class.java)) {
-            return GetClientBookingViewModel(apiService, context) as T
+            return GetClientBookingViewModel(apiService) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
 

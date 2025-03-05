@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -40,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -163,7 +166,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
                         } else {
                             items(filteredList.size) { index ->
                                 val resume = filteredList[index]
-                                if (resume != null && resume.id !in dismissedResumes) { // Filter directly
+                                if (resume.id !in dismissedResumes) { // Filter directly
                                     AllTradesmanItem (resume,navController, cardHeight,reportViewModel) {
                                         getResumes.dismissResume(resume.id)
                                     }
@@ -188,7 +191,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
 }
 @Composable
 fun         AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
@@ -246,7 +249,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
-                    model = resumes.profilepic,
+                    model = resumes.profilePic,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(cardHeight - 20.dp)
@@ -264,7 +267,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = resumes.tradesmanfullname,
+                            text = resumes.tradesmanFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = nameTextSize,
@@ -305,7 +308,8 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                         }
                     }
                     Text(
-                        text = resumes.specialty,  // Remove closing bracket ,
+                        text = resumes.specialty
+                            .replace("_"," "),  // Remove closing bracket ,
                         color = Color.Black,
                         fontSize = taskTextSize,
                     )
@@ -315,12 +319,12 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                                 .size(70.dp, 50.dp)
                                 .padding(top = 15.dp, end = 5.dp)
                                 .background(
-                                    color = (Color(0xFFFFF2DD)),
+                                    color = (Color(0xFFF5F5F5)),
                                     shape =RoundedCornerShape(12.dp)
                                 )
                         ) {
                             Text(
-                                text = "P${resumes.workfee}/hr",
+                                text = "P${resumes.workFee}/hr",
                                 fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )
@@ -330,7 +334,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                                 .size(70.dp, 50.dp)
                                 .padding(top = 15.dp, start = 10.dp, end = 10.dp)
                                 .background(
-                                    color = (Color(0xFFFFF2DD)),
+                                    color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
@@ -342,7 +346,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                             )
                             Text(
                                 when {
-                                    resumes.ratings == null || resumes.ratings == 0f -> "0"
+                                    resumes.ratings == 0f -> "0"
                                     else -> String.format("%.1f", resumes.ratings)
                                 },
                                 fontSize = smallTextSize,
@@ -362,6 +366,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                 ,
                 contentAlignment = Alignment.Center
             ) {
@@ -381,7 +386,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

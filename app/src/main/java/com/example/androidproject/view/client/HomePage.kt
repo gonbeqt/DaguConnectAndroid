@@ -59,6 +59,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -87,7 +88,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
 
     val categories = listOf(    
         Categories(R.drawable.carpentry, "Carpentry"),
-        Categories(R.drawable.painting, "Painting"),
+        Categories(R.drawable.painting, "Painter"),
         Categories(R.drawable.welding, "Welding"),
         Categories(R.drawable.electrician, "Electrician"),
         Categories(R.drawable.plumbing, "Plumbing"),
@@ -185,8 +186,8 @@ fun CategoryScrollIndicator(scrollState: LazyListState, itemCount: Int, visibleI
         }
     }
 
-    val trackWidth = 150.dp
-    val handleWidth = 30.dp
+    val trackWidth = 100.dp
+    val handleWidth = 15.dp
 
     Box(
         modifier = Modifier
@@ -263,7 +264,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
                         "AC Repair" -> navController.navigate("acrepair")
                         "Masonry" -> navController.navigate("masonry")
                         "Mechanics" -> navController.navigate("mechanics")
-                        "Painting" -> navController.navigate("painting")
+                        "Painter" -> navController.navigate("painting")
                         "Roofing" -> navController.navigate("roofing")
                         "Welding" -> navController.navigate("welding")
                     }
@@ -438,7 +439,7 @@ fun ExploreNow(windowSize: WindowSize) {
 
                 Box(
                     modifier = Modifier
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
                         .background(Color.Transparent)
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 ) {
@@ -581,7 +582,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
-                    model = resumes.profilepic,
+                    model = resumes.profilePic,
                     contentDescription = "Tradesman Image",
                     modifier = Modifier
                         .size(cardHeight - 20.dp)
@@ -599,10 +600,10 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = resumes.tradesmanfullname,
+                            text = resumes.tradesmanFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
-                            fontSize = nameTextSize,
+                            fontSize = taskTextSize,
                         )
 
                         // Menu Icon
@@ -622,7 +623,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 modifier = Modifier.background(Color.White)
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Report") },
+                                    text = { Text("Report", textAlign = TextAlign.Center) },
                                     onClick = {
                                         showMenu = false
                                         showReportDialog = true
@@ -632,7 +633,8 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         }
                     }
                     Text(
-                        text = resumes.specialty,
+                        text = resumes.specialty
+                            .replace("_", " "),
                         color = Color.Black,
                         fontSize = taskTextSize,
                         )
@@ -642,12 +644,12 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 .size(70.dp, 50.dp)
                                 .padding(top = 15.dp, end = 5.dp)
                                 .background(
-                                    color = (Color(0xFFFFF2DD)),
+                                    color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
                             Text(
-                                text = "P${resumes.workfee}/hr",
+                                text = "P${resumes.workFee}/hr",
                                 fontSize = smallTextSize,
                                 modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                             )
@@ -657,7 +659,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 .size(70.dp, 50.dp)
                                 .padding(top = 15.dp, start = 10.dp, end = 10.dp)
                                 .background(
-                                    color = (Color(0xFFFFF2DD)),
+                                    color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                         ) {
@@ -669,7 +671,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             )
                             Text(
                                 when {
-                                    resumes.ratings == null || resumes.ratings == 0f -> "0"
+                                    resumes.ratings == 0f -> "0"
                                     else -> String.format("%.1f", resumes.ratings)
                                 },
                                 fontSize = smallTextSize,
@@ -689,6 +691,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                 ,
                 contentAlignment = Alignment.Center
             ) {
@@ -708,7 +711,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Report",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

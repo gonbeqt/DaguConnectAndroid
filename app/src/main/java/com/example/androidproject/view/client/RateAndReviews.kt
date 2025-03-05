@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -95,7 +96,8 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFD9D9D9))
+                    .background(Color(0xFFECECEC))
+
             ) {
                 // Header Card
                 Card(
@@ -109,8 +111,8 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                         modifier = Modifier
                             .background(Color.White)
                             .fillMaxWidth()
-                            .size(100.dp)
-                            .padding(top = 20.dp)
+                            .size(70.dp)
+                            .padding(top = 5.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -142,7 +144,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors((Color(0xFFD9D9D9)))
+                    colors = CardDefaults.cardColors((Color(0xFFECECEC)))
 
                 ) {
                     Column(
@@ -152,7 +154,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = booking.tradesmanprofile,
+                            model = booking.tradesmanProfile,
                             contentDescription = "Tradesman Image",
                             modifier = Modifier
                                 .size(150.dp)
@@ -162,13 +164,13 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = booking.tradesmanfullname,
+                            text = booking.tradesmanFullName,
                             fontSize = 24.sp,
                             color = Color.Black
                         )
 
                         Text(
-                            text = booking.tasktype,
+                            text = booking.taskType,
                             fontSize = 20.sp,
                             color = Color.Gray
                         )
@@ -198,17 +200,17 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                             onValueChange = { reviewText.value = it },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp)
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(8.dp))
                                 .border(
                                     width = 1.dp,
-                                    color = Color.Gray, // Border color
-                                    shape = RoundedCornerShape(8.dp) // Rounded corners
+                                    color = Color.Gray,
+                                    shape = RoundedCornerShape(8.dp)
                                 ),
                             placeholder = { Text("Write your review here...") },
-                            shape = RoundedCornerShape(8.dp),
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
@@ -226,7 +228,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                                 .fillMaxWidth()
                                 .height(50.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFECAB1E),
+                                containerColor = Color(0xFF122826),
                                 contentColor = Color.White
                             )
 

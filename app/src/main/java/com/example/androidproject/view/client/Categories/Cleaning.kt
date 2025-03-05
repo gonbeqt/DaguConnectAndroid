@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -280,7 +282,8 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable {  navController.navigate("booknow/${cleaning.id}") },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -294,8 +297,8 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
         ) {
             // Profile Picture
             AsyncImage(
-                model = cleaning.profilepic,
-                contentDescription = cleaning.tradesmanfullname,
+                model = cleaning.profilePic,
+                contentDescription = cleaning.tradesmanFullName,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(25.dp))
@@ -308,7 +311,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
             ) {
                 Row (Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
-                        text = cleaning.tradesmanfullname,
+                        text = cleaning.tradesmanFullName,
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -351,12 +354,12 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
                             .size(80.dp, 45.dp)
                             .padding(top = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
                         Text(
-                            text = "P${cleaning.workfee}/hr",
+                            text = "P${cleaning.workFee}/hr",
                             fontSize = smallTextSize,
                             modifier = Modifier.padding(top = 5.dp, start = 8.dp)
                         )
@@ -366,7 +369,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
                             .size(70.dp, 45.dp)
                             .padding(top = 10.dp, start = 10.dp)
                             .background(
-                                color = (Color(0xFFD9D9D9)),
+                                color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -378,7 +381,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
                         )
                         Text(
                             when {
-                                cleaning.ratings == null || cleaning.ratings == 0f -> "0"
+                                cleaning.ratings == 0f -> "0"
                                 else -> String.format("%.1f", cleaning.ratings)
                             },
                             fontSize = smallTextSize,
@@ -394,7 +397,9 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -413,7 +418,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController,reportViewM
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Reason for Cancellation",
+                            "Reason for Reason",
                             fontSize = 20.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold

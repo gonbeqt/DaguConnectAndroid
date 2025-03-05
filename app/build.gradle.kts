@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -9,7 +10,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.androidproject"
+        applicationId = "com.mycompany.daguconnect"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -71,6 +72,8 @@ dependencies {
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     implementation ("com.google.accompanist:accompanist-flowlayout:0.31.2-alpha")
+    //Firebase Cloud Messaging
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
 
 
     implementation(libs.androidx.core.ktx)

@@ -1,17 +1,15 @@
 package com.example.androidproject.viewmodel.Resumes
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
-import com.example.androidproject.data.preferences.TokenManager
-import com.example.androidproject.model.client.resumesItem
+import com.example.androidproject.model.client.viewResume
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import viewResume
 
-class ViewResumeViewModel (private val apiService: ApiService, private val context: Context) : ViewModel(){
+
+class ViewResumeViewModel (private val apiService: ApiService) : ViewModel(){
     private val  _viewResumeState = MutableStateFlow<ViewResumeState>(ViewResumeState.Idle)
     val viewResumeState = _viewResumeState.asStateFlow()
 

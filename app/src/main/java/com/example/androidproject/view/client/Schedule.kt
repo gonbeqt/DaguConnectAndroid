@@ -4,10 +4,13 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,10 +67,10 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
-            .filter { it.bookingstatus == "Active" } // Filter for Active bookings
+            .filter { it.bookingStatus == "Active" } // Filter for Active bookings
             .mapNotNull { booking ->
                 try {
-                    LocalDate.parse(booking.bookingdate, dateFormatter)
+                    LocalDate.parse(booking.bookingDate, dateFormatter)
                 } catch (e: Exception) {
                     null
                 }
@@ -77,8 +80,8 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
             try {
-                val bookingDate = LocalDate.parse(it.bookingdate, dateFormatter)
-                bookingDate.isEqual(selectedClientDate) && it.bookingstatus == "Active"
+                val bookingDate = LocalDate.parse(it.bookingDate, dateFormatter)
+                bookingDate.isEqual(selectedClientDate) && it.bookingStatus == "Active"
             } catch (e: Exception) {
                 false
             }
@@ -96,6 +99,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                 .fillMaxWidth()
                 .wrapContentSize()
                 .background(Color.White)
+
         ) {
             ScheduleTopSection(navController)
 
@@ -113,13 +117,13 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                 allBookingDates = allBookingDates,
                 tradesmen = if (selectedFilter == "My Clients") filteredClients.map {
                     Tradesmandate(
-                        it.tradesmanprofile,
-                        it.tradesmanfullname,
-                        it.tasktype,
-                        "P${it.workfee}",
+                        it.tradesmanProfile,
+                        it.tradesmanFullName,
+                        it.taskType,
+                        "P${it.workFee}",
                         it.ratings,
                         R.drawable.bookmark,
-                        it.bookingdate
+                        it.bookingDate
                     )
                 } else applicants
             )
@@ -142,11 +146,22 @@ fun FilterSection(
     onFilterChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
 
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             Modifier.fillMaxWidth(),
@@ -156,19 +171,19 @@ fun FilterSection(
             Text(
                 text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
+                fontSize = nameTextSize,
                 color = Color.Black
             )
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.wrapContentSize(Alignment.Center)) {
                 TextButton(onClick = { expanded = true }) {
-                    Text(text = selectedFilter, color = Color(0xFF3CC0B0))
+                    Text(text = selectedFilter, color = Color(0xFF3CC0B0), fontSize = taskTextSize)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF3CC0B0))
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                        text = { Text("My Clients") },
+                        text = { Text("My Clients", fontSize = taskTextSize) },
                         onClick = {
                             onFilterChange("My Clients")
                             expanded = false
@@ -176,7 +191,7 @@ fun FilterSection(
                     )
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                        text = { Text("My Applicants") },
+                        text = { Text("My Applicants" , fontSize = taskTextSize) },
                         onClick = {
                             onFilterChange("My Applicants")
                             expanded = false
@@ -188,7 +203,7 @@ fun FilterSection(
 
         Text(
             text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-            fontSize = 16.sp,
+            fontSize = taskTextSize,
             fontWeight = FontWeight.Normal,
             color = Color.Gray
         )
@@ -200,10 +215,10 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
-            .filter { it.bookingstatus == "Active" } // Filter for Active bookingStatus
+            .filter { it.bookingStatus == "Active" } // Filter for Active bookingStatus
             .mapNotNull { booking ->
                 try {
-                    LocalDate.parse(booking.bookingdate, dateFormatter)
+                    LocalDate.parse(booking.bookingDate, dateFormatter)
                 } catch (e: Exception) {
                     null
                 }
@@ -213,8 +228,8 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
             try {
-                val bookingDate = LocalDate.parse(it.bookingdate, dateFormatter)
-                bookingDate.isEqual(selectedDate) && it.bookingstatus == "Active" // Filter for Active bookingStatus
+                val bookingDate = LocalDate.parse(it.bookingDate, dateFormatter)
+                bookingDate.isEqual(selectedDate) && it.bookingStatus == "Active" // Filter for Active bookingStatus
             } catch (e: Exception) {
                 false // Skip invalid dates
             }
@@ -309,25 +324,23 @@ fun CalendarSection(
     } else {
         allBookingDates // Use all booking dates for My Clients
     }
-
+    Spacer(Modifier.height(6.dp))
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp), // Set rounded corners
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(280.dp)
+                .height(210.dp)
                 .background(brush = myGradient4) // Apply gradient
-                .padding(8.dp) // Padding inside the card
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                // Navigation for month (e.g., Jan to Feb)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -339,12 +352,14 @@ fun CalendarSection(
                         Icon(
                             Icons.Default.ArrowBackIos,
                             contentDescription = "Previous Month",
-                            tint = Color.White
+                            tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+
                         )
                     }
                     Text(
                         text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -352,7 +367,8 @@ fun CalendarSection(
                         Icon(
                             Icons.Default.ArrowForwardIos,
                             contentDescription = "Next Month",
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -365,7 +381,7 @@ fun CalendarSection(
                     listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN").forEach { day ->
                         Text(
                             text = day,
-                            fontSize = 12.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -390,12 +406,14 @@ fun CalendarSection(
 
                                     Box(
                                         modifier = Modifier
-                                            .size(30.dp)
+                                            .size(20.dp)
                                             .background(
                                                 if (date == selectedDate) Color.Black else Color.Transparent,
                                                 shape = MaterialTheme.shapes.small
                                             )
-                                            .clickable { onDateSelected(date) },
+                                            .clickable( indication = null,
+                                                interactionSource = remember { MutableInteractionSource() }
+                                            ) { onDateSelected(date) },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
@@ -405,11 +423,12 @@ fun CalendarSection(
                                                 hasData -> Color.Yellow // Highlight days with data
                                                 else -> Color.White
                                             },
+                                            fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
                                 } else {
-                                    Spacer(modifier = Modifier.size(30.dp)) // Empty spaces for alignment
+                                    Spacer(modifier = Modifier.size(20.dp)) // Empty spaces for alignment
                                 }
                                 day++
                             }
@@ -427,7 +446,7 @@ fun CalendarSection(
 @Composable
 fun ScheduleTopSection(navController: NavController){
 
-    Row(Modifier.fillMaxWidth().height(70.dp).shadow(1.dp),
+    Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
 
@@ -493,7 +512,7 @@ fun MyClientsItem(Clients: GetClientsBooking) {
         ) {
 
             AsyncImage(
-                model = Clients.tradesmanprofile,
+                model = Clients.tradesmanProfile,
                 contentDescription = "Tradesman Image",
                 modifier = Modifier
                     .size(120.dp, 120.dp)
@@ -507,20 +526,20 @@ fun MyClientsItem(Clients: GetClientsBooking) {
                 Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
                         modifier = Modifier.padding( top = 5.dp),
-                        text = Clients.tradesmanfullname,
+                        text = Clients.tradesmanFullName,
                         color = Color.Black,
                         fontSize = nameTextSize
                     )
                     Text(
                         modifier = Modifier.padding( top = 5.dp, end = 15.dp),
-                        text = Clients.bookingstatus,
+                        text = Clients.bookingStatus,
                         color = Color.Black,
                         fontSize = smallTextSize
                     )
                 }
 
                 Text(
-                    text = Clients.tasktype,
+                    text = Clients.taskType,
                     color = Color.Gray,
                     fontSize = taskTextSize
                 )
@@ -539,7 +558,7 @@ fun MyClientsItem(Clients: GetClientsBooking) {
                          {
                             Text(
                                 modifier = Modifier.padding(5.dp),
-                                text = "P${Clients.workfee}",
+                                text = "P${Clients.workFee}",
                                 fontSize = smallTextSize
                             )
                         }
@@ -587,7 +606,7 @@ fun MyClientsItem(Clients: GetClientsBooking) {
 
                         )
                         Text(
-                            text = Clients.bookingdate,
+                            text = Clients.bookingDate,
                             fontSize = smallTextSize
                         )
                     }

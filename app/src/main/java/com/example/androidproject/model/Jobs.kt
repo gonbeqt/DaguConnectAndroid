@@ -88,3 +88,15 @@ data class GetMyJobs(
     @SerializedName("total_pages")
     val totalPages: Int
 )
+
+data class UpdateJob(
+    val salary: String,
+    @SerializedName("job_description")
+    val jobDescription: String,
+    val address: String,
+    val deadline: String,
+)
+
+data class UpdateJobResponse(
+    val message: String
+)

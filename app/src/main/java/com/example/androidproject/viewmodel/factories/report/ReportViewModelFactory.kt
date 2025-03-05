@@ -7,7 +7,7 @@ import com.example.androidproject.api.ApiService
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
-class ReportViewModelFactory(private val apiService: ApiService,context: Context): ViewModelProvider.Factory {
+class ReportViewModelFactory(private val apiService: ApiService): ViewModelProvider.Factory {
     override fun <T: ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ReportViewModel::class.java)) {
             return ReportViewModel(apiService) as T

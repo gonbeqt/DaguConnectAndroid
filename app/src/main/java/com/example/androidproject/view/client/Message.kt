@@ -48,7 +48,7 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.Chats
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.androidproject.view.extras.LoadingTradesmanUI
+import com.example.androidproject.view.extras.LoadingUI
 
 
 @Composable
@@ -62,7 +62,7 @@ fun MessageScreen(
     when {
         // Initial loading state
         loadState.refresh is LoadState.Loading && chatState.itemCount == 0 -> {
-            LoadingTradesmanUI()
+            LoadingUI()
         }
 
         // Loading more items (append) or error states can be handled too if needed
@@ -199,7 +199,7 @@ fun MessageTopSection(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp)
+            .shadow(0.2.dp)
             .background(Color.White)
     ) {
         Row(
@@ -227,4 +227,5 @@ fun MessageTopSection(navController: NavController) {
         }
     }
 }
+
 
