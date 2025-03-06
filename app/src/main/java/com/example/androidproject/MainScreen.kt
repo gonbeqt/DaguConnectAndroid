@@ -44,6 +44,7 @@ import com.example.androidproject.view.tradesman.ScheduleTradesman
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.example.androidproject.view.client.MessageScreen
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
@@ -52,6 +53,7 @@ import com.example.androidproject.viewmodel.bookings.UpdateBookingClientViewMode
 import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
@@ -85,6 +87,8 @@ fun MainScreen(
     getTradesmanBooking: GetTradesmanBookingViewModel,
     putJobViewModel: PutJobViewModel,
     updateBookingClientViewModel: UpdateBookingClientViewModel,
+    updateTradesmanProfileViewModel: UpdateTradesmanProfileViewModel,
+    updateClientProfilePictureViewModel: UpdateClientProfilePictureViewModel,
     LoadingUI: @Composable () -> Unit
 ) {
     val role = AccountManager.getAccount()?.isClient
@@ -213,6 +217,8 @@ fun MainScreen(
             getTradesmanBooking,
             putJobViewModel,
             updateBookingClientViewModel,
+            updateTradesmanProfileViewModel,
+            updateClientProfilePictureViewModel,
             LoadingUI
         )
     }
@@ -242,6 +248,8 @@ fun ContentScreen(
     getTradesmanBooking : GetTradesmanBookingViewModel,
     putJobViewModel: PutJobViewModel,
     updateBookingClientViewModel : UpdateBookingClientViewModel, // Add this parameter
+    updateTradesmanProfileViewModel : UpdateTradesmanProfileViewModel,
+    updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
     LoadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
@@ -258,7 +266,9 @@ fun ContentScreen(
                 postJobsViewModel,
                 getMyJobsViewModel,
                 getClientProfileViewModel,
-                putJobViewModel
+                putJobViewModel,
+                updateClientProfilePictureViewModel,
+                selectedTab
             )
         }
     } else {
@@ -267,7 +277,7 @@ fun ContentScreen(
             1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,selectedTab)
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,LoadingUI,selectedTab)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,LoadingUI,selectedTab)
         }
     }
 }

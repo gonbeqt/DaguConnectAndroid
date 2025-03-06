@@ -1,56 +1,56 @@
-package com.example.androidproject.viewmodel.client_profile
+package com.example.androidproject.viewmodel.Tradesman_Profile
 
 import android.content.Context
 import android.net.Uri
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.JsonErrorParser
-import com.example.androidproject.model.UpdateProfilePictureResponse
-import com.example.androidproject.model.UpdateStatus
-import com.example.androidproject.model.UpdateStatusResponse
-import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState
+import com.example.androidproject.model.client.UpdateTradesmanProfileResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.Response
 
-class UpdateClientProfilePictureViewModel(private val apiService: ApiService): ViewModel() {
-    private val _updateClientProfileState = MutableStateFlow<UpdateClientProfilePictureState>(
-        UpdateClientProfilePictureState.Idle)
-    val updateClientProfileState: StateFlow<UpdateClientProfilePictureState> = _updateClientProfileState
+class UpdateTradesmanProfileViewModel (private val apiService: ApiService) :ViewModel(){
+    private val _updateTradesmanProfileState  = MutableStateFlow<UpdateTradesmanProfileState>(
+        UpdateTradesmanProfileState.Idle
+    )
+    val updateTradesmanProfileState : StateFlow<UpdateTradesmanProfileState> =_updateTradesmanProfileState
 
-    fun updateClientProfile(profilePicture: Uri,context: Context) {
+    fun updateTradesmanProfile(profilePic: Uri, context:Context){
         viewModelScope.launch {
-
-            try {
+            _updateTradesmanProfileState.value = UpdateTradesmanProfileState.Loading
+            try{
                 //Converts into URI
-                val profPicture = createMultipartBodyPart(context, profilePicture, "profile_picture")
-                val response = apiService.updateClientProfilePicture(profilePic = profPicture)
-                if(response.isSuccessful){
+                val profilePicture = createMultipartBodyPart(context, profilePic, "profile_pic")
+
+                val response = apiService.updateTradesmanProfile( profilePic = profilePicture)
+                if (response.isSuccessful){
                     val body = response.body()
-                    if(body != null){
-                        _updateClientProfileState.value = UpdateClientProfilePictureState.Success(response)
+                    if(body!= null){
+                        _updateTradesmanProfileState.value =
+                            UpdateTradesmanProfileState.Success(body)
                     }else{
-                        _updateClientProfileState.value = UpdateClientProfilePictureState.Error("Response body is null")
+                        _updateTradesmanProfileState.value =
+                            UpdateTradesmanProfileState.Error("Response body is null")
                     }
-                }else{
+                }else {
                     val errorJson = response.errorBody()?.string()
                     println("Error response: $errorJson") // Debug log
                     val errorMessage = JsonErrorParser.extractField(errorJson, "message") ?: "Unknown error"
-                    _updateClientProfileState.value = UpdateClientProfilePictureState.Error(errorMessage)
+                    _updateTradesmanProfileState.value = UpdateTradesmanProfileState.Error(errorMessage)
                 }
-            }catch (e: Exception){
-                _updateClientProfileState.value = UpdateClientProfilePictureState.Error(e.message ?: "Unknown error")
+            }catch (e:Exception){
+                _updateTradesmanProfileState.value =
+                    UpdateTradesmanProfileState.Error(e.message.toString())
             }
-
-
         }
     }
-
     private fun createMultipartBodyPart(context: Context, uri: Uri, name: String): MultipartBody.Part {
         val contentResolver = context.contentResolver
         val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
@@ -75,14 +75,15 @@ class UpdateClientProfilePictureViewModel(private val apiService: ApiService): V
     }
 
     fun resetState() {
-        _updateClientProfileState.value = UpdateClientProfilePictureState.Idle
+        _updateTradesmanProfileState.value = UpdateTradesmanProfileState.Idle
     }
 
-    sealed class UpdateClientProfilePictureState{
-        data object Idle: UpdateClientProfilePictureState()
-        data object Loading: UpdateClientProfilePictureState()
-        data class Success(val data: Response<UpdateProfilePictureResponse>): UpdateClientProfilePictureState()
-        data class Error(val message: String): UpdateClientProfilePictureState()
-
+    sealed class UpdateTradesmanProfileState{
+        object Loading : UpdateTradesmanProfileState()
+        object Idle : UpdateTradesmanProfileState()
+        data class Success(val message: UpdateTradesmanProfileResponse) : UpdateTradesmanProfileState()
+        data class Error(val message: String) : UpdateTradesmanProfileState()
     }
 }
+
+

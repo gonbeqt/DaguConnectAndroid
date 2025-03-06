@@ -26,7 +26,6 @@ import com.example.androidproject.model.UpdateAddress
 import com.example.androidproject.model.UpdateAddressResponse
 import com.example.androidproject.model.UpdateJob
 import com.example.androidproject.model.UpdateJobResponse
-import com.example.androidproject.model.UpdateProfilePicture
 import com.example.androidproject.model.UpdateProfilePictureResponse
 import com.example.androidproject.model.ResetPasswordRequest
 import com.example.androidproject.model.ResetPasswordResponse
@@ -45,6 +44,7 @@ import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.SubmitResumeResponse
 import com.example.androidproject.model.client.TradesmanWorkStatusRequest
 import com.example.androidproject.model.client.TradesmanWorkStatusResponse
+import com.example.androidproject.model.client.UpdateTradesmanProfileResponse
 import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.rateTradesmanRequest
 import com.example.androidproject.model.client.rateTradesmanResponse
@@ -195,9 +195,15 @@ interface ApiService {
     @GET("/user/notification")
     suspend fun getNotifications(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<GetNotification>
 
+    @Multipart
     @POST("/client/update/profile_picture")
-    suspend fun updateClientProfilePicture(@Body request: UpdateProfilePicture): Response<UpdateProfilePictureResponse>
+    suspend fun updateClientProfilePicture(@Part profilePic: MultipartBody.Part): Response<UpdateProfilePictureResponse>
 
     @PUT("/client/update/profile_address")
     suspend fun updateClientAddress(@Body request: UpdateAddress): Response<UpdateAddressResponse>
+
+    @Multipart
+    @POST("/user/tradesman/update/profile")
+    suspend fun updateTradesmanProfile(@Part profilePic: MultipartBody.Part): Response<UpdateTradesmanProfileResponse>
+
 }

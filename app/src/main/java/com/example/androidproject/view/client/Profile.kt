@@ -88,6 +88,7 @@ import com.example.androidproject.view.ServicePosting
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
@@ -108,6 +109,7 @@ fun ProfileScreen(
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
     putJobs: PutJobViewModel,
+    updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
     initialTabIndex: Int = 0
 ) {
 
@@ -123,6 +125,24 @@ fun ProfileScreen(
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    //state of updating the profile picture
+    val updateProfilePictureState by updateClientProfilePictureViewModel.updateClientProfileState.collectAsState()
+
+    LaunchedEffect(updateProfilePictureState) {
+        when(val updateProf = updateProfilePictureState){
+            is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Success -> {
+                Toast.makeText(context, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                updateClientProfilePictureViewModel.resetState()
+            }
+            is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Error -> {
+              val error = updateProf.message
+                Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+            }
+            else->Unit
+
+        }
+    }
 
     // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableStateOf(0) }
@@ -160,6 +180,7 @@ fun ProfileScreen(
         uri?.let {
             selectedImageUri = it  // Update the local state with the new image URI
             //Here ata iimplement ung viewmodel
+            updateClientProfilePictureViewModel.updateClientProfile(selectedImageUri!!,context)
         }
     }
 

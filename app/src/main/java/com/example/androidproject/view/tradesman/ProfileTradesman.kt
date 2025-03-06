@@ -2,12 +2,8 @@ package com.example.androidproject.view.tradesman
 
 import LogoutViewModel
 import android.app.DownloadManager
-import android.content.ActivityNotFoundException
-import android.content.BroadcastReceiver
 import android.content.Context
 
-import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
 
@@ -46,8 +42,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,7 +53,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -92,6 +85,7 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -102,8 +96,10 @@ fun ProfileTradesman(
     navController: NavController,
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
+    updateTradesmanProfileViewModel : UpdateTradesmanProfileViewModel,
     LoadingUI :  @Composable () -> Unit, // Add this parameter
-    initialTabIndex: Int = 0 // Default to 0 if not provided
+    initialTabIndex: Int = 0, // Default to 0 if not provided
+
 
 ) {
     // Function to check network connectivity using NetworkCapabilities (modern approach)
@@ -115,9 +111,31 @@ fun ProfileTradesman(
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
     }
 
+
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+
+    //state of changing profile
+    val updateProfileState by updateTradesmanProfileViewModel.updateTradesmanProfileState.collectAsState()
+
+    LaunchedEffect(updateProfileState) {
+        when (val updatingProfile = updateProfileState){
+            is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Success->{
+                updateTradesmanProfileViewModel.resetState()
+                Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+            }
+            is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Error ->{
+                val errorMessage = updatingProfile.message
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+
+            }
+            else-> Unit
+        }
+    }
+
+
 
     // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableStateOf(0) }
@@ -138,6 +156,8 @@ fun ProfileTradesman(
         uri?.let {
             selectedImageUri = it  // Update the local state with the new image URI
             //Here ata iimplement ung viewmodel
+            updateTradesmanProfileViewModel.updateTradesmanProfile(selectedImageUri!!,context)
+
         }
     }
 
@@ -240,7 +260,7 @@ fun ProfileTradesman(
             if (isLoading){
                 LoadingUI()
             }else{
-                when (val profilestate =viewTradesmanProfilestate){
+                when (val profileState =viewTradesmanProfilestate){
                     is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
                         // Show loading indicator for initial or ongoing loading
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -384,7 +404,7 @@ fun ProfileTradesman(
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "Error: ${profilestate.message}",
+                                    text = "Error: ${profileState.message}",
                                     color = Color.Red,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold

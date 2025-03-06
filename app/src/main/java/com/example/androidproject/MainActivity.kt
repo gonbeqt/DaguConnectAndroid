@@ -6,29 +6,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,7 +23,6 @@ import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
-import com.example.androidproject.view.ForgotPassword
 import com.example.androidproject.view.client.AllTradesman
 import com.example.androidproject.view.client.Categories.ACRepair
 import com.example.androidproject.view.client.Categories.Cleaning
@@ -80,7 +63,6 @@ import com.example.androidproject.view.tradesman.ManageProfile
 import com.example.androidproject.view.tradesman.MyJobApplicationDetails
 import com.example.androidproject.view.tradesman.ProfileTradesman
 import com.example.androidproject.view.tradesman.ProfileVerification
-import com.example.androidproject.view.tradesman.ScheduleTradesman
 import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.view.tradesman.AccountSettingsTradesman
@@ -88,6 +70,7 @@ import com.example.androidproject.view.tradesman.UpdateResume
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
 import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.LoginViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
 import com.example.androidproject.viewmodel.ResetPassViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
@@ -108,6 +91,7 @@ import com.example.androidproject.viewmodel.client_profile.UpdateClientProfileAd
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
 import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
+import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 import com.example.androidproject.viewmodel.factories.ResetPassViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.ViewTradesmaProfileViewModelFactory
@@ -284,10 +268,13 @@ class MainActivity : ComponentActivity() {
         val getMessageViewModel = ViewModelProvider(this, getMessagesViewModelFactory)[GetMessagesViewModel::class.java]
 
         val updateClientProfilePictureViewModelFactory = UpdateClientProfilePictureViewModelFactory(apiService)
-        val updateClientProfileAddressViewModel = ViewModelProvider(this, updateClientProfilePictureViewModelFactory)[UpdateClientProfilePictureViewModel::class.java]
+        val updateClientProfilePictureViewModel = ViewModelProvider(this, updateClientProfilePictureViewModelFactory)[UpdateClientProfilePictureViewModel::class.java]
 
         val updateClientProfileAddress = UpdateClientProfileAddressViewModelFactory(apiService)
         val updateClientProfileAddressViewModelFactory = ViewModelProvider(this, updateClientProfileAddress)[UpdateClientProfileAddressViewModel::class.java]
+
+        val updateTradesmanVMFactory = UpdateTradesmanProfileViewModelFactory(apiService)
+        val updateTradesmanProfileViewModel = ViewModelProvider(this, updateTradesmanVMFactory)[UpdateTradesmanProfileViewModel::class.java]
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
@@ -347,6 +334,8 @@ class MainActivity : ComponentActivity() {
                             getTradesmanBookingViewModel,
                             putJobViewModel,
                             updateBookingClientViewModel,
+                            updateTradesmanProfileViewModel,
+                            updateClientProfilePictureViewModel,
                             { LoadingUI() } // Pass LoadingUI here
                         )
                     }
@@ -462,7 +451,7 @@ class MainActivity : ComponentActivity() {
                         BookingsTradesman(modifier = Modifier,navController, updateBookingClientViewModel,getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
                     }
                     composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel, { LoadingUI() })
+                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel, { LoadingUI() })
                     }
                     composable("manageprofile") {
                         ManageProfile(modifier = Modifier, navController)

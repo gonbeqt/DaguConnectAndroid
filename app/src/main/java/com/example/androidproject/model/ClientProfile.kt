@@ -16,10 +16,6 @@ data class ClientProfile(
     val createdAt: String
 )
 
-data class UpdateProfilePicture(
-    @SerializedName("profile_picture")
-    val profilePicture: String
-)
 
 data class UpdateProfilePictureResponse(
     val message: String
