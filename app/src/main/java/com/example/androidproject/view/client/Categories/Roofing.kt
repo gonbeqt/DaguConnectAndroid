@@ -87,7 +87,7 @@ fun Roofing(navController: NavController,getResumesViewModel: GetResumesViewMode
     }
     // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
-        getResumesViewModel.invalidatePagingSource()
+        getResumesViewModel.refreshResumes()
     }
 
 

@@ -18,8 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class GetClientBookingViewModel(private val apiService: ApiService) : ViewModel() {
 
     private val _pagingSource = MutableStateFlow<GetClientBookingPagingSource?>(null)
-    private val _dismissedBookings = mutableStateOf(setOf<Int>())
-    val dismissedBookings: State<Set<Int>> = _dismissedBookings
 
     val ClientBookingPagingData: Flow<PagingData<GetClientsBooking>> = Pager(
 
@@ -35,43 +33,4 @@ class GetClientBookingViewModel(private val apiService: ApiService) : ViewModel(
     ).flow.cachedIn(viewModelScope)
 
 
-
-    // Function to invalidate the PagingSource
-    fun invalidatePagingSource() {
-        _pagingSource.value?.invalidate()
-    }
-
-    fun dismissBooking(BookingId: Int) {
-        _dismissedBookings.value = _dismissedBookings.value + BookingId
-        invalidatePagingSource() // Force reload after dismissal
-    }
-
-   /* private val _clientbookingState = MutableStateFlow<GetClientBookings>(GetClientBookings.Idle)
-    val clientbookingState = _clientbookingState.asStateFlow()
-
-    fun getClientBookings() {
-        viewModelScope.launch {
-            _clientbookingState.value = GetClientBookings.Loading
-            try {
-                val response = apiService.getClientBooking()
-                val body = response.body()
-                if (response.isSuccessful) {
-                    if (body != null) {
-                        _clientbookingState.value = GetClientBookings.Success(body)
-                    }
-                } else {
-                    _clientbookingState.value = GetClientBookings.Error(response.message())
-                }
-            } catch (e: Exception) {
-                _clientbookingState.value = GetClientBookings.Error(e.localizedMessage ?: "Unknown error")
-            }
-        }
-    }
-
-    sealed class GetClientBookings{
-        object Idle : GetClientBookings()
-        object Loading : GetClientBookings()
-        data class Success(val data: List<GetClientsBooking>) : GetClientBookings()
-        data class Error(val message: String) : GetClientBookings()
-    }*/
 }

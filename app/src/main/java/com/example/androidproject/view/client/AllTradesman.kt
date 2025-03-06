@@ -72,6 +72,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
     val dismissedResumes by getResumes.dismissedResumes
+
     LaunchedEffect(resumeList.itemSnapshotList, dismissedResumes) {
         displayedResumes = resumeList.itemSnapshotList.items
             .filter { it.id !in dismissedResumes }
@@ -79,7 +80,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
 
     // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
-        getResumes.invalidatePagingSource()
+        getResumes.refreshResumes()
     }
 
 

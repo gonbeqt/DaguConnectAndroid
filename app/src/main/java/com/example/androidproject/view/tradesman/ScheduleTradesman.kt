@@ -53,7 +53,7 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
     val clientBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientsBooking.invalidatePagingSource()
+        clientBooking.refresh()
     }
     Log.i("Screen", "ScheduleScreen")
 

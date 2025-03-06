@@ -50,7 +50,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     val clientBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientsBooking.invalidatePagingSource()
+        clientBooking.refresh()
     }
     Log.i("Screen", "ScheduleScreen")
 

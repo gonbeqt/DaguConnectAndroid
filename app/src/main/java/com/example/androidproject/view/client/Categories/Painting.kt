@@ -86,7 +86,7 @@ fun Painting(navController: NavController,getResumesViewModel: GetResumesViewMod
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
     LaunchedEffect(Unit) {
-        getResumesViewModel.invalidatePagingSource()
+        getResumesViewModel.refreshResumes()
     }
 
 

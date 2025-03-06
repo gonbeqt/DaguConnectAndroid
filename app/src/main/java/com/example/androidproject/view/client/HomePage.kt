@@ -287,7 +287,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        getResumesViewModel.invalidatePagingSource()
+        getResumesViewModel.refreshResumes()
     }
 
     LaunchedEffect(resumeList.itemSnapshotList) {

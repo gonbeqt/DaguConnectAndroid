@@ -18,10 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class GetTradesmanBookingViewModel(private val apiService: ApiService) : ViewModel() {
 
-    private val _pagingSource = MutableStateFlow<GetTradesmanBookingPagingSource?>(null)
-    private val _dismissedBookings = mutableStateOf(setOf<Int>())
-    val dismissedBookings: State<Set<Int>> = _dismissedBookings
-
     val TradesmanBookingPagingData: Flow<PagingData<GetTradesmanBooking>> = Pager(
 
         config = PagingConfig(
@@ -30,20 +26,9 @@ class GetTradesmanBookingViewModel(private val apiService: ApiService) : ViewMod
             prefetchDistance = 2,
             enablePlaceholders = false
         ),
-        pagingSourceFactory = {
-            GetTradesmanBookingPagingSource(apiService).also { _pagingSource.value = it }
-        }
+        pagingSourceFactory = { GetTradesmanBookingPagingSource(apiService)}
     ).flow.cachedIn(viewModelScope)
 
 
 
-    // Function to invalidate the PagingSource
-    fun invalidatePagingSource() {
-        _pagingSource.value?.invalidate()
-    }
-
-    fun dismissBooking(BookingId: Int) {
-        _dismissedBookings.value = _dismissedBookings.value + BookingId
-        invalidatePagingSource() // Force reload after dismissal
-    }
 }

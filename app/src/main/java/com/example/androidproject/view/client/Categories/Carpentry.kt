@@ -86,7 +86,7 @@ fun Carpentry(navController: NavController,getResumesViewModel: GetResumesViewMo
             .filter { it.id !in dismissedResumes }
     }
     LaunchedEffect(Unit) {
-        getResumesViewModel.invalidatePagingSource()
+        getResumesViewModel.refreshResumes()
     }
 
 

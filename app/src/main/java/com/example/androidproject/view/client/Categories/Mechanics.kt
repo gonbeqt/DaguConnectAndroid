@@ -86,7 +86,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
     LaunchedEffect(Unit) {
-        getResumesViewModel.invalidatePagingSource()
+        getResumesViewModel.refreshResumes()
     }
 
     Box(

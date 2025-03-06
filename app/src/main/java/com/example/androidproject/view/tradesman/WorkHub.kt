@@ -261,7 +261,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
     val allBooking = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getTradesmanBooking.invalidatePagingSource()
+        allBooking.refresh()
     }
     LazyColumn(
         modifier = Modifier
@@ -285,7 +285,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
     val bookingPendingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getTradesmanBooking.invalidatePagingSource()
+        bookingPendingstate.refresh()
     }
     val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
     LazyColumn(
@@ -309,7 +309,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
     val declinedBookingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getTradesmanBooking.invalidatePagingSource()
+        declinedBookingState.refresh()
     }
 
     val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
@@ -335,7 +335,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
    val activeBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getTradesmanBooking.invalidatePagingSource()
+        activeBookingstate.refresh()
     }
     val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Active" }
     LazyColumn(
@@ -360,7 +360,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
     val completedBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getTradesmanBooking.invalidatePagingSource()
+        completedBookingstate.refresh()
     }
     val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
 
@@ -385,7 +385,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
     val cancelledBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getTradesmanBooking.invalidatePagingSource()
+        cancelledBookingstate.refresh()
     }
 
     val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Cancelled" }
@@ -1533,7 +1533,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
     val myJobs = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.invalidatePagingSource()
+        getMyJobApplications.refreshJobApplicants()
     }
 
     LazyColumn(
@@ -1567,7 +1567,7 @@ fun PendingMySubmissionsTradesmanContent(
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.invalidatePagingSource()
+        getMyJobApplications.refreshJobApplicants()
     }
 
     LazyColumn(
@@ -1598,7 +1598,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.invalidatePagingSource()
+        myJob.refresh()
     }
     val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
     LazyColumn(
@@ -1624,7 +1624,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.invalidatePagingSource()
+        myJob.refresh()
     }
 
     val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }
@@ -1651,7 +1651,7 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.invalidatePagingSource()
+        myJob.refresh()
     }
 
     val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }
@@ -1678,7 +1678,7 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.invalidatePagingSource()
+        myJob.refresh()
     }
 
     val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }

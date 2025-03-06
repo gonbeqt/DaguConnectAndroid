@@ -269,7 +269,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 
     // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
-        getClientsBooking.invalidatePagingSource()
+        allBooking.refresh()
     }
     LazyColumn(
         modifier = Modifier
@@ -306,13 +306,13 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 
 @Composable
 fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController) {
-    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    val pending = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.invalidatePagingSource()
+        pending.refresh()
     }
     // Filter the bookings to get only those with status "Pending"
-    val pendingBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
+    val pendingBookings = pending.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -335,14 +335,14 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
 }
 @Composable
 fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
-    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    val declined = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.invalidatePagingSource()
+        declined.refresh()
     }
 
     // Filter the bookings to get only those with status "Declined"
-    val declinedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
+    val declinedBookings = declined.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -364,13 +364,13 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
 
 @Composable
 fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navController:NavController,updateWorkStatusViewModel:UpdateBookingTradesmanViewModel) {
-    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    val active = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.invalidatePagingSource()
+        active.refresh()
     }
     // Filter the bookings to get only those with status "Active"
-    val activeBooking = clientbookingState.itemSnapshotList.items.filter { it.bookingStatus == "Active" }
+    val activeBooking = active.itemSnapshotList.items.filter { it.bookingStatus == "Active" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -390,12 +390,12 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
 
 @Composable
 fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
-    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    val completed = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
-        getClientBooking.invalidatePagingSource()
+        completed.refresh()
     }
     // Filter the bookings to get only those with status "Completed"
-    val completedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }
+    val completedBookings = completed.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -415,14 +415,14 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
 }
 @Composable
 fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
-    val clientbookingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    val cancelled = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getClientBooking.invalidatePagingSource()
+        cancelled.refresh()
     }
 
     // Filter the bookings to get only those with status "Completed"
-    val completedBookings = clientbookingState.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }
+    val completedBookings = cancelled.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
@@ -1576,7 +1576,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
     val myJobs = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplicant.invalidatePagingSource()
+        myJobs.refresh()
     }
 
     LazyColumn(

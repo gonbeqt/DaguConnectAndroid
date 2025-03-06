@@ -86,7 +86,7 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
     LaunchedEffect(Unit)  {
-        getResumesViewModel.invalidatePagingSource()
+        getResumesViewModel.refreshResumes()
     }
 
 

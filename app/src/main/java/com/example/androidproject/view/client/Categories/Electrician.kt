@@ -87,7 +87,7 @@ fun Electrician(navController: NavController,getResumesViewModel: GetResumesView
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
     LaunchedEffect(Unit) {
-        getResumesViewModel.invalidatePagingSource()
+        getResumesViewModel.refreshResumes()
     }
 
 
