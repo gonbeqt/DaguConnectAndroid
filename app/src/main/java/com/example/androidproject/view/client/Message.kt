@@ -146,7 +146,7 @@ fun ChatListItem(chats: Chats,navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .clickable { navController.navigate("message_screen") },
+            .clickable { navController.navigate("messaging") },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
