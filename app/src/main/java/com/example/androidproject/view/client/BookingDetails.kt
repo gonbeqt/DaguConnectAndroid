@@ -152,7 +152,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                             contentAlignment = Alignment.Center // Ensure padding is inside the gradient box
                         ) {
                             Text(
-                                text = "Your appointment is Pending",
+                                text = "Your appointment is ${clientbooking.bookingStatus}",
                                 fontSize = nameTextSize,
                                 color = Color.White,
                             )
@@ -214,7 +214,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                         Box(
                                             modifier = Modifier
                                                 .background(
-                                                    color = (Color(0xFFFFF2DD)),
+                                                    color = (Color(0xFFF5F5F5)),
                                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                                                         12.dp
                                                     )
@@ -232,7 +232,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                         Box(
                                             modifier = Modifier
                                                 .background(
-                                                    color = (Color(0xFFFFF2DD)),
+                                                    color = (Color(0xFFF5F5F5)),
                                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                                                         12.dp
                                                     )
