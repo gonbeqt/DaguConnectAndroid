@@ -42,24 +42,29 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ToggleOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextRange
 import com.google.accompanist.flowlayout.FlowRow
 
 
 @Composable
 fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
-    var estimatedRate by remember { mutableStateOf(TextFieldValue("₱100")) }
+    var selectedLocation by remember { mutableStateOf("Select location") }
+    var estimatedRate by remember { mutableStateOf(TextFieldValue("₱")) }
     var aboutMe by remember {
         mutableStateOf(
             TextFieldValue("")
         )
     }
-
-    val allSkills = listOf("Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5", "Skill 6", "Skill 7")
-    var selectedSkills by remember { mutableStateOf(setOf("Skill 2", "Skill 3", "Skill 7")) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -148,10 +153,9 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        modifier = Modifier.padding(2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Status:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
+                        Text(text = "Status:", fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.DarkGray)
                         Text(
                             modifier = Modifier.padding(start = 8.dp),
                             text = if (isAvailable) "Available" else "Unavailable", // change text dynamically
@@ -191,12 +195,58 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
 
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    Text(text = "About Me:", fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.DarkGray)
+
+                    // textfield with placeholder
+                    BasicTextField(
+                        value = aboutMe,
+                        onValueChange = { aboutMe = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                            .padding(10.dp),
+                        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                        decorationBox = { innerTextField ->
+                            if (aboutMe.text.isEmpty()) {
+                                Text(
+                                    text = "Example: I'm a licensed plumber with over 7 years of experience handling everything from leak repairs to full plumbing system installations.",
+                                    fontSize = 16.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            innerTextField()
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            item {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    Text(text = "Preferred location:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                    ) {
+                        CustomDropdown(
+                            selectedOption = selectedLocation,
+                            onOptionSelected = { selectedLocation = "$it, Pangasinan" }
+                        )
+
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            item {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                     Text(text = "Estimated rate:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(10.dp)
+                            .padding(12.dp)
                     ) {
                         // Placeholder
                         if (estimatedRate.text == "₱") {
@@ -222,120 +272,6 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
                 }
                 Spacer(modifier = Modifier.height(10.dp))
             }
-
-            item {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(text = "About Me:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
-
-                    // textfield with placeholder
-                    BasicTextField(
-                        value = aboutMe,
-                        onValueChange = { aboutMe = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(10.dp),
-                        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                        decorationBox = { innerTextField ->
-                            if (aboutMe.text.isEmpty()) {
-                                Text(
-                                    text = "Example: I'm a licensed plumber with over 7 years of experience handling everything from leak repairs to full plumbing system installations.",
-                                    fontSize = 16.sp,
-                                    color = Color.Gray
-                                )
-                            }
-                            innerTextField()
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-
-            // selected skills section
-            item {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(text = "Specialties", fontWeight = FontWeight.Normal, fontSize = 16.sp)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(70.dp)
-                            .border(1.dp, Color.DarkGray, RoundedCornerShape(10.dp))
-                            .padding(10.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (selectedSkills.isEmpty()) {
-                            Text(
-                                text = "Provide at least 3 maximum skill set",
-                                textAlign = TextAlign.Start,
-                                fontSize = 16.sp,
-                                color = Color.Gray
-                            )
-                        } else {
-                            // selected Skills
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                selectedSkills.forEach { skill ->
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(4.dp)
-                                            .background(Color(0xFFB3E5FC), RoundedCornerShape(50.dp))
-                                            .clickable {
-                                                selectedSkills = selectedSkills - skill
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                        ) {
-                                            Text(text = skill, fontSize = 14.sp, color = Color.Black)
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = "Remove skill",
-                                                tint = Color.Black,
-                                                modifier = Modifier.size(14.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            // available skill section
-            item {
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    mainAxisSpacing = 8.dp, // Spacing between items horizontally
-                    crossAxisSpacing = 8.dp // Spacing between rows
-                ) {
-                    allSkills.filter { it !in selectedSkills }.forEach { skill ->
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFFE0E0E0), RoundedCornerShape(50.dp))
-                                .clickable {
-                                    selectedSkills = selectedSkills + skill
-                                }
-                                .padding(horizontal = 10.dp, vertical = 6.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = skill,
-                                fontSize = 14.sp,
-                                color = Color.DarkGray
-                            )
-                        }
-                    }
-                }
-            }
             item {
                 Button(
                     onClick = { navController.navigate("profiletradesman") },
@@ -347,5 +283,65 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
             }
         }
 
+    }
+}
+
+@Composable
+fun CustomDropdown(
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
+
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val options = listOf("Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
+        "Bayambang", "Binalonan", "Binmaley", "Bolinao", "Bugallon", "Burgos", "Calasiao",
+        "Dagupan City", "Dasol", "Infanta", "Labrador", "Laoac", "Lingayen", "Mabini", "Malasiqui",
+        "Manaoag", "Mangaldan", "Mangatarem", "Mapandan", "Natividad", "Pozorrubio", "Rosales",
+        "San Fabian", "San Jacinto", "San Manuel", "San Nicolas", "San Quintin", "Santa Barbara",
+        "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
+        "Urdaneta City", "Villasis")
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+            .clickable { expanded = true }
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = selectedOption,
+                fontSize = 16.sp,
+                color = if (selectedOption == "Select location") Color.Gray else Color.Black
+            )
+
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = "Dropdown",
+                tint = Color.Gray,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { expanded = true }
+            )
+        }
+    }
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier.width(330.dp).background(Color.White)
+    ) {
+        options.forEach { option ->
+            DropdownMenuItem(
+                text = { Text(option) },
+                onClick = {
+                    onOptionSelected(option)
+                    expanded = false
+                }
+            )
+        }
     }
 }
