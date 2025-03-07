@@ -75,13 +75,11 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
         Spacer(modifier = Modifier.height(8.dp))
 
 
-        Text(
-            text = "Today"
-        )
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .size(200.dp)
+                .size(420.dp)
                 .background(Color(0xFFD9D9D9))
             ,
             contentPadding = PaddingValues(12.dp),
@@ -96,28 +94,6 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
                         NotificationCardToday(today)
                     }
                 }
-            }
-        }
-        Text(
-            text = "Previous"
-        )
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxHeight()
-                .size(420.dp)
-                .background(Color(0xFFD9D9D9))
-
-            ,
-            contentPadding = PaddingValues(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-
-            if (previousNotifications != null) {
-                items(previousNotifications.size) { index ->
-                    val previous = previousNotifications[index]
-                    if (previous != null) {
-                        NotificationCardPrevious(previous)
-                    } }
             }
         }
     }
@@ -215,36 +191,3 @@ fun NotificationCardToday(notification: Notification) {
     }
 }
 
-@Composable
-fun NotificationCardPrevious(notification: Notification) {
-    val createdAt = ViewModelSetups.formatDateTime(notification.createdAt)
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text ="${notification.notificationTitle}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-
-            Text(
-                text = "${notification.message}",
-                fontSize = 12.sp,
-                color = Color.Gray
-            )
-
-            Text(
-                text = "$createdAt",
-                fontSize = 12.sp,
-                color = Color.Gray
-            )
-        }
-    }
-}

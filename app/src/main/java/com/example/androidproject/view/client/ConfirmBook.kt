@@ -84,6 +84,7 @@ fun ConfirmBook(
     val bookingState by bookingTradesmanViewModel.bookTradesmanState.collectAsState()
     var isValid by remember { mutableStateOf(false) }
     val phoneRegex = "^09[0-9]{9}$".toRegex()
+    var isValidAddress by remember { mutableStateOf(true) }
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -234,7 +235,10 @@ fun ConfirmBook(
                                     )
                                     Spacer(modifier = Modifier.size(4.dp))
                                     Text(
-                                        text = "4",
+                                        text =  when {
+                                            resume.ratings == 0f -> "0"
+                                            else -> String.format("%.1f", resume.ratings)
+                                        },
                                         fontSize = smallTextSize
                                     )
                                 }
@@ -261,18 +265,21 @@ fun ConfirmBook(
                                     .padding(top = 6.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color.White)
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                            ) {
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isValidAddress) Color.Gray else Color.Red,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )                            ) {
                                 TextField(
                                     value = address,
-                                    onValueChange = { address = it },
+                                    onValueChange = { address = it
+                                        isValidAddress = validateAddress(address)},
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .background(Color.White),
+
                                     placeholder = { Text(text = "eg. 123 Street Name, Barangay, City") },
-                                    maxLines = 3,
-
-
+                                    maxLines = 2,
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.White,
                                         unfocusedContainerColor = Color.White,
@@ -282,6 +289,14 @@ fun ConfirmBook(
                                         unfocusedTextColor = Color.Black,
                                         cursorColor = Color.Black
                                     ),
+                                )
+                            }
+                            if (!isValidAddress) {
+                                Text(
+                                    text = "Please enter a valid address (e.g., 123 Street Name, Barangay, City)",
+                                    color = Color.Red,
+                                    fontSize = smallTextSize,
+                                    modifier = Modifier.padding(top = 4.dp)
                                 )
                             }
 
@@ -473,6 +488,7 @@ fun ConfirmBook(
         }
         else -> Unit
     }
+
 }
 @Composable
 fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) -> Unit) {
@@ -534,3 +550,11 @@ fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) ->
     }
 }
 
+fun validateAddress(input: String): Boolean {
+    if (input.isEmpty()) return false
+    val parts = input.split(",").map { it.trim() }
+    if (parts.size < 3) return false // Must have at least street, barangay, and city
+    val streetPart = parts[0].trim()
+    if (!streetPart.any { it.isDigit() }) return false
+    return true
+}

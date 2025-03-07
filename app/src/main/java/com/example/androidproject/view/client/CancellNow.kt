@@ -261,7 +261,7 @@ fun CancelNow(
                                         Box(
                                             modifier = Modifier
                                                 .background(
-                                                    color = (Color(0xFFFFF2DD)),
+                                                    color = (Color(0xFFF5F5F5)),
                                                     shape = RoundedCornerShape(12.dp)
                                                 )
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -275,7 +275,7 @@ fun CancelNow(
                                         Box(
                                             modifier = Modifier
                                                 .background(
-                                                    color = (Color(0xFFFFF2DD)),
+                                                    color = (Color(0xFFF5F5F5)),
                                                     shape = RoundedCornerShape(12.dp)
                                                 )
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)

@@ -29,6 +29,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -138,7 +140,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         Image(
             painter = painterResource(id = R.drawable.authbg),
             contentDescription = "Background Image",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .offset(y = (-150).dp)
         )
 
@@ -527,7 +530,9 @@ fun BirthdayCalendar(
             border = BorderStroke(1.dp, Color.Gray)
         ) {
             Row(
-                Modifier.fillMaxWidth().offset(x = (-10).dp),
+                Modifier
+                    .fillMaxWidth()
+                    .offset(x = (-10).dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -637,16 +642,23 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
         }
         Row(
             modifier = Modifier
-                .fillMaxWidth().padding(horizontal = 25.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // First Card
             Card(
-                modifier = Modifier.size(70.dp)
+                modifier = Modifier
+                    .size(70.dp)
                     .weight(1f)
                     .padding(8.dp)
-                    .clickable {
+
+                    .clickable
+                        (
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ){
                         if (selectedCard.value != true) {
                             selectedCard.value = true
                             onIsClientChange(true)
@@ -654,7 +666,8 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
                             selectedCard.value = null
                             onIsClientChange(false)
                         }
-                    },
+                    }
+                    ,
                 colors = CardDefaults.cardColors(
                     if (selectedCard.value == true) Color(0xFF122826) else Color.White
                 ),
@@ -685,18 +698,23 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
 
             // Second Card
             Card(
-                modifier = Modifier.size(70.dp)
+                modifier = Modifier
+                    .size(70.dp)
                     .weight(1f)
                     .padding(8.dp)
-                    .clickable {
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
                         if (selectedCard.value != false) {
                             selectedCard.value = false
-                            onIsClientChange(false)  // Your implementation for second card
+                            onIsClientChange(false)
                         } else {
                             selectedCard.value = null
-                            onIsClientChange(false)  // Deselecting (not selecting any card)
+                            onIsClientChange(false)
                         }
-                    },
+                    }
+                    ,
                 colors = CardDefaults.cardColors(
                     if (selectedCard.value == false) Color(0xFF122826) else Color.White
                 ),
@@ -786,7 +804,9 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
 fun RegistrationLoginButton(navController: NavController,modifier: Modifier = Modifier){
     Column(modifier = modifier) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         )
         {

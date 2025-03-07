@@ -42,6 +42,9 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,6 +56,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,6 +73,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -78,6 +83,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberImagePainter
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
@@ -181,7 +187,7 @@ fun ProfileTradesman(
             modifier = Modifier
                 .padding(top = 10.dp, start = 25.dp, end = 25.dp)
                 .fillMaxWidth()
-                .height(70.dp),
+                .height(50.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -205,9 +211,9 @@ fun ProfileTradesman(
                 )
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = "User Account",
+                    contentDescription = "User Account Settings",
                     tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp).clickable { navController.navigate("accountsettingstradesman") }
                 )
             }
         }
@@ -305,33 +311,53 @@ fun ProfileTradesman(
 
 
                                         )
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = "Edit Profile Picture",
-                                            tint = Color.Gray,
+                                        Box(
                                             modifier = Modifier
-                                                .size(20.dp)
-                                                .align(Alignment.TopEnd)
-                                                .background(Color.White, CircleShape)
+                                                .size(28.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.Green)
+                                                .align(Alignment.BottomEnd)
                                                 .clickable {
                                                     imageLauncher.launch("image/*")
-                                                }
-                                        )
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Edit Profile Picture",
+                                                tint = Color.White,
+                                                modifier = Modifier
+                                                    .size(20.dp)
+
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
-                                    Column(modifier = Modifier.padding(top = 5.dp)) {
-                                        Text(
-                                            text = tradesmanDetails.tradesmanFullName ?: "N/A",
-                                            color = Color.White,
-                                            style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                                        )
+                                    Column {
+                                        Row{
+                                            Text(
+                                                text = tradesmanDetails.tradesmanFullName ?: "N/A",
+                                                color = Color.White,
+                                                style = TextStyle(
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Icon(
+                                                painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),                                                contentDescription = "Profile Verified",
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(24.dp)
+
+                                            )
+                                        }
                                         Text(
                                             text = tradesmanDetails.email ?: "N/A",
                                             color = Color.White,
                                             style = TextStyle(fontSize = 14.sp)
                                         )
                                         Text(
-                                            text = tradesmanDetails.preferredWorkLocation ?: "N/A",
+                                            text = tradesmanDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
                                             color = Color.White,
                                             style = TextStyle(fontSize = 14.sp)
                                         )
@@ -468,9 +494,9 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
         WindowType.LARGE -> 22.sp
     }
     val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
     }
     val smallTextSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -509,7 +535,9 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
     }
 
     // Rest of the composable remains the same...
-    Column(modifier = Modifier.padding(8.dp).verticalScroll(rememberScrollState())) {
+    Column(modifier = Modifier
+        .padding(2.dp)
+        .verticalScroll(rememberScrollState())) {
         Box(modifier = Modifier.border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier.padding(10.dp)) {
                 if (tradesmanDetails.isApprove == 0) {
@@ -539,8 +567,40 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                 }
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)){
+                    Box(
+                        modifier = Modifier
+                            .clickable {  }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFF122826), shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Public View", color = Color(0xFF122826), fontSize = 14.sp)
+                    }
 
+                    Box(
+                        modifier = Modifier
+                            .clickable {  }
+                            .background(
+                                color = Color(0xFF122826),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .clickable { navController.navigate("manageprofile") }
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Manage Profile", color = Color.White, fontSize = 14.sp)
+                    }
+                }
 
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -551,33 +611,16 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         text = "Specialty : ",
                         color = Color.Gray,
                         fontSize = nameTextSize,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                         Text(
                             text = displayDetails.specialty?.replace("_"," ").takeIf { it != "null" } ?: "N/A",
                             color = Color.Black,
                             fontSize = taskTextSize,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Medium,
                             modifier = Modifier.weight(1f)
 
                         )
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .border(1.dp,Color.Gray, shape = RoundedCornerShape(12.dp))
-                                .background(Color.White)
-                                .clickable { navController.navigate("updateresume") },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Icon",
-                                tint = Color.Black,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
 
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -591,33 +634,35 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                             text = "About Me:",
                             fontSize = nameTextSize,
                             color = Color.Gray,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Medium
                         )
                     }
                     Text(
                         text = displayDetails.aboutMe ?: "N/A",
-                        fontSize = 16.sp,
+                        fontSize = taskTextSize,
                         color = Color.Black,
-                        fontWeight = FontWeight.Normal
+                        fontWeight = FontWeight.Medium
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Preferred Location :",
+                            color = Color.Gray,
+                            fontSize = nameTextSize,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                     Text(
-                        text = "Preferred Location :",
-                        color = Color.Gray,
-                        fontSize = nameTextSize,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text =  displayDetails.preferredWorkLocation ?: "N/A",
+                        text = displayDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
                         color = Color.Black,
                         fontSize = taskTextSize,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -630,13 +675,13 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         text = "Est. Rate :",
                         fontSize = nameTextSize,
                         color = Color.Gray,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = displayDetails.workFee?.takeIf { it != 0 }?.let { "₱ $it /hr" } ?: "N/A",
                         fontSize = taskTextSize,
                         color = Color.Black,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -650,7 +695,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         text = "Trades Credential:" ,
                                 fontSize = nameTextSize,
                         color = Color.Gray,
-                        fontWeight = FontWeight(500)
+                        fontWeight = FontWeight.Medium
                     )
 
                         Text(
@@ -658,7 +703,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                             color = Color.Blue,
                             fontSize = taskTextSize,
                             textDecoration = TextDecoration.Underline,
-                            fontWeight = FontWeight(500),
+                            fontWeight = FontWeight.Medium,
                             modifier = Modifier
                                 .clickable {
                                     val fileUrl = tradesmanDetails.documents
@@ -680,7 +725,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 50.dp)) {
             Text(text = "Ratings", fontSize = nameTextSize, fontWeight = FontWeight.Bold)
             Text(text = "Feedback from satisfied clients", fontSize = taskTextSize, color = Color.Gray)
             Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
