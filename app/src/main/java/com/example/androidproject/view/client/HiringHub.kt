@@ -191,7 +191,7 @@ fun BookingsScreen(
                             0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
                             1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
                             2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
-                            3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication )
+                            3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
                             4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
                             5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
                         }
@@ -644,7 +644,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
         when (val updateWorkStatusState= updateWorkState) {
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
                 Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
-                updateBookingTradesmanViewModel.resetState()
+                updateWorkStatusViewModel.resetState()
 
                 navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
                     popUpTo(navController.graph.startDestinationId)  { inclusive = false }
@@ -782,7 +782,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        updateBookingTradesmanViewModel.updateWorkStatus(
+                        updateWorkStatusViewModel.updateWorkStatus(
                             "Completed",
                             NULL.toString(),
                             activeBooking.id
@@ -804,11 +804,6 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
         }
     }
 }
-
-
-
-}
-
 
 @Composable
 fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController) {
@@ -1508,7 +1503,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
 }
 
 @Composable
-fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -1526,7 +1521,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
     ) {
         items(activeApplication.size) { index ->
             val activeJobs = activeApplication[index]
-            ActiveApplicantsItem(activeJobs, navController)
+            ActiveApplicantsItem(activeJobs, navController, putJobApplicationStatus)
         }
     }
 }
@@ -1710,7 +1705,6 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
             if (buttonSubmit) {
                 Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatus.resetState()
-                navController.navigate("main_screen")
             }
         }
     }
@@ -1849,7 +1843,6 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 }
 
             }
-
         }
         if (showApproveDialog) {
             AlertDialog(
@@ -1882,7 +1875,6 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                             showApproveDialog = false
                             showJobApproveDialog = true
                             putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Active", "")
-
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
                     ) {
@@ -2046,12 +2038,15 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 
 }
 @Composable
-fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) {
+fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
     var cancel by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-
+    val putJobState by putJobApplicationStatus.putJobApplicationState.collectAsState()
+    val context = LocalContext.current
+    var cancelledClicked by remember { mutableStateOf(false) }
+    var completedClicked by remember { mutableStateOf(false) }
     val reasons = listOf(
         "Change of Mind",
         "Found a Different Service Provider",
@@ -2060,6 +2055,30 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
         "Personal Reasons",
         "Others"
     )
+
+    LaunchedEffect(putJobState) {
+        if (cancelledClicked || completedClicked) {
+            when (val putJob = putJobState) {
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
+
+                }
+
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
+
+                }
+
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
+                    Toast.makeText(context, putJob.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
+                    Toast.makeText(context, "Job Updated", Toast.LENGTH_SHORT).show()
+                    putJobApplicationStatus.resetState()
+                }
+            }
+        }
+    }
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 250.dp
@@ -2176,7 +2195,14 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                             modifier = Modifier
                                 .clickable(indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
-                                ) { }
+                                ) {
+                                    putJobApplicationStatus.updateJobApplicationStatus(
+                                        myJob.id,
+                                        "Completed",
+                                        "",
+                                    )
+                                    completedClicked = true
+                                }
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -2303,7 +2329,9 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Button(
-                                    onClick = { cancel = false },
+                                    onClick = {
+                                        cancel = false
+                                    },
                                     modifier = Modifier.size(110.dp, 45.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(
@@ -2315,7 +2343,25 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController) 
                                 }
                                 Button(
                                     onClick = {
-
+                                        if (selectedIndex == -1) {
+                                            Toast.makeText(context, "Please select a reason for cancellation", Toast.LENGTH_SHORT).show()
+                                        } else if (selectedIndex == reasons.lastIndex && otherReason.isEmpty()) {
+                                            Toast.makeText(context, "Please type a reason for cancellation", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                                otherReason
+                                            } else {
+                                                reasons[selectedIndex]
+                                            }
+                                            Log.d("My jobs", "Selected reason: ${myJob.id}")
+                                            putJobApplicationStatus.updateJobApplicationStatus(
+                                                myJob.id,
+                                                "Cancelled",
+                                                selectedReason,
+                                            )
+                                            cancelledClicked = true
+                                            cancel = false
+                                        }
                                     },
                                     modifier = Modifier.size(110.dp, 45.dp),
                                     colors = ButtonDefaults.buttonColors(

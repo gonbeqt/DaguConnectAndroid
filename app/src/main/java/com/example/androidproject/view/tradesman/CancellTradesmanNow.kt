@@ -1,5 +1,6 @@
 package com.example.androidproject.view.tradesman
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -43,7 +45,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.androidproject.LoadingUI
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.view.theme.myGradient3
@@ -64,13 +70,34 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
     val viewJobApplicationState by viewJobApplication.viewApplicationState.collectAsState()
     val putJob by putJobApplicationStatus.putJobApplicationState.collectAsState()
     var Cancel by remember { mutableStateOf(false) }
+    var cancelClicked by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
-    val id = jobApplicationId.toIntOrNull()
+    val id = jobApplicationId.toInt()
 
     LaunchedEffect(Unit) {
         if (id != null) {
             viewJobApplication.viewJobApplication(id)
+        }
+    }
+
+    LaunchedEffect(putJob) {
+        if (cancelClicked) {
+            when(val jobPut = putJob){
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
+                    Toast.makeText(context, jobPut.message, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
+                }
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {}
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
+                    Toast.makeText(context, "Job application cancelled!", Toast.LENGTH_SHORT)
+                        .show()
+                    putJobApplicationStatus.resetState()
+                }
+            }
         }
     }
 
@@ -82,26 +109,6 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
         "Personal Reasons",
         "Others"
     )
-    when(putJob) {
-        is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
-
-        }
-
-        is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
-
-        }
-
-        is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
-
-        }
-
-        is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
-            Cancel = false
-            Toast.makeText(LocalContext.current, "Job Application Cancelled", Toast.LENGTH_SHORT).show()
-            putJobApplicationStatus.resetState()
-            navController.navigate("main_screen")
-        }
-    }
      when (viewJobApplicationState) {
          is ViewJobApplicationViewModel.ViewJobApplicationState.Error -> {
 
@@ -117,6 +124,13 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
              val viewJob = (viewJobApplicationState as ViewJobApplicationViewModel.ViewJobApplicationState.Success).data
              val deadline = ViewModelSetups.formatDateTime(viewJob?.jobApplication?.jobDeadline)
              val createdAt = ViewModelSetups.formatDateTime(viewJob?.jobApplication?.createdAt)
+             var service = viewJob?.jobApplication?.jobType
+             if (service == "Electrical_work") {
+                 service = "Electrical Work"
+                }
+             if (service == "Plumber_work") {
+                 service = "Plumbing Work"
+             }
              Column( // Change Box to Column
                  modifier = Modifier
                      .fillMaxSize()
@@ -269,11 +283,13 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
                                      verticalAlignment = Alignment.CenterVertically
                                  ) {
                                      // Tradesman image
-                                     Image(
-                                         painter = painterResource(R.drawable.pfp),
-                                         contentDescription = "Tradesman Image",
+                                     AsyncImage(
+                                         model = viewJob?.jobApplication?.clientProfilePicture, // Use URL here
+                                         contentDescription = "Profile Image",
                                          modifier = Modifier
-                                             .size(100.dp)
+                                             .size(62.dp)
+                                             .clip(CircleShape),
+                                         contentScale = ContentScale.Crop
                                      )
 
                                      // Tradesman details
@@ -285,7 +301,7 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
 
                                          if (viewJob != null) {
                                              Text(
-                                                 text = "Looking for ${viewJob.jobApplication.jobType}",
+                                                 text = "Service: $service",
                                                  color = Color.Black,
                                                  fontWeight = FontWeight(500),
                                                  fontSize = 18.sp,
@@ -549,12 +565,23 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
                                                  }
                                                  Button(
                                                      onClick = {
-                                                         if (id != null) {
+                                                         if (selectedIndex == -1) {
+                                                             Toast.makeText(context, "Please select a reason for cancellation", Toast.LENGTH_SHORT).show()
+                                                         } else if (selectedIndex == reasons.lastIndex && otherReason.isEmpty()) {
+                                                             Toast.makeText(context, "Please type a reason for cancellation", Toast.LENGTH_SHORT).show()
+                                                         } else {
+                                                             val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                                                 otherReason
+                                                             } else {
+                                                                 reasons[selectedIndex]
+                                                             }
                                                              putJobApplicationStatus.updateJobApplicationStatus(
                                                                  id,
                                                                  "Cancelled",
-                                                                 selectedIndex.toString(),
+                                                                 selectedReason,
                                                              )
+                                                             cancelClicked = true
+                                                             Cancel = false
                                                          }
                                                      },
                                                      modifier = Modifier.size(110.dp, 45.dp),

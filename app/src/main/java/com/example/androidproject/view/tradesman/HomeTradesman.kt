@@ -208,6 +208,12 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
 @Composable
 fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
+    var jobType = getJobs.jobType
+
+    if (jobType == "Ac_technician") {
+        jobType = "AC Technician"
+    }
+
     val profilePicture = getJobs.clientProfilePicture
     Card(
         modifier = Modifier
@@ -241,7 +247,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
             Row {
                 Column {
                     Text(
-                        text = "Looking for ${getJobs.jobType}",
+                        text = "Looking for $jobType",
                         fontSize = 24.sp,
                         color = Color.Black,
                         fontWeight = FontWeight(500)
@@ -298,6 +304,12 @@ fun RecentJobs(navController: NavController, getRecentJobsViewModel: GetRecentJo
 
 @Composable
 fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
+    val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
+    var jobType = getJobs.jobType
+
+    if (jobType == "Ac_technician") {
+        jobType = "AC Technician"
+    }
 
     Card(
         modifier = Modifier
@@ -328,8 +340,8 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
             Spacer(modifier = Modifier.height(16.dp))
             Row {
                 Column {
-                    Text(text = getJobs.jobType, fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
-                    Text(text = "Posted on ${getJobs.createdAt} - ${getJobs.status} ")
+                    Text(text = "Looking for $jobType", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
+                    Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
 
                 }
                 Spacer(modifier = Modifier.weight(1f))
