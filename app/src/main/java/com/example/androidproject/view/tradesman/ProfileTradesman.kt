@@ -377,7 +377,9 @@ fun ProfileTradesman(
                         Column {
                             TabRow(
                                 selectedTabIndex = selectedTabIndex,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White),
                             ) {
                                 tabNames.forEachIndexed { index, title ->
                                     Tab(
@@ -513,7 +515,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
 
     // Rest of the composable remains the same...
     Column(modifier = Modifier
-        .padding(2.dp)
+        .padding(4.dp)
         .verticalScroll(rememberScrollState())) {
         Box(modifier = Modifier.border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier.padding(10.dp)) {

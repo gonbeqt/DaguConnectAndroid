@@ -147,7 +147,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             Text(
                 text = "Home",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Bold
             )
             // Right-aligned icons
             Row(
