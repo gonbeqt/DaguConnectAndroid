@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
+import com.example.androidproject.api.JsonErrorParser
 import com.example.androidproject.model.UpdateStatus
 import com.example.androidproject.model.UpdateStatusResponse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +26,11 @@ class PutJobApplicationStatusViewModel(private val apiService: ApiService, priva
                 if (put.isSuccessful) {
                     _putJobApplicationStatusState.value = PutJobApplicationState.Success(put)
                 } else {
-                    _putJobApplicationStatusState.value = PutJobApplicationState.Error(put.message())
+//                    _putJobApplicationStatusState.value = PutJobApplicationState.Error(put.message())
+                    val errorJson = put.errorBody()?.string()
+                    println("Error response: $errorJson") // Debug log
+                    val errorMessage = JsonErrorParser.extractField(errorJson, "message") ?: "Unknown error"
+                    _putJobApplicationStatusState.value = PutJobApplicationState.Error(errorMessage)
                 }
             } catch (e: Exception) {
                 _putJobApplicationStatusState.value = PutJobApplicationState.Error(e.message ?: "An error occurred")

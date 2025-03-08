@@ -111,8 +111,11 @@ fun TradesmanApply(
                 val job = (viewJobState as ViewJobViewModel.JobState.Success).data
                 val date = ViewModelSetups.formatDateTime(job.job.createdAt)
                 val deadline = ViewModelSetups.formatDateTime(job.job.deadline)
-                val items = listOf(job.job.jobType)
-
+                var jobType = job.job.jobType
+                if (jobType == "Ac_technician") {
+                    jobType = "AC Technician"
+                }
+                val items = listOf(jobType)
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -147,16 +150,16 @@ fun TradesmanApply(
                                     .padding(start = 15.dp)
                             ) {
                                 Text(
+                                    text = "Client",
+                                    color = Color.Black,
+                                    fontSize = 16.sp
+                                )
+                                Text(
                                     text = job.job.clientFullname.orEmpty(),
                                     color = Color.Black,
                                     fontWeight = FontWeight(500),
                                     fontSize = 20.sp,
-                                    modifier = Modifier.padding(top = 10.dp)
-                                )
-                                Text(
-                                    text = job.job.jobType.orEmpty(),
-                                    color = Color.Black,
-                                    fontSize = 16.sp
+                                    modifier = Modifier.padding(top = 2.dp)
                                 )
                                 Box(
                                     modifier = Modifier.padding(vertical = 4.dp)
@@ -187,7 +190,7 @@ fun TradesmanApply(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Hiring: ${job.job.jobType}",
+                                text = "Hiring: $jobType",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight(500)
                             )

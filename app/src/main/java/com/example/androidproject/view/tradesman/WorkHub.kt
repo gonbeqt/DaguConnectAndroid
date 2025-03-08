@@ -179,7 +179,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                 0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
                                 1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel, viewJobsApplication)
                                 2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
-                                3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
+                                3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel)
                                 4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
                                 5 -> CancelledMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication )
                             }
@@ -1619,7 +1619,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
 }
 
 @Composable
-fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
+fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
 
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
@@ -1641,7 +1641,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
     ) {
         items(activeApplication.size) { index ->
             val activeJobs = activeApplication[index]
-            ActiveMySubmissionsTradesmanItem(activeJobs,navController)
+            ActiveMySubmissionsTradesmanItem(activeJobs,navController, putJobApplicationStatusViewModel)
         }
     }
 }
@@ -1916,7 +1916,9 @@ fun PendingMySubmissionsTradesmanItem(
                     }
                     Box(
                         modifier = Modifier
-                            .clickable { }
+                            .clickable {
+                                navController.navigate("tradesmanapply/${myJob.jobId}")
+                            }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -1934,10 +1936,37 @@ fun PendingMySubmissionsTradesmanItem(
     }
 }
 @Composable
-fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
+fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
 
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
+    val putJobState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
+    var cancelledClicked by remember { mutableStateOf(false) }
+    var completedClicked by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    LaunchedEffect(putJobState) {
+        if (cancelledClicked || completedClicked) {
+            when (val putJob = putJobState) {
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
+
+                }
+
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
+
+                }
+
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
+                    Toast.makeText(context, putJob.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
+                    Toast.makeText(context, putJob.data.message(), Toast.LENGTH_SHORT).show()
+                    putJobApplicationStatusViewModel.resetState()
+                }
+            }
+        }
+    }
+
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 410.dp to 270.dp
@@ -2026,7 +2055,14 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable { }
+                            .clickable {
+                                putJobApplicationStatusViewModel.updateJobApplicationStatus(
+                                    myJob.id,
+                                    "Cancelled",
+                                    "",
+                                )
+                                cancelledClicked = true
+                            }
                             .background(
                                 color = Color(0xFFC51B1B),
                                 shape = RoundedCornerShape(12.dp)
@@ -2039,7 +2075,14 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                     }
                     Box(
                         modifier = Modifier
-                            .clickable {}
+                            .clickable {
+                                putJobApplicationStatusViewModel.updateJobApplicationStatus(
+                                    myJob.id,
+                                    "Completed",
+                                    "",
+                                )
+                                completedClicked = true
+                            }
                             .background(
                                 color = Color(0xFF42C2AE),
                                 shape = RoundedCornerShape(12.dp)
@@ -2057,7 +2100,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
     }
 }
 @Composable
-fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
+fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, ) {
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val windowSize = rememberWindowSizeClass()

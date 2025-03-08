@@ -54,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -247,141 +248,237 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                             // Additional Sections
                             Spacer(modifier = Modifier.height(4.dp))
                             Column(Modifier.padding(horizontal = 10.dp)) {
-                                Text(
-                                    text = "About Me",
-                                    color = Color.Black,
-                                    fontSize = nameTextSize,
-                                    fontWeight = FontWeight(500),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp)
-                                )
-                                Text(
-                                    text = resume.aboutMe,
-                                    modifier = Modifier.padding(horizontal = 8.dp),
-                                    fontSize = taskTextSize,
-                                    color = Color.Black,
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                Row (Modifier.fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween){
-                                    Text(
-                                        text = "Preferred Location",
-                                        color = Color.Black,
-                                        fontSize = nameTextSize,
-                                        fontWeight = FontWeight(500))
-
-                                    resume.preferredWorkLocation?.let {
+                                Card(Modifier.fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    ,
+                                    colors =CardDefaults.cardColors(Color.White)) {
+                                    Column(Modifier.fillMaxSize().shadow(0.5.dp)
+                                        .padding(horizontal = 8.dp).padding(10.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                         Text(
-                                            text = it,
+                                            text = "About Me",
                                             color = Color.Black,
-                                            fontSize = taskTextSize,
-                                            fontWeight = FontWeight(500)
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(
-                                            text = "Est. Rate",
-                                            color = Color.Gray,
                                             fontSize = nameTextSize,
-                                            fontWeight = FontWeight(500))
-
-                                    Text(
-                                        text =  "₱${resume.workFee}",
-                                        color = Color.Black,
-                                        fontWeight = FontWeight(500),
-                                        fontSize = taskTextSize
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(
-                                            text = "Trade Credential",
-                                            color = Color.Gray,
-                                            fontSize = nameTextSize,
-                                            fontWeight = FontWeight(500))
-
-                                        Text(
-                                            text = "View File",
-                                            color = Color.Blue,
-                                            fontSize = 16.sp,
-                                            textDecoration = TextDecoration.Underline,
                                             fontWeight = FontWeight(500),
-                                        modifier = Modifier
-                                                .clickable {
 
-                                                val fileUrl = resume.documents // Assuming this is the URL to the file
-                                                val fileName = "trade_credential_${resume.tradesmanFullName}.pdf" // Customize the file name as needed
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
 
-                                                    if (fileUrl != null) {
-                                                        try {
-                                                            downloadId = downloadFileTradesman(context, fileUrl, fileName)
-                                                            Toast.makeText(context, "Download success", Toast.LENGTH_SHORT).show()
-                                                        } catch (e: Exception) {
-                                                            Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
-                                                        }
-                                                    } else {
-                                                        Toast.makeText(context, "No file available", Toast.LENGTH_SHORT).show()
-                                                    }
+                                        var showFullText by remember { mutableStateOf(false) }
+                                        val aboutme = resume.aboutMe ?: "No comments available"
+                                        val maxPreviewLength = 100 // Adjust this value as needed
+
+                                        if (aboutme.length > maxPreviewLength) {
+                                            Column {
+                                                Text(
+                                                    text = if (showFullText) aboutme else "${aboutme.take(maxPreviewLength)}...",
+                                                    modifier = Modifier.padding(top = 4.dp),
+                                                    fontSize = taskTextSize,
+                                                    color = if (aboutme.isEmpty()) Color.Gray else Color.Black
+                                                )
+                                                TextButton(
+                                                    onClick = { showFullText = !showFullText },
+                                                    modifier = Modifier
+                                                        .align(Alignment.End)
+                                                ) {
+                                                    Text(
+                                                        text = if (showFullText) "See Less" else "See More",
+                                                        color = Color.Blue,
+                                                        fontSize = smallTextSize
+                                                    )
+                                                }
                                             }
-                                    )
+                                        } else {
+                                            Text(
+                                                text = aboutme,
+                                                modifier = Modifier.padding(top = 4.dp),
+                                                fontSize = taskTextSize,
+                                                color = if (aboutme.isEmpty()) Color.Gray else Color.Black
+                                            )
+                                        }
+                                    }
+
                                 }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                    Text(
-                                        text = "Contact Information",
-                                        color = Color.Black,
-                                        fontSize = nameTextSize,
-                                        modifier = Modifier.padding(horizontal = 10.dp),
-                                        fontWeight = FontWeight(500))
 
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                Row (Modifier.fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween){
-                                    Text(
-                                        text = "Phone Number",
-                                        color = Color.Gray,
-                                        fontSize = nameTextSize,
-                                        fontWeight = FontWeight(500)
-                                    )
-
-                                    Text(
-                                        text = resume.phoneNumber?: "N/A",
-                                        color = Color.Black,
-                                        fontSize = taskTextSize,
-                                        fontWeight = FontWeight(500)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                    Row (Modifier.fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Card(Modifier.fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    ,
+                                    colors =CardDefaults.cardColors(Color.White)) {
+                                    Column(
+                                        Modifier.fillMaxSize().shadow(0.5.dp)
+                                            .padding(horizontal = 8.dp).padding(10.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
                                         Text(
-                                            text = "Email",
-                                            color = Color.Gray,
+                                            text = "Tradesman Information",
+                                            color = Color.Black,
                                             fontSize = nameTextSize,
                                             fontWeight = FontWeight(500)
                                         )
 
-                                        Text(
-                                            text = resume.email,
-                                            color = Color.Black,
-                                            fontSize = taskTextSize,
-                                            fontWeight = FontWeight(500
-                                            ))
+                                        Row(
+                                            Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Preferred Location",
+                                                color = Color.Gray,
+                                                fontSize = nameTextSize,
+                                                fontWeight = FontWeight(500)
+                                            )
+
+                                            resume.preferredWorkLocation?.let {
+                                                Text(
+                                                    text = it,
+                                                    color = Color.Black,
+                                                    fontSize = taskTextSize,
+                                                    fontWeight = FontWeight(500)
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(2.dp))
+
+                                        Row(
+                                            Modifier.fillMaxWidth()
+                                                ,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Est. Rate",
+                                                color = Color.Gray,
+                                                fontSize = nameTextSize,
+                                                fontWeight = FontWeight(500)
+                                            )
+
+                                            Text(
+                                                text = "₱${resume.workFee}",
+                                                color = Color.Black,
+                                                fontWeight = FontWeight(500),
+                                                fontSize = taskTextSize
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(2.dp))
+
+                                        Row(
+                                            Modifier.fillMaxWidth()
+                                                ,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Trade Credential",
+                                                color = Color.Gray,
+                                                fontSize = nameTextSize,
+                                                fontWeight = FontWeight(500)
+                                            )
+
+                                            Text(
+                                                text = "View File",
+                                                color = Color.Blue,
+                                                fontSize = 16.sp,
+                                                textDecoration = TextDecoration.Underline,
+                                                fontWeight = FontWeight(500),
+                                                modifier = Modifier
+                                                    .clickable {
+
+                                                        val fileUrl =
+                                                            resume.documents // Assuming this is the URL to the file
+                                                        val fileName =
+                                                            "trade_credential_${resume.tradesmanFullName}.pdf" // Customize the file name as needed
+
+                                                        if (fileUrl != null) {
+                                                            try {
+                                                                downloadId = downloadFileTradesman(
+                                                                    context,
+                                                                    fileUrl,
+                                                                    fileName
+                                                                )
+                                                                Toast.makeText(
+                                                                    context,
+                                                                    "Download success",
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                            } catch (e: Exception) {
+                                                                Toast.makeText(
+                                                                    context,
+                                                                    "Download failed: ${e.message}",
+                                                                    Toast.LENGTH_LONG
+                                                                ).show()
+                                                            }
+                                                        } else {
+                                                            Toast.makeText(
+                                                                context,
+                                                                "No file available",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
+                                                    }
+                                            )
+                                        }
                                     }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Card(Modifier.fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    ,
+                                    colors =CardDefaults.cardColors(Color.White)) {
+                                    Column(
+                                        Modifier.fillMaxSize().shadow(0.5.dp)
+                                            .padding(horizontal = 8.dp).padding(10.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text(
+                                            text = "Contact Information",
+                                            color = Color.Black,
+                                            fontSize = nameTextSize,
+                                            fontWeight = FontWeight(500)
+                                        )
+
+
+                                        Row(
+                                            Modifier.fillMaxWidth()
+                                               ,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Phone Number",
+                                                color = Color.Gray,
+                                                fontSize = nameTextSize,
+                                                fontWeight = FontWeight(500)
+                                            )
+
+                                            Text(
+                                                text = resume.phoneNumber ?: "N/A",
+                                                color = Color.Black,
+                                                fontSize = taskTextSize,
+                                                fontWeight = FontWeight(500)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(2.dp))
+
+                                        Row(
+                                            Modifier.fillMaxWidth()
+                                               ,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Email",
+                                                color = Color.Gray,
+                                                fontSize = nameTextSize,
+                                                fontWeight = FontWeight(500)
+                                            )
+
+                                            Text(
+                                                text = resume.email,
+                                                color = Color.Black,
+                                                fontSize = taskTextSize,
+                                                fontWeight = FontWeight(
+                                                    500
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
 
 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -511,7 +608,7 @@ fun BoxRow(specialties: String) {
     Text(
         text = specialties,
         color = Color.Black,
-        fontSize = 16.sp,
+        fontSize = taskTextSize,
         fontWeight = FontWeight.Medium,
         )
 }

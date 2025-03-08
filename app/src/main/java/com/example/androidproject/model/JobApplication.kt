@@ -116,6 +116,8 @@ data class ViewJobApplicationData(
     val tradesmanFullname: String,
     @SerializedName("tradesman_profile_picture")
     val tradesmanProfilePicture: String,
+    @SerializedName("client_profile_picture")
+    val clientProfilePicture: String,
     @SerializedName("job_address")
     val jobAddress: String,
     @SerializedName("job_type")
