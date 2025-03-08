@@ -76,6 +76,7 @@ import com.example.androidproject.viewmodel.ResetPassViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanDetailViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
@@ -94,6 +95,7 @@ import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 import com.example.androidproject.viewmodel.factories.ResetPassViewModelFactory
+import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanDetailViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.ViewTradesmaProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.GetClientBookingViewModelFactory
@@ -278,6 +280,9 @@ class MainActivity : ComponentActivity() {
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
+
+        val updateTradesmanDetailVMFactory = UpdateTradesmanDetailViewModelFactory(apiService)
+        val updateTradesmanDetailViewModel = ViewModelProvider(this, updateTradesmanDetailVMFactory)[UpdateTradesmanDetailViewModel::class.java]
         setContent {
             AndroidProjectTheme {
                 val navController = rememberNavController()
@@ -474,7 +479,7 @@ class MainActivity : ComponentActivity() {
                         AccountSettingsTradesman(navController)
                     }
                     composable("updateresume"){
-                        UpdateResume(navController)
+                        UpdateResume(navController,updateTradesmanDetailViewModel)
                     }
 
                 }

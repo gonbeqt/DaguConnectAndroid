@@ -32,8 +32,8 @@ class GetClientProfileViewModel(private val apiService: ApiService) : ViewModel(
     }
 
     sealed class ClientProfileState {
-        object Idle : ClientProfileState()
         object Loading : ClientProfileState()
+        object Idle : ClientProfileState()
         data class Success(val data: ClientProfile) : ClientProfileState()
         data class Error(val message: String) : ClientProfileState()
 

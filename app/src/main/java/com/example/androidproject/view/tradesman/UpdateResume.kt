@@ -1,5 +1,6 @@
 package com.example.androidproject.view.tradesman
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,18 +46,48 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.androidproject.model.client.UpdateTradesmanDetailsRequest
+import com.example.androidproject.model.client.UpdateTradesmanDetailsResponse
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanDetailViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateResume(navController: NavController){
+fun UpdateResume(navController: NavController,updateTradesmanDetailViewModel: UpdateTradesmanDetailViewModel){
+    val updateDetailState by updateTradesmanDetailViewModel.updateTradesmanDetailState.collectAsState()
         var speciality by remember { mutableStateOf("") }
         var location by remember { mutableStateOf("") }
         var rate by remember { mutableStateOf("") }
         var documents by remember { mutableStateOf("") }
-        var aboutme by remember { mutableStateOf("") }
+        var aboutMe by remember { mutableStateOf("") }
+        val context = LocalContext.current
 
 
+
+    LaunchedEffect(updateDetailState) {
+        when(val updateDetails = updateDetailState){
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Loading-> {
+                //loading
+            }
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Success->{
+                Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
+                updateTradesmanDetailViewModel.resetState()
+                // Navigate to the "profile" screen and clear the back stack
+                navController.navigate("main_screen?selectedItem=4&selectedTab=0") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+
+            }
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Error -> {
+               val error = updateDetails.message
+                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                updateTradesmanDetailViewModel.resetState()
+            }
+            else -> Unit
+        }
+    }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -178,8 +209,8 @@ fun UpdateResume(navController: NavController){
                             )
 
                             OutlinedTextField(
-                                value = aboutme,
-                                onValueChange = { aboutme = it },
+                                value = aboutMe,
+                                onValueChange = { aboutMe = it },
                                 label = { Text("Update About Me") },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(10.dp),
@@ -267,7 +298,9 @@ fun UpdateResume(navController: NavController){
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Button(
-                            onClick = { /* Handle Save */ },
+                            onClick = {
+                                updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,location,rate.toInt(), "090712312322")
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3CC0B0)),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.weight(1f)

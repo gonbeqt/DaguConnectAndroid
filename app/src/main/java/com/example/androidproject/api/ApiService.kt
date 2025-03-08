@@ -44,6 +44,8 @@ import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.SubmitResumeResponse
 import com.example.androidproject.model.client.TradesmanWorkStatusRequest
 import com.example.androidproject.model.client.TradesmanWorkStatusResponse
+import com.example.androidproject.model.client.UpdateTradesmanDetailsRequest
+import com.example.androidproject.model.client.UpdateTradesmanDetailsResponse
 import com.example.androidproject.model.client.UpdateTradesmanProfileResponse
 import com.example.androidproject.model.client.ViewClientBooking
 import com.example.androidproject.model.client.rateTradesmanRequest
@@ -205,5 +207,9 @@ interface ApiService {
     @Multipart
     @POST("/user/tradesman/update/profile")
     suspend fun updateTradesmanProfile(@Part profilePic: MultipartBody.Part): Response<UpdateTradesmanProfileResponse>
+
+
+    @PUT("/user/tradesman/update/resume/details")
+    suspend fun  updateTradesmanDetail(@Body request: UpdateTradesmanDetailsRequest) : Response<UpdateTradesmanDetailsResponse>
 
 }

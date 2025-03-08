@@ -68,7 +68,23 @@ data class SubmitResumeResponse(
         val isApprove: Int,
         @SerializedName("status_of_approval")
         val statusOfApproval: String?
+    )
 
+
+    data class UpdateTradesmanDetailsRequest(
+        @SerializedName("about_me")
+        val aboutMe : String,
+        @SerializedName("prefered_work_location")
+        val preferredWorkLocation: String,
+        @SerializedName("work_fee")
+        val workFee : Int,
+        @SerializedName("phone_number")
+        val phoneNumber : String
+    )
+
+
+    data class UpdateTradesmanDetailsResponse(
+        val message: String
     )
 
 

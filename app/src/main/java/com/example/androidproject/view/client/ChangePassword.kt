@@ -47,7 +47,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
             is ChangePasswordViewModel.ChangePassState.Success->{
                 changePassword.resetState()
                 Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
-                // Navigate to the "login" screen and clear the back stack
+                // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=1") {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
