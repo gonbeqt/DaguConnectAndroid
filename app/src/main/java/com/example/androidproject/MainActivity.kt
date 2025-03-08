@@ -473,7 +473,7 @@ class MainActivity : ComponentActivity() {
                          ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel, { LoadingUI() })
                     }
                     composable("manageprofile") {
-                        ManageProfile(modifier = Modifier, navController)
+                        ManageProfile(modifier = Modifier, navController,updateTradesmanDetailViewModel)
                     }
                     composable("availabilitystatus") {
                         AvailabilityStatus(modifier = Modifier, navController)

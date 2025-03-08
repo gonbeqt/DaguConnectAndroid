@@ -619,10 +619,10 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
     val updateWorkState by updateWorkStatusViewModel.workStatusState.collectAsState()
     val  context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
-    val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 380.dp to 260.dp
-        WindowType.MEDIUM -> 390.dp to 270.dp
-        WindowType.LARGE -> 400.dp to 280.dp
+    val cardWidth = when (windowSize.width) {
+        WindowType.SMALL -> 380.dp
+        WindowType.MEDIUM -> 390.dp
+        WindowType.LARGE -> 400.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
