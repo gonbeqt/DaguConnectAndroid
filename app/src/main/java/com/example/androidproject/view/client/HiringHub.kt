@@ -89,7 +89,7 @@ fun BookingsScreen(
     viewJobsApplication: ViewJobApplicationViewModel,
     putJobApplicationStatus: PutJobApplicationStatusViewModel,
     initialTabIndex: Int = 0, // Default to 0 if not provided
-    initialSection: String = "My Clients"
+    initialSection: Int = 0
 ) {
     Log.i("Screen", "BookingsScreen")
     val windowSize = rememberWindowSizeClass()
@@ -100,11 +100,11 @@ fun BookingsScreen(
     }
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
-    var selectedSection by remember { mutableStateOf(initialSection) }
+    var selectedSection by remember { mutableIntStateOf(initialSection) }
 
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
-    val tabTitles = if (selectedSection == "My Jobs") myJobsTabs else myApplicantsTabs
+    val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
 
     Box(
         modifier = modifier
@@ -181,7 +181,7 @@ fun BookingsScreen(
                         .padding(16.dp)
                 ) {
                     when (selectedSection) {
-                        "My Clients" -> when (selectedTabIndex) {
+                      0 -> when (selectedTabIndex) {
                             0 -> AllBookingsContent(getClientsBooking, navController)
                             1 -> PendingBookingsContent(getClientsBooking, navController)
                             2 -> DeclinedBookingsContent(getClientsBooking, navController)
@@ -189,7 +189,7 @@ fun BookingsScreen(
                             4 -> CompletedBookingsContent(getClientsBooking, navController)
                             5 -> CancelledBookingsContent(getClientsBooking, navController)
                         }
-                        "My Applicants" -> when (selectedTabIndex) {
+                      1 -> when (selectedTabIndex) {
                             0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
                             1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
                             2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
@@ -205,7 +205,7 @@ fun BookingsScreen(
 }
 
 @Composable
-fun BookingsTopSection(navController: NavController, selectedSection: String, onSectionSelected: (String) -> Unit) {
+fun BookingsTopSection(navController: NavController, selectedSection: Int, onSectionSelected: (Int) -> Unit) {
     val windowSize = rememberWindowSizeClass()
 
     val nameTextSize = when (windowSize.width) {
@@ -226,10 +226,10 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .background(if (selectedSection == "My Clients") Color(0xFF3CC0B0  ) else (Color.Transparent))
+                .background(if (selectedSection == 0) Color(0xFF3CC0B0  ) else (Color.Transparent))
                 .weight(1f)
                 .clickable {
-                    onSectionSelected("My Clients")
+                    onSectionSelected(0)
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -239,7 +239,7 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
                 fontSize = nameTextSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
-                color = if (selectedSection == "My Clients") Color.White else Color.Black
+                color = if (selectedSection == 0) Color.White else Color.Black
             )
 
         }
@@ -248,10 +248,10 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .background(if (selectedSection == "My Applicants") Color(0xFF3CC0B0  ) else (Color.Transparent))
+                .background(if (selectedSection == 1) Color(0xFF3CC0B0  ) else (Color.Transparent))
                 .weight(1f)
                 .clickable {
-                    onSectionSelected("My Applicants")
+                    onSectionSelected(1)
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -261,7 +261,7 @@ fun BookingsTopSection(navController: NavController, selectedSection: String, on
                 fontSize = nameTextSize,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
-                color = if (selectedSection == "My Applicants") Color.White else Color.Black
+                color = if (selectedSection == 1) Color.White else Color.Black
             )
 
         }
@@ -619,6 +619,12 @@ fun AllItem(allBooking : GetClientsBooking,navController: NavController) {
 @Composable
 fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,updateWorkStatusViewModel:UpdateBookingTradesmanViewModel) {
     val updateWorkState by updateWorkStatusViewModel.workStatusState.collectAsState()
+    var showCompletedDialog by remember { mutableStateOf(false) }
+    var showCancelledDialog by remember { mutableStateOf(false) }
+    var showJobCompletedDialog by remember { mutableStateOf(false) }
+    var showCancelledReason by remember { mutableStateOf(false) }
+    var buttonSubmit by remember { mutableStateOf(false) }
+
     val  context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val cardWidth = when (windowSize.width) {
@@ -647,12 +653,22 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
                 Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
                 updateWorkStatusViewModel.resetState()
-                // Navigate to the "profile" screen and clear the back stack
-                navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
+                if(updateWorkStatusState.status == "Completed"){
+                    // Navigate to the "profile" screen and clear the back stack
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                }else if(updateWorkStatusState.status == "Cancelled"){
+                    // Navigate to the "profile" screen and clear the back stack
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
                     }
                 }
+
             }
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = updateWorkStatusState.message
@@ -772,7 +788,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                     .padding(bottom = 8.dp),
             ) {
                 Button(
-                    onClick = { navController.navigate("cancelnow/${activeBooking.resumeId}/${activeBooking.bookingStatus}/${activeBooking.id}") },
+                    onClick = { showCancelledDialog = true },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFC51B1B),
@@ -785,11 +801,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        updateWorkStatusViewModel.updateWorkStatus(
-                            "Completed",
-                            NULL.toString(),
-                            activeBooking.id
-                        )
+                            showCompletedDialog = true
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -805,6 +817,202 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
 
             }
         }
+    }
+    if (showCompletedDialog) {
+        AlertDialog(
+            containerColor = Color.White,
+
+            onDismissRequest = { showCompletedDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Completed Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once Completed, this job will be marked as Completed. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCompletedDialog = false
+                        showJobCompletedDialog = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showCompletedDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            }
+        )
+    }
+
+    if (showCancelledDialog) {
+        AlertDialog(
+            containerColor = Color.White,
+            onDismissRequest = { showCancelledDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Cancel Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once Cancelled, this job may not be available again. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCancelledDialog = false
+                        showCancelledReason = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showCancelledDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            },
+        )
+    }
+
+    if (showJobCompletedDialog) {
+        AlertDialog(
+            containerColor = Color.White,
+            onDismissRequest = { showJobCompletedDialog = false },
+            icon = {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_jobapproved_checked),
+                    contentDescription = "Job Approve Icon",
+                    modifier = Modifier.size(60.dp)
+                )
+            },
+            title = { Text("Job Completed!") },
+            text = { Text("Reach out to the client for more project details.") },
+            confirmButton = {
+                Button(
+                    onClick = { showJobCompletedDialog = false
+                        buttonSubmit = true
+                        updateWorkStatusViewModel.updateWorkStatus(
+                            "Completed",
+                            "",
+                            activeBooking.id
+                        )
+
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("OK", color = Color.White)
+                }
+            }
+        )
+    }
+
+    if (showCancelledReason) {
+        var selectedReason by remember { mutableStateOf<String?>(null) }
+
+        val reasons = listOf(
+            "Workload concerns",
+            "Schedule conflicts",
+            "Relocation issues",
+            "Committed to a contract project",
+            "Short notice start date",
+            "Personal Reasons",
+            "Other"
+        )
+
+        AlertDialog(
+            containerColor = Color.White,
+            onDismissRequest = { showCancelledReason = false },
+            title = {
+                Text(
+                    text = "Reason for Cancellation",
+                    fontSize = 18.sp,
+                    color = Color(0xFF42C2AE)
+                )
+            },
+            text = {
+                Column {
+                    reasons.forEach { reason ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedReason = reason },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = selectedReason == reason,
+                                onCheckedChange = { isChecked ->
+                                    if (isChecked) {
+                                        selectedReason = reason
+                                    }
+                                }
+                            )
+                            Text(reason, fontSize = 14.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        buttonSubmit = true
+                        showCancelledReason = false
+                        selectedReason?.let {
+                            updateWorkStatusViewModel.updateWorkStatus(
+                                "Cancelled",
+                                it,
+                                activeBooking.id
+                            )
+                        }
+
+                    },
+                    enabled = selectedReason != null,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Submit", color = Color.White)
+                }
+            }
+        )
     }
 }
 
@@ -1706,11 +1914,11 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatus.resetState()
                 if(jobput.status == "Active"){
-                    navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=My Applicants") {
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = false }
                     }
                 }else if(jobput.status == "Declined"){
-                    navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=My Applicants") {
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = false }
                     }
                 }
@@ -2027,11 +2235,13 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                         onClick = {
                             buttonSubmit = true
                             showDeclineReasons = false
-                            putJobApplicationStatus.updateJobApplicationStatus(
-                                myJob.id,
-                                "Declined",
-                                selectedReason
-                            )
+                            selectedReason?.let {
+                                putJobApplicationStatus.updateJobApplicationStatus(
+                                    myJob.id,
+                                    "Declined",
+                                    it
+                                )
+                            }
 
                         },
                         enabled = selectedReason != null,
@@ -2049,22 +2259,19 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 }
 @Composable
 fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, putJobApplicationStatus: PutJobApplicationStatusViewModel) {
-    var cancel by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(-1) }
-    var otherReason by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+
+
     val putJobState by putJobApplicationStatus.putJobApplicationState.collectAsState()
+
+    var showCompletedDialog by remember { mutableStateOf(false) }
+    var showCancelledDialog by remember { mutableStateOf(false) }
+    var showJobCompletedDialog by remember { mutableStateOf(false) }
+    var showCancelledReason by remember { mutableStateOf(false) }
+    var buttonSubmit by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var cancelledClicked by remember { mutableStateOf(false) }
     var completedClicked by remember { mutableStateOf(false) }
-    val reasons = listOf(
-        "Change of Mind",
-        "Found a Different Service Provider",
-        "No Longer Needed",
-        "Scheduled Time Conflict",
-        "Personal Reasons",
-        "Others"
-    )
+
 
     LaunchedEffect(putJobState) {
         if (cancelledClicked || completedClicked) {
@@ -2084,12 +2291,12 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                     if (putJob.status =="Completed"){
                         Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
-                        navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=My Applicants") {
+                        navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
                             popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         }
                     }else if(putJob.status == "Cancelled"){
-
-                        navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=My Applicants") {
+                        Toast.makeText(context, "Job Cancelled", Toast.LENGTH_SHORT).show()
+                        navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                             popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         }
                     }
@@ -2145,7 +2352,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                     AsyncImage(
                         model = myJob.clientProfilePicture, // Use URL here
                         contentDescription = "Profile Image",
-                        modifier = Modifier
+                         modifier = Modifier
                             .size(62.dp)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop
@@ -2200,7 +2407,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             modifier = Modifier
                                 .clickable(indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
-                                ) { cancel = true }
+                                ) { showCancelledDialog = true }
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -2217,12 +2424,8 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                                 .clickable(indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) {
-                                    putJobApplicationStatus.updateJobApplicationStatus(
-                                        myJob.id,
-                                        "Completed",
-                                        "",
-                                    )
-                                    completedClicked = true
+                                    showCompletedDialog = true
+
                                 }
                                 .background(
                                     color = Color.Transparent,
@@ -2244,162 +2447,207 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                 }
             }
         }
-        if (cancel) {
-            Dialog(onDismissRequest = { cancel = false }) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        if (showCompletedDialog) {
+            AlertDialog(
+                containerColor = Color.White,
+
+                onDismissRequest = { showCompletedDialog = false },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "Reason for Cancellation",
-                                fontSize = 20.sp,
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_approve_decline),
+                            contentDescription = "Approval Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Completed Job",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                },
+                text = { Text("Once Completed, this job will be marked as Completed. Proceed?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showCompletedDialog = false
+                            showJobCompletedDialog = true
+                            putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Active", "")
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                    ) {
+                        Text("Confirm", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showCompletedDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Cancel", color = Color.White)
+                    }
+                }
+            )
+        }
+
+        if (showCancelledDialog) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showCancelledDialog = false },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_approve_decline),
+                            contentDescription = "Approval Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Cancel Job",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                },
+                text = { Text("Once Cancelled, this job may not be available again. Proceed?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showCancelledDialog = false
+                            showCancelledReason = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Confirm", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showCancelledDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Cancel", color = Color.White)
+                    }
+                },
+            )
+        }
+
+        if (showJobCompletedDialog) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showJobCompletedDialog = false },
+                icon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_jobapproved_checked),
+                        contentDescription = "Job Approve Icon",
+                        modifier = Modifier.size(60.dp)
+                    )
+                },
+                title = { Text("Job Completed!") },
+                text = { Text("Reach out to the client for more project details.") },
+                confirmButton = {
+                    Button(
+                        onClick = { showJobCompletedDialog = false
+                            buttonSubmit = true
+                            putJobApplicationStatus.updateJobApplicationStatus(
+                                myJob.id,
+                                "Completed",
+                                "",
                             )
+                            completedClicked = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("OK", color = Color.White)
+                    }
+                }
+            )
+        }
 
-                            Column(modifier = Modifier.padding(top = 16.dp)) {
-                                reasons.forEachIndexed { index, reason ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.padding(vertical = 8.dp)
-                                    ) {
-                                        Checkbox(
-                                            checked = selectedIndex == index,
-                                            onCheckedChange = {
-                                                selectedIndex =
-                                                    if (selectedIndex == index) -1 else index
-                                            },
-                                            colors = CheckboxDefaults.colors(
-                                                uncheckedColor = Color.Black,
-                                                checkedColor = Color(0xFF42C2AE)
-                                            )
-                                        )
-                                        Text(
-                                            text = reason,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color.Black,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
+        if (showCancelledReason) {
+            var selectedReason by remember { mutableStateOf<String?>(null) }
 
-                            if (selectedIndex == reasons.lastIndex) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                OutlinedTextField(
-                                    value = otherReason,
-                                    onValueChange = { otherReason = it },
-                                    placeholder = { Text("Enter your reason") },
-                                    shape = RoundedCornerShape(16.dp),
-                                    singleLine = true,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(min = 56.dp),
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.Transparent,
-                                        unfocusedContainerColor = Color.Transparent,
-                                        focusedIndicatorColor = Color.Blue,
-                                        unfocusedIndicatorColor = Color.Gray,
-                                        focusedLabelColor = Color.Blue,
-                                        unfocusedLabelColor = Color.Gray,
-                                        cursorColor = Color.Black
-                                    )
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            OutlinedTextField(
-                                value = description,
-                                onValueChange = { description = it },
-                                placeholder = { Text("Enter your description") },
-                                shape = RoundedCornerShape(16.dp),
-                                maxLines = 3,
+            val reasons = listOf(
+                "Workload concerns",
+                "Schedule conflicts",
+                "Relocation issues",
+                "Committed to a contract project",
+                "Short notice start date",
+                "Personal Reasons",
+                "Other"
+            )
+
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showCancelledReason = false },
+                title = {
+                    Text(
+                        text = "Reason for Cancellation",
+                        fontSize = 18.sp,
+                        color = Color(0xFF42C2AE)
+                    )
+                },
+                text = {
+                    Column {
+                        reasons.forEach { reason ->
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(min = 100.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Blue,
-                                    unfocusedIndicatorColor = Color.Gray,
-                                    focusedLabelColor = Color.Blue,
-                                    unfocusedLabelColor = Color.Gray,
-                                    cursorColor = Color.Black
-                                )
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
+                                    .clickable { selectedReason = reason },
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Button(
-                                    onClick = {
-                                        cancel = false
-                                    },
-                                    modifier = Modifier.size(110.dp, 45.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(
-                                            0xFF42C2AE
-                                        )
-                                    )
-                                ) {
-                                    Text("Cancel", color = Color.White)
-                                }
-                                Button(
-                                    onClick = {
-                                        if (selectedIndex == -1) {
-                                            Toast.makeText(context, "Please select a reason for cancellation", Toast.LENGTH_SHORT).show()
-                                        } else if (selectedIndex == reasons.lastIndex && otherReason.isEmpty()) {
-                                            Toast.makeText(context, "Please type a reason for cancellation", Toast.LENGTH_SHORT).show()
-                                        } else {
-                                            val selectedReason = if (selectedIndex == reasons.size - 1) {
-                                                otherReason
-                                            } else {
-                                                reasons[selectedIndex]
-                                            }
-                                            Log.d("My jobs", "Selected reason: ${myJob.id}")
-                                            putJobApplicationStatus.updateJobApplicationStatus(
-                                                myJob.id,
-                                                "Cancelled",
-                                                selectedReason,
-                                            )
-                                            cancelledClicked = true
-                                            cancel = false
+                                Checkbox(
+                                    checked = selectedReason == reason,
+                                    onCheckedChange = { isChecked ->
+                                        if (isChecked) {
+                                            selectedReason = reason
                                         }
-                                    },
-                                    modifier = Modifier.size(110.dp, 45.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFF42C2AE)
-                                    )
-                                ) {
-                                    Text("Submit", color = Color.White)
-                                }
+                                    }
+                                )
+                                Text(reason, fontSize = 14.sp)
                             }
                         }
                     }
-                }
-            }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            buttonSubmit = true
+                            showCancelledReason = false
+                            selectedReason?.let {
+                                putJobApplicationStatus.updateJobApplicationStatus(
+                                    myJob.id,
+                                    "Cancelled",
+                                    it
+                                )
+                            }
+                            completedClicked = true
 
+                        },
+                        enabled = selectedReason != null,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Submit", color = Color.White)
+                    }
+                }
+            )
         }
     }
-}
+    }
+
 @Composable
 fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()

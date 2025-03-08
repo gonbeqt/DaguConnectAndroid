@@ -24,7 +24,7 @@ class UpdateBookingTradesmanViewModel(private val apiService: ApiService, contex
                 if(response.isSuccessful){
                     val body = response.body()
                     if(body!=null){
-                        _workStatusState.value = UpdateWorkStatus.Success(body)
+                        _workStatusState.value = UpdateWorkStatus.Success(body,work_status)
                     }else{
                         _workStatusState.value = UpdateWorkStatus.Error("No data received from the server")
                     }
@@ -50,7 +50,7 @@ class UpdateBookingTradesmanViewModel(private val apiService: ApiService, contex
     sealed class UpdateWorkStatus{
         object Idle : UpdateWorkStatus()
         object Loading : UpdateWorkStatus()
-        data class Success(val data: TradesmanWorkStatusResponse?): UpdateWorkStatus()
+        data class Success(val data: TradesmanWorkStatusResponse?,val status :String): UpdateWorkStatus()
         data class Error(val message: String): UpdateWorkStatus()
     }
 }

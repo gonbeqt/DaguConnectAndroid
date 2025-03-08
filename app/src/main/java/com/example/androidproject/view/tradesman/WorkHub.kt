@@ -75,7 +75,7 @@ import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobAp
 import java.sql.Types.NULL
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ,initialSection: String = "" ) {// Default to 0 if not provided
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ,initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -90,7 +90,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     // Define tab titles based on selected section
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
-    val tabTitles = if (selectedSection == "My Jobs") myJobsTabs else myApplicantsTabs
+    val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
 
     Column(
         modifier = modifier
@@ -166,7 +166,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             .padding(8.dp)
                     ) {
                         when (selectedSection) {
-                            "My Jobs" -> when (selectedTabIndex) {
+                           0 -> when (selectedTabIndex) {
                                 0 -> AllBookingsTradesmanContent(getTradesmanBooking)
                                 1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel)
                                 2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
@@ -175,7 +175,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                 5 -> CancelledBookingsTradesmanContent(navController,getTradesmanBooking)
                             }
 
-                            "My Submissions" -> when (selectedTabIndex) {
+                            1 -> when (selectedTabIndex) {
                                 0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
                                 1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel, viewJobsApplication)
                                 2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
@@ -191,7 +191,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     }
 }
 @Composable
-fun JobsTradesmanTopSection(navController: NavController, selectedSection: String, onSectionSelected: (String) -> Unit) {
+fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, onSectionSelected: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -202,15 +202,15 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
         // Left-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == "My Jobs") myGradient3 else SolidColor(Color.Transparent))
+                .background(if (selectedSection == 0) myGradient3 else SolidColor(Color.Transparent))
                 .weight(1f)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
             TextButton(
-                onClick = { onSectionSelected("My Jobs") },
+                onClick = { onSectionSelected(0) },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Jobs") Color.White else Color.Black
+                    contentColor = if (selectedSection == 0) Color.White else Color.Black
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -226,7 +226,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
         Box(
             modifier = Modifier
                 .background(
-                    if (selectedSection == "My Submissions") myGradient3 else SolidColor(
+                    if (selectedSection == 1) myGradient3 else SolidColor(
                         Color.Transparent
                     )
                 )
@@ -234,9 +234,9 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
                 .weight(1f),
         ) {
             TextButton(
-                onClick = { onSectionSelected("My Submissions") },
+                onClick = { onSectionSelected(1) },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Submissions") Color.White else Color.Black
+                    contentColor = if (selectedSection == 1) Color.White else Color.Black
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -1799,6 +1799,11 @@ fun PendingMySubmissionsTradesmanItem(
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     onJobCancelled: () -> Unit
 ) {
+
+
+    var showCancelDialog by remember { mutableStateOf(false) }
+    var showCancelReasons by remember { mutableStateOf(false) }
+
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val putState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
@@ -1819,7 +1824,7 @@ fun PendingMySubmissionsTradesmanItem(
                 Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatusViewModel.resetState()
                 onJobCancelled() // Refresh list
-                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=My Submissions") {
+                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = false
                     }
@@ -1908,7 +1913,7 @@ fun PendingMySubmissionsTradesmanItem(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("canceltradesmannow/${myJob.id}")
+                                showCancelDialog= true
                             }
                             .background(
                                 color = Color.Transparent,
@@ -1941,6 +1946,118 @@ fun PendingMySubmissionsTradesmanItem(
             }
         }
     }
+
+
+
+    if (showCancelDialog) {
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Cancel Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once Cancelled, this job may not be available again. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCancelDialog = false
+                        showCancelReasons = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showCancelDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            }
+        )
+    }
+
+
+    if (showCancelReasons) {
+        var selectedReason by remember { mutableStateOf<String?>(null) }
+
+        val reasons = listOf(
+            "Workload concerns",
+            "Schedule conflicts",
+            "Relocation issues",
+            "Committed to a contract project",
+            "Short notice start date",
+            "Personal Reasons",
+            "Other"
+        )
+
+        AlertDialog(
+            onDismissRequest = { showCancelReasons = false },
+            title = {
+                Text(
+                    text = "Reason for Cancellation",
+                    fontSize = 18.sp,
+                    color = Color(0xFF42C2AE)
+                )
+            },
+            text = {
+                Column {
+                    reasons.forEach { reason ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedReason = reason },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = selectedReason == reason,
+                                onCheckedChange = { isChecked ->
+                                    if (isChecked) {
+                                        selectedReason = reason
+                                    }
+                                }
+                            )
+                            Text(reason, fontSize = 14.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCancelReasons = false
+                        selectedReason?.let {
+                            putJobApplicationStatusViewModel.updateJobApplicationStatus(myJob.id,"Cancelled",it)
+
+                        }
+                    },
+                    enabled = selectedReason != null,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Submit", color = Color.White)
+                }
+            }
+        )
+    }
 }
 @Composable
 fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
@@ -1954,9 +2071,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
     LaunchedEffect(putJobState) {
         if (cancelledClicked || completedClicked) {
             when (val putJob = putJobState) {
-                is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
 
-                }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
 
@@ -1969,13 +2084,12 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                     Toast.makeText(context, putJob.data.message(), Toast.LENGTH_SHORT).show()
                     putJobApplicationStatusViewModel.resetState()
-                    navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=My Submissions") {
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
                         popUpTo(navController.graph.startDestinationId) {
                             inclusive = false
                         }
-                        launchSingleTop = true
                     }
-                }
+                }else -> Unit
             }
         }
     }

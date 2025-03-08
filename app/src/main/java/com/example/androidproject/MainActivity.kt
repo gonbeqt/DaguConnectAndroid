@@ -329,15 +329,15 @@ class MainActivity : ComponentActivity() {
                                 defaultValue = 0
                             },
                             navArgument("selectedSection") {
-                                type = NavType.StringType
-                                defaultValue = if (AccountManager.getAccount()?.isClient == true) "My Clients" else "My Jobs"
+                                type = NavType.IntType
+                                defaultValue = 0
                             }
                         )
                     ) { backStackEntry ->
                         val selectedItem = backStackEntry.arguments?.getInt("selectedItem") ?: 0
                         val selectedTab = backStackEntry.arguments?.getInt("selectedTab") ?: 0
-                        val selectedSection = backStackEntry.arguments?.getString("selectedSection")
-                            ?: if (AccountManager.getAccount()?.isClient == true) "My Clients" else "My Jobs"
+                        val selectedSection = backStackEntry.arguments?.getInt("selectedSection")?: 0
+
                         MainScreen(
                             navController,
                             logoutViewModel,

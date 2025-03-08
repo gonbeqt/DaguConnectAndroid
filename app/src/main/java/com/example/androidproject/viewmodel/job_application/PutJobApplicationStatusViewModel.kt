@@ -17,7 +17,7 @@ class PutJobApplicationStatusViewModel(private val apiService: ApiService, priva
         PutJobApplicationState.Idle)
     val putJobApplicationState: StateFlow<PutJobApplicationState> = _putJobApplicationStatusState
 
-    fun updateJobApplicationStatus(id: Int, status: String, reason: String?) {
+    fun updateJobApplicationStatus(id: Int, status: String, reason: String) {
         viewModelScope.launch {
             _putJobApplicationStatusState.value = PutJobApplicationState.Loading
             val data  = UpdateStatus(status, reason)
