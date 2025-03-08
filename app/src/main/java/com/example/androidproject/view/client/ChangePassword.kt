@@ -90,7 +90,9 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.popBackStack() }
+                                .clickable {
+                                    navController.navigate("main_screen?selectedItem=4&selectedTab=1") // or whatever your default route is
+                                   }
                                 .padding(16.dp),
                             tint = Color.Black
                         )

@@ -281,12 +281,12 @@ fun ProfileScreen(
         } else {
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    isLoading = true
                 }
             } else {
                 when (val state = profileState) {
                     is GetClientProfileViewModel.ClientProfileState.Loading -> {
-                        Text(text = "Loading...", color = Color.Gray)
+                        isLoading = true
                     }
                     is GetClientProfileViewModel.ClientProfileState.Success -> {
                         val profile = state.data
@@ -353,6 +353,7 @@ fun ProfileScreen(
                                         )
                                         Text(text = profile.email, color = Color.White)
                                         Text(text = profile.address, color = Color.White)
+                                        Text(text = profile.phoneNumber, color = Color.White)
                                     }
                                 }
                             }

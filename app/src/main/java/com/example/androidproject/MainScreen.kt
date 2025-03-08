@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -109,8 +110,8 @@ fun MainScreen(
     val initialSelectedItem = arguments?.getInt("selectedItem") ?: 0
     val initialSelectedTab = arguments?.getInt("selectedTab") ?: 0
 
-    var selectedItem by remember { mutableStateOf(initialSelectedItem) }
-    var selectedTab by remember { mutableStateOf(initialSelectedTab) } // Track selectedTab locally
+    var selectedItem by remember { mutableIntStateOf(initialSelectedItem) }
+    var selectedTab by remember { mutableIntStateOf(initialSelectedTab) } // Track selectedTab locally
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val selectedTabState = savedStateHandle?.getLiveData<Int>("selectedTab")?.observeAsState()
     val observedSelectedTab = selectedTabState?.value ?: initialSelectedTab

@@ -632,13 +632,11 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
                 Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
                 updateWorkStatusViewModel.resetState()
-                navController.currentBackStackEntry?.savedStateHandle?.apply {
-                    set("selectedItem", 1) // Bookings tab
-                    set("selectedTab", 4)  // Completed tab
-                }
-                navController.navigate("main_screen") {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                    launchSingleTop = true
+                // Navigate to the "profile" screen and clear the back stack
+                navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
                 }
             }
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {

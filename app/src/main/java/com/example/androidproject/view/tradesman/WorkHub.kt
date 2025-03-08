@@ -362,7 +362,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
     LaunchedEffect(Unit) {
         completedBookingstate.refresh()
     }
-    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
+    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Completed" }
 
     LazyColumn(
         modifier = Modifier
