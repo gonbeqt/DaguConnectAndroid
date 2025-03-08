@@ -24,7 +24,7 @@ class PutJobApplicationStatusViewModel(private val apiService: ApiService, priva
             val put = apiService.updateJobApplicationStatus(id, data)
             try {
                 if (put.isSuccessful) {
-                    _putJobApplicationStatusState.value = PutJobApplicationState.Success(put)
+                    _putJobApplicationStatusState.value = PutJobApplicationState.Success(put, status)
                 } else {
 //                    _putJobApplicationStatusState.value = PutJobApplicationState.Error(put.message())
                     val errorJson = put.errorBody()?.string()
@@ -45,7 +45,7 @@ class PutJobApplicationStatusViewModel(private val apiService: ApiService, priva
     sealed class PutJobApplicationState{
         data object Idle: PutJobApplicationState()
         data object Loading: PutJobApplicationState()
-        data class Success(val data: Response<UpdateStatusResponse>): PutJobApplicationState()
+        data class Success(val data: Response<UpdateStatusResponse>,val status: String): PutJobApplicationState()
         data class Error(val message: String): PutJobApplicationState()
 
     }

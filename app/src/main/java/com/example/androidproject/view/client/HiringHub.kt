@@ -88,7 +88,8 @@ fun BookingsScreen(
     getMyJobApplicants: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     putJobApplicationStatus: PutJobApplicationStatusViewModel,
-    initialTabIndex: Int = 0 // Default to 0 if not provided
+    initialTabIndex: Int = 0, // Default to 0 if not provided
+    initialSection: String = "My Clients"
 ) {
     Log.i("Screen", "BookingsScreen")
     val windowSize = rememberWindowSizeClass()
@@ -97,8 +98,9 @@ fun BookingsScreen(
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
-    var selectedSection by remember { mutableStateOf("My Clients") }
+    var selectedSection by remember { mutableStateOf(initialSection) }
 
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
@@ -1689,10 +1691,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
     var buttonSubmit by remember { mutableStateOf(false) }
-    when(putJob) {
-        is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
-
-        }
+    when(val jobput =putJob) {
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
 
@@ -1706,8 +1705,18 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
             if (buttonSubmit) {
                 Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatus.resetState()
+                if(jobput.status == "Active"){
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=My Applicants") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                    }
+                }else if(jobput.status == "Declined"){
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=My Applicants") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                    }
+                }
             }
         }
+        else -> Unit
     }
 
 
@@ -1818,7 +1827,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                                 .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "Cancel Job ", fontSize = taskTextSize)
+                            Text(text = "Decline Job ", fontSize = taskTextSize)
                         }
 
                         Box(
@@ -2020,7 +2029,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                             showDeclineReasons = false
                             putJobApplicationStatus.updateJobApplicationStatus(
                                 myJob.id,
-                                "Cancelled",
+                                "Declined",
                                 selectedReason
                             )
 
@@ -2073,7 +2082,18 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                 }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
-                    Toast.makeText(context, "Job Updated", Toast.LENGTH_SHORT).show()
+                    if (putJob.status =="Completed"){
+                        Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
+                        navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=My Applicants") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                        }
+                    }else if(putJob.status == "Cancelled"){
+
+                        navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=My Applicants") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                        }
+                    }
+
                     putJobApplicationStatus.resetState()
                 }
             }

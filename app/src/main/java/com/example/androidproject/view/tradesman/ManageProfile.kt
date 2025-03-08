@@ -109,7 +109,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
             Icon(
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .clickable{navController.navigate("profiletradesman")},
+                    .clickable{  navController.navigate("main_screen?selectedItem=4&selectedTab=0") },
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
                 tint = Color.Black
@@ -304,7 +304,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
             item {
                 Button(
                     onClick = {
-                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe.toString(),selectedLocation,estimatedRate.toInt(), "090712312322")
+                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,selectedLocation,estimatedRate.toInt(), "090712312322")
                               },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
                     modifier = Modifier.padding(16.dp).fillMaxWidth().background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))

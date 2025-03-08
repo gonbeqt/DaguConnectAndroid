@@ -75,7 +75,7 @@ import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobAp
 import java.sql.Types.NULL
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ) {// Default to 0 if not provided
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ,initialSection: String = "" ) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -84,8 +84,8 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     }
 
 
-    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
-    var selectedSection by remember { mutableStateOf("My Jobs") }
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
+    var selectedSection by remember { mutableStateOf(initialSection) }
 
     // Define tab titles based on selected section
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
@@ -1819,6 +1819,13 @@ fun PendingMySubmissionsTradesmanItem(
                 Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatusViewModel.resetState()
                 onJobCancelled() // Refresh list
+                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=My Submissions") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
+                }
+
             }
             else -> {}
         }
@@ -1962,6 +1969,12 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                     Toast.makeText(context, putJob.data.message(), Toast.LENGTH_SHORT).show()
                     putJobApplicationStatusViewModel.resetState()
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=My Submissions") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
                 }
             }
         }

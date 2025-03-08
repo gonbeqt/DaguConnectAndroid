@@ -318,7 +318,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(
-                        route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}",
+                        route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}&selectedSection={selectedSection}",
                         arguments = listOf(
                             navArgument("selectedItem") {
                                 type = NavType.IntType
@@ -327,9 +327,17 @@ class MainActivity : ComponentActivity() {
                             navArgument("selectedTab") {
                                 type = NavType.IntType
                                 defaultValue = 0
+                            },
+                            navArgument("selectedSection") {
+                                type = NavType.StringType
+                                defaultValue = if (AccountManager.getAccount()?.isClient == true) "My Clients" else "My Jobs"
                             }
                         )
                     ) { backStackEntry ->
+                        val selectedItem = backStackEntry.arguments?.getInt("selectedItem") ?: 0
+                        val selectedTab = backStackEntry.arguments?.getInt("selectedTab") ?: 0
+                        val selectedSection = backStackEntry.arguments?.getString("selectedSection")
+                            ?: if (AccountManager.getAccount()?.isClient == true) "My Clients" else "My Jobs"
                         MainScreen(
                             navController,
                             logoutViewModel,
@@ -353,6 +361,9 @@ class MainActivity : ComponentActivity() {
                             updateBookingClientViewModel,
                             updateTradesmanProfileViewModel,
                             updateClientProfilePictureViewModel,
+                            initialSelectedItem = selectedItem,
+                            initialSelectedTab = selectedTab,
+                            initialSelectedSection = selectedSection,
                             { LoadingUI() } // Pass LoadingUI here
                         )
                     }

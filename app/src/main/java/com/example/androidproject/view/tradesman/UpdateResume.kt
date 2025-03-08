@@ -118,7 +118,7 @@ fun UpdateResume(navController: NavController,updateTradesmanDetailViewModel: Up
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Arrow Back",
                                 modifier = Modifier
-                                    .clickable { navController.popBackStack() }
+                                    .clickable {   navController.navigate("main_screen?selectedItem=4&selectedTab=0") }
                                     .padding(16.dp),
                                 tint = Color.Black
                             )
