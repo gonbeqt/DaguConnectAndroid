@@ -188,8 +188,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
             Box(
                 modifier = Modifier
                     .matchParentSize() // Match the size of the parent Box (entire screen)
-                .zIndex(10f), // Ensure it stays on top of all other elements
-                contentAlignment = Alignment.Center
+                    .zIndex(10f), // Ensure it stays on top of all other elements
+                    contentAlignment = Alignment.Center
             ) {
                 LoadingUI()
             }
