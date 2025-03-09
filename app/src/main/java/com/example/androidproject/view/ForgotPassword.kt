@@ -104,9 +104,7 @@ fun ResetPassword(
                 Toast.makeText(context, "Password Reset Successfully", Toast.LENGTH_SHORT).show()
                 // Navigate to the "login" screen and clear the back stack
                 navController.navigate("login") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
+                    navController.popBackStack()
                     isLoading = false // Hide loading UI
                 }
             }
