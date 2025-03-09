@@ -169,7 +169,7 @@ fun FilterSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
+                text = selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy")),
                 fontWeight = FontWeight.Bold,
                 fontSize = nameTextSize,
                 color = Color.Black
@@ -177,12 +177,12 @@ fun FilterSection(
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.wrapContentSize(Alignment.Center)) {
                 TextButton(onClick = { expanded = true }) {
-                    Text(text = selectedFilter, color = Color(0xFF3CC0B0), fontSize = taskTextSize)
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF3CC0B0))
+                    Text(text = selectedFilter, color = Color.Black, fontSize = taskTextSize)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Black)
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(
-                        colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
+                        colors = MenuDefaults.itemColors(textColor =  Color.Black),
                         text = { Text("My Clients", fontSize = taskTextSize) },
                         onClick = {
                             onFilterChange("My Clients")
@@ -190,7 +190,7 @@ fun FilterSection(
                         }
                     )
                     DropdownMenuItem(
-                        colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
+                        colors = MenuDefaults.itemColors(textColor = Color.Black),
                         text = { Text("My Applicants" , fontSize = taskTextSize) },
                         onClick = {
                             onFilterChange("My Applicants")
@@ -406,10 +406,14 @@ fun CalendarSection(
 
                                     Box(
                                         modifier = Modifier
-                                            .size(20.dp)
+                                            .size(22.dp)
                                             .background(
-                                                if (date == selectedDate) Color.Black else Color.Transparent,
-                                                shape = MaterialTheme.shapes.small
+                                                color = when {
+                                                    date == selectedDate -> Color.Black
+                                                    hasData -> Color.Yellow // Background for dates with data
+                                                    else -> Color.Transparent
+                                                },
+                                                shape = RoundedCornerShape(10.dp)
                                             )
                                             .clickable( indication = null,
                                                 interactionSource = remember { MutableInteractionSource() }
@@ -420,7 +424,7 @@ fun CalendarSection(
                                             text = day.toString(),
                                             color = when {
                                                 date == selectedDate -> Color.White
-                                                hasData -> Color.Yellow // Highlight days with data
+                                                hasData -> Color.Black
                                                 else -> Color.White
                                             },
                                             fontSize = 12.sp,
@@ -428,7 +432,7 @@ fun CalendarSection(
                                         )
                                     }
                                 } else {
-                                    Spacer(modifier = Modifier.size(20.dp)) // Empty spaces for alignment
+                                    Spacer(modifier = Modifier.size(20.dp))
                                 }
                                 day++
                             }

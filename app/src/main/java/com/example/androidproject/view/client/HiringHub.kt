@@ -329,10 +329,12 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        items(pendingBookings.size) { index ->
-            val pendingbookings = pendingBookings[index]
-            PendingItem(pendingbookings,navController)
-        }
+            // Render the list of pending bookings
+            items(pendingBookings.size) { index ->
+                val pendingbooking = pendingBookings[index]
+                PendingItem(pendingbooking, navController)
+            }
+
     }
 
 

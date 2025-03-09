@@ -1,7 +1,10 @@
 package com.example.androidproject.view.client.Categories
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -70,6 +73,8 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.client.UploadFieldScreenShot
+import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
@@ -288,6 +293,11 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
     }
+    var screenShot by remember { mutableStateOf<Uri?>(null) }
+
+    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { screenShot = it } }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -499,7 +509,19 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController,reportViewM
                                     }
                                 }
                             }
-
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = screenShot,
+                                fileType = "image",
+                                onUploadClick = {
+                                    screenshotPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    screenShot?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
                             OutlinedTextField(
                                 value = reasonDescription,
                                 onValueChange = { reasonDescription = it },

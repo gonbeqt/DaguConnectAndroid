@@ -252,7 +252,7 @@ fun EmailField(
 
     Column(modifier = modifier) {
         OutlinedTextField(
-            value = email,
+            value = email.trim(),
             onValueChange = {
                 onEmailChange(it)
                 emailError = it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
@@ -307,7 +307,7 @@ fun PasswordField(password: String,
         painterResource(id = R.drawable.visibility_off)
     Column(modifier = modifier) {
     OutlinedTextField(
-        value = password,
+        value = password.trim(),
         onValueChange = {
             onPasswordChange(it)
         },
