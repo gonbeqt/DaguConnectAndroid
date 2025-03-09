@@ -6,13 +6,19 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -305,7 +311,7 @@ class MainActivity : ComponentActivity() {
                         LandingPage2(navController)
                     }
                     composable("signup") {
-                        SignUpScreen(navController,registerViewModel)
+                        SignUpScreen(navController,registerViewModel,{LoadingUI()})
                     }
                     composable("login") {
                         LogInScreen(navController,loginViewModel,logoutViewModel)
@@ -510,8 +516,29 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 fun LoadingUI() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator() // You can customize this with your LoadingTradesmanUI design
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        // Square white box with shadow behind the CircularProgressIndicator
+        Box(
+            modifier = Modifier
+                .size(60.dp) // Define the size of the square box
+                .shadow(
+                    elevation = 8.dp, // Shadow elevation for the 3D effect
+                    shape = RoundedCornerShape(12.dp), // Rounded corners for a polished look
+                    clip = true // Clip the shadow to the shape
+                )
+                .background(Color.White) // White background for the box
+        )
+
+        // CircularProgressIndicator on top of the square box
+        CircularProgressIndicator(
+            color = Color(0xFF122826), // Match the app's color scheme
+            modifier = Modifier
+                .size(40.dp) // Size of the CircularProgressIndicator
+        )
     }
 }
 

@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
@@ -77,9 +79,10 @@ fun SignUpScreenPreview() {
 }
 
 @Composable
-fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
+fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,LoadingUI : @Composable () -> Unit) {
     val windowSize = rememberWindowSizeClass()
     val registerState by viewModel.registerState.collectAsState()
+
 
     var firstName by remember {
         mutableStateOf("")
@@ -127,7 +130,43 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         WindowType.MEDIUM -> 725.dp
         WindowType.LARGE -> 825.dp
     }
+// State to track loading
+    val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(false) } // Added loading state
+    var ifToast by remember { mutableStateOf(true) }
 
+    // Update isLoading based on registerState
+    when (val resgister =registerState) {
+        is RegisterViewModel.RegisterState.Loading -> {
+            isLoading = true
+        }
+        is RegisterViewModel.RegisterState.Success -> {
+            if (ifToast){
+                Toast.makeText(context, resgister.data?.message, Toast.LENGTH_SHORT)
+                    .show()
+                navController.navigate("login"){
+                    popUpTo("signup") { inclusive = true }
+
+                }
+
+                viewModel.resetState()
+                ifToast = false
+                isLoading = false
+            }
+        }
+
+        is RegisterViewModel.RegisterState.Error -> {
+            Toast.makeText(context, resgister.message, Toast.LENGTH_SHORT)
+                .show()
+            Log.i("Register screen error", "Register error $registerState.message")
+            isLoading = false
+            viewModel.resetState()
+        }
+
+        RegisterViewModel.RegisterState.Idle -> {
+            // Do nothing
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -144,15 +183,25 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                 .offset(y = (-150).dp)
         )
 
+        // Loading overlay at the top level
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize() // Match the size of the parent Box (entire screen)
+                .zIndex(10f), // Ensure it stays on top of all other elements
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingUI()
+            }
+        }
+
         Card(
             modifier = Modifier
-                .offset(y = cardOffsetY.value.dp) // Apply animation offset
+                .offset(y = cardOffsetY.value.dp)
                 .fillMaxWidth(cardWidth)
                 .height(cardHeight)
                 .align(Alignment.BottomCenter)
-                .verticalScroll(rememberScrollState())
-
-            ,
+                .verticalScroll(rememberScrollState()),
             shape = RoundedCornerShape(
                 topEnd = 20.dp,
                 topStart = 20.dp
@@ -163,12 +212,11 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White) // Background color for clarity
+                    .background(Color.White)
             ) {
-                val (titleText,FirstnameField,LastnameField,username, birthdatelayout,emaillayout, passwordlayout, roles, signUpButton, loginButton) = createRefs()
-                val verticalGuideline1= createGuidelineFromStart(0.05f)
+                val (titleText, FirstnameField, LastnameField, username, birthdatelayout, emaillayout, passwordlayout, roles, signUpButton, loginButton) = createRefs()
+                val verticalGuideline1 = createGuidelineFromStart(0.05f)
                 val verticalGuideline2 = createGuidelineFromStart(0.95f)
-
                 val horizontalGuideline = createGuidelineFromTop(0.03f)
 
                 Text(
@@ -183,7 +231,6 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     modifier = Modifier.constrainAs(titleText) {
                         top.linkTo(horizontalGuideline)
                         start.linkTo(verticalGuideline1)
-
                     }
                 )
                 FirstnameField(
@@ -194,7 +241,6 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
-
                     }
                 )
                 LastnameField(
@@ -205,51 +251,43 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
-
                     }
-
                 )
                 UsernameField(
                     userName = userName,
                     onUserNameChange = { userName = it },
                     modifier = Modifier.constrainAs(username) {
-                        top.linkTo(LastnameField.bottom, margin =5.dp)
+                        top.linkTo(LastnameField.bottom, margin = 5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
-
                     }
                 )
                 EmailField(
                     email = email,
                     onEmailChange = { email = it },
                     modifier = Modifier.constrainAs(emaillayout) {
-                        top.linkTo(username.bottom, margin =5.dp)
+                        top.linkTo(username.bottom, margin = 5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
-
                     }
-
                 )
-
                 BirthdayCalendar(
                     birthdate = birthdate,
                     onBirthDateChange = { birthdate = it },
-                    modifier = Modifier.constrainAs(birthdatelayout){
-                        top.linkTo(emaillayout.bottom, margin =10.dp)
+                    modifier = Modifier.constrainAs(birthdatelayout) {
+                        top.linkTo(emaillayout.bottom, margin = 10.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
-
                     }
-
                 )
                 PasswordField(
                     password = password,
                     onPasswordChange = { password = it },
                     modifier = Modifier.constrainAs(passwordlayout) {
-                        top.linkTo(birthdatelayout.bottom, margin =5.dp)
+                        top.linkTo(birthdatelayout.bottom, margin = 5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
@@ -257,14 +295,12 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                 )
                 Roles(
                     isClient = isClient,
-                    onIsClientChange = {isClient = it},
-                    modifier = Modifier.constrainAs(roles){
+                    onIsClientChange = { isClient = it },
+                    modifier = Modifier.constrainAs(roles) {
                         top.linkTo(passwordlayout.bottom)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
-
-
                 )
                 RegistrationButton(
                     navController = navController,
@@ -279,13 +315,11 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     confirmPassword = confirmPassword,
                     registerState = registerState,
                     modifier = Modifier.constrainAs(signUpButton) {
-                        top.linkTo(roles.bottom, margin =5.dp,)
+                        top.linkTo(roles.bottom, margin = 5.dp)
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                         width = Dimension.fillToConstraints
                     }
-
-
                 )
                 RegistrationLoginButton(
                     navController = navController,
@@ -294,16 +328,10 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                         start.linkTo(verticalGuideline1)
                         end.linkTo(verticalGuideline2)
                     }
-
                 )
-
-
-
             }
-
         }
     }
-
 }
 
 @Composable
@@ -630,7 +658,7 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-            .padding(start = 6.dp),
+                .padding(start = 6.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
@@ -658,7 +686,7 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
                         (
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ){
+                    ) {
                         if (selectedCard.value != true) {
                             selectedCard.value = true
                             onIsClientChange(true)
@@ -748,32 +776,6 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
 }
 @Composable
 fun RegistrationButton(navController: NavController, viewModel: RegisterViewModel, firstName: String, lastName: String, userName: String, email: String, birthdate: String, isClient: Boolean, password: String, confirmPassword: String, registerState: RegisterViewModel.RegisterState, modifier: Modifier = Modifier){
-    val context = LocalContext.current
-    var ifToast by remember { mutableStateOf(true) }
-    when (registerState) {
-        is RegisterViewModel.RegisterState.Loading -> {
-            CircularProgressIndicator()
-        }
-        is RegisterViewModel.RegisterState.Success -> {
-            if (ifToast){
-                Toast.makeText(context, registerState.data?.message, Toast.LENGTH_SHORT)
-                    .show()
-                navController.navigate("login")
-                ifToast = false
-            }
-        }
-
-        is RegisterViewModel.RegisterState.Error -> {
-            Toast.makeText(context, registerState.message, Toast.LENGTH_SHORT)
-                .show()
-            Log.i("Register screen error", "Register error $registerState.message")
-        }
-
-        RegisterViewModel.RegisterState.Idle -> {
-            // Do nothing
-        }
-    }
-
     Column(modifier = modifier) {
 
             Button(
