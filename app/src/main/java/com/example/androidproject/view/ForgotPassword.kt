@@ -211,7 +211,7 @@ fun ResetPassword(
                                 color = Color.Black
                             )
                             OutlinedTextField(
-                                value = email,
+                                value = email.trim(),
                                 onValueChange = { email = it },
                                 label = { Text("eg. sample@gmail.com") },
                                 modifier = Modifier.fillMaxWidth(),
@@ -251,7 +251,7 @@ fun ResetPassword(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             OutlinedTextField(
-                                value = newPassword,
+                                value = newPassword.trim(),
                                 onValueChange = { newPassword = it },
                                 label = { Text("New Password") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -269,7 +269,7 @@ fun ResetPassword(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             OutlinedTextField(
-                                value = confirmPassword,
+                                value = confirmPassword.trim(),
                                 onValueChange = { confirmPassword = it },
                                 label = { Text("Confirm Password") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),

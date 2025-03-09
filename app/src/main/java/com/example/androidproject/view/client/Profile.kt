@@ -16,6 +16,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -1299,7 +1300,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                     val isSelected = selectedCategories.contains(category)
                                     Box(
                                         modifier = Modifier
-                                            .clickable {
+                                            .clickable(interactionSource = MutableInteractionSource(), indication = null) {
                                                 if (isSelected) {
                                                     selectedCategories.remove(category) // Remove if already selected
                                                     jobType = ""

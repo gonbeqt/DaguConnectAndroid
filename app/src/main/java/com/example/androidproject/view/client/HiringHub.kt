@@ -332,7 +332,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 
 
 @Composable
-fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController: NavController) {
+fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController) {
     val pending = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -515,6 +515,7 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
 @Composable
 fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
     val cancelled = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
     LaunchedEffect(Unit) {
         cancelled.refresh()
     }
@@ -554,6 +555,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
             }
         }
     }
+
 }
 
 
@@ -1837,7 +1839,6 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
             }
         }
     }
-
 }
 @Composable
 fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
@@ -1880,7 +1881,6 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
             }
         }
     }
-
 }
 
 @Composable
@@ -1964,9 +1964,9 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
             items(completedApplication.size) { index ->
                 val completedJobs = completedApplication[index]
                 CompletedApplicantsItem(completedJobs, navController)
+                }
             }
         }
-    }
     }
 
 

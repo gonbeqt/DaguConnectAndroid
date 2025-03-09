@@ -34,7 +34,6 @@ import com.example.androidproject.view.client.Categories.Plumbing
 import com.example.androidproject.view.client.Categories.Roofing
 import com.example.androidproject.view.client.Categories.Welding
 import com.example.androidproject.view.client.ChangePassword
-import com.example.androidproject.view.client.EmailVerification
 import com.example.androidproject.view.client.ReportProblem
 import com.example.androidproject.view.LandingPage2
 import com.example.androidproject.view.LandingPageScreen
@@ -435,9 +434,6 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("alltradesman"){
                         AllTradesman(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("emailverification"){
-                        EmailVerification(navController)
                     }
                     composable("changepassword"){
                         ChangePassword(navController,changePasswordViewModel,{ LoadingUI() })

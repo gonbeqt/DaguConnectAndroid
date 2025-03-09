@@ -123,16 +123,15 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
         WindowType.LARGE -> 0.55f
     }
     val cardHeight = when (windowSize.height) {
-        WindowType.SMALL -> 675.dp
-        WindowType.MEDIUM -> 775.dp
-        WindowType.LARGE -> 875.dp
+        WindowType.SMALL -> 625.dp
+        WindowType.MEDIUM -> 725.dp
+        WindowType.LARGE -> 825.dp
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(myGradient)
-            .verticalScroll(rememberScrollState())
         ,
         contentAlignment = Alignment.Center
     ) {
@@ -151,6 +150,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                 .fillMaxWidth(cardWidth)
                 .height(cardHeight)
                 .align(Alignment.BottomCenter)
+                .verticalScroll(rememberScrollState())
 
             ,
             shape = RoundedCornerShape(
@@ -166,11 +166,10 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
                     .background(Color.White) // Background color for clarity
             ) {
                 val (titleText,FirstnameField,LastnameField,username, birthdatelayout,emaillayout, passwordlayout, roles, signUpButton, loginButton) = createRefs()
-                val verticalGuideline1= createGuidelineFromStart(0.05f) // 10% from the start
-                val verticalGuideline2 = createGuidelineFromStart(0.95f) // 10% from the start
-                val verticalGuideline3= createGuidelineFromStart(0.075f) // 10% from the start
-                val verticalGuideline4 = createGuidelineFromStart(0.925f)
-                val horizontalGuideline = createGuidelineFromTop(0.05f)
+                val verticalGuideline1= createGuidelineFromStart(0.05f)
+                val verticalGuideline2 = createGuidelineFromStart(0.95f)
+
+                val horizontalGuideline = createGuidelineFromTop(0.03f)
 
                 Text(
                     text = "Create an Account",
@@ -398,7 +397,7 @@ fun UsernameField(
 {
     Column(modifier = modifier) {
         OutlinedTextField(
-            value = userName,
+            value = userName.trim(),
             onValueChange = onUserNameChange,
             label = { Text("Username") },
             leadingIcon = {
@@ -440,7 +439,7 @@ fun EmailField(
 
     Column(modifier = modifier) {
         OutlinedTextField(
-            value = email,
+            value = email.trim(),
             onValueChange = {
                 onEmailChange(it)
                 emailError = it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
@@ -568,7 +567,7 @@ fun PasswordField(
         painterResource(id = R.drawable.visibility_off)
     Column(modifier = modifier) {
         OutlinedTextField(
-            value = password,
+            value = password.trim(),
             onValueChange = {
                 onPasswordChange(it)
                 passwordError = it.isNotEmpty() && it.length < 8
@@ -630,7 +629,8 @@ fun Roles(isClient: Boolean, onIsClientChange: (Boolean) -> Unit,modifier: Modif
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(16.dp)
+            .padding(start = 6.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
