@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.MotionScene
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -572,9 +573,9 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 240.dp
-        WindowType.MEDIUM -> 400.dp to 250.dp
-        WindowType.LARGE -> 410.dp to 260.dp
+        WindowType.SMALL -> 390.dp to 180.dp
+        WindowType.MEDIUM -> 400.dp to 190.dp
+        WindowType.LARGE -> 410.dp to 200.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -593,6 +594,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     }
     Card(
         modifier = Modifier
+            .clickable {navController.navigate("tradesmanpendingdetails") }
             .size(cardHeight.first,cardHeight.second)
         ,
         shape = RoundedCornerShape(8.dp),
@@ -633,53 +635,27 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                         Text(
                             text = pending.clientfullname,
                             color = Color.Black,
-                            fontWeight = FontWeight(500),
+                            fontWeight = FontWeight.Medium,
                             fontSize = nameTextSize,
-                            modifier = Modifier.padding(top = 10.dp)
                         )
-                        Row(
-                            modifier = Modifier.padding(top = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Rate Box
-
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                            12.dp
-                                        )
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Star Icon",
-                                        tint = Color(0xFFFFA500),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                }
-                            }
+                        Row {
+                            Text(
+                                text = "Job Date:",
+                                color = Color.Black,
+                                fontSize = taskTextSize,
+                            )
+                            Text(
+                                modifier = Modifier.padding(start = 5.dp),
+                                text = date,
+                                color = Color.Gray,
+                                fontSize = taskTextSize,
+                            )
                         }
-                        Text(
-                            text = "Weekdays Selected",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
-                        )
-                        Text(
-                            text = date,
-                            color = Color.Gray,
-                            fontSize = smallTextSize,
-                        )
                     }
                 }
 
                 // Spacer between text and buttons
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -920,9 +896,9 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
     val date = ViewModelSetups.formatDateTime(declined.bookingdate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 240.dp
-        WindowType.MEDIUM -> 400.dp to 250.dp
-        WindowType.LARGE -> 410.dp to 260.dp
+        WindowType.SMALL -> 390.dp to 180.dp
+        WindowType.MEDIUM -> 400.dp to 190.dp
+        WindowType.LARGE -> 410.dp to 210.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -979,79 +955,41 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                             .padding(start = 10.dp)
                     ) {
                         Text(
+                            modifier = Modifier.padding(top = 8.dp),
                             text = "Karlos Rivo",
                             color = Color.Black,
                             fontWeight = FontWeight(500),
-                            fontSize = nameTextSize,
-                            modifier = Modifier.padding(top = 10.dp)
-                        )
-                        Text(
-                            text = "Electrician",
-                            color = Color.Black,
                             fontSize = taskTextSize,
                         )
-                        Row(
-                            modifier = Modifier.padding(top = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Reviews Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                            12.dp
-                                        )
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Star Icon",
-                                        tint = Color(0xFFFFA500),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                }
-                            }
+                        Row {
+                            Text(
+                                text = "Job Date:",
+                                color = Color.Black,
+                                fontSize = 12.sp
+                            )
+                            Text(
+                                text = date,
+                                color = Color.Gray,
+                                fontSize = taskTextSize,
+                            )
                         }
-                        Text(
-                            text = "Weekdays Selected",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
-                        )
-                        Text(
-                            text = date,
-                            color = Color.Gray,
-                            fontSize = smallTextSize,
-                        )
+
                     }
                 }
                 // Spacer between text and buttons
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
+                        .clickable { }
+                        .background(
+                            color = Color.Transparent,
+                        )
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .padding(vertical = 8.dp),  // Adjust padding as needed
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-
-                            .clickable { }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp),  // Adjust padding as needed
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Apply Again", fontSize = smallTextSize)
-                    }
+                    Text(text = "Declination Details", fontSize = smallTextSize)
                 }
             }
         }

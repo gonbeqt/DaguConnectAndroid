@@ -68,6 +68,7 @@ import com.example.androidproject.view.tradesman.ProfileVerification
 import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.view.tradesman.AccountSettingsTradesman
+import com.example.androidproject.view.tradesman.TradesmanPendingDetails
 import com.example.androidproject.view.tradesman.UpdateResume
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
 import com.example.androidproject.viewmodel.ForgotPassViewModel
@@ -505,6 +506,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("updateresume"){
                         UpdateResume(navController,updateTradesmanDetailViewModel)
+                    }
+                    composable("tradesmanpendingdetails"){
+                        TradesmanPendingDetails(modifier = Modifier, navController)
                     }
 
                 }
