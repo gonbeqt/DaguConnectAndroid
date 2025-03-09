@@ -1,5 +1,6 @@
 package com.example.androidproject.view
 
+import LogoutViewModel
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
@@ -28,6 +29,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
@@ -55,6 +57,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
+import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.LoginViewModel
 
@@ -64,23 +68,50 @@ fun LogInScreenPreview() {
     //LogInScreen(navController = rememberNavController())
 }
 @Composable
-fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
+fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutViewModel:LogoutViewModel) {
+
+    val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val windowSize = rememberWindowSizeClass()
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
+    var showSuspendedDialog by remember { mutableStateOf(false) }
+
+
+
+    LaunchedEffect(logoutResult) {
+        logoutResult?.let {
+            // Clear tokens and navigate regardless of result
+            TokenManager.clearToken()
+            AccountManager.clearAccountData()
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }
+            logoutViewModel.resetLogoutResult()
+        }
+    }
 
     // Observe login state changes
     LaunchedEffect(loginState) {
-        when (loginState) {
+        when (val loginStatus =loginState) {
             is LoginViewModel.LoginState.Success -> {
-                Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                navController.navigate("main_screen") {
-                    popUpTo("login") { inclusive = true }
+                val response = loginStatus.data
+                val account = response?.user
+                val isSuspended = account?.suspend == true
+
+                if (isSuspended) {
+                    showSuspendedDialog = true
+                    return@LaunchedEffect
+                }else{
+                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+
+                    navController.navigate("main_screen") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
                 viewModel.resetState()
             }
             is LoginViewModel.LoginState.Error -> {
-                Toast.makeText(context, (loginState as LoginViewModel.LoginState.Error).message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, loginStatus.message, Toast.LENGTH_SHORT).show()
                 viewModel.resetState()
             }
             else -> {}
@@ -225,7 +256,52 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel) {
             }
         }
     }
+    // Suspension Dialog
+    if (showSuspendedDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showSuspendedDialog = false
+                viewModel.resetState()
+            },
+            title = {
+                Text(
+                    text = "Account Suspended",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Text(
+                    text = "Your account has been suspended. Please contact support for more information.",
+                    fontSize = 16.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showSuspendedDialog = false
+                        viewModel.resetState()
+                        val token = TokenManager.getToken()
+                        if (token != null) {
+                            logoutViewModel.logout()
+                        } else {
+                            // Handle case where token is null
+                            TokenManager.clearToken()
+                            AccountManager.clearAccountData()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
+                ) {
+                    Text("OK", color = Color.White)
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.padding(16.dp)
+        )
+    }
 }
+
 @Composable
 fun WelcomeText(windowSize: WindowSize, modifier: Modifier = Modifier) {
     Text(

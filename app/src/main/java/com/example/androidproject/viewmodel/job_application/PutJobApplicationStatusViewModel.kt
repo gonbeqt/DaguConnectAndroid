@@ -26,7 +26,6 @@ class PutJobApplicationStatusViewModel(private val apiService: ApiService, priva
                 if (put.isSuccessful) {
                     _putJobApplicationStatusState.value = PutJobApplicationState.Success(put, status)
                 } else {
-//                    _putJobApplicationStatusState.value = PutJobApplicationState.Error(put.message())
                     val errorJson = put.errorBody()?.string()
                     println("Error response: $errorJson") // Debug log
                     val errorMessage = JsonErrorParser.extractField(errorJson, "message") ?: "Unknown error"

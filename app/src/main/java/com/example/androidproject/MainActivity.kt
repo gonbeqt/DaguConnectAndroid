@@ -309,7 +309,7 @@ class MainActivity : ComponentActivity() {
                         SignUpScreen(navController,registerViewModel)
                     }
                     composable("login") {
-                        LogInScreen(navController,loginViewModel)
+                        LogInScreen(navController,loginViewModel,logoutViewModel)
 
                     }
 

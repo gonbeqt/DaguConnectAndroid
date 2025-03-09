@@ -277,24 +277,45 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
     LaunchedEffect(Unit) {
         allBooking.refresh()
     }
-    LazyColumn(
+
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
+        if (allBooking.itemCount == 0) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Clients",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
 
-        items(allBooking.itemCount) { index ->
-            val clientbooking = allBooking[index]
-            if (clientbooking != null) {
-                AllItem(clientbooking,navController)
-                Log.d("ALLBOOKINGS", "AllBookingsContent: $clientbooking")
-            }
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+
+                items(allBooking.itemCount) { index ->
+                    val clientbooking = allBooking[index]
+                    if (clientbooking != null) {
+                        AllItem(clientbooking,navController)
+                        Log.d("ALLBOOKINGS", "AllBookingsContent: $clientbooking")
+                    }
+                }
         }
+    }
+
 
         /* items(booking.size) { index ->
              val bookings = booking[index]
@@ -311,7 +332,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 
 
 @Composable
-fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController) {
+fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController: NavController) {
     val pending = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -319,25 +340,37 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
     }
     // Filter the bookings to get only those with status "Pending"
     val pendingBookings = pending.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
-    LazyColumn(
+
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(pendingBookings.size) { index ->
-            val pendingbookings = pendingBookings[index]
-            PendingItem(pendingbookings,navController)
+        if (pendingBookings.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Pending Clients ",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            // Display the LazyColumn when there are pending bookings
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(pendingBookings.size) { index ->
+                    val pendingBooking = pendingBookings[index]
+                    PendingItem(pendingBooking, navController)
+                }
+            }
         }
     }
-
-
-
-
 }
 @Composable
 fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
@@ -349,20 +382,40 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
 
     // Filter the bookings to get only those with status "Declined"
     val declinedBookings = declined.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(declinedBookings.size) { index ->
-            val declinedbooking = declinedBookings[index]
-            DeclinedItem(declinedbooking, navController )
+        if (declinedBookings.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Declined Clients ",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(declinedBookings.size) { index ->
+                    val declinedbooking = declinedBookings[index]
+                    DeclinedItem(declinedbooking, navController )
+                }
+            }
         }
     }
+
 
 
 
@@ -377,20 +430,40 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
     }
     // Filter the bookings to get only those with status "Active"
     val activeBooking = active.itemSnapshotList.items.filter { it.bookingStatus == "Active" }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(activeBooking.size) { index ->
-            val activebooking = activeBooking[index]
-            ActiveItems(activebooking,navController,updateWorkStatusViewModel)
+        if (activeBooking.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Active Clients",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(activeBooking.size) { index ->
+                    val activebooking = activeBooking[index]
+                    ActiveItems(activebooking,navController,updateWorkStatusViewModel)
+                }
+            }
         }
     }
+
 
 }
 
@@ -402,48 +475,85 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
     }
     // Filter the bookings to get only those with status "Completed"
     val completedBookings = completed.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(completedBookings.size) { index ->
-            val completedbooking = completedBookings[index]
-            CompletedItem(completedbooking, navController )
+        if (completedBookings.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Completed Clients",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(completedBookings.size) { index ->
+                    val completedbooking = completedBookings[index]
+                    CompletedItem(completedbooking, navController )
+                }
+            }
         }
     }
+
 
 }
 @Composable
 fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navController: NavController) {
     val cancelled = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
-
     LaunchedEffect(Unit) {
         cancelled.refresh()
     }
 
     // Filter the bookings to get only those with status "Completed"
     val completedBookings = cancelled.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(completedBookings.size) { index ->
-            val cancelledbooking = completedBookings[index]
-            CancelledItem(cancelledbooking, navController )
+        if (completedBookings.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Cancelled Clients",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(completedBookings.size) { index ->
+                    val cancelledbooking = completedBookings[index]
+                    CancelledItem(cancelledbooking, navController )
+                }
+            }
         }
     }
-
 }
 
 
@@ -1646,22 +1756,42 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
         myJobs.refresh()
     }
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9)),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(myJobs.itemCount) { index ->
-            val myJob = myJobs[index]
-            if (myJob != null) {
-                AllApplicantsItem(myJob)
-            }
+        if (myJobs.itemCount == 0) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Pending Applicants",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9)),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(myJobs.itemCount) { index ->
+                    val myJob = myJobs[index]
+                    if (myJob != null) {
+                        AllApplicantsItem(myJob)
+                    }
 
+                }
+            }
         }
     }
+
 }
 
 
@@ -1675,19 +1805,39 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
 
     val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9)),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(pendingApplication.size) { index ->
-            val pendingJobs = pendingApplication[index]
-            PendingApplicantsItem(pendingJobs, navController, putJobApplicationStatus)
+        if (pendingApplication.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Pending Applicants",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9)),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(pendingApplication.size) { index ->
+                    val pendingJobs = pendingApplication[index]
+                    PendingApplicantsItem(pendingJobs, navController, putJobApplicationStatus)
+                }
+            }
         }
     }
+
 }
 @Composable
 fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
@@ -1698,19 +1848,39 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
     }
 
     val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9)),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(declinedApplication.size) { index ->
-            val declineJob = declinedApplication[index]
-            DeclinedApplicantsItem(declineJob, navController)
+        if (declinedApplication.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Declined Applicants",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9)),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(declinedApplication.size) { index ->
+                    val declineJob = declinedApplication[index]
+                    DeclinedApplicantsItem(declineJob, navController)
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -1722,17 +1892,36 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
     }
 
     val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9)),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(activeApplication.size) { index ->
-            val activeJobs = activeApplication[index]
-            ActiveApplicantsItem(activeJobs, navController, putJobApplicationStatus)
+        if (activeApplication.isEmpty()) {
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Active Applicants",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9)),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(activeApplication.size) { index ->
+                    val activeJobs = activeApplication[index]
+                    ActiveApplicantsItem(activeJobs, navController, putJobApplicationStatus)
+                }
+            }
         }
     }
 }
@@ -1746,20 +1935,41 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
     }
 
     val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }
-
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9)),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(completedApplication.size) { index ->
-            val completedJobs = completedApplication[index]
-            CompletedApplicantsItem(completedJobs, navController )
+    if (completedApplication.isEmpty()) {
+
+        // Display "No Pending Booking" when the list is empty
+        Text(
+            text = "No Completed Applicants",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxHeight()
+                .size(420.dp)
+                .background(Color(0xFFD9D9D9)),
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(completedApplication.size) { index ->
+                val completedJobs = completedApplication[index]
+                CompletedApplicantsItem(completedJobs, navController)
+            }
         }
     }
+    }
+
+
 }
 @Composable
 fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: GetMyJobApplicantsViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
