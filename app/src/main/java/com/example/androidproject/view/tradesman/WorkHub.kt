@@ -76,7 +76,7 @@ import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobAp
 import java.sql.Types.NULL
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ,initialSection: String = "" ) {// Default to 0 if not provided
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ,initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -91,7 +91,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     // Define tab titles based on selected section
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
-    val tabTitles = if (selectedSection == "My Jobs") myJobsTabs else myApplicantsTabs
+    val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
 
     Column(
         modifier = modifier
@@ -167,7 +167,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             .padding(8.dp)
                     ) {
                         when (selectedSection) {
-                            "My Jobs" -> when (selectedTabIndex) {
+                           0 -> when (selectedTabIndex) {
                                 0 -> AllBookingsTradesmanContent(getTradesmanBooking)
                                 1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel)
                                 2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
@@ -176,9 +176,9 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                 5 -> CancelledBookingsTradesmanContent(navController,getTradesmanBooking)
                             }
 
-                            "My Submissions" -> when (selectedTabIndex) {
+                            1 -> when (selectedTabIndex) {
                                 0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
-                                1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel, viewJobsApplication)
+                                1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel)
                                 2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
                                 3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel)
                                 4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
@@ -192,7 +192,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     }
 }
 @Composable
-fun JobsTradesmanTopSection(navController: NavController, selectedSection: String, onSectionSelected: (String) -> Unit) {
+fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, onSectionSelected: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -203,15 +203,15 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
         // Left-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == "My Jobs") myGradient3 else SolidColor(Color.Transparent))
+                .background(if (selectedSection == 0) myGradient3 else SolidColor(Color.Transparent))
                 .weight(1f)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
             TextButton(
-                onClick = { onSectionSelected("My Jobs") },
+                onClick = { onSectionSelected(0) },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Jobs") Color.White else Color.Black
+                    contentColor = if (selectedSection == 0) Color.White else Color.Black
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -227,7 +227,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
         Box(
             modifier = Modifier
                 .background(
-                    if (selectedSection == "My Submissions") myGradient3 else SolidColor(
+                    if (selectedSection == 1) myGradient3 else SolidColor(
                         Color.Transparent
                     )
                 )
@@ -235,9 +235,9 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Strin
                 .weight(1f),
         ) {
             TextButton(
-                onClick = { onSectionSelected("My Submissions") },
+                onClick = { onSectionSelected(1) },
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == "My Submissions") Color.White else Color.Black
+                    contentColor = if (selectedSection == 1) Color.White else Color.Black
                 ),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -264,22 +264,42 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
     LaunchedEffect(Unit) {
         allBooking.refresh()
     }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(allBooking.itemCount) { index ->
-            val clients = allBooking[index]
-            if (clients != null) {
-                AllTradesmanItem(clients)
+        if (allBooking.itemCount == 0) {
+            // Display "No Declined Jobs" when the list is empty
+            Text(
+                text = "No Jobs",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(allBooking.itemCount) { index ->
+                    val clients = allBooking[index]
+                    if (clients != null) {
+                        AllTradesmanItem(clients)
+                    }
+                }
             }
         }
     }
+
 }
 @Composable
 fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel, updateBookingClientViewModel: UpdateBookingClientViewModel) {
@@ -289,21 +309,41 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
         bookingPendingstate.refresh()
     }
     val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
-    LazyColumn(
+    Box(
         modifier = Modifier
-            .padding(bottom = 80.dp)
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(bookingPending.size) { index ->
-            val Pending = bookingPending[index]
-            PendingTradesmanItem(Pending,navController,updateBookingClientViewModel)
+        if (bookingPending.isEmpty()) {
+            // Display "No Pending Jobs" when the list is empty
+            Text(
+                text = "No Pending Jobs",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .padding(bottom = 80.dp)
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(bookingPending.size) { index ->
+                    val Pending = bookingPending[index]
+                    PendingTradesmanItem(Pending,navController,updateBookingClientViewModel)
+                }
+            }
         }
     }
+
 }
 @Composable
 fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
@@ -314,21 +354,40 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
     }
 
     val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
-
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .padding(bottom = 70.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(declinedBookings.size) { index ->
-            val declined = declinedBookings[index]
-            DeclinedTradesmanItem(declined,navController)
+        if (declinedBookings.isEmpty()) {
+            // Display "No Declined Jobs" when the list is empty
+            Text(
+                text = "No Declined Jobs",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .padding(bottom = 70.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(declinedBookings.size) { index ->
+                    val declined = declinedBookings[index]
+                    DeclinedTradesmanItem(declined,navController)
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -339,19 +398,39 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
         activeBookingstate.refresh()
     }
     val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Active" }
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .padding(bottom = 70.dp)
-
-            .background(Color(0xFFD9D9D9))
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(activeBookings.size) { index ->
-            val active = activeBookings[index]
-            ActiveTradesmanItem(active, navController)
+        if (activeBookings.isEmpty()) {
+            // Display "No Active Jobs" when the list is empty
+            Text(
+                text = "No Active Jobs",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .padding(bottom = 70.dp)
+
+                    .background(Color(0xFFD9D9D9))
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(activeBookings.size) { index ->
+                    val active = activeBookings[index]
+                    ActiveTradesmanItem(active, navController)
+                }
+            }
         }
     }
 }
@@ -365,21 +444,41 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
     }
     val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Completed" }
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .padding(bottom = 70.dp)
-
-            .background(Color(0xFFD9D9D9))
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(completedBooking.size) { index ->
-            val Pending = completedBooking[index]
-            CompletedItem(Pending, navController )
+        if (completedBooking.isEmpty()) {
+            // Display "No Completed Jobs" when the list is empty
+            Text(
+                text = "No Completed Jobs",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .padding(bottom = 70.dp)
+
+                    .background(Color(0xFFD9D9D9))
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(completedBooking.size) { index ->
+                    val Pending = completedBooking[index]
+                    CompletedItem(Pending, navController )
+                }
+            }
         }
     }
+
 }
 @Composable
 fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
@@ -390,22 +489,41 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
     }
 
     val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Cancelled" }
-
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .padding(bottom = 70.dp)
-
-            .background(Color(0xFFD9D9D9))
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(cancelledBookings.size) { index ->
-            val cancel = cancelledBookings[index]
-            CancelledItem(cancel, navController )
+        if (cancelledBookings.isEmpty()) {
+            // Display "No Cancelled Jobs" when the list is empty
+            Text(
+                text = "No Cancelled Jobs",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .padding(bottom = 70.dp)
+
+                    .background(Color(0xFFD9D9D9))
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(cancelledBookings.size) { index ->
+                    val cancel = cancelledBookings[index]
+                    CancelledItem(cancel, navController )
+                }
+            }
         }
     }
+
 }
 
 
@@ -1474,24 +1592,45 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
         getMyJobApplications.refreshJobApplicants()
     }
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
-            .padding(bottom = 70.dp)
-
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(myJobs.itemCount) { index ->
-            val myJob = myJobs[index]
-            if (myJob != null) {
-                AllMySubmissionsTradesmanItem(myJob)
+        if (myJobs.itemCount == 0) {
+            // Display "No Submissions" when the list is empty
+            Text(
+                text = "No Declined Submissions",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(bottom = 70.dp)
+
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(myJobs.itemCount) { index ->
+                    val myJob = myJobs[index]
+                    if (myJob != null) {
+                        AllMySubmissionsTradesmanItem(myJob)
+                    }
+                }
             }
         }
     }
+
+
 }
 
 
@@ -1499,37 +1638,52 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
 fun PendingMySubmissionsTradesmanContent(
     navController: NavController,
     getMyJobApplications: GetMyJobApplicationViewModel,
-    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
-    viewJobsApplication: ViewJobApplicationViewModel
+    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
 ) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.refreshJobApplicants()
+        myJob.refresh()
     }
-
-    LazyColumn(
+    val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
+    Box(
         modifier = Modifier
-            .padding(bottom = 70.dp)
             .fillMaxHeight()
             .size(420.dp)
             .background(Color(0xFFD9D9D9)),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(myJob.itemCount) { index ->
-            val job = myJob[index]
-            if (job != null && job.status == "Pending") {
-                PendingMySubmissionsTradesmanItem(
-                    myJob = job,
-                    navController = navController,
-                    putJobApplicationStatusViewModel = putJobApplicationStatusViewModel,
-                    onJobCancelled = {
-                        myJob.refresh() // Refresh list when job is canceled
-                    }
-                )
+        if (pendingApplication.isEmpty()) {
+            // Display "No Pending Submissions" when the list is empty
+            Text(
+                text = "No Pending Submissions",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .padding(bottom = 70.dp)
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9)),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(pendingApplication.size) { index ->
+                    val pendingJobs = pendingApplication[index]
+                    PendingMySubmissionsTradesmanItem(
+                        pendingJobs,
+                        navController,
+                        putJobApplicationStatusViewModel
+                    )
+                }
             }
         }
     }
+
+
 }
 @Composable
 fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
@@ -1539,21 +1693,41 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
         myJob.refresh()
     }
     val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
-    LazyColumn(
+    Box(
         modifier = Modifier
-            .padding(bottom = 70.dp)
-
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(declinedApplication.size) { index ->
-            val declinedJobs = declinedApplication[index]
-            DeclinedMySubmissionsTradesmanItem(declinedJobs, navController)
+        if (declinedApplication.isEmpty()) {
+            // Display "No Active Submissions" when the list is empty
+            Text(
+                text = "No Active Submissions",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .padding(bottom = 70.dp)
+
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(declinedApplication.size) { index ->
+                    val declinedJobs = declinedApplication[index]
+                    DeclinedMySubmissionsTradesmanItem(declinedJobs, navController)
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -1566,22 +1740,42 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
     }
 
     val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }
-
-    LazyColumn(
+    Box(
         modifier = Modifier
-            .padding(bottom = 70.dp)
-
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(activeApplication.size) { index ->
-            val activeJobs = activeApplication[index]
-            ActiveMySubmissionsTradesmanItem(activeJobs,navController, putJobApplicationStatusViewModel)
+        if (activeApplication.isEmpty()) {
+            // Display "No Active Submissions" when the list is empty
+            Text(
+                text = "No Active Submissions",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+
+            LazyColumn(
+                modifier = Modifier
+                    .padding(bottom = 70.dp)
+
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(activeApplication.size) { index ->
+                    val activeJobs = activeApplication[index]
+                    ActiveMySubmissionsTradesmanItem(activeJobs,navController, putJobApplicationStatusViewModel)
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -1593,23 +1787,42 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
     }
 
     val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }
-
-    LazyColumn(
+    Box(
         modifier = Modifier
-            .padding(bottom = 70.dp)
-
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(completedApplication.size) { index ->
-            val completedJobs = completedApplication[index]
-            CompletedMySubmissionsTradesmanItem(completedJobs, navController )
+        if (completedApplication.isEmpty()) {
+            // Display "No Completed Submissions" when the list is empty
+            Text(
+                text = "No Completed Submissions",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .padding(bottom = 70.dp)
+
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(completedApplication.size) { index ->
+                    val completedJobs = completedApplication[index]
+                    CompletedMySubmissionsTradesmanItem(completedJobs, navController )
+                }
+            }
         }
     }
+
 }
 @Composable
 fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
@@ -1620,22 +1833,41 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
     }
 
     val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }
-
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxHeight()
-            .padding(bottom = 70.dp)
-
             .size(420.dp)
-            .background(Color(0xFFD9D9D9))
-        ,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .background(Color(0xFFD9D9D9)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(cancelledApplication.size) { index ->
-            val calledJobs = cancelledApplication[index]
-            CancelledMySubmissionsTradesmanItem(calledJobs, navController )
+        if (cancelledApplication.isEmpty()) {
+            // Display "No Declined Submissions" when the list is empty
+            Text(
+                text = "No Cancelled Submissions",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(bottom = 70.dp)
+
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9))
+                ,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(cancelledApplication.size) { index ->
+                    val calledJobs = cancelledApplication[index]
+                    CancelledMySubmissionsTradesmanItem(calledJobs, navController )
+                }
+            }
         }
     }
+
 }
 
 
@@ -1734,9 +1966,13 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
 fun PendingMySubmissionsTradesmanItem(
     myJob: JobApplicationData,
     navController: NavController,
-    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
-    onJobCancelled: () -> Unit
+    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
 ) {
+
+
+    var showCancelDialog by remember { mutableStateOf(false) }
+    var showCancelReasons by remember { mutableStateOf(false) }
+
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val putState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
@@ -1756,8 +1992,7 @@ fun PendingMySubmissionsTradesmanItem(
             is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                 Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatusViewModel.resetState()
-                onJobCancelled() // Refresh list
-                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=My Submissions") {
+                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = false
                     }
@@ -1846,7 +2081,7 @@ fun PendingMySubmissionsTradesmanItem(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("canceltradesmannow/${myJob.id}")
+                                showCancelDialog= true
                             }
                             .background(
                                 color = Color.Transparent,
@@ -1879,6 +2114,118 @@ fun PendingMySubmissionsTradesmanItem(
             }
         }
     }
+
+
+
+    if (showCancelDialog) {
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_approve_decline),
+                        contentDescription = "Approval Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Cancel Job",
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            },
+            text = { Text("Once Cancelled, this job may not be available again. Proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCancelDialog = false
+                        showCancelReasons = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Confirm", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showCancelDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            }
+        )
+    }
+
+
+    if (showCancelReasons) {
+        var selectedReason by remember { mutableStateOf<String?>(null) }
+
+        val reasons = listOf(
+            "Workload concerns",
+            "Schedule conflicts",
+            "Relocation issues",
+            "Committed to a contract project",
+            "Short notice start date",
+            "Personal Reasons",
+            "Other"
+        )
+
+        AlertDialog(
+            onDismissRequest = { showCancelReasons = false },
+            title = {
+                Text(
+                    text = "Reason for Cancellation",
+                    fontSize = 18.sp,
+                    color = Color(0xFF42C2AE)
+                )
+            },
+            text = {
+                Column {
+                    reasons.forEach { reason ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedReason = reason },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = selectedReason == reason,
+                                onCheckedChange = { isChecked ->
+                                    if (isChecked) {
+                                        selectedReason = reason
+                                    }
+                                }
+                            )
+                            Text(reason, fontSize = 14.sp)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showCancelReasons = false
+                        selectedReason?.let {
+                            putJobApplicationStatusViewModel.updateJobApplicationStatus(myJob.id,"Cancelled",it)
+
+                        }
+                    },
+                    enabled = selectedReason != null,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Submit", color = Color.White)
+                }
+            }
+        )
+    }
 }
 @Composable
 fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
@@ -1892,9 +2239,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
     LaunchedEffect(putJobState) {
         if (cancelledClicked || completedClicked) {
             when (val putJob = putJobState) {
-                is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
 
-                }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
 
@@ -1907,13 +2252,12 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                     Toast.makeText(context, putJob.data.message(), Toast.LENGTH_SHORT).show()
                     putJobApplicationStatusViewModel.resetState()
-                    navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=My Submissions") {
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
                         popUpTo(navController.graph.startDestinationId) {
                             inclusive = false
                         }
-                        launchSingleTop = true
                     }
-                }
+                }else -> Unit
             }
         }
     }

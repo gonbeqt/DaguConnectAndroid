@@ -38,6 +38,9 @@ class RegisterViewModel(private val apiService: ApiService):ViewModel() {
             }
         }
     }
+    fun resetState(){
+        _registerState.value = RegisterState.Idle
+    }
     sealed class RegisterState {
         object Idle : RegisterState()
         object Loading : RegisterState()

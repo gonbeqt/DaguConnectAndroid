@@ -132,8 +132,8 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                     ) {
                         // Old Password Input
                         OutlinedTextField(
-                            value = oldPassword,
-                            onValueChange = { oldPassword = it },
+                            value = oldPassword.trim(),
+                            onValueChange = { oldPassword= it },
                             label = { Text("Old Password") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             visualTransformation = if (oldPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -153,7 +153,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
 
                         // New Password Input
                         OutlinedTextField(
-                            value = newPassword,
+                            value = newPassword.trim(),
                             onValueChange = {
                                 newPassword = it
                                 lengthError = if (it.length < 8) "Password must be at least 8 characters" else null
@@ -187,7 +187,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
 
                         // Confirm Password Input
                         OutlinedTextField(
-                            value = confirmPassword,
+                            value = confirmPassword.trim(),
                             onValueChange = {
                                 confirmPassword = it
                                 passwordError = if (newPassword != it && it.isNotEmpty()) "Passwords do not match" else null

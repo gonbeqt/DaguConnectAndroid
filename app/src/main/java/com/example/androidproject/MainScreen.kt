@@ -92,7 +92,7 @@ fun MainScreen(
     updateClientProfilePictureViewModel: UpdateClientProfilePictureViewModel,
     initialSelectedItem: Int = 0,
     initialSelectedTab: Int = 0,
-    initialSelectedSection: String = if (AccountManager.getAccount()?.isClient == true) "My Clients" else "My Jobs",
+    initialSelectedSection: Int = 0,
     LoadingUI: @Composable () -> Unit
 ) {
     val role = AccountManager.getAccount()?.isClient
@@ -108,8 +108,10 @@ fun MainScreen(
         NavigationItem("Message", Icons.Default.Message),
         NavigationItem("Profile", Icons.Default.Person)
     )
+
+
     // Lift the selectedSection state up
-    var selectedSection by remember { mutableStateOf(initialSelectedSection) }
+    var selectedSection by remember { mutableIntStateOf(initialSelectedSection) }
 
 
 
@@ -138,6 +140,7 @@ fun MainScreen(
     LaunchedEffect(selectedItem) {
         if (selectedItem == 1) { // 1 corresponds to the BookingsScreen
             selectedTab = 0 // Reset to the AllItems screen
+            selectedSection= 0
         }
     }
 
@@ -238,7 +241,7 @@ fun ContentScreen(
     modifier: Modifier = Modifier,
     selectedItem: Int,
     selectedTab: Int, // Add selectedTab parameter
-    selectedSection: String, // Add selectedSection parameter
+    selectedSection: Int, // Add selectedSection parameter
     navController: NavController,
     getJobsViewModel: GetJobsViewModel,
     logoutViewModel: LogoutViewModel,
