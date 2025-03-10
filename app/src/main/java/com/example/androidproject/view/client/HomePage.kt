@@ -565,9 +565,10 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+
 
     val screenshotPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()

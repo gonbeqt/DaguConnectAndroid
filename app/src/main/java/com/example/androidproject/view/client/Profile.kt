@@ -630,25 +630,38 @@ fun PostsCard(
                     color = Color.Black,
                     fontWeight = FontWeight.Normal
                 )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)){
-                    Text(text = "Job Address: $editableLocation",
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)){
+                    Text(text = "Job Address:",
                         fontWeight = FontWeight.Bold, color = Color.Gray, fontSize =taskTextSize)
                     Text(text = editableLocation, fontSize = smallTextSize,fontWeight = FontWeight.Bold, color = Color.Black,)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)){
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)){
                     Text(
-                        text = "Budget: $editableBudget pesos",
+                        text = "Budget:",
                         fontSize = taskTextSize,
                         color = Color.Gray,
                         fontWeight = FontWeight.Bold
                     )
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        text = "Service Type: ${getJobs.jobType}",
+                        text = "${editableBudget.toInt()} ₱",
+                        fontSize = taskTextSize,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Service Type:",
                         fontSize = taskTextSize,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray
+
+                    )
+                    Text(
+                        text = "${getJobs.jobType}",
+                        fontSize = taskTextSize,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
 
                     )
                 }

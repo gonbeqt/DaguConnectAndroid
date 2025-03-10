@@ -1,8 +1,13 @@
 package com.example.androidproject.view.tradesman
 
 import android.annotation.SuppressLint
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,21 +17,36 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,11 +59,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -52,9 +75,12 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.client.UploadFieldScreenShot
+import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
+import com.example.androidproject.viewmodel.report.ReportViewModel
 
 @Composable
 fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel, getRecentJobsViewModel: GetRecentJobsViewModel){
@@ -208,6 +234,33 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
 @Composable
 fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
+    val windowSize = rememberWindowSizeClass()
+
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 25.dp
+        WindowType.MEDIUM -> 35.dp
+        WindowType.LARGE -> 45.dp
+    }
+    val context = LocalContext.current
+
+    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var reasonDescription by remember { mutableStateOf("") }
+    var showReportDialog by remember { mutableStateOf(false) }
+    val reasons = listOf(
+        "Abusive or Harassing Behavior",
+        "Inappropriate Content or Language",
+        "Fraudulent Activity or Scam",
+        "Poor Quality of Service",
+        "Unprofessional Conduct",
+        "Safety Concerns",
+        "Others"
+    )
+    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { screenShot = it } }
     var jobType = getJobs.jobType
 
     if (jobType == "Ac_technician") {
@@ -215,6 +268,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
     }
 
     val profilePicture = getJobs.clientProfilePicture
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -235,13 +289,44 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
-                Text(
-                    text = getJobs.clientFullname,
-                    fontSize = 16.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight(500),
-                    modifier = Modifier.padding(start = 20.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = getJobs.clientFullname,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight(500),
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
+                    Box {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Menu Icon",
+                            modifier = Modifier
+                                .size(iconSize)
+                                .clickable { showMenu = true }
+                        )
+
+                        // Popup Menu
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                            modifier = Modifier.background(Color.White)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Report", textAlign = TextAlign.Center) },
+                                onClick = {
+                                    showMenu = false
+                                    showReportDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
+
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row {
@@ -282,6 +367,178 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
             }
         }
     }
+    if (showReportDialog) {
+        Dialog(onDismissRequest = { showReportDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Reason for Report",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Column(modifier = Modifier.padding(top = 16.dp)) {
+                            reasons.forEachIndexed { index, reason ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Checkbox(
+                                        checked = selectedIndex == index,
+                                        onCheckedChange = {
+                                            selectedIndex = if (selectedIndex == index) -1 else index
+                                        },
+                                        colors = CheckboxDefaults.colors(
+                                            uncheckedColor = Color.Black,
+                                            checkedColor = Color(0xFF42C2AE)
+                                        )
+                                    )
+
+                                    if (reason == "Others") {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = reason,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color.Black
+                                            )
+
+                                            if (selectedIndex == index) {
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                TextField(
+                                                    value = otherReason,
+                                                    onValueChange = { otherReason = it },
+                                                    placeholder = { Text("Enter other reason") },
+                                                    singleLine = true,
+                                                    modifier = Modifier
+                                                        .weight(1f) // Pushes the field to the right
+                                                        .heightIn(min = 40.dp),
+                                                    colors = TextFieldDefaults.colors(
+                                                        focusedContainerColor = Color.Transparent,
+                                                        unfocusedContainerColor = Color.Transparent,
+                                                        focusedIndicatorColor = Color.Blue,
+                                                        unfocusedIndicatorColor = Color.Gray,
+                                                        cursorColor = Color.Black
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Text(
+                                            text = reason,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = screenShot,
+                                fileType = "image",
+                                onUploadClick = {
+                                    screenshotPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    screenShot?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
+
+                            OutlinedTextField(
+                                value = reasonDescription,
+                                onValueChange = { reasonDescription = it },
+                                placeholder = { Text("Enter Your Explanation") },
+                                shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Blue,
+                                    unfocusedIndicatorColor = Color.Gray,
+                                    focusedLabelColor = Color.Blue,
+                                    unfocusedLabelColor = Color.Gray,
+                                    cursorColor = Color.Black
+                                )
+                            )
+
+                        }
+
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Button(
+                                onClick = { showReportDialog = false },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Cancel", color = Color.White)
+                            }
+                            Button(
+                                onClick = {
+
+
+                                },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Submit", color = Color.White)
+                            }
+
+                            }
+                        }
+
+                    }
+
+
+        }
+    }
+}
 }
 
 
@@ -305,6 +562,31 @@ fun RecentJobs(navController: NavController, getRecentJobsViewModel: GetRecentJo
 @Composable
 fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
+    val windowSize = rememberWindowSizeClass()
+    val context =LocalContext.current
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 25.dp
+        WindowType.MEDIUM -> 35.dp
+        WindowType.LARGE -> 45.dp
+    }
+    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var reasonDescription by remember { mutableStateOf("") }
+    var showReportDialog by remember { mutableStateOf(false) }
+    val reasons = listOf(
+        "Abusive or Harassing Behavior",
+        "Inappropriate Content or Language",
+        "Fraudulent Activity or Scam",
+        "Poor Quality of Service",
+        "Unprofessional Conduct",
+        "Safety Concerns",
+        "Others"
+    )
+    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { screenShot = it } }
     var jobType = getJobs.jobType
 
     if (jobType == "Ac_technician") {
@@ -331,11 +613,43 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
-                Text(text = getJobs.clientFullname,
-                    fontSize = 16.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight(500),
-                    modifier = Modifier.padding(start = 20.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = getJobs.clientFullname,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight(500),
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
+                    Box {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Menu Icon",
+                            modifier = Modifier
+                                .size(iconSize)
+                                .clickable { showMenu = true }
+                        )
+
+                        // Popup Menu
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                            modifier = Modifier.background(Color.White)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Report", textAlign = TextAlign.Center) },
+                                onClick = {
+                                    showMenu = false
+                                    showReportDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row {
@@ -359,6 +673,178 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
 
 
                 }
+            }
+        }
+    }
+    if (showReportDialog) {
+        Dialog(onDismissRequest = { showReportDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Reason for Report",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Column(modifier = Modifier.padding(top = 16.dp)) {
+                            reasons.forEachIndexed { index, reason ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Checkbox(
+                                        checked = selectedIndex == index,
+                                        onCheckedChange = {
+                                            selectedIndex =
+                                                if (selectedIndex == index) -1 else index
+                                        },
+                                        colors = CheckboxDefaults.colors(
+                                            uncheckedColor = Color.Black,
+                                            checkedColor = Color(0xFF42C2AE)
+                                        )
+                                    )
+
+                                    if (reason == "Others") {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = reason,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color.Black
+                                            )
+
+                                            if (selectedIndex == index) {
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                TextField(
+                                                    value = otherReason,
+                                                    onValueChange = { otherReason = it },
+                                                    placeholder = { Text("Enter other reason") },
+                                                    singleLine = true,
+                                                    modifier = Modifier
+                                                        .weight(1f) // Pushes the field to the right
+                                                        .heightIn(min = 40.dp),
+                                                    colors = TextFieldDefaults.colors(
+                                                        focusedContainerColor = Color.Transparent,
+                                                        unfocusedContainerColor = Color.Transparent,
+                                                        focusedIndicatorColor = Color.Blue,
+                                                        unfocusedIndicatorColor = Color.Gray,
+                                                        cursorColor = Color.Black
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Text(
+                                            text = reason,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = screenShot,
+                                fileType = "image",
+                                onUploadClick = {
+                                    screenshotPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    screenShot?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
+
+                            OutlinedTextField(
+                                value = reasonDescription,
+                                onValueChange = { reasonDescription = it },
+                                placeholder = { Text("Enter Your Explanation") },
+                                shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Blue,
+                                    unfocusedIndicatorColor = Color.Gray,
+                                    focusedLabelColor = Color.Blue,
+                                    unfocusedLabelColor = Color.Gray,
+                                    cursorColor = Color.Black
+                                )
+                            )
+
+                        }
+
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Button(
+                                onClick = { showReportDialog = false },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Cancel", color = Color.White)
+                            }
+                            Button(
+                                onClick = {
+
+
+                                },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFF42C2AE
+                                    )
+                                )
+                            ) {
+                                Text("Submit", color = Color.White)
+                            }
+
+                        }
+                    }
+
+                }
+
+
             }
         }
     }
