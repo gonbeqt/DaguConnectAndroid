@@ -183,7 +183,7 @@ fun BookingsScreen(
                     when (selectedSection) {
                       0 -> when (selectedTabIndex) {
                             0 -> AllBookingsContent(getClientsBooking, navController)
-                            1 -> PendingBookingsContent(getClientsBooking, navController)
+                            1 -> PendingBookingsContent(getClientsBooking, navController,updateBookingTradesmanViewModel)
                             2 -> DeclinedBookingsContent(getClientsBooking, navController)
                             3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
                             4 -> CompletedBookingsContent(getClientsBooking, navController)
@@ -332,8 +332,10 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 
 
 @Composable
-fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController) {
+fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController,updateBookingTradesmanViewModel: UpdateBookingTradesmanViewModel) {
     val pending = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+
+
 
     LaunchedEffect(Unit) {
         pending.refresh()
@@ -366,7 +368,7 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
             ) {
                 items(pendingBookings.size) { index ->
                     val pendingBooking = pendingBookings[index]
-                    PendingItem(pendingBooking, navController)
+                    PendingItem(pendingBooking, navController,updateBookingTradesmanViewModel)
                 }
             }
         }
@@ -768,16 +770,12 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                 if(updateWorkStatusState.status == "Completed"){
                     // Navigate to the "profile" screen and clear the back stack
                     navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
+                        navController.popBackStack()
                     }
                 }else if(updateWorkStatusState.status == "Cancelled"){
                     // Navigate to the "profile" screen and clear the back stack
                     navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
+                        navController.popBackStack()
                     }
                 }
 
@@ -1129,8 +1127,26 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
 }
 
 @Composable
-fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController) {
+fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,updateBookingTradesmanViewModel: UpdateBookingTradesmanViewModel) {
     val bookingDate = ViewModelSetups.formatDateTime(pendingBooking.bookingDate)
+    val updateBookingState by updateBookingTradesmanViewModel.workStatusState.collectAsState()
+    var showCancelDialog by remember { mutableStateOf(false) }
+    var showCancelReasons by remember { mutableStateOf(false) }
+
+    LaunchedEffect(updateBookingState) {
+        when (updateBookingState) {
+            is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
+                Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
+                updateBookingTradesmanViewModel.resetState()
+                navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
+                    navController.popBackStack()
+                }
+
+            }
+            else -> {}
+        }
+    }
+
     val windowSize = rememberWindowSizeClass()
     val cardWidth = when (windowSize.width) {
         WindowType.SMALL -> 380.dp
@@ -1258,7 +1274,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                 horizontalArrangement = Arrangement.End
             ) {
                 OutlinedButton(
-                    onClick = { navController.navigate("cancelnow/${pendingBooking.resumeId}/${pendingBooking.bookingStatus}/${pendingBooking.id}") },
+                    onClick = { showCancelDialog = true},
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color.Gray),
                     modifier = Modifier.weight(1f)
@@ -1277,6 +1293,115 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController)
                     Text("Booking Details", fontSize = smallTextSize)
                 }
             }
+        }
+        if (showCancelDialog) {
+            AlertDialog(
+                onDismissRequest = { showCancelDialog = false },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_approve_decline),
+                            contentDescription = "Approval Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Cancel Job",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                },
+                text = { Text("Once Cancelled, this job may not be available again. Proceed?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showCancelDialog = false
+                            showCancelReasons = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Confirm", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showCancelDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Cancel", color = Color.White)
+                    }
+                }
+            )
+        }
+
+
+        if (showCancelReasons) {
+            var selectedReason by remember { mutableStateOf<String?>(null) }
+
+            val reasons = listOf(
+                "Workload concerns",
+                "Schedule conflicts",
+                "Relocation issues",
+                "Committed to a contract project",
+                "Short notice start date",
+                "Personal Reasons",
+                "Other"
+            )
+
+            AlertDialog(
+                onDismissRequest = { showCancelReasons = false },
+                title = {
+                    Text(
+                        text = "Reason for Cancellation",
+                        fontSize = 18.sp,
+                        color = Color(0xFF42C2AE)
+                    )
+                },
+                text = {
+                    Column {
+                        reasons.forEach { reason ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedReason = reason },
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = selectedReason == reason,
+                                    onCheckedChange = { isChecked ->
+                                        if (isChecked) {
+                                            selectedReason = reason
+                                        }
+                                    }
+                                )
+                                Text(reason, fontSize = 14.sp)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showCancelReasons = false
+                            selectedReason?.let {
+                                updateBookingTradesmanViewModel.updateWorkStatus("Cancelled", it, pendingBooking.id)
+
+                            }
+                        },
+                        enabled = selectedReason != null,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Submit", color = Color.White)
+                    }
+                }
+            )
         }
     }
 }
@@ -2125,11 +2250,11 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 putJobApplicationStatus.resetState()
                 if(jobput.status == "Active"){
                     navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                       navController.popBackStack()
                     }
                 }else if(jobput.status == "Declined"){
                     navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                        navController.popBackStack()
                     }
                 }
             }
@@ -2502,12 +2627,12 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                     if (putJob.status =="Completed"){
                         Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
                         navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                            navController.popBackStack()
                         }
                     }else if(putJob.status == "Cancelled"){
                         Toast.makeText(context, "Job Cancelled", Toast.LENGTH_SHORT).show()
                         navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                            navController.popBackStack()
                         }
                     }
 
