@@ -1,7 +1,10 @@
 package com.example.androidproject.viewmodel.Tradesman_Profile
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +18,7 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 
 class UpdateTradesmanProfileViewModel (private val apiService: ApiService) :ViewModel(){
     private val _updateTradesmanProfileState  = MutableStateFlow<UpdateTradesmanProfileState>(
@@ -53,27 +57,44 @@ class UpdateTradesmanProfileViewModel (private val apiService: ApiService) :View
     }
     private fun createMultipartBodyPart(context: Context, uri: Uri, name: String): MultipartBody.Part {
         val contentResolver = context.contentResolver
-        val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
-        println("Uploading $name with MIME type: $mimeType") // Debug log
-        val fileStream = contentResolver.openInputStream(uri)
-        val byteArray = fileStream?.readBytes() ?: byteArrayOf()
-        fileStream?.close()
+        val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+        Log.d("FileUpload", "URI: $uri, MIME Type: $mimeType")
 
-        // Determine a proper filename based on the field name and MIME type
-        val fileExtension = when (mimeType) {
-            "application/pdf" -> ".pdf"
-            "application/msword" -> ".doc"
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> ".docx"
-            "image/jpeg" -> ".jpg"
-            "image/png" -> ".png"
-            else -> "" // Fallback, though validation should prevent this
+        // Read the original stream
+        val inputStream = contentResolver.openInputStream(uri)
+        if (inputStream == null) {
+            Log.e("FileUpload", "Failed to open input stream for URI: $uri")
+            throw IllegalStateException("Unable to open file stream")
         }
-        val fileName = "$name$fileExtension" // e.g., "document.pdf", "valid_id_front.png"
 
+        // Decode the bitmap with error handling
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream.close()
+
+        if (bitmap == null) {
+            Log.e("FileUpload", "Failed to decode bitmap for URI: $uri")
+            throw IllegalStateException("Unable to decode image")
+        }
+
+        // Compress the image
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+        val byteArray = outputStream.toByteArray()
+        Log.d("FileUpload", "Compressed byte array length: ${byteArray.size}")
+
+        if (byteArray.isEmpty()) {
+            Log.e("FileUpload", "Empty byte array after compression for URI: $uri")
+            throw IllegalStateException("No data after compression")
+        }
+        if (byteArray.size > 10_000_000) {
+            Log.e("FileUpload", "Compressed file size exceeds 10 MB: ${byteArray.size}")
+            throw IllegalArgumentException("File size exceeds 10 MB limit even after compression")
+        }
+
+        val fileName = "profile_picture.jpg"
         val requestBody = byteArray.toRequestBody(mimeType.toMediaType())
         return MultipartBody.Part.createFormData(name, fileName, requestBody)
     }
-
     fun resetState() {
         _updateTradesmanProfileState.value = UpdateTradesmanProfileState.Idle
     }

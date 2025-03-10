@@ -2,8 +2,11 @@ package com.example.androidproject.view.client
 
 import LogoutViewModel
 import android.Manifest
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -76,6 +79,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -175,13 +180,42 @@ fun ProfileScreen(
     }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
+    // Define the image launcher
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            selectedImageUri = it  // Update the local state with the new image URI
-            //Here ata iimplement ung viewmodel
-            updateClientProfilePictureViewModel.updateClientProfile(selectedImageUri!!,context)
+            selectedImageUri = it
+            updateClientProfilePictureViewModel.updateClientProfile(selectedImageUri!!, context)
+        }
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val imagesGranted = permissions[Manifest.permission.READ_MEDIA_IMAGES] == true
+        val userSelectedGranted = permissions[Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED] == true
+
+        when {
+            imagesGranted -> {
+                // Full access granted, launch your image picker
+                imageLauncher.launch("image/*")
+            }
+            userSelectedGranted -> {
+                // Partial access granted, handle selected media
+                imageLauncher.launch("image/*") // System picker will show only selected media
+            }
+            else -> {
+                val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+                    context as Activity,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                )
+                if (shouldShowRationale) {
+                    Toast.makeText(context, "Permission is required to select a profile picture", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, "Permission denied. Enable it in Settings.", Toast.LENGTH_LONG).show()
+                    val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = Uri.parse("package:${context.packageName}")
+                    context.startActivity(intent)
+                }
+            }
         }
     }
 
@@ -325,7 +359,8 @@ fun ProfileScreen(
                                     ) {
                                         // Profile Icon
                                         AsyncImage(
-                                            model = selectedImageUri ?: profile.profilePicture,                                            contentDescription = "Profile Image",
+                                            model = selectedImageUri ?: profile.profilePicture,
+                                            contentDescription = "Profile Image",
                                             modifier = Modifier
                                                 .size(100.dp)
                                                 .clip(CircleShape),
@@ -340,7 +375,18 @@ fun ProfileScreen(
                                                 .align(Alignment.TopEnd)
                                                 .background(Color.White, CircleShape)
                                                 .clickable {
-                                                    imageLauncher.launch("image/*")
+                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+                                                        permissionLauncher.launch(arrayOf(
+                                                            Manifest.permission.READ_MEDIA_IMAGES,
+                                                            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                                                        ))
+                                                    } else {
+                                                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                                                            imageLauncher.launch("image/*")
+                                                        } else {
+                                                            permissionLauncher.launch(arrayOf(Manifest.permission.READ_MEDIA_IMAGES))
+                                                        }
+                                                    }
                                                 }
                                         )
                                     }
