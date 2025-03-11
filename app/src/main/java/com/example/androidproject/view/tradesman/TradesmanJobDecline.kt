@@ -83,7 +83,7 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Work Details",
+                        text = "Job Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
@@ -119,7 +119,7 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Job offer has been declined by you",
+                            text = "Job offer has been Declined by you",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold

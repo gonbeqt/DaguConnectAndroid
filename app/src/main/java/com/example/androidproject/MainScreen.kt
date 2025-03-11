@@ -102,7 +102,7 @@ fun MainScreen(
         if (role == true) {
             NavigationItem("Hiring Hub", Icons.Default.ListAlt)
         } else {
-            NavigationItem("Work Hub", Icons.Default.ListAlt)
+            NavigationItem("Job Hub", Icons.Default.ListAlt)
         },
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
         NavigationItem("Message", Icons.Default.Message),

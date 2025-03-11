@@ -112,7 +112,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
         ) {
             // Left-aligned text
             Text(
-                text = "Work Hub",
+                text = "Job Hub",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Normal
             )
@@ -197,6 +197,13 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 }
 @Composable
 fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, onSectionSelected: (Int) -> Unit) {
+    val windowSize = rememberWindowSizeClass()
+    val headerTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -221,7 +228,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
             ) {
                 Text(
                     text = "My Jobs",
-                    fontSize = 20.sp,
+                    fontSize = headerTextSize,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -246,8 +253,8 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
-                    text = "My Submissions",
-                    fontSize = 20.sp,
+                    text = "My Applications",
+                    fontSize = headerTextSize,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -1453,10 +1460,10 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
         if (myJobs.itemCount == 0) {
             // Display "No Submissions" when the list is empty
             Text(
-                text = "No Declined Submissions",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black,
+                text = "No Applications",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Gray,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1507,10 +1514,10 @@ fun PendingMySubmissionsTradesmanContent(
         if (pendingApplication.isEmpty()) {
             // Display "No Pending Submissions" when the list is empty
             Text(
-                text = "No Pending Submissions",
-                fontSize = 14.sp,
+                text = "No Pending Applications",
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color.Black,
+                color = Color.Gray,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1554,10 +1561,10 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
         if (declinedApplication.isEmpty()) {
             // Display "No Active Submissions" when the list is empty
             Text(
-                text = "No Active Submissions",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black,
+                text = "No Decline Applications",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Gray,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1601,10 +1608,10 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
         if (activeApplication.isEmpty()) {
             // Display "No Active Submissions" when the list is empty
             Text(
-                text = "No Active Submissions",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black,
+                text = "No Active Applications",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Gray,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1648,10 +1655,10 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
         if (completedApplication.isEmpty()) {
             // Display "No Completed Submissions" when the list is empty
             Text(
-                text = "No Completed Submissions",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black,
+                text = "No Completed Applications",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Gray,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1694,10 +1701,10 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
         if (cancelledApplication.isEmpty()) {
             // Display "No Declined Submissions" when the list is empty
             Text(
-                text = "No Cancelled Submissions",
-                fontSize = 14.sp,
+                text = "No Cancelled Applications",
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color.Black,
+                color = Color.Gray,
                 textAlign = TextAlign.Center
             )
         } else{

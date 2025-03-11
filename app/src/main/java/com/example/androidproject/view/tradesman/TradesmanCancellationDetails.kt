@@ -204,7 +204,7 @@ fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: N
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Work Details", fontSize = nameTextSize)
+                Text(text = "Job Details", fontSize = nameTextSize)
             }
         }
 

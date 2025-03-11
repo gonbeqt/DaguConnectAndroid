@@ -196,7 +196,7 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: Na
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Work Details", fontSize = nameTextSize)
+                Text(text = "Job Details", fontSize = nameTextSize)
             }
         }
 

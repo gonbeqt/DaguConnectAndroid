@@ -119,7 +119,7 @@ fun TradesmanJobCancelled(modifier: Modifier = Modifier, navController: NavContr
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Job offer has been cancelled by client",
+                            text = "Job offer has been Cancelled by client",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold

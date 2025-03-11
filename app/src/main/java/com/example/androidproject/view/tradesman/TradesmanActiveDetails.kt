@@ -83,7 +83,7 @@ fun TradesmanActiveDetails(modifier: Modifier = Modifier, navController: NavCont
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Work Details",
+                        text = "Job Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,

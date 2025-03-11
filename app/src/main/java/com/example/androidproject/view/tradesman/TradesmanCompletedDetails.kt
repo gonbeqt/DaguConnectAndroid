@@ -83,7 +83,7 @@ fun TradesmanCompletedDetails(modifier: Modifier = Modifier, navController: NavC
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Work Details",
+                        text = "Job Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
@@ -117,7 +117,7 @@ fun TradesmanCompletedDetails(modifier: Modifier = Modifier, navController: NavC
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Your job has been marked as complete",
+                            text = "Your job has been marked as Complete",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
