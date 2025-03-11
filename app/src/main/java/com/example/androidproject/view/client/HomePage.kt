@@ -566,13 +566,13 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         WindowType.LARGE -> 16.sp
     }
     var showReportDialog by remember { mutableStateOf(false) }
-    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
 
 
-    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+    val documentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { screenShot = it } }
+    ) { uri -> uri?.let { reportDocument = it } }
 
     // Permission launcher for storage access
 
@@ -582,7 +582,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             selectedIndex = -1
             otherReason = ""
             reasonDescription = ""
-            screenShot = null
+            reportDocument = null
         }
     }
     Card(
@@ -803,13 +803,13 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             }
                             UploadFieldScreenShot(
                                 label = "Screenshot",
-                                uri = screenShot,
+                                uri = reportDocument,
                                 fileType = "image",
                                 onUploadClick = {
-                                    screenshotPickerLauncher.launch("image/*")
+                                    documentPickerLauncher.launch("image/*")
                                 },
                                 onViewClick = {
-                                    screenShot?.let { uri ->
+                                    reportDocument?.let { uri ->
                                         openScreenShot(context, uri)
                                     }
                                 }
@@ -870,7 +870,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModels.report(selectedReason, reasonDescription, resumes.userid)
+                                        reportViewModels.report(selectedReason, reasonDescription, reportDocument!!,context,resumes.userid)
                                     }
                                           },
                                 modifier = Modifier.size(110.dp, 45.dp),

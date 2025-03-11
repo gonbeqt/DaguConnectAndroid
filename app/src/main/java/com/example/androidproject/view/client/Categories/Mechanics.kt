@@ -73,6 +73,8 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.client.UploadFieldScreenShot
+import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
@@ -284,11 +286,11 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
             WindowType.MEDIUM -> 16.sp
             WindowType.LARGE -> 18.sp
         }
-    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
 
-    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+    val documentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { screenShot = it } }
+    ) { uri -> uri?.let { reportDocument = it } }
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -497,6 +499,19 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                                     }
                                 }
                             }
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = reportDocument,
+                                fileType = "image",
+                                onUploadClick = {
+                                    documentPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    reportDocument?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
 
                             OutlinedTextField(
                                 value = reasonDescription,
@@ -553,7 +568,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription, mechanics.userid)
+                                        reportViewModel.report(selectedReason, reasonDescription,reportDocument!! ,context,mechanics.userid)
                                     }
                                 },
                                 modifier = Modifier.size(110.dp, 45.dp),

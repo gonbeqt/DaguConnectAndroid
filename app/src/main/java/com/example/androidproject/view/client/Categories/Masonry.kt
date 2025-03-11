@@ -288,11 +288,11 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
     }
-    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
 
-    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+    val documentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { screenShot = it } }
+    ) { uri -> uri?.let { reportDocument = it } }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -502,13 +502,13 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                             }
                             UploadFieldScreenShot(
                                 label = "Screenshot",
-                                uri = screenShot,
+                                uri = reportDocument,
                                 fileType = "image",
                                 onUploadClick = {
-                                    screenshotPickerLauncher.launch("image/*")
+                                    documentPickerLauncher.launch("image/*")
                                 },
                                 onViewClick = {
-                                    screenShot?.let { uri ->
+                                    reportDocument?.let { uri ->
                                         openScreenShot(context, uri)
                                     }
                                 }
@@ -567,7 +567,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription, masonry.userid)
+                                        reportViewModel.report(selectedReason, reasonDescription,reportDocument!!,context, masonry.userid)
                                     }
 
                                           },

@@ -1,5 +1,9 @@
 package com.example.androidproject.viewmodel.report
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,18 +16,27 @@ import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel.Book
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 
 class ReportViewModel (private val apiService: ApiService): ViewModel() {
     private val _reportState = MutableStateFlow<ReportState>(ReportState.Idle)
     val reportState = _reportState.asStateFlow()
 
-    fun report(report_reason: String, report_details: String, tradesmanId: Int) {
+    fun report(report_reason: String, report_details: String, report_attachment : Uri, context: Context, tradesman_Id: Int) {
         viewModelScope.launch {
             _reportState.value = ReportState.Loading
             try{
-                val response = apiService.report(
-                    ReportRequest(report_reason, report_details),
-                    tradesmanId
+                val reportReason = report_reason.toRequestBody("text/plain".toMediaType())
+                val reportDetails = report_details.toRequestBody("text/plain".toMediaType())
+                val reportAttachment = createMultipartBodyPart(context, report_attachment, "report_attachment")
+                val response = apiService.reportTradesman(
+                    reportReason,
+                    reportDetails,
+                    reportAttachment,
+                    tradesman_Id
                 )
                 if(response.isSuccessful){
                     val responseBody = response.body()
@@ -49,6 +62,47 @@ class ReportViewModel (private val apiService: ApiService): ViewModel() {
     fun resetState() {
         _reportState.value = ReportState.Idle // Add an idle state
     }
+    private fun createMultipartBodyPart(context: Context, uri: Uri, name: String): MultipartBody.Part {
+        val contentResolver = context.contentResolver
+        val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+        Log.d("FileUpload", "URI: $uri, MIME Type: $mimeType")
+
+        // Read the original stream
+        val inputStream = contentResolver.openInputStream(uri)
+        if (inputStream == null) {
+            Log.e("FileUpload", "Failed to open input stream for URI: $uri")
+            throw IllegalStateException("Unable to open file stream")
+        }
+
+        // Decode the bitmap with error handling
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream.close()
+
+        if (bitmap == null) {
+            Log.e("FileUpload", "Failed to decode bitmap for URI: $uri")
+            throw IllegalStateException("Unable to decode image")
+        }
+
+        // Compress the image
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+        val byteArray = outputStream.toByteArray()
+        Log.d("FileUpload", "Compressed byte array length: ${byteArray.size}")
+
+        if (byteArray.isEmpty()) {
+            Log.e("FileUpload", "Empty byte array after compression for URI: $uri")
+            throw IllegalStateException("No data after compression")
+        }
+        if (byteArray.size > 10_000_000) {
+            Log.e("FileUpload", "Compressed file size exceeds 10 MB: ${byteArray.size}")
+            throw IllegalArgumentException("File size exceeds 10 MB limit even after compression")
+        }
+
+        val fileName = "profile_picture.jpg"
+        val requestBody = byteArray.toRequestBody(mimeType.toMediaType())
+        return MultipartBody.Part.createFormData(name, fileName, requestBody)
+    }
+
 
 
 

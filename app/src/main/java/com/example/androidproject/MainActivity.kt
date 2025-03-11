@@ -93,6 +93,7 @@ import com.example.androidproject.viewmodel.ResetPassViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanDetailViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
@@ -112,6 +113,7 @@ import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
 import com.example.androidproject.viewmodel.factories.ResetPassViewModelFactory
+import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanActiveStatusViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanDetailViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.ViewTradesmaProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.bookings.BookTradesmanViewModelFactory
@@ -296,6 +298,9 @@ class MainActivity : ComponentActivity() {
 
         val updateTradesmanVMFactory = UpdateTradesmanProfileViewModelFactory(apiService)
         val updateTradesmanProfileViewModel = ViewModelProvider(this, updateTradesmanVMFactory)[UpdateTradesmanProfileViewModel::class.java]
+
+        val UpdateTradesmanActiveStatusVMFactory = UpdateTradesmanActiveStatusViewModelFactory(apiService)
+        val updateTradesmanActiveStatusViewModel = ViewModelProvider(this, UpdateTradesmanActiveStatusVMFactory)[UpdateTradesmanActiveStatusViewModel::class.java]
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]

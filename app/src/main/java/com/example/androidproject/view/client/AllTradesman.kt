@@ -1,6 +1,9 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -191,11 +194,12 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
     }
 }
 @Composable
-fun         AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
+fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showReportDialog by remember { mutableStateOf(false) }
     val reasons = listOf(
         "Abusive or Harassing Behavior",
@@ -206,6 +210,19 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
         "Safety Concerns",
         "Others"
     )
+
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { reportDocument = it } }
+
+    LaunchedEffect(showReportDialog) {
+        if(showReportDialog){
+            selectedIndex = -1
+            otherReason = ""
+            reasonDescription = ""
+            reportDocument = null
+        }
+    }
     val reportState by reportViewModel.reportState.collectAsState()
     val context = LocalContext.current
 
@@ -454,6 +471,20 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                                 }
                             }
 
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = reportDocument,
+                                fileType = "image",
+                                onUploadClick = {
+                                    documentPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    reportDocument?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
+
                             OutlinedTextField(
                                 value = reasonDescription,
                                 onValueChange = { reasonDescription = it },
@@ -509,7 +540,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription, resumes.userid)
+                                        reportViewModel.report(selectedReason, reasonDescription,  reportDocument!!,context, resumes.userid)
                                     }
                                           },
                                 modifier = Modifier.size(110.dp, 45.dp),

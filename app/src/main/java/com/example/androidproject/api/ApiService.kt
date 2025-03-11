@@ -38,12 +38,13 @@ import com.example.androidproject.model.client.ClientWorkStatusRequest
 import com.example.androidproject.model.client.ClientWorkStatusResponse
 import com.example.androidproject.model.client.GetClientsBookingResponse
 import com.example.androidproject.model.client.GetTradesmanBookingResponse
-import com.example.androidproject.model.client.ReportRequest
 import com.example.androidproject.model.client.ReportResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.SubmitResumeResponse
 import com.example.androidproject.model.client.TradesmanWorkStatusRequest
 import com.example.androidproject.model.client.TradesmanWorkStatusResponse
+import com.example.androidproject.model.client.UpdateActiveStatusRequest
+import com.example.androidproject.model.client.UpdateActiveStatusResponse
 import com.example.androidproject.model.client.UpdateTradesmanDetailsRequest
 import com.example.androidproject.model.client.UpdateTradesmanDetailsResponse
 import com.example.androidproject.model.client.UpdateTradesmanProfileResponse
@@ -125,10 +126,13 @@ interface ApiService {
         @Path("tradesman_Id") tradesman_Id: Int
     ): Response<BookTradesmanResponse>
 
-    @POST("/user/client/reporttradesman/{tradesmanId}")
-    suspend fun report(
-        @Body request: ReportRequest,
-        @Path("tradesmanId") tradesmanId: Int
+    @Multipart
+    @POST("/user/client/report/tradesman/{tradesman_Id}")
+    suspend fun reportTradesman(
+        @Part("report_reason") report_reason: RequestBody,
+        @Part("report_details") preferedLocation: RequestBody,
+        @Part report_attachment: MultipartBody.Part, // File upload
+        @Path("tradesman_Id") tradesman_Id: Int
     ): Response<ReportResponse>
 
     @GET("/user/client/view/tradesman/rating/{tradesmanId}")
@@ -212,4 +216,6 @@ interface ApiService {
     @PUT("/user/tradesman/update/resume/details")
     suspend fun  updateTradesmanDetail(@Body request: UpdateTradesmanDetailsRequest) : Response<UpdateTradesmanDetailsResponse>
 
+    @PUT("/user/tradesman/update/activeStatus")
+    suspend fun  updateTradesmanActiveStatus(@Body request: UpdateActiveStatusRequest) : Response<UpdateActiveStatusResponse>
 }
