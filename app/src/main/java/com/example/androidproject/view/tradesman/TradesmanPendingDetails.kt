@@ -36,6 +36,7 @@ import java.sql.Types.NULL
 
 @Composable
 fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavController) {
+
     var showApproveDialog by remember { mutableStateOf(false) }
     var showDeclineDialog by remember { mutableStateOf(false) }
     var showJobApproveDialog by remember { mutableStateOf(false) }
@@ -56,10 +57,14 @@ fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavCon
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
+            .background(Color(0xFFF5F5F5)
+            )
+            .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
         Card(
             modifier = Modifier

@@ -35,9 +35,8 @@ import com.example.androidproject.view.theme.myGradient3
 import java.sql.Types.NULL
 
 
-@Preview
 @Composable
-fun TradesmanCompletedDetails(modifier: Modifier = Modifier) {
+fun TradesmanCompletedDetails(modifier: Modifier = Modifier, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -59,6 +58,8 @@ fun TradesmanCompletedDetails(modifier: Modifier = Modifier) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
         Card(
             modifier = Modifier
@@ -119,7 +120,8 @@ fun TradesmanCompletedDetails(modifier: Modifier = Modifier) {
                             text = "Your job has been marked as complete",
                             fontSize = nameTextSize,
                             color = Color.White,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -415,7 +417,7 @@ fun TradesmanCompletedDetails(modifier: Modifier = Modifier) {
                                 Text(fontWeight = FontWeight.Normal,
                                     fontSize = smallTextSize,
                                     color = Color.Gray,
-                                    text = "Completion Date and Time")
+                                    text = "Completed Date and Time")
                                 Text(fontSize = smallTextSize,
                                     text = "03-09-2025 10:30 AM")
                             }
@@ -423,6 +425,7 @@ fun TradesmanCompletedDetails(modifier: Modifier = Modifier) {
                         }
 
                     }
+
                 }
                 Spacer(Modifier.height(10.dp))
                 Box(
@@ -434,12 +437,12 @@ fun TradesmanCompletedDetails(modifier: Modifier = Modifier) {
                             shape = RoundedCornerShape(12.dp)
                         )
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                        .weight(1f)
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "OK", fontSize = nameTextSize)
                 }
+
             }
         }
 

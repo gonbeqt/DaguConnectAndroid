@@ -102,6 +102,8 @@ fun ProfileVerification(
         modifier = Modifier
             .fillMaxSize()
             .background(myGradient3)
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
         Row(
             modifier = Modifier

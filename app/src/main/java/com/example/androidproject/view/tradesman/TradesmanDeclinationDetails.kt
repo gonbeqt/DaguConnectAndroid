@@ -12,10 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,20 +19,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.example.androidproject.R
+import androidx.navigation.NavController import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
-import com.example.androidproject.view.theme.myGradient3
-import java.sql.Types.NULL
 
-@Preview
+
 @Composable
-fun TradesmanDeclinationDetails(modifier: Modifier = Modifier) {
+fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -58,6 +49,8 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
         Card(
             modifier = Modifier
@@ -194,7 +187,7 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {}
+                    .clickable {navController.navigate("tradesmanjobdecline")}
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

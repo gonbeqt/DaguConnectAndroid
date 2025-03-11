@@ -34,9 +34,8 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import java.sql.Types.NULL
 
-@Preview
 @Composable
-fun TradesmanCancellationnDetails(modifier: Modifier = Modifier) {
+fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -58,6 +57,8 @@ fun TradesmanCancellationnDetails(modifier: Modifier = Modifier) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
         Card(
             modifier = Modifier
@@ -194,7 +195,7 @@ fun TradesmanCancellationnDetails(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {}
+                    .clickable {navController.navigate("tradesmanjobcancelled")}
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

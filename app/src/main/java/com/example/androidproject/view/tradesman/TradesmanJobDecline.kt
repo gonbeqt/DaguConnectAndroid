@@ -35,9 +35,8 @@ import com.example.androidproject.view.theme.myGradient3
 import java.sql.Types.NULL
 
 
-@Preview
 @Composable
-fun TradesmanJobDecline(modifier: Modifier = Modifier) {
+fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -59,6 +58,8 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
         Card(
             modifier = Modifier
@@ -396,7 +397,7 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {}
+                    .clickable {navController.navigate("tradesmandeclineddetails")   }
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

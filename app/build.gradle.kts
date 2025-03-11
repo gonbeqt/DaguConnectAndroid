@@ -75,7 +75,7 @@ dependencies {
     //Firebase Cloud Messaging
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
 
-
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0") // Check for the latest version
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -97,6 +100,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
+            .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
         Row(
             modifier = Modifier //top nav
@@ -275,8 +279,8 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
             // Display "No Declined Jobs" when the list is empty
             Text(
                 text = "No Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -320,8 +324,8 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             // Display "No Pending Jobs" when the list is empty
             Text(
                 text = "No Pending Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -365,8 +369,8 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
             // Display "No Declined Jobs" when the list is empty
             Text(
                 text = "No Declined Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -409,8 +413,8 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
             // Display "No Active Jobs" when the list is empty
             Text(
                 text = "No Active Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -455,8 +459,8 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
             // Display "No Completed Jobs" when the list is empty
             Text(
                 text = "No Completed Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -500,8 +504,8 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
             // Display "No Cancelled Jobs" when the list is empty
             Text(
                 text = "No Cancelled Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -556,7 +560,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
 
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
+            .fillMaxWidth()
             .clickable { }, // Add implementation for click if needed
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -566,82 +570,59 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White),
-            contentAlignment = Alignment.CenterStart
         ) {
-            Row(
+            Column( // Using Column to stack elements vertically inside the Card
                 modifier = Modifier
+                    .padding(10.dp)
                     .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Tradesman image
-                Image(
-                     painter = painterResource(R.drawable.pfp),
-                    contentDescription = "Tradesman Image",
+                Row(
                     modifier = Modifier
-                        .size(100.dp)
-                        .padding(start = 10.dp)
-                )
-
-                // Tradesman details
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = allBooking.clientfullname,
-                        color = Color.Black,
-                        fontWeight = FontWeight(500),
-                        fontSize = nameTextSize,
-                    )
-
-
-
-                    Spacer(Modifier.height(8.dp))
-                    Box(
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(R.drawable.pfp),
+                        contentDescription = "Tradesman Image",
                         modifier = Modifier
-                            .background(
-                                color = (Color(0xFFFFF2DD)),
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Star Icon",
-                                tint = Color(0xFFFFA500),
-                                modifier = Modifier.size(16.dp)
+
+                        Text(
+                            text = allBooking.clientfullname,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = nameTextSize
+                        )
+
+                        Row {
+                            Text(
+                                text = "Job Date:",
+                                color = Color.Black,
+                                fontSize = taskTextSize
                             )
-                            Spacer(modifier = Modifier.size(4.dp))
+                            Text(
+                                text = date,
+                                color = Color.Gray,
+                                fontSize = taskTextSize,
+                            )
                         }
+                        Text(
+                            text = allBooking.bookingstatus,
+                            color = Color.Gray,
+                            fontSize = taskTextSize,
+                        )
+
                     }
-                    Text(
-                        text = "Weekdays Selected",
-                        color = Color.Black,
-                        fontSize = taskTextSize,
-
-                        )
-                    Text(
-                        text = date,
-                        color = Color.Gray,
-                        fontSize = smallTextSize,
-
-                        )
                 }
-
-                Text(
-                    text = allBooking.bookingstatus,
-                    fontSize = smallTextSize,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(end = 8.dp)
-
-
-                )
-
             }
         }
     }
@@ -711,7 +692,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     Card(
         modifier = Modifier
             .clickable {navController.navigate("tradesmanpendingdetails") }
-            .size(cardHeight.first,cardHeight.second)
+            .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -796,7 +777,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                         modifier = Modifier
                             .clickable { showApproveDialog = true }
                             .background(
-                                color = Color.Transparent,
+                                color = Color(0xFF42C2AE),
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp))
@@ -805,7 +786,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                         contentAlignment = Alignment.Center
                     ) {
 
-                        Text(text = "Approve", color = Color(0xFF42C2AE), fontSize = smallTextSize)
+                        Text(text = "Approve", color = Color.White, fontSize = smallTextSize)
                     }
                 }
             }
@@ -1034,7 +1015,347 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
 
     Card(
         modifier = Modifier
-            .size(cardHeight.first,cardHeight.second)
+            .clickable {navController.navigate("tradesmanjobdecline") }
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(R.drawable.pfp),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(top = 8.dp),
+                            text = "Karlos Rivo",
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = taskTextSize,
+                        )
+                        Row {
+                            Text(
+                                text = "Job Date:",
+                                color = Color.Black,
+                                fontSize = 12.sp
+                            )
+                            Text(
+                                text = date,
+                                color = Color.Gray,
+                                fontSize = taskTextSize,
+                            )
+                        }
+
+                    }
+                }
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { }
+                        .background(
+                            color = Color.Transparent,
+                        )
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .padding(vertical = 8.dp),  // Adjust padding as needed
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Work Details", fontSize = smallTextSize)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavController) {
+    val date = ViewModelSetups.formatDateTime(active.bookingdate)
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {navController.navigate("tradesmanactivedetails") }
+        ,
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(R.drawable.pfp),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = active.clientfullname,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = nameTextSize,
+                        )
+                        Row {
+                            Text(
+                                text = "Job Date:",
+                                color = Color.Black,
+                                fontSize = taskTextSize,
+                            )
+                            Text(
+                                modifier = Modifier.padding(start = 5.dp),
+                                text = date,
+                                color = Color.Gray,
+                                fontSize = taskTextSize,
+                            )
+                        }
+                    }
+                }
+
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable {  }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Cancel", fontSize = smallTextSize)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable {  }
+                            .background(
+                                color = Color(0xFF42C2AE),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Completed", color = Color.White, fontSize = smallTextSize)
+                    }
+                }
+            }
+        }
+    }
+
+}
+@Composable
+fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) {
+    val date = ViewModelSetups.formatDateTime(completed.bookingdate)
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
+    Card(
+        modifier = Modifier
+            .clickable {navController.navigate("tradesmancompleteddetails") }
+            .fillMaxWidth()
+        ,
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
+            Column( // Using Column to stack elements vertically inside the Card
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tradesman image
+                    Image(
+                        painter = painterResource(R.drawable.pfp),
+                        contentDescription = "Tradesman Image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(start = 10.dp)
+                    )
+                    // Tradesman details
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(top = 8.dp),
+                            text = completed.clientfullname,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            fontSize = taskTextSize,
+                        )
+                        Row {
+                            Text(
+                                text = "Job Date:",
+                                color = Color.Black,
+                                fontSize = taskTextSize
+                            )
+                            Text(
+                                text = date,
+                                color = Color.Gray,
+                                fontSize = taskTextSize,
+                            )
+                        }
+
+                    }
+                }
+                // Spacer between text and buttons
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { }
+                        .background(
+                            color = Color.Transparent,
+                        )
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .padding(vertical = 8.dp),  // Adjust padding as needed
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Work Details", fontSize = smallTextSize)
+                }
+            }
+        }
+    }
+
+}
+
+
+@Composable
+fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
+    val date = ViewModelSetups.formatDateTime(cancel.bookingdate)
+    val windowSize = rememberWindowSizeClass()
+    val cardHeight = when (windowSize.width) {
+        WindowType.SMALL -> 390.dp to 240.dp
+        WindowType.MEDIUM -> 400.dp to 250.dp
+        WindowType.LARGE -> 410.dp to 260.dp
+    }
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
+    Card(
+        modifier = Modifier
+            .clickable {navController.navigate("tradesmanjobcancelled") }
+            .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1105,476 +1426,8 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                         .padding(vertical = 8.dp),  // Adjust padding as needed
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Declination Details", fontSize = smallTextSize)
+                    Text(text = "Work Details", fontSize = smallTextSize)
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(active.bookingdate)
-    val windowSize = rememberWindowSizeClass()
-    val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 240.dp
-        WindowType.MEDIUM -> 400.dp to 250.dp
-        WindowType.LARGE -> 410.dp to 260.dp
-    }
-    val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
-    }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
-    val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
-    Card(
-        modifier = Modifier
-            .size(cardHeight.first,cardHeight.second)
-        ,
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
-
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-        ) {
-            Column( // Using Column to stack elements vertically inside the Card
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
-                        contentDescription = "Tradesman Image",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(start = 10.dp)
-                    )
-
-                    // Tradesman details
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 10.dp)
-                    ) {
-                        Text(
-                            text = active.clientfullname,
-                            color = Color.Black,
-                            fontWeight = FontWeight(500),
-                            fontSize = nameTextSize,
-                            modifier = Modifier.padding(top = 10.dp)
-                        )
-                        Text(
-                            text = "Electrician",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
-                        )
-                        Row(
-                            modifier = Modifier.padding(top = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-
-                            // Reviews Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                            12.dp
-                                        )
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Star Icon",
-                                        tint = Color(0xFFFFA500),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                }
-                            }
-                        }
-                        Text(
-                            text = "Weekdays Selected",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
-                        )
-                        Text(
-                            text = date,
-                            color = Color.Gray,
-                            fontSize = smallTextSize,
-                        )
-                    }
-
-                }
-
-                // Spacer between text and buttons
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable { }
-                            .background(
-                                color = Color(0xFFC51B1B),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-
-                        Text(text = "Cancel", fontSize = smallTextSize,color = Color.White,)
-
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clickable { }
-                            .background(
-                                color = Color(0xFF42C2AE),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(text = "Completed", color = Color.White, fontSize = smallTextSize)
-                    }
-                }
-            }
-        }
-    }
-
-}
-@Composable
-fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(completed.bookingdate)
-    val windowSize = rememberWindowSizeClass()
-    val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 240.dp
-        WindowType.MEDIUM -> 400.dp to 250.dp
-        WindowType.LARGE -> 410.dp to 260.dp
-    }
-    val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
-    }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
-    val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
-    Card(
-        modifier = Modifier
-            .size(cardHeight.first,cardHeight.second)
-        ,
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
-
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-        ) {
-            Column( // Using Column to stack elements vertically inside the Card
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
-                        contentDescription = "Tradesman Image",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(start = 10.dp)
-                    )
-
-                    // Tradesman details
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 10.dp)
-                    ) {
-                        Text(
-                            text = completed.clientfullname,
-                            color = Color.Black,
-                            fontWeight = FontWeight(500),
-                            fontSize = nameTextSize,
-                            modifier = Modifier.padding(top = 10.dp)
-                        )
-                        Row(
-                            modifier = Modifier.padding(top = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-                            // Reviews Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                            12.dp
-                                        )
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Star Icon",
-                                        tint = Color(0xFFFFA500),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                    Text(
-                                        text = "4",
-                                        fontSize = smallTextSize
-                                    )
-                                }
-                            }
-                        }
-                        Text(
-                            text = "Weekdays Selected",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
-                        )
-                        Text(
-                            text = date,
-                            color = Color.Gray,
-                            fontSize = smallTextSize,
-                        )
-                    }
-
-                }
-
-                // Spacer between text and buttons
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable { }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Book Again", fontSize = smallTextSize)
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clickable { }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = smallTextSize)
-                    }
-                }
-            }
-        }
-    }
-
-}
-
-
-@Composable
-fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(cancel.bookingdate)
-    val windowSize = rememberWindowSizeClass()
-    val cardHeight = when (windowSize.width) {
-        WindowType.SMALL -> 390.dp to 240.dp
-        WindowType.MEDIUM -> 400.dp to 250.dp
-        WindowType.LARGE -> 410.dp to 260.dp
-    }
-    val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
-    }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
-    val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
-    Card(
-        modifier = Modifier
-            .size(cardHeight.first,cardHeight.second)
-        ,
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
-
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-        ) {
-            Column( // Using Column to stack elements vertically inside the Card
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
-                        contentDescription = "Tradesman Image",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(start = 10.dp)
-                    )
-
-                    // Tradesman details
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 10.dp)
-                    ) {
-                        Text(
-                            text = cancel.clientfullname,
-                            color = Color.Black,
-                            fontWeight = FontWeight(500),
-                            fontSize = nameTextSize,
-                            modifier = Modifier.padding(top = 10.dp)
-                        )
-                        Row(
-                            modifier = Modifier.padding(top = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-
-                            // Reviews Box
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = (Color(0xFFFFF2DD)),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                                            12.dp
-                                        )
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Star Icon",
-                                        tint = Color(0xFFFFA500),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(4.dp))
-
-                                }
-                            }
-                        }
-                        Text(
-                            text = "Weekdays Selected",
-                            color = Color.Black,
-                            fontSize = taskTextSize,
-                        )
-                        Text(
-                            text = date,
-                            color = Color.Gray,
-                            fontSize = smallTextSize,
-                        )
-                    }
-
-                }
-
-                // Spacer between text and buttons
-                Spacer(modifier = Modifier.height(20.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-
-                            .clickable { }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 8.dp),  // Adjust padding as needed
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Apply Again", fontSize = smallTextSize)
-                    }
-                }
-
-
-
             }
         }
     }
@@ -1655,8 +1508,8 @@ fun PendingMySubmissionsTradesmanContent(
             // Display "No Pending Submissions" when the list is empty
             Text(
                 text = "No Pending Submissions",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1842,8 +1695,8 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
             // Display "No Declined Submissions" when the list is empty
             Text(
                 text = "No Cancelled Submissions",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )

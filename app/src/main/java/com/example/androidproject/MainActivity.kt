@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,6 +76,12 @@ import com.example.androidproject.view.tradesman.ProfileVerification
 import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.view.tradesman.AccountSettingsTradesman
+import com.example.androidproject.view.tradesman.TradesmanCompletedDetails
+import com.example.androidproject.view.tradesman.TradesmanJobDecline
+import com.example.androidproject.view.tradesman.TradesmanJobCancelled
+import com.example.androidproject.view.tradesman.TradesmanActiveDetails
+import com.example.androidproject.view.tradesman.TradesmanCancellationDetails
+import com.example.androidproject.view.tradesman.TradesmanDeclinationDetails
 import com.example.androidproject.view.tradesman.TradesmanPendingDetails
 import com.example.androidproject.view.tradesman.UpdateResume
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
@@ -156,9 +165,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val isShown = sharedPreferences.getBoolean("isShown", false)
+
         // Initialize TokenManager
         TokenManager.init(this)
         AccountManager.init(this)
+
 
         // Determine the start destination based on token and user role
         val startDestination = when {
@@ -303,216 +314,322 @@ class MainActivity : ComponentActivity() {
         val updateTradesmanDetailViewModel = ViewModelProvider(this, updateTradesmanDetailVMFactory)[UpdateTradesmanDetailViewModel::class.java]
         setContent {
             AndroidProjectTheme {
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = startDestination ) {
-                    composable("landing_page") {
-                        LandingPageScreen(navController)
-                    }
-                    composable("landingpage2") {
-                        LandingPage2(navController)
-                    }
-                    composable("signup") {
-                        SignUpScreen(navController,registerViewModel,{LoadingUI()})
-                    }
-                    composable("login") {
-                        LogInScreen(navController,loginViewModel,logoutViewModel)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    NavHost(navController = navController, startDestination = startDestination) {
+                        composable("landing_page") {
+                            LandingPageScreen(navController)
+                        }
+                        composable("landingpage2") {
+                            LandingPage2(navController)
+                        }
+                        composable("signup") {
+                            SignUpScreen(navController, registerViewModel, { LoadingUI() })
+                        }
+                        composable("login") {
+                            LogInScreen(navController, loginViewModel, logoutViewModel)
+
+                        }
+
+                        composable("resetpassword") {
+                            ResetPassword(
+                                navController,
+                                forgotPassViewModel,
+                                resetPassViewModel,
+                                { LoadingUI() })
+                        }
+
+                        composable(
+                            route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}&selectedSection={selectedSection}",
+                            arguments = listOf(
+                                navArgument("selectedItem") {
+                                    type = NavType.IntType
+                                    defaultValue = 0
+                                },
+                                navArgument("selectedTab") {
+                                    type = NavType.IntType
+                                    defaultValue = 0
+                                },
+                                navArgument("selectedSection") {
+                                    type = NavType.IntType
+                                    defaultValue = 0
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val selectedItem = backStackEntry.arguments?.getInt("selectedItem") ?: 0
+                            val selectedTab = backStackEntry.arguments?.getInt("selectedTab") ?: 0
+                            val selectedSection =
+                                backStackEntry.arguments?.getInt("selectedSection") ?: 0
+
+                            MainScreen(
+                                navController,
+                                logoutViewModel,
+                                getClientBookingViewModel,
+                                getResumesViewModel,
+                                modifier = Modifier,
+                                getChatsViewModel,
+                                reportViewModel,
+                                postJobsViewModel,
+                                getMyJobsViewModel,
+                                getClientProfileViewModel,
+                                updateBookingTradesmanViewModel,
+                                getRecentJobsViewModel,
+                                viewTradesmanProfileViewModel,
+                                getMyJobApplicationViewModel,
+                                putJobApplicationStatusViewModel,
+                                getMyJobApplicantsViewModel,
+                                viewJobApplicationViewModel,
+                                getTradesmanBookingViewModel,
+                                putJobViewModel,
+                                updateBookingClientViewModel,
+                                updateTradesmanProfileViewModel,
+                                updateClientProfilePictureViewModel,
+                                initialSelectedItem = selectedItem,
+                                initialSelectedTab = selectedTab,
+                                initialSelectedSection = selectedSection,
+                                { LoadingUI() } // Pass LoadingUI here
+                            )
+                        }
+                        composable("message_screen") {
+                            MessageScreen(modifier = Modifier, navController, getChatsViewModel)
+                        }
+                        composable("booknow/{resumeId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            Log.d("rateid", resumeId)
+                            BookNow(
+                                viewResumeViewModel,
+                                navController,
+                                resumeId,
+                                viewRatingsViewModel
+                            )
+                        }
+                        composable("confirmbook/{resumeId}/{tradesmanId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            val tradesmanId =
+                                backStackEntry.arguments?.getString("tradesmanId") ?: ""
+                            ConfirmBook(
+                                viewResumeViewModel,
+                                navController,
+                                resumeId,
+                                tradesmanId,
+                                bookingTradesmanViewModel
+                            )
+                        }
+                        composable("bookingdetails/{resumeId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            BookingDetails(viewClientBookingViewModel, navController, resumeId)
+                        }
+                        composable("cancelleddetails") {
+                            CancelledDetails(trade, navController)
+                        }
+                        composable("cancelnow/{resumeId}/{bookingstatus}/{bookingId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            val bookingStatus =
+                                backStackEntry.arguments?.getString("bookingstatus") ?: ""
+                            val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
+                            CancelNow(
+                                updateBookingTradesmanViewModel,
+                                viewClientBookingViewModel,
+                                navController,
+                                resumeId,
+                                bookingStatus,
+                                bookingId
+                            )
+                        }
+
+                        composable("booking") {
+                            BookingsScreen(
+                                modifier = Modifier,
+                                navController,
+                                getClientBookingViewModel,
+                                updateBookingTradesmanViewModel,
+                                getMyJobApplicantsViewModel,
+                                viewJobApplicationViewModel,
+                                putJobApplicationStatusViewModel
+                            )
+                        }
+                        composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            val bookingId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+                            RateAndReviews(
+                                rateTradesmanViewModel,
+                                viewClientBookingViewModel,
+                                navController,
+                                resumeId,
+                                bookingId
+                            )
+                        }
+
+                        composable("acrepair") {
+                            ACRepair(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("plumbing") {
+                            Plumbing(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("carpentry") {
+                            Carpentry(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("electrician") {
+                            Electrician(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("masonry") {
+                            Masonry(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("cleaning") {
+                            Cleaning(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("mechanics") {
+                            Mechanics(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("painting") {
+                            Painting(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("roofing") {
+                            Roofing(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("welding") {
+                            Welding(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("alltradesman") {
+                            AllTradesman(navController, getResumesViewModel, reportViewModel)
+                        }
+                        composable("changepassword") {
+                            ChangePassword(navController, changePasswordViewModel, { LoadingUI() })
+                        }
+                        composable("aboutus") {
+                            AboutUs(navController)
+                        }
+                        composable("reportproblem") {
+                            ReportProblem(navController)
+                        }
+                        composable("notification") {
+                            NotificationScreen(navController, getNotificationViewModel)
+                        }
+                        composable("accountsettings") {
+                            AccountSettings(navController, getClientProfileViewModel)
+                        }
+
+
+                        //CANCELLED DETAILS
+                        composable("canceljobapplicationsdetails") {
+                            CancelledJobApplicationDetails(
+                                navController,
+                                viewJobApplicationViewModel,
+                                putJobApplicationStatusViewModel
+                            )
+                        }
+                        composable("messaging") {
+                            MessagingScreen(initialMessages, navController)
+                        }
+
+                        //Tradesman Routes
+                        composable("hometradesman") {
+                            HomeTradesman(
+                                modifier = Modifier,
+                                navController,
+                                getJobsViewModel,
+                                getRecentJobsViewModel
+                            )
+                        }
+                        composable("tradesmanapply/{jobId}") { backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            Log.e("Job ID", jobId)
+                            TradesmanApply(jobId, navController, viewJobViewModel)
+                        }
+                        composable("hiringdetails/{jobId}") { backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            HiringDetails(
+                                jobId,
+                                modifier = Modifier,
+                                navController,
+                                postJobApplicationViewModel
+                            )
+                        }
+                        composable("bookingstradesman") {
+                            BookingsTradesman(
+                                modifier = Modifier,
+                                navController,
+                                updateBookingClientViewModel,
+                                getMyJobApplicationViewModel,
+                                getTradesmanBookingViewModel,
+                                putJobApplicationStatusViewModel,
+                                viewJobApplicationViewModel
+                            )
+                        }
+                        composable("profiletradesman") {
+                            ProfileTradesman(
+                                modifier = Modifier,
+                                navController,
+                                logoutViewModel,
+                                viewTradesmanProfileViewModel,
+                                updateTradesmanProfileViewModel,
+                                { LoadingUI() })
+                        }
+                        composable("manageprofile") {
+                            ManageProfile(
+                                modifier = Modifier,
+                                navController,
+                                updateTradesmanDetailViewModel
+                            )
+                        }
+                        composable("availabilitystatus") {
+                            AvailabilityStatus(modifier = Modifier, navController)
+                        }
+                        composable("profileverification/{statusofapproval}") { backStackEntry ->
+                            val statusofapproval =
+                                backStackEntry.arguments?.getString("statusofapproval") ?: ""
+                            ProfileVerification(
+                                modifier = Modifier,
+                                navController,
+                                submitResumeViewModel,
+                                statusofapproval
+                            )
+                        }
+                        composable("canceltradesmannow/{jobId}") { backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            CancelTradesmanNow(
+                                jobId,
+                                navController,
+                                viewJobApplication = viewJobApplicationViewModel,
+                                putJobApplicationStatus = putJobApplicationStatusViewModel
+                            )
+                        }
+                        composable("myjobapplicationdetails") {
+                            MyJobApplicationDetails(navController)
+                        }
+                        composable("accountsettingstradesman") {
+                            AccountSettingsTradesman(navController)
+                        }
+                        composable("updateresume") {
+                            UpdateResume(navController, updateTradesmanDetailViewModel)
+                        }
+                        composable("tradesmanpendingdetails") {
+                            TradesmanPendingDetails(modifier = Modifier, navController)
+                        }
+                        composable("tradesmancompleteddetails") {
+                            TradesmanCompletedDetails(modifier = Modifier, navController)
+                        }
+                        composable("tradesmancancellationdetails") {
+                            TradesmanCancellationDetails(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanactivedetails") {
+                            TradesmanActiveDetails(modifier = Modifier, navController)
+                        }
+                        composable("tradesmandeclineddetails") {
+                            TradesmanDeclinationDetails(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanjobcancelled") {
+                            TradesmanJobCancelled(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanjobdecline") {
+                            TradesmanJobDecline(modifier = Modifier, navController)
+                        }
+
 
                     }
-
-                    composable("resetpassword") {
-                        ResetPassword(navController,forgotPassViewModel,resetPassViewModel,{ LoadingUI() })
-                    }
-
-                    composable(
-                        route = "main_screen?selectedItem={selectedItem}&selectedTab={selectedTab}&selectedSection={selectedSection}",
-                        arguments = listOf(
-                            navArgument("selectedItem") {
-                                type = NavType.IntType
-                                defaultValue = 0
-                            },
-                            navArgument("selectedTab") {
-                                type = NavType.IntType
-                                defaultValue = 0
-                            },
-                            navArgument("selectedSection") {
-                                type = NavType.IntType
-                                defaultValue = 0
-                            }
-                        )
-                    ) { backStackEntry ->
-                        val selectedItem = backStackEntry.arguments?.getInt("selectedItem") ?: 0
-                        val selectedTab = backStackEntry.arguments?.getInt("selectedTab") ?: 0
-                        val selectedSection = backStackEntry.arguments?.getInt("selectedSection")?: 0
-
-                        MainScreen(
-                            navController,
-                            logoutViewModel,
-                            getClientBookingViewModel,
-                            getResumesViewModel,
-                            modifier = Modifier,
-                            getChatsViewModel,
-                            reportViewModel,
-                            postJobsViewModel,
-                            getMyJobsViewModel,
-                            getClientProfileViewModel,
-                            updateBookingTradesmanViewModel,
-                            getRecentJobsViewModel,
-                            viewTradesmanProfileViewModel,
-                            getMyJobApplicationViewModel,
-                            putJobApplicationStatusViewModel,
-                            getMyJobApplicantsViewModel,
-                            viewJobApplicationViewModel,
-                            getTradesmanBookingViewModel,
-                            putJobViewModel,
-                            updateBookingClientViewModel,
-                            updateTradesmanProfileViewModel,
-                            updateClientProfilePictureViewModel,
-                            initialSelectedItem = selectedItem,
-                            initialSelectedTab = selectedTab,
-                            initialSelectedSection = selectedSection,
-                            { LoadingUI() } // Pass LoadingUI here
-                        )
-                    }
-                    composable("message_screen") {
-                        MessageScreen(modifier=Modifier, navController, getChatsViewModel)
-                    }
-                    composable("booknow/{resumeId}") { backStackEntry ->
-                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
-                        Log.d("rateid",resumeId)
-                        BookNow(viewResumeViewModel, navController,resumeId,viewRatingsViewModel)
-                    }
-                    composable("confirmbook/{resumeId}/{tradesmanId}") {backStackEntry ->
-                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
-                        val tradesmanId = backStackEntry.arguments?.getString("tradesmanId")?:""
-                        ConfirmBook(viewResumeViewModel,navController,resumeId,tradesmanId,bookingTradesmanViewModel)
-                    }
-                    composable("bookingdetails/{resumeId}") {backStackEntry ->
-                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
-                        BookingDetails(viewClientBookingViewModel,navController,resumeId)
-                    }
-                    composable("cancelleddetails") {
-                        CancelledDetails(trade,navController)
-                    }
-                    composable("cancelnow/{resumeId}/{bookingstatus}/{bookingId}"){ backStackEntry ->
-                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
-                        val bookingStatus = backStackEntry.arguments?.getString("bookingstatus")?: ""
-                        val bookingId = backStackEntry.arguments?.getString("bookingId")?: ""
-                        CancelNow(updateBookingTradesmanViewModel,viewClientBookingViewModel,navController,resumeId,bookingStatus,bookingId)
-                    }
-
-                    composable("booking") {
-                        BookingsScreen(modifier = Modifier,navController,getClientBookingViewModel,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobApplicationViewModel, putJobApplicationStatusViewModel )
-                    }
-                    composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
-                        val resumeId = backStackEntry.arguments?.getString("resumeId")?: ""
-                        val bookingId = backStackEntry.arguments?.getString("tradesmanId")?: ""
-                        RateAndReviews(rateTradesmanViewModel,viewClientBookingViewModel,navController,resumeId,bookingId)
-                    }
-
-                    composable("acrepair"){
-                        ACRepair(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("plumbing") {
-                        Plumbing(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("carpentry") {
-                        Carpentry(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("electrician") {
-                        Electrician(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("masonry"){
-                        Masonry(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("cleaning") {
-                        Cleaning(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("mechanics"){
-                        Mechanics(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("painting"){
-                        Painting(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("roofing"){
-                        Roofing(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("welding"){
-                        Welding(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("alltradesman"){
-                        AllTradesman(navController,getResumesViewModel,reportViewModel)
-                    }
-                    composable("changepassword"){
-                        ChangePassword(navController,changePasswordViewModel,{ LoadingUI() })
-                    }
-                    composable("aboutus"){
-                        AboutUs(navController)
-                    }
-                    composable("reportproblem"){
-                        ReportProblem(navController)
-                    }
-                    composable("notification"){
-                        NotificationScreen(navController, getNotificationViewModel)
-                    }
-                    composable("accountsettings"){
-                        AccountSettings(navController,getClientProfileViewModel)
-                    }
-
-
-                    //CANCELLED DETAILS
-                    composable("canceljobapplicationsdetails") {
-                        CancelledJobApplicationDetails(navController, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
-                    }
-                    composable("messaging"){
-                        MessagingScreen(initialMessages,navController)
-                    }
-
-                    //Tradesman Routes
-                    composable("hometradesman") {
-                        HomeTradesman(modifier = Modifier,navController, getJobsViewModel, getRecentJobsViewModel)
-                    }
-                    composable("tradesmanapply/{jobId}") { backStackEntry ->
-                        val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                        Log.e("Job ID" , jobId)
-                        TradesmanApply(jobId, navController, viewJobViewModel)
-                    }
-                    composable("hiringdetails/{jobId}") { backStackEntry ->
-                        val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                        HiringDetails(jobId, modifier = Modifier, navController, postJobApplicationViewModel)
-                    }
-                    composable("bookingstradesman") {
-                        BookingsTradesman(modifier = Modifier,navController, updateBookingClientViewModel,getMyJobApplicationViewModel,getTradesmanBookingViewModel, putJobApplicationStatusViewModel, viewJobApplicationViewModel)
-                    }
-                    composable("profiletradesman") {
-                         ProfileTradesman(modifier = Modifier, navController,logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel, { LoadingUI() })
-                    }
-                    composable("manageprofile") {
-                        ManageProfile(modifier = Modifier, navController,updateTradesmanDetailViewModel)
-                    }
-                    composable("availabilitystatus") {
-                        AvailabilityStatus(modifier = Modifier, navController)
-                    }
-                    composable("profileverification/{statusofapproval}") { backStackEntry ->
-                        val statusofapproval = backStackEntry.arguments?.getString("statusofapproval") ?: ""
-                        ProfileVerification(modifier = Modifier, navController,submitResumeViewModel,statusofapproval)
-                    }
-                    composable("canceltradesmannow/{jobId}") { backStackEntry ->
-                        val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                        CancelTradesmanNow(jobId, navController, viewJobApplication = viewJobApplicationViewModel, putJobApplicationStatus = putJobApplicationStatusViewModel)
-                    }
-                    composable("myjobapplicationdetails") {
-                        MyJobApplicationDetails(navController)
-                    }
-                    composable("accountsettingstradesman"){
-                        AccountSettingsTradesman(navController)
-                    }
-                    composable("updateresume"){
-                        UpdateResume(navController,updateTradesmanDetailViewModel)
-                    }
-                    composable("tradesmanpendingdetails"){
-                        TradesmanPendingDetails(modifier = Modifier, navController)
-                    }
-
                 }
             }
         }
