@@ -27,30 +27,61 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.Conversation
 import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 // Data class to represent a message with a sender/receiver flag
 data class Message(val text: String, val isSent: Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessagingScreen(getMessages: GetMessagesViewModel, receiverId: Int, chatId:Int, receipientName: String, receipientProfile: String, navController: NavController) {
-    // Mutable state to hold the list of messages
+fun MessagingScreen(
+    getMessages: GetMessagesViewModel,
+    receiverId: Int,
+    chatId: Int,
+    receipientName: String,
+    receipientProfile: String,
+    navController: NavController
+) {
     val pagingMessages = getMessages.messagesPagingData.collectAsLazyPagingItems()
     val newMessages by getMessages.newMessages.collectAsState()
     val userId = AccountManager.getAccount()?.id
     val webSocketMessages by WebSocketManager.incomingMessages.collectAsState()
     val listState = rememberLazyListState()
+    var sentMessage by remember { mutableStateOf(false) }
 
-    // Combine paged messages and real-time messages
-    val allMessages by remember {
+    // Combine paged messages and real-time messages, ensuring they are sorted properly
+    val allMessages by remember(webSocketMessages, pagingMessages, newMessages) {
         derivedStateOf {
             val paged = pagingMessages.itemSnapshotList.items
-            val new = newMessages + webSocketMessages.mapNotNull { json ->
+            val new = webSocketMessages.mapNotNull { json ->
                 try {
                     val obj = JSONObject(json)
-                    // Check if it's a message with "type" and "data"
                     if (obj.has("type") && obj.getString("type") == "message") {
                         val data = obj.getJSONObject("data")
+                        val createdAt = data.getString("created_at")
+                        // Convert from server local time (UTC-8) to UTC
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).apply {
+                            timeZone = TimeZone.getTimeZone("UTC")
+                        }
+                        val dateFormatLocal = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).apply {
+                            timeZone = TimeZone.getTimeZone("Etc/GMT+8") // Fixed UTC-8
+                        }
+                        val localDate = dateFormatLocal.parse(createdAt)
+                        val adjustedCreatedAt = if (localDate != null) {
+                            val localTimeMillis = localDate.time
+                            val offset = -8 * 60 * 60 * 1000L // Fixed -8 hours in milliseconds
+                            Log.d("MessagingScreen", "WebSocket createdAt: $createdAt, localTimeMillis: $localTimeMillis, offset: $offset")
+                            val utcTimeMillis = localTimeMillis - offset // Add 8 hours to convert UTC-8 to UTC
+                            Log.d("MessagingScreen", "UTC timeMillis for ${data.getString("message")}: $utcTimeMillis")
+                            dateFormat.format(Date(utcTimeMillis))
+                        } else {
+                            Log.w("MessagingScreen", "Failed to parse createdAt: $createdAt, using original")
+                            createdAt
+                        }
+                        Log.d("MessagingScreen", "Adjusted WebSocket createdAt for ${data.getString("message")}: $adjustedCreatedAt")
                         Conversation(
                             id = data.getInt("id"),
                             userId = data.getString("user_id").toInt(),
@@ -58,28 +89,48 @@ fun MessagingScreen(getMessages: GetMessagesViewModel, receiverId: Int, chatId:I
                             chatId = data.optInt("chat_id", chatId),
                             message = data.getString("message"),
                             isRead = data.getInt("is_read"),
-                            createdAt = data.getString("created_at")
+                            createdAt = adjustedCreatedAt // Adjusted to UTC
                         )
-                    } else {
-                        // Skip non-message types like "authenticated"
-                        null
-                    }
+                    } else null
                 } catch (e: Exception) {
                     Log.e("MessagingScreen", "Error parsing WebSocket message: $json", e)
                     null
                 }
+            }.distinctBy { it.id }
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
             }
-            paged + new
+            (paged + new + newMessages)
+                .distinctBy { if (it.id == -1) "${it.message}_${it.createdAt}" else it.id.toString() }
+                .sortedBy { message ->
+                    try {
+                        val time = dateFormat.parse(message.createdAt)?.time ?: Long.MAX_VALUE
+                        Log.d("MessagingScreen", "Message: ${message.message}, createdAt: ${message.createdAt}, parsed time: $time")
+                        time
+                    } catch (e: Exception) {
+                        Log.e("MessagingScreen", "Error parsing createdAt: ${message.createdAt}", e)
+                        Long.MAX_VALUE
+                    }
+                }
         }
     }
 
-    LaunchedEffect(allMessages.size) {
+// Scroll to the bottom when a new message arrives
+    LaunchedEffect(allMessages) {
         if (allMessages.isNotEmpty()) {
-            listState.animateScrollToItem(0) // Scroll to the bottom (reverseLayout = true)
+            listState.animateScrollToItem(allMessages.lastIndex)
         }
     }
 
-    // Connect to WebSocket when the screen is composed
+// Ensure scrolling when sending a message
+    LaunchedEffect(sentMessage) {
+        if (sentMessage) {
+            getMessages.refreshMessages()
+            listState.animateScrollToItem(allMessages.lastIndex)
+            sentMessage = false
+        }
+    }
+
     LaunchedEffect(Unit) {
         Log.d("MessagingScreen", "profile: $receipientProfile")
         WebSocketManager.connect(userId.toString())
@@ -118,8 +169,10 @@ fun MessagingScreen(getMessages: GetMessagesViewModel, receiverId: Int, chatId:I
         },
         bottomBar = {
             BottomInputBar(onSend = { newMessage ->
-                WebSocketManager.sendMessage(userId.toString(), receiverId.toString(), newMessage) // Receiver ID hardcoded as "2" for now
-                getMessages.addLocalMessage(newMessage, receiverId, chatId)
+                WebSocketManager.sendMessage(userId.toString(), receiverId.toString(), newMessage)
+                //getMessages.addLocalMessage(newMessage, receiverId, chatId)
+                getMessages.refreshMessages()
+                sentMessage = true
             })
         }
     ) { padding ->
@@ -141,10 +194,10 @@ fun MessagingScreen(getMessages: GetMessagesViewModel, receiverId: Int, chatId:I
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp),
-                    reverseLayout = true // Messages load from bottom to top
+                    reverseLayout = false
                 ) {
-                    items(allMessages.size) { index ->
-                        val message = allMessages[allMessages.size - 1 - index]
+                    items(allMessages.size) { message ->
+                        val message = allMessages[message]
                         MessageComposable(
                             message = message.message,
                             isSent = userId?.toInt() == message.userId
@@ -155,7 +208,6 @@ fun MessagingScreen(getMessages: GetMessagesViewModel, receiverId: Int, chatId:I
         }
     }
 
-    // Cleanup on dispose
     DisposableEffect(Unit) {
         onDispose {
             WebSocketManager.disconnect()
