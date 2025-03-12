@@ -487,7 +487,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Cancel Application", fontSize = nameTextSize)
+                    Text(text = "OK", fontSize = nameTextSize)
                 }
             }
         }

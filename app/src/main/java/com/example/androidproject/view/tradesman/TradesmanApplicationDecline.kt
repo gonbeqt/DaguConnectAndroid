@@ -475,41 +475,19 @@ fun TradesmanApplicationDecline(modifier: Modifier = Modifier, navController: Na
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Row(
+                Box(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                        .fillMaxWidth()
+                        .clickable {navController.navigate("tradesmanapplicationdeclinedetails")}
+                        .background(
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable {  }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Apply Again", fontSize = 14.sp)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clickable { navController.navigate("tradesmanapplicationdeclinedetails") }
-                            .background(
-                                color = Color(0xFF42C2AE),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(text = "Declination Details", color = Color.White, fontSize = 14.sp)
-                    }
+                    Text(text = "Declination Details", fontSize = nameTextSize)
                 }
             }
         }
