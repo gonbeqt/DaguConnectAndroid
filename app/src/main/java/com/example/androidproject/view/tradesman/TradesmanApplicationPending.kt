@@ -457,7 +457,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                                     color = Color.Gray,
                                     text = "Posted on")
                                 Text(fontSize = smallTextSize,
-                                    text = "You")
+                                    text = "03-01-2025")
                             }
                             Row(modifier = Modifier
                                 .fillMaxWidth(),

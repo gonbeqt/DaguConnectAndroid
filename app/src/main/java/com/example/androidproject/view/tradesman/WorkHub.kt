@@ -2263,9 +2263,25 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
 }
 @Composable
 fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, ) {
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
-    val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
@@ -2329,7 +2345,7 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Applied on: $createdAt",
+                            text = "Applied at: $createdAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -2340,22 +2356,21 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Address: ${myJob.jobAddress}",
+                            text = "Address: ${myJob.jobAddress}, Pangasinan",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
                 Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
                 ) {
                     Box(
                         modifier = Modifier
-                            .clickable {navController.navigate("hiringdetails/{jobId}")}
+                            .clickable {
+                                navController.navigate("hiringdetails/{jobId}")
+                            }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -2365,22 +2380,23 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Apply Again", fontSize = 14.sp)
+                        Text(text = "Apply Again", fontSize = smallTextSize)
                     }
-
                     Box(
                         modifier = Modifier
-                            .clickable { navController.navigate("tradesmanapplicationdecline") }
+                            .clickable {
+                                navController.navigate("tradesmanapplicationdedecline")
+                            }
                             .background(
-                                color = Color(0xFF42C2AE),
+                                color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
+                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-
-                        Text(text = "Declination Details", color = Color.White, fontSize = 14.sp)
+                        Text(text = "Job Details", color = Color(0xFFECAB1E), fontSize = smallTextSize)
                     }
                 }
             }
@@ -2392,6 +2408,22 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
@@ -2484,7 +2516,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                         .padding(vertical = 8.dp),  // Adjust padding as needed
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Work Details", fontSize = 14.sp)
+                    Text(text = "Work Details", fontSize = smallTextSize)
 
                 }
             }
@@ -2495,9 +2527,25 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
 
 @Composable
 fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
-    val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
@@ -2600,7 +2648,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                             .padding(vertical = 8.dp),  // Adjust padding as needed
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Apply Again", fontSize = 14.sp)
+                        Text(text = "Apply Again", fontSize = smallTextSize)
                     }
                 }
 
