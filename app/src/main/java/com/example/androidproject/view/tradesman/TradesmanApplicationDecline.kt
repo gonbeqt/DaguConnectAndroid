@@ -41,7 +41,7 @@ import com.example.androidproject.view.theme.myGradient3
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanApplicationDecline(modifier: Modifier = Modifier, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -122,7 +122,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Your application is Pending",
+                            text = "Your application is Declined",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
@@ -475,19 +475,41 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Box(
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {}
-                        .background(
-                            color = Color.Transparent,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
                 ) {
-                    Text(text = "Cancel Application", fontSize = nameTextSize)
+                    Box(
+                        modifier = Modifier
+                            .clickable {  }
+                            .background(
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Apply Again", fontSize = 14.sp)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clickable { navController.navigate("tradesmanapplicationdeclinedetails") }
+                            .background(
+                                color = Color(0xFF42C2AE),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .weight(1f)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(text = "Declination Details", color = Color.White, fontSize = 14.sp)
+                    }
                 }
             }
         }
