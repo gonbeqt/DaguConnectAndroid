@@ -67,10 +67,10 @@ import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
 @Composable
-fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,reportViewModel: ReportViewModel) {
+fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel) {
     val resumeList = getResumes.resumePagingData.collectAsLazyPagingItems()
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
@@ -171,7 +171,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
                             items(filteredList.size) { index ->
                                 val resume = filteredList[index]
                                 if (resume.id !in dismissedResumes) { // Filter directly
-                                    AllTradesmanItem (resume,navController, cardHeight,reportViewModel) {
+                                    AllTradesmanItem (resume,navController, cardHeight,reportTradesmanViewModel) {
                                         getResumes.dismissResume(resume.id)
                                     }
                                 }
@@ -194,7 +194,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
     }
 }
 @Composable
-fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
+fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -223,7 +223,7 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
             reportDocument = null
         }
     }
-    val reportState by reportViewModel.reportState.collectAsState()
+    val reportState by reportTradesmanViewModel.reportState.collectAsState()
     val context = LocalContext.current
 
 
@@ -540,7 +540,7 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription,  reportDocument!!,context, resumes.userid)
+                                        reportTradesmanViewModel.report(selectedReason, reasonDescription,  reportDocument!!,context, resumes.userid)
                                     }
                                           },
                                 modifier = Modifier.size(110.dp, 45.dp),
@@ -555,22 +555,22 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
 
                             LaunchedEffect(reportState) {
                                 when(val report = reportState){
-                                    is ReportViewModel.ReportState.Loading -> {
+                                    is ReportTradesmanViewModel.ReportState.Loading -> {
                                         //do nothing
                                     }
-                                    is ReportViewModel.ReportState.Success -> {
+                                    is ReportTradesmanViewModel.ReportState.Success -> {
                                         val responsereport = report.data?.message
                                         Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
 
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                         // Close the dialog
                                         showReportDialog = false
                                     }
-                                    is ReportViewModel.ReportState.Error -> {
+                                    is ReportTradesmanViewModel.ReportState.Error -> {
                                         val errorMessage = report.message
                                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         showReportDialog = true
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                     }
                                     else -> Unit
                                 }

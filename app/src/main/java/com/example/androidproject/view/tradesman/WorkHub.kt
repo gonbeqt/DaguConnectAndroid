@@ -655,7 +655,9 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                 updateBookingClientViewModel.resetState()
                 // Set the selectedTab based on the work status
                 if (updateStatus.status == "Accepted") {
-                    navController.popBackStack()
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=3"){
+                        navController.popBackStack()
+                    }
                 } else if (updateStatus.status == "Declined") {
                     navController.navigate("main_screen?selectedItem=1&selectedTab=2") {
                         navController.popBackStack()

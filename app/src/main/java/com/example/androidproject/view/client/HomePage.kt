@@ -1,11 +1,9 @@
 package com.example.androidproject.view.client
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -76,7 +74,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -87,14 +84,12 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient2
-import com.example.androidproject.view.tradesman.UploadField
-import com.example.androidproject.view.tradesman.openFile
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
 
 @Composable
-fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel) {
+fun     HomeScreen(modifier: Modifier = Modifier, navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
 
@@ -138,7 +133,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
                 CategoryRow(categories,navController)
 
                 Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(getResumesViewModel,navController,reportViewModel)
+                TradesmanColumn(getResumesViewModel,navController,reportTradesmanViewModel)
             }
         }
     }
@@ -293,7 +288,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 
 
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportViewModel: ReportViewModel) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
@@ -362,7 +357,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                     navController = navController,
                     cardHeight = cardHeight,
                     textSize = textSize,
-                    reportViewModels = reportViewModel
+                    reportTradesmanViewModels = reportTradesmanViewModel
                 )
             }
         }
@@ -527,11 +522,11 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportViewModels: ReportViewModel) {
-    var selectedIndex by remember { mutableStateOf(-1) }
+fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportTradesmanViewModels: ReportTradesmanViewModel) {
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
-    val reportState by reportViewModels.reportState.collectAsState()
+    val reportState by reportTradesmanViewModels.reportState.collectAsState()
     val context = LocalContext.current
 
     val reasons = listOf(
@@ -585,6 +580,29 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             reportDocument = null
         }
     }
+
+
+    LaunchedEffect(reportState) {
+        when(val report = reportState){
+            is ReportTradesmanViewModel.ReportState.Loading -> {
+                //do nothing
+            }
+            is ReportTradesmanViewModel.ReportState.Success -> {
+                val responseReport = report.data?.message
+                Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
+                reportTradesmanViewModels.resetState()
+                showReportDialog = false
+            }
+            is ReportTradesmanViewModel.ReportState.Error -> {
+                val errorMessage = report.message
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                showReportDialog = true
+                reportTradesmanViewModels.resetState()
+            }
+            else -> Unit
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -870,7 +888,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModels.report(selectedReason, reasonDescription, reportDocument!!,context,resumes.userid)
+                                        reportTradesmanViewModels.report(selectedReason, reasonDescription, reportDocument!!,context,resumes.userid)
                                     }
                                           },
                                 modifier = Modifier.size(110.dp, 45.dp),
@@ -882,28 +900,6 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             ) {
                                 Text("Submit", color = Color.White)
                             }
-                            LaunchedEffect(reportState) {
-                                when(val report = reportState){
-                                    is ReportViewModel.ReportState.Loading -> {
-                                        //do nothing
-                                    }
-                                    is ReportViewModel.ReportState.Success -> {
-                                        val responsereport = report.data?.message
-                                        Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
-
-                                        reportViewModels.resetState()
-                                        // Close the dialog
-                                        showReportDialog = false
-                                    }
-                                    is ReportViewModel.ReportState.Error -> {
-                                        val errorMessage = report.message
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                        showReportDialog = true
-                                        reportViewModels.resetState()
-                                    }
-                                    else -> Unit
-                                    }
-                                }
                             }
 
                         }

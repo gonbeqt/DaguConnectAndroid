@@ -77,10 +77,10 @@ import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
 @Composable
-fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel){
+fun Masonry(navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel){
     val masonryList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
@@ -227,7 +227,7 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
                                 items(filteredList.size) { index ->
                                     val masonryList = filteredList[index]
                                     if (masonryList != null && masonryList.id !in dismissedResumes) {
-                                        MasonryItem(masonryList, navController,reportViewModel){
+                                        MasonryItem(masonryList, navController,reportTradesmanViewModel){
                                             getResumesViewModel.dismissResume(masonryList.id)
                                         }
                                     }
@@ -255,7 +255,7 @@ fun Masonry(navController: NavController,getResumesViewModel: GetResumesViewMode
 }
 
 @Composable
-fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewModel:ReportViewModel,onUninterested: () -> Unit) {
+fun MasonryItem(masonry: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel, onUninterested: () -> Unit) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -270,7 +270,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
         "Safety Concerns",
         "Others"
     )
-    val reportState by reportViewModel.reportState.collectAsState()
+    val reportState by reportTradesmanViewModel.reportState.collectAsState()
     val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
@@ -567,7 +567,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription,reportDocument!!,context, masonry.userid)
+                                        reportTradesmanViewModel.report(selectedReason, reasonDescription,reportDocument!!,context, masonry.userid)
                                     }
 
                                           },
@@ -582,22 +582,22 @@ fun MasonryItem(masonry: resumesItem, navController: NavController,reportViewMod
                             }
                             LaunchedEffect(reportState) {
                                 when(val report = reportState){
-                                    is ReportViewModel.ReportState.Loading -> {
+                                    is ReportTradesmanViewModel.ReportState.Loading -> {
                                         //do nothing
                                     }
-                                    is ReportViewModel.ReportState.Success -> {
+                                    is ReportTradesmanViewModel.ReportState.Success -> {
                                         val responsereport = report.data?.message
                                         Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
 
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                         // Close the dialog
                                         showReportDialog = false
                                     }
-                                    is ReportViewModel.ReportState.Error -> {
+                                    is ReportTradesmanViewModel.ReportState.Error -> {
                                         val errorMessage = report.message
                                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         showReportDialog = true
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                     }
                                     else -> Unit
                                 }

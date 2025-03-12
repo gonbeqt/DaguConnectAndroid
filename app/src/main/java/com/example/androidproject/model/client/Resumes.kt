@@ -64,11 +64,17 @@ data class SubmitResumeResponse(
         val documents: String? ,
         @SerializedName("about_me")
         val aboutMe: String,
+        @SerializedName("is_active")
+        val isActive: Int,
         @SerializedName("is_approve")
         val isApprove: Int,
         @SerializedName("status_of_approval")
         val statusOfApproval: String?
-    )
+    ){
+        // Helper property to convert Int to Boolean
+        val isActiveBoolean: Boolean
+            get() = isActive != 0
+    }
 
 
     data class UpdateTradesmanDetailsRequest(

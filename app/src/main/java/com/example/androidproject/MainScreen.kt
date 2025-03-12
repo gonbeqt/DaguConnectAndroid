@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -47,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.androidproject.view.client.MessageScreen
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
@@ -63,7 +63,8 @@ import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportClientViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
 
 @Composable
@@ -74,7 +75,7 @@ fun MainScreen(
     getResumesViewModel: GetResumesViewModel,
     modifier: Modifier = Modifier,
     viewModel: GetChatViewModel,
-    reportViewModel: ReportViewModel,
+    reportTradesmanViewModel: ReportTradesmanViewModel,
     postJobsViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
@@ -90,6 +91,8 @@ fun MainScreen(
     updateBookingClientViewModel: UpdateBookingClientViewModel,
     updateTradesmanProfileViewModel: UpdateTradesmanProfileViewModel,
     updateClientProfilePictureViewModel: UpdateClientProfilePictureViewModel,
+    updateTradesmanActiveStatusViewModel: UpdateTradesmanActiveStatusViewModel,
+    reportClientViewModel : ReportClientViewModel,
     initialSelectedItem: Int = 0,
     initialSelectedTab: Int = 0,
     initialSelectedSection: Int = 0,
@@ -216,7 +219,7 @@ fun MainScreen(
             getClientsBooking,
             getResumesViewModel,
             viewModel,
-            reportViewModel,
+            reportTradesmanViewModel,
             postJobsViewModel,
             getMyJobsViewModel,
             getClientProfileViewModel,
@@ -232,6 +235,8 @@ fun MainScreen(
             updateBookingClientViewModel,
             updateTradesmanProfileViewModel,
             updateClientProfilePictureViewModel,
+            updateTradesmanActiveStatusViewModel,
+            reportClientViewModel,
             LoadingUI
         )
     }
@@ -248,7 +253,7 @@ fun ContentScreen(
     getClientsBooking: GetClientBookingViewModel,
     getResumesViewModel: GetResumesViewModel,
     viewModel: GetChatViewModel,
-    reportViewModel: ReportViewModel,
+    reportTradesmanViewModel: ReportTradesmanViewModel,
     postJobsViewModel: PostJobViewModel,
     getMyJobsViewModel: GetMyJobsViewModel,
     getClientProfileViewModel: GetClientProfileViewModel,
@@ -264,12 +269,14 @@ fun ContentScreen(
     updateBookingClientViewModel : UpdateBookingClientViewModel, // Add this parameter
     updateTradesmanProfileViewModel : UpdateTradesmanProfileViewModel,
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
+    updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
+    reportClientViewModel:ReportClientViewModel,
     LoadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
-            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportViewModel)
+            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportTradesmanViewModel)
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel, selectedTab,selectedSection)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
@@ -287,11 +294,11 @@ fun ContentScreen(
         }
     } else {
         when (selectedItem) {
-            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
+            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel,reportClientViewModel,LoadingUI,selectedTab)
             1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,selectedTab,  selectedSection )
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,LoadingUI,selectedTab)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,updateTradesmanActiveStatusViewModel,LoadingUI,selectedTab)
         }
     }
 }

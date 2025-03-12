@@ -38,7 +38,6 @@ class UpdateTradesmanActiveStatusViewModel(private val apiService: ApiService):V
         _UpdateStatusState.value = UpdateStatusState.Idle
     }
 
-
     sealed class UpdateStatusState{
         object Idle : UpdateStatusState()
         object Loading : UpdateStatusState()

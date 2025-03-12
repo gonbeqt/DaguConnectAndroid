@@ -1,6 +1,10 @@
 package com.example.androidproject.model.client
 
 
-data class ReportResponse(
+data class ReportTradesmanResponse(
+    var message : String
+)
+
+data class ReportClientResponse(
     var message : String
 )

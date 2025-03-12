@@ -38,7 +38,8 @@ import com.example.androidproject.model.client.ClientWorkStatusRequest
 import com.example.androidproject.model.client.ClientWorkStatusResponse
 import com.example.androidproject.model.client.GetClientsBookingResponse
 import com.example.androidproject.model.client.GetTradesmanBookingResponse
-import com.example.androidproject.model.client.ReportResponse
+import com.example.androidproject.model.client.ReportClientResponse
+import com.example.androidproject.model.client.ReportTradesmanResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.SubmitResumeResponse
 import com.example.androidproject.model.client.TradesmanWorkStatusRequest
@@ -127,13 +128,22 @@ interface ApiService {
     ): Response<BookTradesmanResponse>
 
     @Multipart
-    @POST("/user/client/report/tradesman/{tradesman_Id}")
+    @POST("/user/client/report/tradesman/{tradesmanId}")
     suspend fun reportTradesman(
+        @Part("report_reason") report_reason: RequestBody,
+        @Part("report_details") report_details: RequestBody,
+        @Part report_attachment: MultipartBody.Part, // File upload
+        @Path("tradesmanId") tradesmanId: Int
+    ): Response<ReportTradesmanResponse>
+
+    @Multipart
+    @POST("/user/tradesman/report/client/{clientId}")
+    suspend fun reportClient(
         @Part("report_reason") report_reason: RequestBody,
         @Part("report_details") preferedLocation: RequestBody,
         @Part report_attachment: MultipartBody.Part, // File upload
-        @Path("tradesman_Id") tradesman_Id: Int
-    ): Response<ReportResponse>
+        @Path("clientId") clientId: Int
+    ): Response<ReportClientResponse>
 
     @GET("/user/client/view/tradesman/rating/{tradesmanId}")
     suspend fun getRatingsById(@Path("tradesmanId") resumeId: Int): Response<List<ratingsItem>>
@@ -218,4 +228,6 @@ interface ApiService {
 
     @PUT("/user/tradesman/update/activeStatus")
     suspend fun  updateTradesmanActiveStatus(@Body request: UpdateActiveStatusRequest) : Response<UpdateActiveStatusResponse>
+
+
 }

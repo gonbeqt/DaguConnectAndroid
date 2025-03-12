@@ -9,59 +9,46 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.JsonErrorParser
-import com.example.androidproject.data.preferences.TokenManager
-import com.example.androidproject.model.client.ReportRequest
-import com.example.androidproject.model.client.ReportResponse
-import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel.BookTradesmanState
+import com.example.androidproject.model.client.ReportClientResponse
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 
-class ReportViewModel (private val apiService: ApiService): ViewModel() {
-    private val _reportState = MutableStateFlow<ReportState>(ReportState.Idle)
-    val reportState = _reportState.asStateFlow()
+class ReportClientViewModel(private val apiService: ApiService):ViewModel() {
+    private val _reportClientState = MutableStateFlow<ReportClientState>(ReportClientState.Idle)
+    val reportClientState : StateFlow<ReportClientState> = _reportClientState
 
-    fun report(report_reason: String, report_details: String, report_attachment : Uri, context: Context, tradesman_Id: Int) {
+    fun reportClient( clientId: Int, report_reason: String, report_details: String, report_attachment: Uri,context: Context){
         viewModelScope.launch {
-            _reportState.value = ReportState.Loading
-            try{
+            _reportClientState.value = ReportClientState.Loading
+            try {
                 val reportReason = report_reason.toRequestBody("text/plain".toMediaType())
                 val reportDetails = report_details.toRequestBody("text/plain".toMediaType())
                 val reportAttachment = createMultipartBodyPart(context, report_attachment, "report_attachment")
-                val response = apiService.reportTradesman(
-                    reportReason,
-                    reportDetails,
-                    reportAttachment,
-                    tradesman_Id
-                )
-                if(response.isSuccessful){
-                    val responseBody = response.body()
-                    if(responseBody != null){
-                        _reportState.value = ReportState.Success(responseBody)
-                    }else{
-                        _reportState.value = ReportState.Error("Response body is null")
-                    }
+                val response =apiService.reportClient(reportReason, reportDetails, reportAttachment, clientId)
+                if (response.isSuccessful){
+                    _reportClientState.value = ReportClientState.Success(response.body())
                 }else{
                     val errorJson = response.errorBody()?.string()
                     val errorMessage = JsonErrorParser.extractField(errorJson, "message") ?: "Unknown error"
                     errorJson?.let { Log.d("tester", it) }
                     Log.d("tester", errorMessage)
-                    _reportState.value = ReportState.Error(errorMessage)
+                    _reportClientState.value = ReportClientState.Error(errorMessage)
                 }
-
             }catch (e: Exception){
-                Log.e("ReportViewModel", "Exception: ${e.message}", e)
-                _reportState.value = ReportState.Error("An unexpected error occurred: ${e.message}")
+                _reportClientState.value = ReportClientState.Error("An unexpected error occurred: ${e.message}")
             }
         }
     }
+
     fun resetState() {
-        _reportState.value = ReportState.Idle // Add an idle state
+        _reportClientState.value = ReportClientState.Idle // Add an idle state
     }
+
     private fun createMultipartBodyPart(context: Context, uri: Uri, name: String): MultipartBody.Part {
         val contentResolver = context.contentResolver
         val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
@@ -103,14 +90,11 @@ class ReportViewModel (private val apiService: ApiService): ViewModel() {
         return MultipartBody.Part.createFormData(name, fileName, requestBody)
     }
 
+    sealed class ReportClientState{
+        object Idle: ReportClientState()
+        object Loading: ReportClientState()
+        data class Success(val data: ReportClientResponse?): ReportClientState()
+        data class Error(val message: String): ReportClientState()
 
-
-
-
-    sealed class ReportState {
-        object Idle : ReportState()
-        object Loading : ReportState()
-        data class Success(val data: ReportResponse?): ReportState()
-        data class Error(val message: String): ReportState()
     }
 }

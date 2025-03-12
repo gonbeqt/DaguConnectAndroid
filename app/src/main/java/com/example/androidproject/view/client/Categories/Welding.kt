@@ -77,10 +77,10 @@ import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
 @Composable
-fun Welding(navController: NavController, getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel){
+fun Welding(navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel){
     val weldingList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
 
@@ -229,7 +229,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                                 items(filteredList.size) { index ->
                                     val weldingList = filteredList[index]
                                     if (weldingList.id !in dismissedResumes) { // Filter directly
-                                        WeldingItem(weldingList, navController,reportViewModel){
+                                        WeldingItem(weldingList, navController,reportTradesmanViewModel){
                                             getResumesViewModel.dismissResume(weldingList.id)
                                         }
                                     }
@@ -257,7 +257,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun WeldingItem(welding: resumesItem, navController: NavController,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
+fun WeldingItem(welding: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -272,7 +272,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
         "Safety Concerns",
         "Others"
     )
-    val reportState by reportViewModel.reportState.collectAsState()
+    val reportState by reportTradesmanViewModel.reportState.collectAsState()
     val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
@@ -570,7 +570,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription,reportDocument!!,context, welding.userid)
+                                        reportTradesmanViewModel.report(selectedReason, reasonDescription,reportDocument!!,context, welding.userid)
                                     }
                                 },
                                 modifier = Modifier.size(110.dp, 45.dp),
@@ -584,22 +584,22 @@ fun WeldingItem(welding: resumesItem, navController: NavController,reportViewMod
                             }
                             LaunchedEffect(reportState) {
                                 when(val report = reportState){
-                                    is ReportViewModel.ReportState.Loading -> {
+                                    is ReportTradesmanViewModel.ReportState.Loading -> {
                                         //do nothing
                                     }
-                                    is ReportViewModel.ReportState.Success -> {
+                                    is ReportTradesmanViewModel.ReportState.Success -> {
                                         val responsereport = report.data?.message
                                         Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
 
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                         // Close the dialog
                                         showReportDialog = false
                                     }
-                                    is ReportViewModel.ReportState.Error -> {
+                                    is ReportTradesmanViewModel.ReportState.Error -> {
                                         val errorMessage = report.message
                                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         showReportDialog = true
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                     }
                                     else -> Unit
                                 }

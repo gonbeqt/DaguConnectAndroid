@@ -87,6 +87,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -101,6 +102,7 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
 import kotlinx.coroutines.delay
@@ -113,6 +115,7 @@ fun ProfileTradesman(
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
     updateTradesmanProfileViewModel : UpdateTradesmanProfileViewModel,
+    updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
     LoadingUI :  @Composable () -> Unit, // Add this parameter
     initialTabIndex: Int = 0, // Default to 0 if not provided
 
@@ -151,15 +154,17 @@ fun ProfileTradesman(
         }
     }
 
+    val updateTradesmanActiveStatusState by updateTradesmanActiveStatusViewModel.updateStatusState.collectAsState()
+
 
 
     // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableStateOf(0) }
+    var refreshTrigger by remember { mutableIntStateOf(0) }
 
     // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
-    var isAvailable by remember { mutableStateOf(true) } // State to track availability
+
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
     val tabNames = listOf("Job Profile", "General")
@@ -215,6 +220,7 @@ fun ProfileTradesman(
             isLoading = false // Reset loading state after fetching (or handle errors)
         }
     }
+
 
     Column(
         modifier = modifier
@@ -311,14 +317,15 @@ fun ProfileTradesman(
                     is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
                         // Show loading indicator for initial or ongoing loading
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
+                            LoadingUI()
                         }
                     }
                     is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success -> {
                         // Handle success state
-                        val tradesmanDetails = (viewTradesmanProfilestate as ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success).data
-
-
+                        val isUpdating = updateTradesmanActiveStatusState is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Loading
+                        val tradesmanDetails =profileState.data
+                        var isAvailable by remember { mutableStateOf(tradesmanDetails.isActiveBoolean) } // State to track availability
+                        var previousAvailability by remember { mutableStateOf(isAvailable) } // Track previous state for rollback
                         // Profile Info
                         Column(
                             modifier = Modifier.fillMaxWidth().background(Color.White)
@@ -409,7 +416,7 @@ fun ProfileTradesman(
                                             style = TextStyle(fontSize = 14.sp)
                                         )
                                         Text(
-                                            text = tradesmanDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
+                                            text = tradesmanDetails.phoneNumber ?: "N/A",
                                             color = Color.White,
                                             style = TextStyle(fontSize = 14.sp)
                                         )
@@ -420,8 +427,10 @@ fun ProfileTradesman(
                                                 .height(30.dp)
                                                 .clip(RoundedCornerShape(50.dp))
                                                 .background(Color.White)
-                                                .clickable {
-                                                    isAvailable = !isAvailable // Toggle state on click
+                                                .clickable (enabled = !isUpdating) { // Disable when loading
+                                                    previousAvailability = isAvailable // Store previous state
+                                                    isAvailable = !isAvailable // Optimistic update
+                                                    updateTradesmanActiveStatusViewModel.updateStatusState(isAvailable)
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {
@@ -447,7 +456,22 @@ fun ProfileTradesman(
                                 }
                             }
                         }
-
+// Handle server response
+                        LaunchedEffect(updateTradesmanActiveStatusState) {
+                            when (val updatingStatus = updateTradesmanActiveStatusState) {
+                                is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
+                                    updateTradesmanActiveStatusViewModel.resetState()
+                                    viewTradesmanProfileViewModel.viewTradesmanProfile() // Refresh profile
+                                    Toast.makeText(context, "Status updated successfully", Toast.LENGTH_SHORT).show()
+                                    // isAvailable is already updated optimistically, no need to change unless server disagrees
+                                }
+                                is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
+                                    val errorMessage = updatingStatus.message
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                                else -> Unit
+                            }
+                        }
                         // Tab Selection
                         Column {
                             TabRow(
@@ -532,6 +556,7 @@ fun ProfileTradesman(
 
 
 // Keep the other composables (JobProfile, GeneralTradesmanSettings, SettingsTradesmanScreen) unchanged unless you need specific adjustments.
+
 @Composable
 fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
     var scale by remember { mutableStateOf(1f) }

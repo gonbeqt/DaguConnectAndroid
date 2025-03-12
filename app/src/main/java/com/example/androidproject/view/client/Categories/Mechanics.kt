@@ -77,10 +77,10 @@ import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
 @Composable
-fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewModel, reportViewModel: ReportViewModel) {
+fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel) {
     val mechanicsList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
@@ -226,7 +226,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                 items(filteredList.size) { index ->
                                     val mechanicsList = filteredList[index]
                                     if (mechanicsList != null && mechanicsList.id !in dismissedResumes) {
-                                        MechanicsItem(mechanicsList, navController,reportViewModel){
+                                        MechanicsItem(mechanicsList, navController,reportTradesmanViewModel){
                                             getResumesViewModel.dismissResume(mechanicsList.id)
                                         }
                                     }
@@ -253,7 +253,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
 }
 
 @Composable
-fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
+fun MechanicsItem(mechanics: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -268,7 +268,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
         "Safety Concerns",
         "Others"
     )
-    val reportState by reportViewModel.reportState.collectAsState()
+    val reportState by reportTradesmanViewModel.reportState.collectAsState()
     val context = LocalContext.current
         val windowSize = rememberWindowSizeClass()
         val iconSize = when (windowSize.width) {
@@ -568,7 +568,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription,reportDocument!! ,context,mechanics.userid)
+                                        reportTradesmanViewModel.report(selectedReason, reasonDescription,reportDocument!! ,context,mechanics.userid)
                                     }
                                 },
                                 modifier = Modifier.size(110.dp, 45.dp),
@@ -582,22 +582,22 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
                             }
                             LaunchedEffect(reportState) {
                                 when(val report = reportState){
-                                    is ReportViewModel.ReportState.Loading -> {
+                                    is ReportTradesmanViewModel.ReportState.Loading -> {
                                         //do nothing
                                     }
-                                    is ReportViewModel.ReportState.Success -> {
+                                    is ReportTradesmanViewModel.ReportState.Success -> {
                                         val responsereport = report.data?.message
                                         Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
 
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                         // Close the dialog
                                         showReportDialog = false
                                     }
-                                    is ReportViewModel.ReportState.Error -> {
+                                    is ReportTradesmanViewModel.ReportState.Error -> {
                                         val errorMessage = report.message
                                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         showReportDialog = true
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                     }
                                     else -> Unit
                                 }

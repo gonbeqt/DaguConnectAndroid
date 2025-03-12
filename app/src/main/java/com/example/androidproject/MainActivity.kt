@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -83,7 +82,6 @@ import com.example.androidproject.view.tradesman.TradesmanActiveDetails
 import com.example.androidproject.view.tradesman.TradesmanCancellationDetails
 import com.example.androidproject.view.tradesman.TradesmanDeclinationDetails
 import com.example.androidproject.view.tradesman.TradesmanPendingDetails
-import com.example.androidproject.view.tradesman.UpdateResume
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
 import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.LoginViewModel
@@ -141,7 +139,8 @@ import com.example.androidproject.viewmodel.factories.messeges.GetMessageViewMod
 import com.example.androidproject.viewmodel.factories.notification.GetNotificationViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
-import com.example.androidproject.viewmodel.factories.report.ReportViewModelFactory
+import com.example.androidproject.viewmodel.factories.report.ReportClientViewModelFactory
+import com.example.androidproject.viewmodel.factories.report.ReportTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.GetResumesViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.SubmitResumeViewModelFactory
 import com.example.androidproject.viewmodel.factories.resumes.ViewResumeViewModelFactory
@@ -160,7 +159,8 @@ import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportClientViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -187,8 +187,11 @@ class MainActivity : ComponentActivity() {
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 
-        val reportVMFactory = ReportViewModelFactory(apiService)
-        val reportViewModel = ViewModelProvider(this, reportVMFactory)[ReportViewModel::class.java]
+        val reportTradesmanVMFactory = ReportTradesmanViewModelFactory(apiService)
+        val reportTradesmanViewModel = ViewModelProvider(this, reportTradesmanVMFactory)[ReportTradesmanViewModel::class.java]
+
+        val reportClientVMFactory = ReportClientViewModelFactory(apiService)
+        val reportClientViewModel = ViewModelProvider(this, reportClientVMFactory)[ReportClientViewModel::class.java]
 
         val getClientsBookingVMFactory = GetClientBookingViewModelFactory(apiService)
         val getClientBookingViewModel = ViewModelProvider(this,getClientsBookingVMFactory)[GetClientBookingViewModel::class.java]
@@ -293,14 +296,14 @@ class MainActivity : ComponentActivity() {
         val updateClientProfilePictureViewModelFactory = UpdateClientProfilePictureViewModelFactory(apiService)
         val updateClientProfilePictureViewModel = ViewModelProvider(this, updateClientProfilePictureViewModelFactory)[UpdateClientProfilePictureViewModel::class.java]
 
-        val updateClientProfileAddress = UpdateClientProfileAddressViewModelFactory(apiService)
-        val updateClientProfileAddressViewModelFactory = ViewModelProvider(this, updateClientProfileAddress)[UpdateClientProfileAddressViewModel::class.java]
+        val updateClientProfileAddressVMFactory = UpdateClientProfileAddressViewModelFactory(apiService)
+        val updateClientProfileAddressViewModel = ViewModelProvider(this, updateClientProfileAddressVMFactory)[UpdateClientProfileAddressViewModel::class.java]
 
         val updateTradesmanVMFactory = UpdateTradesmanProfileViewModelFactory(apiService)
         val updateTradesmanProfileViewModel = ViewModelProvider(this, updateTradesmanVMFactory)[UpdateTradesmanProfileViewModel::class.java]
 
-        val UpdateTradesmanActiveStatusVMFactory = UpdateTradesmanActiveStatusViewModelFactory(apiService)
-        val updateTradesmanActiveStatusViewModel = ViewModelProvider(this, UpdateTradesmanActiveStatusVMFactory)[UpdateTradesmanActiveStatusViewModel::class.java]
+        val updateTradesmanActiveStatusVMFactory = UpdateTradesmanActiveStatusViewModelFactory(apiService)
+        val updateTradesmanActiveStatusViewModel = ViewModelProvider(this, updateTradesmanActiveStatusVMFactory)[UpdateTradesmanActiveStatusViewModel::class.java]
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
@@ -376,7 +379,7 @@ class MainActivity : ComponentActivity() {
                                 getResumesViewModel,
                                 modifier = Modifier,
                                 getChatsViewModel,
-                                reportViewModel,
+                                reportTradesmanViewModel,
                                 postJobsViewModel,
                                 getMyJobsViewModel,
                                 getClientProfileViewModel,
@@ -392,6 +395,8 @@ class MainActivity : ComponentActivity() {
                                 updateBookingClientViewModel,
                                 updateTradesmanProfileViewModel,
                                 updateClientProfilePictureViewModel,
+                                updateTradesmanActiveStatusViewModel,
+                                reportClientViewModel,
                                 initialSelectedItem = selectedItem,
                                 initialSelectedTab = selectedTab,
                                 initialSelectedSection = selectedSection,
@@ -469,37 +474,37 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("acrepair") {
-                            ACRepair(navController, getResumesViewModel, reportViewModel)
+                            ACRepair(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("plumbing") {
-                            Plumbing(navController, getResumesViewModel, reportViewModel)
+                            Plumbing(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("carpentry") {
-                            Carpentry(navController, getResumesViewModel, reportViewModel)
+                            Carpentry(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("electrician") {
-                            Electrician(navController, getResumesViewModel, reportViewModel)
+                            Electrician(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("masonry") {
-                            Masonry(navController, getResumesViewModel, reportViewModel)
+                            Masonry(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("cleaning") {
-                            Cleaning(navController, getResumesViewModel, reportViewModel)
+                            Cleaning(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("mechanics") {
-                            Mechanics(navController, getResumesViewModel, reportViewModel)
+                            Mechanics(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("painting") {
-                            Painting(navController, getResumesViewModel, reportViewModel)
+                            Painting(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("roofing") {
-                            Roofing(navController, getResumesViewModel, reportViewModel)
+                            Roofing(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("welding") {
-                            Welding(navController, getResumesViewModel, reportViewModel)
+                            Welding(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("alltradesman") {
-                            AllTradesman(navController, getResumesViewModel, reportViewModel)
+                            AllTradesman(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("changepassword") {
                             ChangePassword(navController, changePasswordViewModel, { LoadingUI() })
@@ -536,7 +541,9 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier,
                                 navController,
                                 getJobsViewModel,
-                                getRecentJobsViewModel
+                                getRecentJobsViewModel,
+                                reportClientViewModel,
+                                { LoadingUI() }
                             )
                         }
                         composable("tradesmanapply/{jobId}") { backStackEntry ->
@@ -571,6 +578,7 @@ class MainActivity : ComponentActivity() {
                                 logoutViewModel,
                                 viewTradesmanProfileViewModel,
                                 updateTradesmanProfileViewModel,
+                                updateTradesmanActiveStatusViewModel,
                                 { LoadingUI() })
                         }
                         composable("manageprofile") {
@@ -607,9 +615,6 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("accountsettingstradesman") {
                             AccountSettingsTradesman(navController)
-                        }
-                        composable("updateresume") {
-                            UpdateResume(navController, updateTradesmanDetailViewModel)
                         }
                         composable("tradesmanpendingdetails") {
                             TradesmanPendingDetails(modifier = Modifier, navController)
