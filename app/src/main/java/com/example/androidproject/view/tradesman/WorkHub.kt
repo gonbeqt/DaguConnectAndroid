@@ -1750,7 +1750,7 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
 
     Card(
         modifier = Modifier
-            .size(cardHeight.first, cardHeight.second)
+            .fillMaxWidth()
             .clickable { }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
