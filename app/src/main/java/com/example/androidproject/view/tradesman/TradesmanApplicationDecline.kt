@@ -41,7 +41,7 @@ import com.example.androidproject.view.theme.myGradient3
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanApplicationDecline(modifier: Modifier = Modifier, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -122,7 +122,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Your application is Pending",
+                            text = "Your application is Declined",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
@@ -457,7 +457,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                                     color = Color.Gray,
                                     text = "Posted on")
                                 Text(fontSize = smallTextSize,
-                                    text = "03-01-2025")
+                                    text = "You")
                             }
                             Row(modifier = Modifier
                                 .fillMaxWidth(),
@@ -478,7 +478,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {}
+                        .clickable {navController.navigate("tradesmanapplicationdeclinedetails")}
                         .background(
                             color = Color.Transparent,
                             shape = RoundedCornerShape(12.dp)
@@ -487,7 +487,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "OK", fontSize = nameTextSize)
+                    Text(text = "Declination Details", fontSize = nameTextSize)
                 }
             }
         }

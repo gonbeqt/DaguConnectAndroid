@@ -41,7 +41,7 @@ import com.example.androidproject.view.theme.myGradient3
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanApplicationActive(modifier: Modifier = Modifier, navController: NavController) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -122,7 +122,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Your application is Pending",
+                            text = "Your application is Active",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
@@ -457,7 +457,7 @@ fun TradesmanApplicationPending(modifier: Modifier = Modifier, navController: Na
                                     color = Color.Gray,
                                     text = "Posted on")
                                 Text(fontSize = smallTextSize,
-                                    text = "03-01-2025")
+                                    text = "You")
                             }
                             Row(modifier = Modifier
                                 .fillMaxWidth(),

@@ -79,6 +79,13 @@ import com.example.androidproject.view.tradesman.TradesmanCompletedDetails
 import com.example.androidproject.view.tradesman.TradesmanJobDecline
 import com.example.androidproject.view.tradesman.TradesmanJobCancelled
 import com.example.androidproject.view.tradesman.TradesmanActiveDetails
+import com.example.androidproject.view.tradesman.TradesmanApplicationActive
+import com.example.androidproject.view.tradesman.TradesmanApplicationCancelDetails
+import com.example.androidproject.view.tradesman.TradesmanApplicationCancelled
+import com.example.androidproject.view.tradesman.TradesmanApplicationCompleted
+import com.example.androidproject.view.tradesman.TradesmanApplicationDecline
+import com.example.androidproject.view.tradesman.TradesmanApplicationDeclineDetails
+import com.example.androidproject.view.tradesman.TradesmanApplicationPending
 import com.example.androidproject.view.tradesman.TradesmanCancellationDetails
 import com.example.androidproject.view.tradesman.TradesmanDeclinationDetails
 import com.example.androidproject.view.tradesman.TradesmanPendingDetails
@@ -636,6 +643,28 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("tradesmanjobdecline") {
                             TradesmanJobDecline(modifier = Modifier, navController)
+                        }
+
+                        composable("tradesmanapplicationpending") {
+                            TradesmanApplicationPending(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanapplicationdecline") {
+                            TradesmanApplicationDecline(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanapplicationactive") {
+                            TradesmanApplicationActive(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanapplicationdeclinedetails") {
+                            TradesmanApplicationDeclineDetails(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanapplicationcompleted") {
+                            TradesmanApplicationCompleted(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanapplicationcancelled") {
+                            TradesmanApplicationCancelled(modifier = Modifier, navController)
+                        }
+                        composable("tradesmanapplicationcanceldetails") {
+                            TradesmanApplicationCancelDetails(modifier = Modifier, navController)
                         }
 
 
