@@ -46,6 +46,12 @@ data class JobApplicationData(
     @SerializedName("qualification_summary")
     val qualificationSummary: String,
     val status: String,
+    @SerializedName("cancelled_reason")
+    val cancelledReason: String?,
+    @SerializedName("cancelled_by")
+    val cancelledBy: String,
+    @SerializedName("updated_at")
+    val updatedAt: String,
     @SerializedName("created_at")
     val createdAt: String
 )
@@ -95,6 +101,8 @@ data class JobApplicantData(
     @SerializedName("qualification_summary")
     val qualificationSummary: String,
     val status: String,
+    @SerializedName("updated_at")
+    val updatedAt: String,
     @SerializedName("created_at")
     val createdAt: String
 )
@@ -132,6 +140,8 @@ data class ViewJobApplicationData(
     val cancelledReason: String?,
     @SerializedName("cancelled_by")
     val cancelledBy: String?,
+    @SerializedName("updated_at")
+    val updatedAt: String,
     @SerializedName("created_at")
     val createdAt: String
 )

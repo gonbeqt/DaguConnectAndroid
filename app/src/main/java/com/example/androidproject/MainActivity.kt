@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -152,6 +153,7 @@ class MainActivity : ComponentActivity() {
         TokenManager.init(this)
         AccountManager.init(this)
 
+
         // Determine the start destination based on token and user role
         val startDestination = when {
             !isShown -> "landing_page"
@@ -265,9 +267,10 @@ class MainActivity : ComponentActivity() {
         val putJobViewModelFactory = PutJobViewModelFactory(apiService)
         val putJobViewModel = ViewModelProvider(this, putJobViewModelFactory)[PutJobViewModel::class.java]
 
-        val chatId = intent.extras?.getInt("chatId") ?: 0
-        val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId)
-        val getMessageViewModel = ViewModelProvider(this, getMessagesViewModelFactory)[GetMessagesViewModel::class.java]
+//        val chatId = intent.extras?.getInt("chatId") ?: 0
+//
+//        val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId)
+//        val getMessageViewModel = ViewModelProvider(this, getMessagesViewModelFactory)[GetMessagesViewModel::class.java]
 
         val updateClientProfilePictureViewModelFactory = UpdateClientProfilePictureViewModelFactory(apiService)
         val updateClientProfilePictureViewModel = ViewModelProvider(this, updateClientProfilePictureViewModelFactory)[UpdateClientProfilePictureViewModel::class.java]
@@ -280,6 +283,7 @@ class MainActivity : ComponentActivity() {
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
+
         val initialMessages = listOf(
             Message("Hello!", true),              // Sent (right)
             Message("Hi, how are you?", false),   // Received (left)
@@ -444,10 +448,19 @@ class MainActivity : ComponentActivity() {
                     composable("canceljobapplicationsdetails") {
                         CancelledJobApplicationDetails(navController, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
                     }
-                    composable("messaging"){
-                        MessagingScreen(initialMessages,navController)
-                    }
+                    composable("messaging/{chatId}/{receiverId}/{receipientName}/{receipientProfile}") { backStackEntry ->
+                        val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
+                        val receiverId = backStackEntry.arguments?.getString("receiverId")?.toIntOrNull() ?: 0
+                        val receipientName = backStackEntry.arguments?.getString("receipientName") ?: ""
+                        val receipientProfile = backStackEntry.arguments?.getString("receipientProfile") ?: ""
+                        val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId)
+                        val getMessageViewModel = ViewModelProvider(
+                            LocalViewModelStoreOwner.current!!,
+                            getMessagesViewModelFactory
+                        )[GetMessagesViewModel::class.java]
 
+                        MessagingScreen(getMessageViewModel, receiverId, chatId, receipientName, receipientProfile, navController)
+                    }
                     //Tradesman Routes
                     composable("hometradesman") {
                         HomeTradesman(modifier = Modifier,navController, getJobsViewModel, getRecentJobsViewModel)

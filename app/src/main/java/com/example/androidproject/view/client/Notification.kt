@@ -23,37 +23,13 @@ import com.example.androidproject.ViewModelSetups.Companion.getDateOnly
 import com.example.androidproject.ViewModelSetups.Companion.isNotToday
 import com.example.androidproject.ViewModelSetups.Companion.isToday
 import com.example.androidproject.model.Notification
-import com.example.androidproject.view.NotificationItem
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 
 @Composable
 fun NotificationScreen(navController: NavController, getNotification: GetNotificationViewModel) {
     val notifications = getNotification.getNotificationPagingData.collectAsLazyPagingItems()
 
-    // Filter with additional logging
-    val todayNotifications = notifications.itemSnapshotList?.filter { item ->
-        Log.d("NotificationScreen", "Processing item: $item")
-        item?.createdAt?.let { createdAt ->
-            val result = isToday(createdAt)
-            Log.d("NotificationScreen", "isToday result for $createdAt: $result")
-            result
-        } == true
-    } ?: emptyList()
-
-    val previousNotifications = notifications.itemSnapshotList?.filter { item ->
-        Log.d("NotificationScreen", "Processing item: $item")
-        item?.createdAt?.let { createdAt ->
-            val result = isNotToday(createdAt)
-            Log.d("NotificationScreen", "isNotToday result for $createdAt: $result")
-            result
-        } == true
-    } ?: emptyList()
-
-    Log.d("NotificationScreen", "Today Notifications: $todayNotifications")
-
-    Log.d("NotificationScreen", "Previous Notifications: $previousNotifications")
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(notifications) {
         getNotification.refreshNotification()
     }
 
@@ -74,8 +50,6 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
 
         Spacer(modifier = Modifier.height(8.dp))
 
-
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,14 +59,11 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
-            if (todayNotifications != null) {
-                items(todayNotifications.size) { index ->
-                    val today = todayNotifications[index]
-                    if (today != null) {
-                        Log.d("NotificationScreen", "Today Notification: ${todayNotifications}")
-                        NotificationCardToday(today)
-                    }
+            items(notifications.itemCount) { index ->
+                val notification = notifications[index]
+                if (notification != null) {
+                    NotificationCardToday(notification)
+                    Log.d("NotificationScreen", "Notification Title: ${notification.notificationTitle}")
                 }
             }
         }

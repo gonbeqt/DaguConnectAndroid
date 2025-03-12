@@ -22,6 +22,8 @@ import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
+import com.example.androidproject.model.PostMessage
+import com.example.androidproject.model.PostMessageResponse
 import com.example.androidproject.model.UpdateAddress
 import com.example.androidproject.model.UpdateAddressResponse
 import com.example.androidproject.model.UpdateJob
@@ -156,7 +158,7 @@ interface ApiService {
     suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicantsData>
 
     @GET("/user/message/{chatId}")
-    suspend fun getConversation(@Path("chatId") chatId: Int, @Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<List<GetMessages>>
+    suspend fun getConversation(@Path("chatId") chatId: Int, @Query("page") page: Int = 1, @Query("limit") limit: Int = 20): Response<GetMessages>
 
     @GET("/user/tradesman/getResume/Details")
     suspend fun getTradesmanResume(): Response<viewResume>
@@ -206,4 +208,6 @@ interface ApiService {
     @POST("/user/tradesman/update/profile")
     suspend fun updateTradesmanProfile(@Part profilePic: MultipartBody.Part): Response<UpdateTradesmanProfileResponse>
 
+    @POST("/user/message/send")
+    suspend fun sendMessage(@Body request: PostMessage): Response<PostMessageResponse>
 }

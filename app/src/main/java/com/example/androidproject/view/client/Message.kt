@@ -1,5 +1,7 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -34,6 +36,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -48,6 +52,7 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.Chats
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.extras.LoadingUI
 
 
@@ -59,6 +64,11 @@ fun MessageScreen(
 ) {
     val chatState = getChatViewModel.getChatsPagingData.collectAsLazyPagingItems()
     val loadState = chatState.loadState
+
+    LaunchedEffect(Unit) {
+        getChatViewModel.refreshChats()
+    }
+
     when {
         // Initial loading state
         loadState.refresh is LoadState.Loading && chatState.itemCount == 0 -> {
@@ -141,12 +151,19 @@ fun MessageScreen(
 @Composable
 fun ChatListItem(chats: Chats,navController: NavController) {
     val date = ViewModelSetups.formatDateTime(chats.createdAt)
-
+    var receiverId = 0
+    receiverId = if (AccountManager.getAccount()?.id != chats.userId1){
+        chats.userId1
+    } else {
+        chats.userId2
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .clickable { navController.navigate("messaging") },
+            .clickable {
+                val encodedProfilePicture = Uri.encode(chats.profilePicture)
+                navController.navigate("messaging/${chats.id}/${receiverId}/${chats.fullName}/${encodedProfilePicture}")  },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -221,7 +238,8 @@ fun MessageTopSection(navController: NavController) {
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
-                modifier = Modifier.size(35.dp)
+                modifier = Modifier
+                    .size(35.dp)
                     .clickable { navController.navigate("notification") }
             )
         }

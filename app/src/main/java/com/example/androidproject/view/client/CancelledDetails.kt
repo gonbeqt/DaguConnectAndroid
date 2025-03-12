@@ -189,7 +189,6 @@ fun ClientDetails() {
             LabelValuePair(label = "Reason", value = "Change of mind")
         }
     }
-
 }
 
 

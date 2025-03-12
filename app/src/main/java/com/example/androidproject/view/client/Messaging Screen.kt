@@ -1,10 +1,12 @@
 package com.example.androidproject.view.client
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
@@ -17,19 +19,72 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.model.Conversation
+import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
+import org.json.JSONObject
 
 // Data class to represent a message with a sender/receiver flag
 data class Message(val text: String, val isSent: Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessagingScreen(initialMessages: List<Message> = emptyList(),navController: NavController) {
+fun MessagingScreen(getMessages: GetMessagesViewModel, receiverId: Int, chatId:Int, receipientName: String, receipientProfile: String, navController: NavController) {
     // Mutable state to hold the list of messages
-    val messages = remember { mutableStateListOf(*initialMessages.toTypedArray()) }
+    val pagingMessages = getMessages.messagesPagingData.collectAsLazyPagingItems()
+    val newMessages by getMessages.newMessages.collectAsState()
+    val userId = AccountManager.getAccount()?.id
+    val webSocketMessages by WebSocketManager.incomingMessages.collectAsState()
+    val listState = rememberLazyListState()
+
+    // Combine paged messages and real-time messages
+    val allMessages by remember {
+        derivedStateOf {
+            val paged = pagingMessages.itemSnapshotList.items
+            val new = newMessages + webSocketMessages.mapNotNull { json ->
+                try {
+                    val obj = JSONObject(json)
+                    // Check if it's a message with "type" and "data"
+                    if (obj.has("type") && obj.getString("type") == "message") {
+                        val data = obj.getJSONObject("data")
+                        Conversation(
+                            id = data.getInt("id"),
+                            userId = data.getString("user_id").toInt(),
+                            receiverId = data.getString("receiver_id").toInt(),
+                            chatId = data.optInt("chat_id", chatId),
+                            message = data.getString("message"),
+                            isRead = data.getInt("is_read"),
+                            createdAt = data.getString("created_at")
+                        )
+                    } else {
+                        // Skip non-message types like "authenticated"
+                        null
+                    }
+                } catch (e: Exception) {
+                    Log.e("MessagingScreen", "Error parsing WebSocket message: $json", e)
+                    null
+                }
+            }
+            paged + new
+        }
+    }
+
+    LaunchedEffect(allMessages.size) {
+        if (allMessages.isNotEmpty()) {
+            listState.animateScrollToItem(0) // Scroll to the bottom (reverseLayout = true)
+        }
+    }
+
+    // Connect to WebSocket when the screen is composed
+    LaunchedEffect(Unit) {
+        Log.d("MessagingScreen", "profile: $receipientProfile")
+        WebSocketManager.connect(userId.toString())
+        getMessages.refreshMessages()
+    }
 
     Scaffold(
         modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues()),
@@ -45,21 +100,26 @@ fun MessagingScreen(initialMessages: List<Message> = emptyList(),navController: 
                                 .clickable { navController.navigate("message_screen") }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
+                        AsyncImage(
+                            model = receipientProfile,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .padding(end = 8.dp)
+                        )
                         Text(
-                            text = "Tradesman's Name",
+                            text = receipientName,
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
         bottomBar = {
             BottomInputBar(onSend = { newMessage ->
-                // Add the new message as "Sent" (isSent = true)
-                messages.add(Message(newMessage, true))
+                WebSocketManager.sendMessage(userId.toString(), receiverId.toString(), newMessage) // Receiver ID hardcoded as "2" for now
+                getMessages.addLocalMessage(newMessage, receiverId, chatId)
             })
         }
     ) { padding ->
@@ -68,28 +128,37 @@ fun MessagingScreen(initialMessages: List<Message> = emptyList(),navController: 
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (messages.isEmpty()) {
+            if (allMessages.isEmpty()) {
                 Text(
                     text = "Start a conversation",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    ),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp, color = Color.Gray),
                     modifier = Modifier.align(Alignment.Center),
                     textAlign = TextAlign.Center
                 )
             } else {
-                Column(
+                LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState()) // Enable scrolling
-                        .padding(8.dp)
+                        .padding(8.dp),
+                    reverseLayout = true // Messages load from bottom to top
                 ) {
-                    messages.forEach { message ->
-                        MessageComposable(message = message.text, isSent = message.isSent)
+                    items(allMessages.size) { index ->
+                        val message = allMessages[allMessages.size - 1 - index]
+                        MessageComposable(
+                            message = message.message,
+                            isSent = userId?.toInt() == message.userId
+                        )
                     }
                 }
             }
+        }
+    }
+
+    // Cleanup on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            WebSocketManager.disconnect()
         }
     }
 }
@@ -167,37 +236,5 @@ fun MessageComposable(message: String, isSent: Boolean) {
                 fontSize = 16.sp
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MessagingScreenPreview() {
-    MessagingScreen(
-        initialMessages = listOf(
-            Message("Hello!", true),              // Sent (right)
-            Message("Hi, how are you?", false),   // Received (left)
-            Message("I'm doing well!", true),     // Sent (right)
-            Message("Great to hear!", false),     // Received (left)
-            Message("I have a lot to say...", false), // Received (left)
-            Message("Like, a lot!", false),       // Received (left)
-            Message("Keep going!", false),        // Received (left)
-            Message("Cool, I'm listening!", true) // Sent (right)
-        ),
-        navController = NavController(LocalContext.current)
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MessageComposablePreview() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        MessageComposable(message = "Hi there!", isSent = false) // Receiver (left)
-        MessageComposable(message = "Hey, how's it going?", isSent = true) // Sender (right)
     }
 }

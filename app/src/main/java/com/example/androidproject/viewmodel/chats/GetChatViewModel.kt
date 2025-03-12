@@ -31,10 +31,6 @@ class GetChatViewModel(private val apiService: ApiService) : ViewModel() {
         ).flow.cachedIn(viewModelScope)
 
     fun refreshChats() {
-        refreshTrigger.value = Unit
-    }
-
-    fun invalidatePagingSource() {
         _pagingSource.value?.invalidate()
     }
 }

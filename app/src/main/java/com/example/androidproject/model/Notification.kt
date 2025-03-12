@@ -27,7 +27,7 @@ data class Notification(
     @SerializedName("report_id")
     val reportId: Int?,
     @SerializedName("is_read")
-    val isRead: Boolean,
+    val isRead: Int,
     @SerializedName("created_at")
     val createdAt: String
 )

@@ -1705,7 +1705,7 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
 //Design For Items
 @Composable
 fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
 
     val windowSize = rememberWindowSizeClass()
@@ -1770,7 +1770,7 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Applied on $createdAt",
+                        text = "Applied on $updatedAt",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
@@ -1799,7 +1799,7 @@ fun PendingMySubmissionsTradesmanItem(
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
     onJobCancelled: () -> Unit
 ) {
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val putState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
     val windowSize = rememberWindowSizeClass()
@@ -1877,7 +1877,7 @@ fun PendingMySubmissionsTradesmanItem(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Applied at: $createdAt",
+                            text = "Applied at: $updatedAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -1938,7 +1938,7 @@ fun PendingMySubmissionsTradesmanItem(
 @Composable
 fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
 
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val putJobState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
     var cancelledClicked by remember { mutableStateOf(false) }
@@ -2031,7 +2031,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Applied on: $createdAt",
+                            text = "Active since: $updatedAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -2101,7 +2101,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
 }
 @Composable
 fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, ) {
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -2167,7 +2167,7 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Applied on: $createdAt",
+                            text = "Declined on: $updatedAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -2195,7 +2195,9 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                         modifier = Modifier
                             .fillMaxWidth()
 
-                            .clickable { }
+                            .clickable {
+                                navController.navigate("tradesmanapply/${myJob.jobId}")
+                            }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -2207,13 +2209,13 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                         Text(text = "Apply Again", fontSize = 14.sp)
                     }
                 }
-                }
             }
+        }
     }
 }
 @Composable
 fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -2279,7 +2281,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Applied on: $createdAt",
+                            text = "Completed on: $updatedAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -2294,40 +2296,6 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                             color = Color.Black,
                             fontSize = 14.sp
                         )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable {}
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Apply Again", fontSize = 16.sp)
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clickable { }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(text = "Rate", color = Color(0xFFECAB1E), fontSize = 16.sp)
                     }
                 }
             }
@@ -2335,10 +2303,9 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
     }
 }
 
-
 @Composable
 fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -2406,18 +2373,18 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Applied on: $createdAt",
+                            text = "Cancelled on: $updatedAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
                         Text(
-                            text = "Due-Date: $deadline",
+                            text = "Cancelled reason: ${myJob.cancelledReason}",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Address: ${myJob.jobAddress}",
+                            text = "Cancelled by: ${myJob.cancelledBy}",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -2434,7 +2401,9 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { }
+                            .clickable {
+                                navController.navigate("tradesmanapply/${myJob.jobId}")
+                            }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -2446,7 +2415,6 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                         Text(text = "Apply Again", fontSize = 14.sp)
                     }
                 }
-
             }
         }
     }
