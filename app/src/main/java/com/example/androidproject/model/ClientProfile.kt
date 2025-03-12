@@ -10,6 +10,8 @@ data class ClientProfile(
     val fullname: String,
     val email: String,
     val address: String,
+    @SerializedName("phone_number")
+    val phoneNumber: String,
     @SerializedName("profile_picture")
     val profilePicture: String,
     @SerializedName("created_at")
@@ -22,7 +24,9 @@ data class UpdateProfilePictureResponse(
 )
 
 data class UpdateAddress(
-    val address: String
+    val address: String,
+    @SerializedName("phone_number")
+    val phoneNumber: String
 )
 
 data class UpdateAddressResponse(

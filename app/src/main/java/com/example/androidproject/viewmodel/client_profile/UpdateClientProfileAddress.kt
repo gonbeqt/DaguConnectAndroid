@@ -15,11 +15,11 @@ class UpdateClientProfileAddressViewModel(private val apiService: ApiService): V
         UpdateClientProfileAddressState.Idle)
     val updateClientProfileState: StateFlow<UpdateClientProfileAddressState> = _updateClientProfileState
 
-    fun updateClientProfile(address: String) {
+    fun updateClientProfile(address: String,phoneNumber : String) {
         viewModelScope.launch {
             _updateClientProfileState.value = UpdateClientProfileAddressState.Loading
-            val data  = UpdateAddress(address)
-            val put = apiService.updateClientAddress(data)
+            val data  = UpdateAddress(address,phoneNumber)
+            val put = apiService.updateClientDetails(data)
             try {
                 if (put.isSuccessful) {
                     _updateClientProfileState.value = UpdateClientProfileAddressState.Success(put)

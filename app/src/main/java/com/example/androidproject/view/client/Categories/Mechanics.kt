@@ -1,7 +1,10 @@
 package com.example.androidproject.view.client.Categories
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -281,6 +284,11 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController,reportVie
             WindowType.MEDIUM -> 16.sp
             WindowType.LARGE -> 18.sp
         }
+    var screenShot by remember { mutableStateOf<Uri?>(null) }
+
+    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { screenShot = it } }
         Card(
             modifier = Modifier
                 .fillMaxWidth()

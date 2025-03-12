@@ -1,14 +1,19 @@
 package com.example.androidproject.view.tradesman
 
 import LogoutViewModel
+import android.Manifest
+import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 
 import android.net.Uri
 import android.os.Environment
 
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,11 +30,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -81,6 +89,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
@@ -166,6 +176,35 @@ fun ProfileTradesman(
 
         }
     }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val imagesGranted = permissions[Manifest.permission.READ_MEDIA_IMAGES] == true
+        val userSelectedGranted = permissions[Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED] == true
+
+        when {
+            imagesGranted -> {
+                // Full access granted, launch your image picker
+                imageLauncher.launch("image/*")
+            }
+            userSelectedGranted -> {
+                // Partial access granted, handle selected media
+                imageLauncher.launch("image/*") // System picker will show only selected media
+            }
+            else -> {
+                val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+                    context as Activity,
+                    Manifest.permission.READ_MEDIA_IMAGES
+                )
+                if (shouldShowRationale) {
+                    Toast.makeText(context, "Permission is required to select a profile picture", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, "Permission denied. Enable it in Settings.", Toast.LENGTH_LONG).show()
+                    val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = Uri.parse("package:${context.packageName}")
+                    context.startActivity(intent)
+                }
+            }
+        }
+    }
 
     // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
@@ -181,6 +220,8 @@ fun ProfileTradesman(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
 
         Row(
@@ -318,7 +359,18 @@ fun ProfileTradesman(
                                                 .background(Color.Green)
                                                 .align(Alignment.BottomEnd)
                                                 .clickable {
-                                                    imageLauncher.launch("image/*")
+                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+                                                        permissionLauncher.launch(arrayOf(
+                                                            Manifest.permission.READ_MEDIA_IMAGES,
+                                                            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                                                        ))
+                                                    } else {
+                                                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                                                            imageLauncher.launch("image/*")
+                                                        } else {
+                                                            permissionLauncher.launch(arrayOf(Manifest.permission.READ_MEDIA_IMAGES))
+                                                        }
+                                                    }
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {

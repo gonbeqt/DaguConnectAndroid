@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,6 +90,9 @@ fun MainScreen(
     updateBookingClientViewModel: UpdateBookingClientViewModel,
     updateTradesmanProfileViewModel: UpdateTradesmanProfileViewModel,
     updateClientProfilePictureViewModel: UpdateClientProfilePictureViewModel,
+    initialSelectedItem: Int = 0,
+    initialSelectedTab: Int = 0,
+    initialSelectedSection: Int = 0,
     LoadingUI: @Composable () -> Unit
 ) {
     val role = AccountManager.getAccount()?.isClient
@@ -98,19 +102,22 @@ fun MainScreen(
         if (role == true) {
             NavigationItem("Hiring Hub", Icons.Default.ListAlt)
         } else {
-            NavigationItem("Work Hub", Icons.Default.ListAlt)
+            NavigationItem("Job Hub", Icons.Default.ListAlt)
         },
         NavigationItem("Schedule", Icons.Default.CalendarMonth),
         NavigationItem("Message", Icons.Default.Message),
         NavigationItem("Profile", Icons.Default.Person)
     )
 
-    val arguments = navController.currentBackStackEntry?.arguments
-    val initialSelectedItem = arguments?.getInt("selectedItem") ?: 0
-    val initialSelectedTab = arguments?.getInt("selectedTab") ?: 0
 
-    var selectedItem by remember { mutableStateOf(initialSelectedItem) }
-    var selectedTab by remember { mutableStateOf(initialSelectedTab) } // Track selectedTab locally
+    // Lift the selectedSection state up
+    var selectedSection by remember { mutableIntStateOf(initialSelectedSection) }
+
+
+
+    var selectedItem by remember { mutableIntStateOf(initialSelectedItem) }
+
+    var selectedTab by remember { mutableIntStateOf(initialSelectedTab) } // Track selectedTab locally
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val selectedTabState = savedStateHandle?.getLiveData<Int>("selectedTab")?.observeAsState()
     val observedSelectedTab = selectedTabState?.value ?: initialSelectedTab
@@ -124,11 +131,16 @@ fun MainScreen(
             savedStateHandle?.remove<Int>("selectedTab")
         }
     }
+    // Log the selected section and tab for debugging
+    LaunchedEffect(selectedSection, selectedTab) {
+        Log.d("MainScreen", "Selected Section: $selectedSection, Selected Tab: $selectedTab")
+    }
 
     // Reset selectedTab to 0 when BookingsScreen is selected
     LaunchedEffect(selectedItem) {
         if (selectedItem == 1) { // 1 corresponds to the BookingsScreen
             selectedTab = 0 // Reset to the AllItems screen
+            selectedSection= 0
         }
     }
 
@@ -197,6 +209,7 @@ fun MainScreen(
             modifier = Modifier.padding(innerPadding),
             selectedItem,
             selectedTab, // Pass the local selectedTab
+            selectedSection,
             navController,
             getJobsViewModel,
             logoutViewModel,
@@ -228,6 +241,7 @@ fun ContentScreen(
     modifier: Modifier = Modifier,
     selectedItem: Int,
     selectedTab: Int, // Add selectedTab parameter
+    selectedSection: Int, // Add selectedSection parameter
     navController: NavController,
     getJobsViewModel: GetJobsViewModel,
     logoutViewModel: LogoutViewModel,
@@ -256,7 +270,7 @@ fun ContentScreen(
     if (role == true) {
         when (selectedItem) {
             0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportViewModel)
-            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel, selectedTab)
+            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel, selectedTab,selectedSection)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
             4 -> ProfileScreen(
@@ -274,7 +288,7 @@ fun ContentScreen(
     } else {
         when (selectedItem) {
             0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel)
-            1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,selectedTab)
+            1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,selectedTab,  selectedSection )
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
             4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,LoadingUI,selectedTab)

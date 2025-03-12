@@ -118,7 +118,7 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
 
 
                             Text(
-                                text = "Bookings Details",
+                                text = "Booking Details",
                                 fontSize = 24.sp,
                                 color = Color.Black,
                                 textAlign = TextAlign.Left,

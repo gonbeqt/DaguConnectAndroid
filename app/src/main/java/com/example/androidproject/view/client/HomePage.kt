@@ -1,8 +1,16 @@
 package com.example.androidproject.view.client
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +44,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -58,6 +67,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -66,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -76,6 +87,8 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient2
+import com.example.androidproject.view.tradesman.UploadField
+import com.example.androidproject.view.tradesman.openFile
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
@@ -552,8 +565,16 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
+    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+
+
+    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { screenShot = it } }
+
+    // Permission launcher for storage access
 
 
     LaunchedEffect(showReportDialog) {
@@ -561,6 +582,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             selectedIndex = -1
             otherReason = ""
             reasonDescription = ""
+            screenShot = null
         }
     }
     Card(
@@ -779,6 +801,19 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                     }
                                 }
                             }
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = screenShot,
+                                fileType = "image",
+                                onUploadClick = {
+                                    screenshotPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    screenShot?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
 
                             OutlinedTextField(
                                     value = reasonDescription,
@@ -878,3 +913,76 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         }
     }
 
+@Composable
+fun UploadFieldScreenShot(label: String, uri: Uri?, fileType: String = "image", onUploadClick: () -> Unit, onViewClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+            .padding(top = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            Modifier
+                .clickable { if (uri != null) onViewClick() }
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${uri?.lastPathSegment ?: "No file uploaded"}",
+                fontSize = 14.sp,
+                color = if (uri != null) Color.Blue else Color.Gray
+            )
+            if (uri != null) {
+                Icon(
+                    imageVector = Icons.Default.OpenInNew,
+                    contentDescription = "View File",
+                    tint = Color.Blue,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .clickable { onUploadClick() }
+                .background(Color(0xFF3E5CE1), RoundedCornerShape(4.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.upload_ic),
+                    contentDescription = "Add File",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Add File", fontSize = 10.sp, color = Color.White)
+            }
+        }
+    }
+    Text(
+        text = "Accepted file types: ${if (fileType == "image") ".jpg, .jpeg, .png" else ".pdf"}",
+        fontStyle = FontStyle.Italic,
+        fontSize = 10.sp,
+        color = Color.Gray,
+        modifier = Modifier.padding(start = 18.dp)
+    )
+}
+fun openScreenShot(context: Context, uri: Uri) {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, context.contentResolver.getType(uri))
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    try {
+        context.startActivity(intent)
+        Log.d("openFile", "Attempting to open URI: $uri")
+
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(context, "No app available to open this file", Toast.LENGTH_SHORT).show()
+    }
+}

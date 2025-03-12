@@ -138,7 +138,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     contentDescription = "Arrow Back",
                                     Modifier.clickable ( indication = null,
                                         interactionSource = remember { MutableInteractionSource() }
-                                    ) { navController.popBackStack() }
+                                    ) { navController.navigate("main_screen") }
                                         .padding(16.dp)
                                     ,
                                     tint = Color.White

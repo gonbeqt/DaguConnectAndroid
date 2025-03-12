@@ -63,7 +63,7 @@ dependencies {
     implementation ("org.json:json:20231013")
     implementation ("androidx.paging:paging-runtime-ktx:3.2.1")
     implementation ("androidx.paging:paging-compose:3.2.1")
-
+    implementation ("androidx.core:core-ktx:1.12.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
     //livedata
     implementation("androidx.compose.runtime:runtime-livedata:1.5.3")
@@ -75,7 +75,7 @@ dependencies {
     //Firebase Cloud Messaging
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
 
-
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0") // Check for the latest version
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

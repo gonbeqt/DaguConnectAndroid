@@ -47,7 +47,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
             is ChangePasswordViewModel.ChangePassState.Success->{
                 changePassword.resetState()
                 Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
-                // Navigate to the "login" screen and clear the back stack
+                // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=1") {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
@@ -90,7 +90,9 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.popBackStack() }
+                                .clickable {
+                                    navController.navigate("main_screen?selectedItem=4&selectedTab=1") // or whatever your default route is
+                                   }
                                 .padding(16.dp),
                             tint = Color.Black
                         )
@@ -130,8 +132,8 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                     ) {
                         // Old Password Input
                         OutlinedTextField(
-                            value = oldPassword,
-                            onValueChange = { oldPassword = it },
+                            value = oldPassword.trim(),
+                            onValueChange = { oldPassword= it },
                             label = { Text("Old Password") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             visualTransformation = if (oldPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -151,7 +153,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
 
                         // New Password Input
                         OutlinedTextField(
-                            value = newPassword,
+                            value = newPassword.trim(),
                             onValueChange = {
                                 newPassword = it
                                 lengthError = if (it.length < 8) "Password must be at least 8 characters" else null
@@ -185,7 +187,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
 
                         // Confirm Password Input
                         OutlinedTextField(
-                            value = confirmPassword,
+                            value = confirmPassword.trim(),
                             onValueChange = {
                                 confirmPassword = it
                                 passwordError = if (newPassword != it && it.isNotEmpty()) "Passwords do not match" else null

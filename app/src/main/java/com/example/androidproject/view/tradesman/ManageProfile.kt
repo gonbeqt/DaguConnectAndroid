@@ -1,5 +1,6 @@
 package com.example.androidproject.view.tradesman
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,11 +10,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -51,24 +55,53 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanDetailViewModel
 import com.google.accompanist.flowlayout.FlowRow
 
 
 @Composable
-fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
+fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,updateTradesmanDetailViewModel :UpdateTradesmanDetailViewModel){
+    val updateDetailState by updateTradesmanDetailViewModel.updateTradesmanDetailState.collectAsState()
     var selectedLocation by remember { mutableStateOf("Select location") }
-    var estimatedRate by remember { mutableStateOf(TextFieldValue("₱")) }
-    var aboutMe by remember {
-        mutableStateOf(
-            TextFieldValue("")
-        )
+    var estimatedRate by remember { mutableStateOf("") } // Changed to String for simplicity
+    var aboutMe by remember { mutableStateOf("")}
+    val context = LocalContext.current
+
+    LaunchedEffect(updateDetailState) {
+        when(val updateDetails = updateDetailState){
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Loading-> {
+                //loading
+            }
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Success->{
+                Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
+                updateTradesmanDetailViewModel.resetState()
+                // Navigate to the "profile" screen and clear the back stack
+                navController.navigate("main_screen?selectedItem=4&selectedTab=0") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+
+            }
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Error -> {
+                val error = updateDetails.message
+                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                updateTradesmanDetailViewModel.resetState()
+            }
+            else -> Unit
+        }
     }
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
         // tob bar
         Row(
@@ -81,7 +114,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
             Icon(
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .clickable{navController.navigate("profiletradesman")},
+                    .clickable{  navController.navigate("main_screen?selectedItem=4&selectedTab=0") },
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
                 tint = Color.Black
@@ -193,33 +226,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
                 }
             }
 
-            item {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(text = "About Me:", fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.DarkGray)
 
-                    // textfield with placeholder
-                    BasicTextField(
-                        value = aboutMe,
-                        onValueChange = { aboutMe = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(10.dp),
-                        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                        decorationBox = { innerTextField ->
-                            if (aboutMe.text.isEmpty()) {
-                                Text(
-                                    text = "Example: I'm a licensed plumber with over 7 years of experience handling everything from leak repairs to full plumbing system installations.",
-                                    fontSize = 16.sp,
-                                    color = Color.Gray
-                                )
-                            }
-                            innerTextField()
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                     Text(text = "Preferred location:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
@@ -249,32 +256,61 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController){
                             .padding(12.dp)
                     ) {
                         // Placeholder
-                        if (estimatedRate.text == "₱") {
+                        if (estimatedRate.isEmpty()) {
                             Text("₱ Enter amount", color = Color.Gray, fontSize = 16.sp)
                         }
 
                         BasicTextField(
                             value = estimatedRate,
                             onValueChange = { newValue ->
-                                val text = newValue.text
-
-                                if (text.isEmpty() || text == "₱") {
-                                    estimatedRate = TextFieldValue("₱", TextRange(1)) // keeps cursor after ₱
-                                } else if (!text.startsWith("₱")) {
-                                    estimatedRate = TextFieldValue("₱" + text.filter { it.isDigit() }, TextRange(text.length + 1))
-                                } else {
-                                    estimatedRate = newValue.copy(selection = TextRange(newValue.text.length)) // keeps cursor at the end
-                                }
+                                // Allow only digits
+                                estimatedRate = newValue.filter { it.isDigit() }
                             },
-                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp)
+                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                            modifier = Modifier.fillMaxWidth(),
+                            decorationBox = { innerTextField ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("₱ ", fontSize = 16.sp) // Peso sign as static prefix
+                                    innerTextField()
+                                }
+                            }
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
             }
             item {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    Text(text = "About Me:", fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.DarkGray)
+
+                    // textfield with placeholder
+                    BasicTextField(
+                        value = aboutMe,
+                        onValueChange = { aboutMe = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                            .padding(10.dp),
+                        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                        decorationBox = { innerTextField ->
+                            if (aboutMe.isEmpty()) {
+                                Text(
+                                    text = "Example: I'm a licensed plumber with over 7 years of experience handling everything from leak repairs to full plumbing system installations.",
+                                    fontSize = 16.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            innerTextField()
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            item {
                 Button(
-                    onClick = { navController.navigate("profiletradesman") },
+                    onClick = {
+                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,selectedLocation,estimatedRate.toInt(), "090712312322")
+                              },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
                     modifier = Modifier.padding(16.dp).fillMaxWidth().background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))
                 ) {

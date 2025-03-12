@@ -102,6 +102,8 @@ fun ProfileVerification(
         modifier = Modifier
             .fillMaxSize()
             .background(myGradient3)
+            .padding(WindowInsets.systemBars.asPaddingValues())
+
     ) {
         Row(
             modifier = Modifier
@@ -833,6 +835,8 @@ fun openFile(context: Context, uri: Uri) {
     }
     try {
         context.startActivity(intent)
+        Log.d("openFile", "Attempting to open URI: $uri")
+
     } catch (e: ActivityNotFoundException) {
         Toast.makeText(context, "No app available to open this file", Toast.LENGTH_SHORT).show()
     }
