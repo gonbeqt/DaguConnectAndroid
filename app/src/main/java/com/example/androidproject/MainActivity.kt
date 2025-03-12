@@ -465,7 +465,8 @@ class MainActivity : ComponentActivity() {
                                 updateBookingTradesmanViewModel,
                                 getMyJobApplicantsViewModel,
                                 viewJobApplicationViewModel,
-                                putJobApplicationStatusViewModel
+                                putJobApplicationStatusViewModel,
+                                {LoadingUI()}
                             )
                         }
                         composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
@@ -511,7 +512,7 @@ class MainActivity : ComponentActivity() {
                             Welding(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("alltradesman") {
-                            AllTradesman(navController, getResumesViewModel, reportTradesmanViewModel)
+                            AllTradesman(navController, getResumesViewModel, reportTradesmanViewModel,{LoadingUI()})
                         }
                         composable("changepassword") {
                             ChangePassword(navController, changePasswordViewModel, { LoadingUI() })
@@ -575,7 +576,8 @@ class MainActivity : ComponentActivity() {
                                 getMyJobApplicationViewModel,
                                 getTradesmanBookingViewModel,
                                 putJobApplicationStatusViewModel,
-                                viewJobApplicationViewModel
+                                viewJobApplicationViewModel,
+                                {LoadingUI()}
                             )
                         }
                         composable("profiletradesman") {

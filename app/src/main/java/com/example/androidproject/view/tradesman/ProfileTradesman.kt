@@ -220,7 +220,21 @@ fun ProfileTradesman(
             isLoading = false // Reset loading state after fetching (or handle errors)
         }
     }
-
+    LaunchedEffect(updateTradesmanActiveStatusState) {
+        when (val updatingStatus = updateTradesmanActiveStatusState) {
+            is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
+                updateTradesmanActiveStatusViewModel.resetState()
+                viewTradesmanProfileViewModel.viewTradesmanProfile() // Refresh profile
+                Toast.makeText(context, "Status updated successfully", Toast.LENGTH_SHORT).show()
+                // isAvailable is already updated optimistically, no need to change unless server disagrees
+            }
+            is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
+                val errorMessage = updatingStatus.message
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+            else -> Unit
+        }
+    }
 
     Column(
         modifier = modifier
@@ -456,22 +470,7 @@ fun ProfileTradesman(
                                 }
                             }
                         }
-// Handle server response
-                        LaunchedEffect(updateTradesmanActiveStatusState) {
-                            when (val updatingStatus = updateTradesmanActiveStatusState) {
-                                is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
-                                    updateTradesmanActiveStatusViewModel.resetState()
-                                    viewTradesmanProfileViewModel.viewTradesmanProfile() // Refresh profile
-                                    Toast.makeText(context, "Status updated successfully", Toast.LENGTH_SHORT).show()
-                                    // isAvailable is already updated optimistically, no need to change unless server disagrees
-                                }
-                                is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
-                                    val errorMessage = updatingStatus.message
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                }
-                                else -> Unit
-                            }
-                        }
+
                         // Tab Selection
                         Column {
                             TabRow(

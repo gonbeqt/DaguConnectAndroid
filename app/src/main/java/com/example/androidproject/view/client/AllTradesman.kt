@@ -1,5 +1,8 @@
 package com.example.androidproject.view.client
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -68,9 +71,11 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel) {
+fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI: @Composable () ->Unit) {
     val resumeList = getResumes.resumePagingData.collectAsLazyPagingItems()
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
@@ -86,7 +91,34 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
         getResumes.refreshResumes()
     }
 
+    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
 
+
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    // State to trigger refresh/recomposition
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    // State to track loading during retry
+    var isLoading by remember { mutableStateOf(false) }
+
+    // Trigger data fetching only when retry is clicked (not automatically on network change)
+    LaunchedEffect(refreshTrigger) {
+        if (isConnected.value) {
+            isLoading = true // Set loading state before fetching
+            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
+            isLoading = false // Reset loading state after fetching (or handle errors)
+        }
+    }
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -140,7 +172,63 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                     }
                 }
             }
-
+            if (!isConnected.value) {
+                // No internet connection
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp), // Optional padding to avoid edge clipping
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center // Ensures vertical centering within the Column
+                    ) {
+                        Text(
+                            text = "No Internet Connection",
+                            fontSize = 18.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Please check your internet and try again.",
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center // Ensures the text is centered if it wraps
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Retry button (only fetch data when clicked)
+                        Box(
+                            modifier = Modifier
+                                .clickable {
+                                    // Re-check network connectivity
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    if (isConnected.value) {
+                                        // Show loading state and trigger data fetch
+                                        isLoading = true
+                                        refreshTrigger++
+                                    } else {
+                                        // Optionally show a toast if still no internet
+                                        Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "Retry",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            } else {
+                if (isLoading){
+                    LoadingUI()
+                }else{
                     LazyColumn(
 
                         modifier = Modifier
@@ -185,11 +273,15 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                                         .padding(16.dp),
                                     horizontalArrangement = Arrangement.Center
                                 ) {
-                                    CircularProgressIndicator()
+                                    LoadingUI()
                                 }
                             }
                         }
                     }
+                }
+            }
+
+
         }
     }
 }

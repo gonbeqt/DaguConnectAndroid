@@ -1,5 +1,8 @@
 package com.example.androidproject.view.client
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -76,7 +79,9 @@ import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewM
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
+import kotlinx.coroutines.delay
 import java.sql.Types.NULL
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
@@ -88,6 +93,7 @@ fun BookingsScreen(
     getMyJobApplicants: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     putJobApplicationStatus: PutJobApplicationStatusViewModel,
+    LoadingUI:@Composable () -> Unit,
     initialTabIndex: Int = 0, // Default to 0 if not provided
     initialSection: Int = 0
 ) {
@@ -105,6 +111,35 @@ fun BookingsScreen(
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
+
+    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
+
+
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    // State to trigger refresh/recomposition
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    // State to track loading during retry
+    var isLoading by remember { mutableStateOf(false) }
+
+    // Trigger data fetching only when retry is clicked (not automatically on network change)
+    LaunchedEffect(refreshTrigger) {
+        if (isConnected.value) {
+            isLoading = true // Set loading state before fetching
+            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
+            isLoading = false // Reset loading state after fetching (or handle errors)
+        }
+    }
 
     Box(
         modifier = modifier
@@ -173,29 +208,79 @@ fun BookingsScreen(
                         )
                     }
                 }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFFD9D9D9))
-                        .padding(16.dp)
-                ) {
-                    when (selectedSection) {
-                      0 -> when (selectedTabIndex) {
-                            0 -> AllBookingsContent(getClientsBooking, navController)
-                            1 -> PendingBookingsContent(getClientsBooking, navController,updateBookingTradesmanViewModel)
-                            2 -> DeclinedBookingsContent(getClientsBooking, navController)
-                            3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
-                            4 -> CompletedBookingsContent(getClientsBooking, navController)
-                            5 -> CancelledBookingsContent(getClientsBooking, navController)
+                // Handle different states based on connectivity and data loading
+                if (!isConnected.value) {
+                    // No internet connection
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "No Internet Connection",
+                                fontSize = 18.sp,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Please check your internet and try again.",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            // Retry button (only fetch data when clicked)
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        // Re-check network connectivity
+                                        isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                        if (isConnected.value) {
+                                            // Show loading state and trigger data fetch
+                                            isLoading = true
+                                            refreshTrigger++
+                                        } else {
+                                            // Optionally show a toast if still no internet
+                                            Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Retry",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
-                      1 -> when (selectedTabIndex) {
-                            0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
-                            1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
-                            2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
-                            3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
-                            4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
-                            5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                    }
+                } else {
+                    if (isLoading){
+                        LoadingUI()
+                    }else{
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFFD9D9D9))
+                                .padding(16.dp)
+                        ) {
+                            when (selectedSection) {
+                                0 -> when (selectedTabIndex) {
+                                    0 -> AllBookingsContent(getClientsBooking, navController)
+                                    1 -> PendingBookingsContent(getClientsBooking, navController,updateBookingTradesmanViewModel)
+                                    2 -> DeclinedBookingsContent(getClientsBooking, navController)
+                                    3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
+                                    4 -> CompletedBookingsContent(getClientsBooking, navController)
+                                    5 -> CancelledBookingsContent(getClientsBooking, navController)
+                                }
+                                1 -> when (selectedTabIndex) {
+                                    0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
+                                    1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
+                                    2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                    3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
+                                    4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                    5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                }
+                            }
                         }
                     }
                 }

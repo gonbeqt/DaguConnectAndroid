@@ -1,5 +1,8 @@
 package com.example.androidproject.view.tradesman
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -76,10 +79,12 @@ import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewM
 import com.example.androidproject.viewmodel.factories.bookings.UpdateBookingClientViewModelFactory
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
+import kotlinx.coroutines.delay
 import java.sql.Types.NULL
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ,initialSection: Int = 0) {// Default to 0 if not provided
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, LoadingUI: @Composable () -> Unit, initialTabIndex: Int = 0, initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
@@ -90,6 +95,36 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
     var selectedSection by remember { mutableStateOf(initialSection) }
+
+
+    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
+
+
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    // State to trigger refresh/recomposition
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    // State to track loading during retry
+    var isLoading by remember { mutableStateOf(false) }
+
+    // Trigger data fetching only when retry is clicked (not automatically on network change)
+    LaunchedEffect(refreshTrigger) {
+        if (isConnected.value) {
+            isLoading = true // Set loading state before fetching
+            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
+            isLoading = false // Reset loading state after fetching (or handle errors)
+        }
+    }
 
     // Define tab titles based on selected section
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
@@ -162,31 +197,81 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             )
                         }
                     }
-
-                    // Content changes based on the selected tab and section
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xFFD9D9D9))
-                            .padding(8.dp)
-                    ) {
-                        when (selectedSection) {
-                           0 -> when (selectedTabIndex) {
-                                0 -> AllBookingsTradesmanContent(getTradesmanBooking)
-                                1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel)
-                                2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
-                                3 -> ActiveBookingsTradesmanContent(navController,getTradesmanBooking)
-                                4 -> CompletedBookingsTradesmanContent(navController,getTradesmanBooking)
-                                5 -> CancelledBookingsTradesmanContent(navController,getTradesmanBooking)
+                    // Handle different states based on connectivity and data loading
+                    if (!isConnected.value) {
+                        // No internet connection
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    fontSize = 18.sp,
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Please check your internet and try again.",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                // Retry button (only fetch data when clicked)
+                                Box(
+                                    modifier = Modifier
+                                        .clickable {
+                                            // Re-check network connectivity
+                                            isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                            if (isConnected.value) {
+                                                // Show loading state and trigger data fetch
+                                                isLoading = true
+                                                refreshTrigger++
+                                            } else {
+                                                // Optionally show a toast if still no internet
+                                                Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Retry",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
+                        }
+                    } else {
+                        if (isLoading){
+                            LoadingUI()
+                        }else{
+                            // Content changes based on the selected tab and section
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFFD9D9D9))
+                                    .padding(8.dp)
+                            ) {
+                                when (selectedSection) {
+                                    0 -> when (selectedTabIndex) {
+                                        0 -> AllBookingsTradesmanContent(getTradesmanBooking)
+                                        1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel)
+                                        2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
+                                        3 -> ActiveBookingsTradesmanContent(navController,getTradesmanBooking)
+                                        4 -> CompletedBookingsTradesmanContent(navController,getTradesmanBooking)
+                                        5 -> CancelledBookingsTradesmanContent(navController,getTradesmanBooking)
+                                    }
 
-                            1 -> when (selectedTabIndex) {
-                                0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
-                                1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel)
-                                2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
-                                3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel)
-                                4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
-                                5 -> CancelledMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication )
+                                    1 -> when (selectedTabIndex) {
+                                        0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
+                                        1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel)
+                                        2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
+                                        3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel)
+                                        4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
+                                        5 -> CancelledMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication )
+                                    }
+                                }
                             }
                         }
                     }
