@@ -64,6 +64,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -75,6 +76,7 @@ import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowSize
@@ -243,9 +245,9 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
 
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
+        WindowType.SMALL -> 24.dp
+        WindowType.MEDIUM -> 32.dp
+        WindowType.LARGE -> 40.dp
     }
     val context = LocalContext.current
 
@@ -309,7 +311,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                     )
                     Box {
                         Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
+                            painter = painterResource(id = R.drawable.meatball_ic),
                             contentDescription = "Menu Icon",
                             modifier = Modifier
                                 .size(iconSize)
@@ -356,8 +358,8 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
             ) {
                 Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
                     Text(text = getJobs.jobDescription, fontSize = 14.sp)
-                    Text(text = "Est. Budget: ${getJobs.salary} pesos", fontSize = 14.sp)
-                    Text(text = "Location: ${getJobs.address}", fontSize = 14.sp)
+                    Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
+                    Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
                 }
                 Row(modifier = Modifier.padding(start = 5.dp)) {
                     TextButton(onClick = {}) {

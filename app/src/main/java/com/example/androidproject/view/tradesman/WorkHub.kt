@@ -1186,42 +1186,19 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                     }
                 }
 
-                // Spacer between text and buttons
                 Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp) // Space out the buttons
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { }
+                        .background(
+                            color = Color.Transparent,
+                        )
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                        .padding(vertical = 8.dp),  // Adjust padding as needed
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clickable {  }
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Cancel", fontSize = smallTextSize)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .clickable {  }
-                            .background(
-                                color = Color(0xFF42C2AE),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .weight(1f)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(text = "Completed", color = Color.White, fontSize = smallTextSize)
-                    }
+                    Text(text = "Job Details", fontSize = smallTextSize)
                 }
             }
         }
