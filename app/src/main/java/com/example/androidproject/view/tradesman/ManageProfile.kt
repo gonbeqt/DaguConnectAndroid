@@ -83,9 +83,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
                 updateTradesmanDetailViewModel.resetState()
                 // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=0") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
+                    navController.popBackStack()
                 }
 
             }
@@ -189,7 +187,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
                     ) {
                         CustomDropdown(
                             selectedOption = selectedLocation,
-                            onOptionSelected = { selectedLocation = "$it, Pangasinan" }
+                            onOptionSelected = { selectedLocation = it }
                         )
 
                     }
@@ -294,7 +292,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
             item {
                 Button(
                     onClick = {
-                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,selectedLocation,estimatedRate.toInt(), "090712312322")
+                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,selectedLocation,estimatedRate.toInt(), phoneNumber)
                               },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
                     modifier = Modifier.padding(16.dp).fillMaxWidth().background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))
