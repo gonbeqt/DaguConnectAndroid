@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,20 +29,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavController) {
-
-    var showApproveDialog by remember { mutableStateOf(false) }
-    var showDeclineDialog by remember { mutableStateOf(false) }
-    var showJobApproveDialog by remember { mutableStateOf(false) }
-    var showDeclineReasons by remember { mutableStateOf(false) }
+fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel,) {
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 16.sp
@@ -57,8 +56,16 @@ fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavCon
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    
 
+    val jobID = jobId.toIntOrNull() ?: return
+    val bookingPendingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        bookingPendingState.refresh()
+    }
+
+    // Find the booking with the matching jobId and "Pending" status
+    val selectedBooking = bookingPendingState.itemSnapshotList.items
+        .firstOrNull { it.id == jobID && it.bookingStatus == "Pending" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -162,12 +169,14 @@ fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavCon
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Client image
-                            Image(
-                                painter = painterResource(id = R.drawable.pfp),
-                                contentDescription = "Tradesman Image",
-                                modifier = Modifier
-                                    .size(100.dp)
-                            )
+                            if (selectedBooking != null) {
+                                AsyncImage(
+                                    model =selectedBooking.clientProfile ,
+                                    contentDescription = "Client Image",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                )
+                            }
 
                             // Tradesman details
                             Column(
@@ -175,25 +184,31 @@ fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavCon
                                     .weight(1f)
                                     .padding(start = 10.dp)
                             ) {
-                                Text(
-                                    text = "Ezekiel Vidal",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = nameTextSize,
-                                )
-                                Text(
-                                    text = "09576947632",
-                                    color = Color.Gray,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = smallTextSize,
-                                )
+                                if (selectedBooking != null) {
+                                    Text(
+                                        text = selectedBooking.clientFullName,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = nameTextSize,
+                                    )
+                                }
+                                if (selectedBooking != null) {
+                                    Text(
+                                        text = selectedBooking.phoneNumber,
+                                        color = Color.Gray,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = smallTextSize,
+                                    )
+                                }
 
 
-                                Text(
-                                    text = "21 Road St. Dagupan City, Pangasinan",
-                                    color = Color.Gray,
-                                    fontSize = smallTextSize,
-                                )
+                                if (selectedBooking != null) {
+                                    Text(
+                                        text = selectedBooking.address,
+                                        color = Color.Gray,
+                                        fontSize = smallTextSize,
+                                    )
+                                }
                             }
                         }
 
@@ -246,11 +261,19 @@ fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavCon
                                             .size(32.dp)
                                     )
                                     Text(
-                                        text = "Job Date: March 23, 2025",
+                                        text = "Job Date:",
                                         fontSize = nameTextSize,
                                         color = Color.Black,
                                         modifier = Modifier.padding(start = 10.dp)
                                     )
+                                    if (selectedBooking != null) {
+                                        Text(
+                                            text = selectedBooking.bookingDate,
+                                            fontSize = nameTextSize,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 10.dp)
+                                        )
+                                    }
                                 }
                             }
                             Row(
@@ -283,7 +306,9 @@ fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavCon
                                             .background(Color(0xFFF5F5F5))
                                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
                                     ) {
-                                        Text(modifier = Modifier.padding(16.dp),text = "Our house needs to be repainted. For further details just contact or chat me.")
+                                        if (selectedBooking != null) {
+                                            Text(modifier = Modifier.padding(16.dp),text = selectedBooking.taskDescription, fontSize = nameTextSize, color = Color.Black)
+                                        }
                                     }
                                 }
 
@@ -389,7 +414,8 @@ fun TradesmanPendingDetails(modifier: Modifier = Modifier, navController: NavCon
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {}
+                    .clickable {
+                    }
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

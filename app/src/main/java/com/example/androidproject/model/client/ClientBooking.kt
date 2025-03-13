@@ -40,7 +40,9 @@ data class GetClientsBooking(
     @SerializedName("tradesman_id")
     val tradesmanId: Int,
     @SerializedName("user_id")
-    val userid: Int
+    val userid: Int,
+    @SerializedName("cancel_reason")
+    val cancelReason: String
 
 )
 
@@ -83,6 +85,8 @@ data class GetTradesmanBooking(
     @SerializedName("tradesman_id")
     val tradesmanId: Int,
     @SerializedName("user_id")
-    val userId: Int
+    val userId: Int,
+    @SerializedName("cancel_reason")
+    val cancelReason: String
 
 )

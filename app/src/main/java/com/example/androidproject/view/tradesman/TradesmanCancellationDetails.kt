@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,15 +28,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanCancellationDetails(jobId:String, modifier: Modifier = Modifier, navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -53,6 +56,15 @@ fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: N
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    val jobID = jobId.toIntOrNull() ?: return
+    val bookingPendingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        bookingPendingState.refresh()
+    }
+
+    // Find the booking with the matching jobId and "Pending" status
+    val selectedBooking = bookingPendingState.itemSnapshotList.items
+        .firstOrNull { it.id == jobID && it.bookingStatus == "Cancelled" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,10 +159,12 @@ fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: N
                                 color = Color.Gray,
                                 text = "Requested by"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "Client"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.clientFullName
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -161,12 +175,14 @@ fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: N
                                 fontWeight = FontWeight.Normal,
                                 fontSize = smallTextSize,
                                 color = Color.Gray,
-                                text = "Request Date and Time"
+                                text = "Request Date"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "03-09-2025 10:30 AM"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.bookingDate
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -179,10 +195,12 @@ fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: N
                                 color = Color.Gray,
                                 text = "Reason"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "Not Responsive"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.cancelReason
+                                )
+                            }
                         }
 
 
@@ -195,7 +213,7 @@ fun TradesmanCancellationDetails(modifier: Modifier = Modifier, navController: N
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {navController.navigate("tradesmanjobcancelled")}
+                    .clickable {navController.navigate("tradesmanjobcancelled/${selectedBooking?.id}")}
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

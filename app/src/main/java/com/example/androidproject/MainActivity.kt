@@ -625,26 +625,48 @@ class MainActivity : ComponentActivity() {
                         composable("accountsettingstradesman") {
                             AccountSettingsTradesman(navController)
                         }
-                        composable("tradesmanpendingdetails") {
-                            TradesmanPendingDetails(modifier = Modifier, navController)
+                        composable("tradesmanpendingdetails/{jobId}") { backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            TradesmanPendingDetails(
+                                jobId,
+                                modifier = Modifier,
+                                navController,
+                                getTradesmanBookingViewModel)
                         }
-                        composable("tradesmancompleteddetails") {
-                            TradesmanCompletedDetails(modifier = Modifier, navController)
+                        composable("tradesmancompleteddetails/{jobId}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            TradesmanCompletedDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel)
                         }
-                        composable("tradesmancancellationdetails") {
-                            TradesmanCancellationDetails(modifier = Modifier, navController)
+                        composable("tradesmancancellationdetails/{jobId}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            TradesmanCancellationDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel)
                         }
-                        composable("tradesmanactivedetails") {
-                            TradesmanActiveDetails(modifier = Modifier, navController)
+                        composable("tradesmanactivedetails/{jobId}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            TradesmanActiveDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel)
                         }
-                        composable("tradesmandeclineddetails") {
-                            TradesmanDeclinationDetails(modifier = Modifier, navController)
+                        composable("tradesmandeclineddetails/{jobId}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+
+                            TradesmanDeclinationDetails( jobId,
+                                modifier = Modifier,
+                                navController,
+                                getTradesmanBookingViewModel
+                                )
                         }
-                        composable("tradesmanjobcancelled") {
-                            TradesmanJobCancelled(modifier = Modifier, navController)
+                        composable("tradesmanjobcancelled/{jobId}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            TradesmanJobCancelled(jobId,
+                                modifier = Modifier,
+                                navController,
+                                getTradesmanBookingViewModel)
                         }
-                        composable("tradesmanjobdecline") {
-                            TradesmanJobDecline(modifier = Modifier, navController)
+                        composable("tradesmanjobdecline/{jobId}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            TradesmanJobDecline(jobId,
+                                modifier = Modifier,
+                                navController,
+                                getTradesmanBookingViewModel)
                         }
 
                         composable("tradesmanapplicationpending") {

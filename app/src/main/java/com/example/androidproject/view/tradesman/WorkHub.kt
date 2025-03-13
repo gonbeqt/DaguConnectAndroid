@@ -372,7 +372,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
             // Display "No Declined Jobs" when the list is empty
             Text(
                 text = "No Jobs",
-                fontSize = 14.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
@@ -417,7 +417,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             // Display "No Pending Jobs" when the list is empty
             Text(
                 text = "No Pending Jobs",
-                fontSize = 14.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
@@ -462,7 +462,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
             // Display "No Declined Jobs" when the list is empty
             Text(
                 text = "No Declined Jobs",
-                fontSize = 14.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
@@ -506,7 +506,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
             // Display "No Active Jobs" when the list is empty
             Text(
                 text = "No Active Jobs",
-                fontSize = 14.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
@@ -552,7 +552,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
             // Display "No Completed Jobs" when the list is empty
             Text(
                 text = "No Completed Jobs",
-                fontSize = 14.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
@@ -597,7 +597,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
             // Display "No Cancelled Jobs" when the list is empty
             Text(
                 text = "No Cancelled Jobs",
-                fontSize = 14.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
@@ -650,7 +650,13 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-
+    val statusColor = when (allBooking.bookingStatus.lowercase()) {
+        "pending" -> Color(0xFFFFA500) // Orange
+        "active" -> Color(0xFF00FF00)  // Green
+        "completed" -> Color(0xFF0000FF) // Blue
+        "declined", "cancelled" -> Color(0xFFFF0000) // Red
+        else -> Color.Gray // Default fallback
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -710,7 +716,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                         }
                         Text(
                             text = allBooking.bookingStatus,
-                            color = Color.Gray,
+                            color = statusColor,
                             fontSize = taskTextSize,
                         )
 
@@ -786,7 +792,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     }
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmanpendingdetails") }
+            .clickable {navController.navigate("tradesmanpendingdetails/${pending.id}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1092,25 +1098,25 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
         WindowType.MEDIUM -> 400.dp to 190.dp
         WindowType.LARGE -> 410.dp to 210.dp
     }
-    val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
-    }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
-    val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
+        val nameTextSize = when (windowSize.width) {
+            WindowType.SMALL -> 18.sp
+            WindowType.MEDIUM -> 20.sp
+            WindowType.LARGE -> 22.sp
+        }
+        val taskTextSize = when (windowSize.width) {
+            WindowType.SMALL -> 14.sp
+            WindowType.MEDIUM -> 16.sp
+            WindowType.LARGE -> 18.sp
+        }
+        val smallTextSize = when (windowSize.width) {
+            WindowType.SMALL -> 12.sp
+            WindowType.MEDIUM -> 14.sp
+            WindowType.LARGE -> 16.sp
+        }
 
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmanjobdecline") }
+            .clickable {navController.navigate("tradesmanjobdecline/${declined.id}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1148,16 +1154,16 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                     ) {
                         Text(
                             modifier = Modifier.padding(top = 8.dp),
-                            text = "Karlos Rivo",
+                            text =declined.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
-                            fontSize = taskTextSize,
+                            fontSize = nameTextSize,
                         )
                         Row {
                             Text(
                                 text = "Job Date:",
                                 color = Color.Black,
-                                fontSize = 12.sp
+                                fontSize = taskTextSize
                             )
                             Text(
                                 text = date,
@@ -1173,7 +1179,7 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("tradesmanjobdecline/${declined.id}")}
                         .background(
                             color = Color.Transparent,
                         )
@@ -1215,7 +1221,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {navController.navigate("tradesmanactivedetails") }
+            .clickable {navController.navigate("tradesmanactivedetails/${active.id}") }
         ,
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1320,7 +1326,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
     }
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmancompleteddetails") }
+            .clickable {navController.navigate("tradesmancompleteddetails/${completed.id}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1384,7 +1390,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("tradesmancompleteddetails/${completed.id}")}
                         .background(
                             color = Color.Transparent,
                         )
@@ -1427,7 +1433,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
     }
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmanjobcancelled") }
+            .clickable {navController.navigate("tradesmanjobcancelled/${cancel.id}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1466,7 +1472,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                     ) {
                         Text(
                             modifier = Modifier.padding(top = 8.dp),
-                            text = "Karlos Rivo",
+                            text = cancel.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = taskTextSize,
@@ -1491,7 +1497,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable {navController.navigate("tradesmanjobcancelled/${cancel.id}")  }
                         .background(
                             color = Color.Transparent,
                         )
