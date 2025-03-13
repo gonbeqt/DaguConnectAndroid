@@ -434,11 +434,7 @@ fun ProfileTradesman(
                                             color = Color.White,
                                             style = TextStyle(fontSize = 14.sp)
                                         )
-                                        Text(
-                                            text = tradesmanDetails.phoneNumber ?: "N/A",
-                                            color = Color.White,
-                                            style = TextStyle(fontSize = 14.sp)
-                                        )
+
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Row {
                                             Box(
@@ -738,13 +734,36 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                             fontSize = nameTextSize,
                             fontWeight = FontWeight.Medium
                         )
+                        Text(
+                            text = displayDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
-                    Text(
-                        text = displayDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
-                        color = Color.Black,
-                        fontSize = taskTextSize,
-                        fontWeight = FontWeight.Medium
-                    )
+
+                }
+                Spacer(Modifier.height(10.dp))
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Phone Number :",
+                            color = Color.Gray,
+                            fontSize = nameTextSize,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = tradesmanDetails.phoneNumber ?: "N/A",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                            fontWeight = FontWeight.Medium
+
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -805,24 +824,21 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "About Me:",
-                            fontSize = nameTextSize,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+
+                   Text(
+                       text = "About Me:",
+                       fontSize = nameTextSize,
+                       color = Color.Gray,
+                       fontWeight = FontWeight.Medium
+                   )
+
                     Text(
                         text = displayDetails.aboutMe ?: "N/A",
                         fontSize = taskTextSize,
                         color = Color.Black,
                         fontWeight = FontWeight.Medium
                     )
+
                 }
             }
         }
