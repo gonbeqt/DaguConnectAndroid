@@ -33,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,6 +48,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -92,7 +95,7 @@ import com.example.androidproject.viewmodel.report.ReportViewModel
 fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel, getRecentJobsViewModel: GetRecentJobsViewModel){
 
     val windowSize = rememberWindowSizeClass()
-    val textSize = when (windowSize.width) {
+    val headerTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
@@ -123,6 +126,14 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                     Column(modifier = Modifier.fillMaxSize()) {
                         // Tabs (Fixed Choices)
                         TabRow(
+                            indicator = { tabPositions ->
+                                TabRowDefaults.Indicator(
+                                    modifier = Modifier
+                                        .tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                    color = Color(0xFF42C2AE), // Change this to your desired color
+                                    height = 2.dp // Adjust thickness if needed
+                                )
+                            },
                             selectedTabIndex = selectedTabIndex,
                             modifier = Modifier.fillMaxWidth(), // Ensures the TabRow fills the width
                             containerColor = Color.White // Background for the TabRow
@@ -134,10 +145,10 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                                     text = {
                                         Text(
                                             text = title,
-                                            fontSize = textSize,
+                                            fontSize = headerTextSize,
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.fillMaxWidth().padding(4.dp), // Fills the width inside each Tab
-                                            color = if (selectedTabIndex == index) Color.Black else Color.Gray
+                                            color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
                                         )
                                     },
                                     modifier = Modifier.weight(1f) // Ensures equal distribution across the width
@@ -165,6 +176,8 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
 fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize) {
     Box(
         modifier = Modifier
+            .shadow(10.dp)
+            .padding(bottom = 1.dp)
             .fillMaxWidth()
             .shadow(1.dp)
             .background(Color.White)
@@ -180,7 +193,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             // Left-aligned text
             Text(
                 text = "Home",
-                fontSize = 20.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Normal
             )
             // Right-aligned icons
@@ -189,24 +202,27 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
+                    tint = Color.Black,
                     modifier = Modifier.size(32.dp)
                 )
             }
         }
     }
-    Divider(
-        color = Color.Black,
-        thickness = 0.3.dp,
-        modifier = Modifier.fillMaxWidth()
-    )
+
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
+    val windowSize = rememberWindowSizeClass()
+
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 24.dp
+        WindowType.MEDIUM -> 32.dp
+        WindowType.LARGE -> 40.dp
+    }
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
         getJobsViewModel.refreshJobs()
@@ -356,7 +372,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                 border = BorderStroke(1.dp, Color.Gray),
                 colors = CardDefaults.cardColors(Color.White)
             ) {
-                Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
+                Column(modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 10.dp)) {
                     Text(text = getJobs.jobDescription, fontSize = 14.sp)
                     Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
                     Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
@@ -367,7 +383,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                             text = "${getJobs.totalApplicants} Applicant",
                             fontSize = 16.sp,
                             color = Color.Black,
-                            fontWeight = FontWeight(500),
+                            fontWeight = FontWeight.Medium,
                             style = TextStyle(textDecoration = TextDecoration.Underline),
                         )
                     }
@@ -630,7 +646,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                         text = getJobs.clientFullname,
                         fontSize = 16.sp,
                         color = Color.Black,
-                        fontWeight = FontWeight(500),
+                        fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(start = 20.dp)
                     )
                     Box {
@@ -670,16 +686,26 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
 
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Card(modifier = Modifier.fillMaxWidth(),
+            Card(
+                modifier = Modifier.fillMaxWidth(),
                 border = BorderStroke(1.dp, Color.Gray),
                 colors = CardDefaults.cardColors(Color.White)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = getJobs.jobDescription, fontSize = 12.sp)
-                    Text(text = "Est. Budget: P${getJobs.salary}", fontSize = 12.sp)
-                    Text(text = "Location: ${getJobs.address}", fontSize = 16.sp)
-
-
+                Column(modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 10.dp)) {
+                    Text(text = getJobs.jobDescription, fontSize = 14.sp)
+                    Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
+                    Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
+                }
+                Row(modifier = Modifier.padding(start = 5.dp)) {
+                    TextButton(onClick = {}) {
+                        Text(
+                            text = "${getJobs.totalApplicants} Applicant",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Medium,
+                            style = TextStyle(textDecoration = TextDecoration.Underline),
+                        )
+                    }
                 }
             }
         }

@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +37,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -81,6 +84,12 @@ import java.sql.Types.NULL
 @Composable
 fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, initialTabIndex: Int = 0 ,initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
+
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 24.dp
+        WindowType.MEDIUM -> 32.dp
+        WindowType.LARGE -> 40.dp
+    }
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
         WindowType.MEDIUM -> 14.sp
@@ -113,7 +122,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
             // Left-aligned text
             Text(
                 text = "Job Hub",
-                fontSize = 20.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Normal
             )
             // Right-aligned icons
@@ -122,16 +131,16 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
+                    tint = Color.Black,
                     modifier = Modifier.size(32.dp)
                 )
             }
         }
         // Add this Divider **outside** the Box to create a visible separator
         Divider(
-            color = Color.Black, // Change color if needed
+            color = Color.Gray, // Change color if needed
             thickness = 0.3.dp, // Adjust thickness for better visibility
             modifier = Modifier.fillMaxWidth()
         )
@@ -149,6 +158,14 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Tabs (Fixed Choices)
                     ScrollableTabRow(
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                modifier = Modifier
+                                    .tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                color = Color(0xFF122826), // Change this to your desired color
+                                height = 2.dp // Adjust thickness if needed
+                            )
+                        },
                         selectedTabIndex = selectedTabIndex,
                         modifier = Modifier.fillMaxWidth(),
                         edgePadding = 5.dp
@@ -157,7 +174,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             Tab(
                                 selected = selectedTabIndex == index,
                                 onClick = { selectedTabIndex = index },
-                                text = { Text(title, fontSize = textSize) },
+                                text = { Text(title, fontSize = textSize, color = if (selectedTabIndex == index) Color(0xFF122826) else Color.Gray) },
                                 modifier = Modifier.background(Color.White)
                             )
                         }
@@ -199,9 +216,9 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, onSectionSelected: (Int) -> Unit) {
     val windowSize = rememberWindowSizeClass()
     val headerTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
 
     Row(
@@ -214,7 +231,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
         // Left-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == 0) myGradient3 else SolidColor(Color.Transparent))
+                .background(if (selectedSection == 0) SolidColor(Color(0xFF122826)) else SolidColor(Color.Transparent))
                 .weight(1f)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
@@ -238,7 +255,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
         Box(
             modifier = Modifier
                 .background(
-                    if (selectedSection == 1) myGradient3 else SolidColor(
+                    if (selectedSection == 1) SolidColor(Color(0xFF122826)) else SolidColor(
                         Color.Transparent
                     )
                 )
@@ -262,7 +279,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
 
     }
     Divider(
-        color = Color.Black, // Change color if needed
+        color = Color.Gray, // Change color if needed
         thickness = 0.3.dp, // Adjust thickness for better visibility
         modifier = Modifier.fillMaxWidth()
     )

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -337,7 +338,7 @@ fun CalendarSectionTradesman(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
+                .height(230.dp)
                 .background(brush = myGradient4) // Apply gradient
         ) {
             Column(
@@ -409,7 +410,7 @@ fun CalendarSectionTradesman(
 
                                     Box(
                                         modifier = Modifier
-                                            .size(20.dp)
+                                            .size(24.dp)
                                             .background(
                                                 if (date == selectedDate) Color.Black else Color.Transparent,
                                                 shape = MaterialTheme.shapes.small
@@ -464,15 +465,15 @@ fun ScheduleTradesmanTopSection(navController: NavController){
         ) {
             Text(
                 text = "Schedule",
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Medium
             )
             Icon(
-                imageVector = Icons.Default.Notifications,
+                imageVector = Icons.Outlined.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
                 modifier = Modifier
-                    .size(35.dp)
+                    .size(32.dp)
                     .clickable { navController.navigate("notification") }
             )
         }
