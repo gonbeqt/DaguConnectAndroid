@@ -54,7 +54,9 @@ fun AvailabilityStatus (modifier: Modifier = Modifier, navController: NavControl
             Icon(
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .clickable {navController.navigate("manageprofile")},
+                    .clickable {
+                        navController.popBackStack()
+                               },
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
                 tint = Color.Black

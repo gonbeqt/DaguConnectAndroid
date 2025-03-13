@@ -80,6 +80,7 @@ import com.example.androidproject.viewmodel.factories.bookings.UpdateBookingClie
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import kotlinx.coroutines.delay
+import org.jetbrains.annotations.Async
 import java.sql.Types.NULL
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -94,7 +95,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
-    var selectedSection by remember { mutableStateOf(initialSection) }
+    var selectedSection by remember { mutableIntStateOf(initialSection) }
 
 
     // Function to check network connectivity using NetworkCapabilities (modern approach)
@@ -404,7 +405,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
     LaunchedEffect(Unit) {
         bookingPendingstate.refresh()
     }
-    val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingstatus == "Pending" }
+    val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -449,7 +450,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
         declinedBookingState.refresh()
     }
 
-    val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingstatus == "Declined" }
+    val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -493,7 +494,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
     LaunchedEffect(Unit) {
         activeBookingstate.refresh()
     }
-    val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Active" }
+    val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Active" }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -538,7 +539,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
     LaunchedEffect(Unit) {
         completedBookingstate.refresh()
     }
-    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Completed" }
+    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }
 
     Box(
         modifier = Modifier
@@ -584,7 +585,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
         cancelledBookingstate.refresh()
     }
 
-    val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingstatus == "Cancelled" }
+    val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -627,7 +628,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
 //Design For Items
 @Composable
 fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
-    val date = ViewModelSetups.formatDateTime(allBooking.bookingdate)
+    val date = ViewModelSetups.formatDateTime(allBooking.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 470.dp to 210.dp
@@ -674,8 +675,8 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
+                    AsyncImage(
+                        model = allBooking.clientProfile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -689,7 +690,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                     ) {
 
                         Text(
-                            text = allBooking.clientfullname,
+                            text = allBooking.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight.Medium,
                             fontSize = nameTextSize
@@ -708,7 +709,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                             )
                         }
                         Text(
-                            text = allBooking.bookingstatus,
+                            text = allBooking.bookingStatus,
                             color = Color.Gray,
                             fontSize = taskTextSize,
                         )
@@ -729,7 +730,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     var showDeclineDialog by remember { mutableStateOf(false) }
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
-    val date = ViewModelSetups.formatDateTime(pending.bookingdate)
+    val date = ViewModelSetups.formatDateTime(pending.bookingDate)
 
     LaunchedEffect(updateWorkStatus) {
         when (val updateStatus = updateWorkStatus) {
@@ -809,8 +810,8 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
+                    AsyncImage(
+                        model = pending.clientProfile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -824,7 +825,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = pending.clientfullname,
+                            text = pending.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight.Medium,
                             fontSize = nameTextSize,
@@ -1084,7 +1085,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
 
     @Composable
 fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(declined.bookingdate)
+    val date = ViewModelSetups.formatDateTime(declined.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 180.dp
@@ -1132,8 +1133,8 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
+                    AsyncImage(
+                        model = declined.clientProfile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -1189,7 +1190,7 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
 
 @Composable
 fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(active.bookingdate)
+    val date = ViewModelSetups.formatDateTime(active.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1237,8 +1238,8 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
+                    AsyncImage(
+                        model = active.clientProfile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -1252,7 +1253,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                             .padding(start = 10.dp)
                     ) {
                         Text(
-                            text = active.clientfullname,
+                            text = active.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight.Medium,
                             fontSize = nameTextSize,
@@ -1317,7 +1318,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
 }
 @Composable
 fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(completed.bookingdate)
+    val date = ViewModelSetups.formatDateTime(completed.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1365,8 +1366,8 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
+                    AsyncImage(
+                        model = completed.clientProfile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
@@ -1380,7 +1381,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                     ) {
                         Text(
                             modifier = Modifier.padding(top = 8.dp),
-                            text = completed.clientfullname,
+                            text = completed.clientFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
                             fontSize = taskTextSize,
@@ -1424,7 +1425,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
 
 @Composable
 fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
-    val date = ViewModelSetups.formatDateTime(cancel.bookingdate)
+    val date = ViewModelSetups.formatDateTime(cancel.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 390.dp to 240.dp
@@ -1472,8 +1473,8 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Tradesman image
-                    Image(
-                        painter = painterResource(R.drawable.pfp),
+                    AsyncImage(
+                        model = cancel.clientProfile,
                         contentDescription = "Tradesman Image",
                         modifier = Modifier
                             .size(100.dp)
