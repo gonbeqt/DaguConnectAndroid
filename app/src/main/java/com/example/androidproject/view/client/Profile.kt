@@ -647,7 +647,7 @@ fun PostsCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${editableBudget.toInt()} ₱",
+                        text = "₱ ${editableBudget.toInt()} ",
                         fontSize = taskTextSize,
                         color = Color.Black,
                         fontWeight = FontWeight.Bold
