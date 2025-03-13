@@ -663,14 +663,18 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("tradesmanjobdecline/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+
+
                             TradesmanJobDecline(jobId,
                                 modifier = Modifier,
                                 navController,
                                 getTradesmanBookingViewModel)
                         }
 
-                        composable("tradesmanapplicationpending") {
-                            TradesmanApplicationPending(modifier = Modifier, navController)
+                        composable("tradesmanapplicationpending/{jobId}/{jobs}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
+                            TradesmanApplicationPending(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
                         }
                         composable("tradesmanapplicationdecline") {
                             TradesmanApplicationDecline(modifier = Modifier, navController)

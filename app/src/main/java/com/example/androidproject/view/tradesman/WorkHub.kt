@@ -1948,7 +1948,7 @@ fun PendingMySubmissionsTradesmanItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanapplicationpending") }, // Add implementation for click if needed
+            .clickable { navController.navigate("tradesmanapplicationpending/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2038,7 +2038,7 @@ fun PendingMySubmissionsTradesmanItem(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("tradesmanapplicationpending")
+                                navController.navigate("tradesmanapplicationpending/${myJob.jobId}")
                             }
                             .background(
                                 color = Color.Transparent,
