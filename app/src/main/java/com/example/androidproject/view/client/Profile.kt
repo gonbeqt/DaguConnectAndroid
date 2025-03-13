@@ -247,7 +247,7 @@ fun ProfileScreen(
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Medium
                 )
-                Row (){
+
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Notifications Icon",
@@ -256,14 +256,8 @@ fun ProfileScreen(
                             .size(35.dp)
                             .clickable { navController.navigate("notification") }
                     )
-                    Icon(imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings Icon",
-                        tint = Color.Black,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clickable { navController.navigate("accountsettings") }
-                    )
-                }
+
+
 
             }
         }
@@ -392,12 +386,26 @@ fun ProfileScreen(
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
-                                        Text(
-                                            text = profile.fullname,
-                                            color = Color.White,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                            Text(
+                                                text = profile.fullname,
+                                                color = Color.White,
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Edit Profile Picture",
+                                                tint = Color.White,
+                                                modifier = Modifier
+                                                    .size(26.dp)
+                                                    .background(Color.Transparent, shape = CircleShape)
+                                                    .clickable{
+                                                        navController.navigate("accountsettings")
+                                                    }
+                                            )
+                                        }
+
                                         Text(text = profile.email, color = Color.White)
                                         Text(text = profile.address, color = Color.White)
                                         Text(text = profile.phoneNumber, color = Color.White)

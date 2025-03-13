@@ -37,6 +37,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -439,6 +440,7 @@ fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: 
                 Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
             } else if (password.length < 8) {
                 Toast.makeText(context, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
+              
             }
 
             else {

@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
@@ -259,24 +260,14 @@ fun ProfileTradesman(
                 fontWeight = FontWeight.Medium
             )
 
-            // Right-aligned icons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color(0xFF3CC0B0),
                     modifier = Modifier.size(32.dp)
                 )
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "User Account Settings",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp).clickable { navController.navigate("accountsettingstradesman") }
-                )
-            }
+
+
         }
         // Handle different states based on connectivity and data loading
         if (!isConnected.value) {
@@ -417,12 +408,26 @@ fun ProfileTradesman(
                                                 )
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
-                                            Icon(
-                                                painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),                                                contentDescription = "Profile Verified",
-                                                tint = Color.Black,
-                                                modifier = Modifier.size(24.dp)
+                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                                Icon(
+                                                    painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),                                                contentDescription = "Profile Verified",
+                                                    tint = Color.Black,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = "Edit Profile Picture",
+                                                    tint = Color.White,
+                                                    modifier = Modifier
+                                                        .size(26.dp)
+                                                        .background(Color.Transparent, shape = CircleShape)
+                                                        .clickable{
+                                                            navController.navigate(navController.navigate("accountsettingstradesman")
+                                                            )
+                                                        }
+                                                )
+                                            }
 
-                                            )
                                         }
                                         Text(
                                             text = tradesmanDetails.email ?: "N/A",
@@ -435,37 +440,57 @@ fun ProfileTradesman(
                                             style = TextStyle(fontSize = 14.sp)
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .width(100.dp)
-                                                .height(30.dp)
-                                                .clip(RoundedCornerShape(50.dp))
-                                                .background(Color.White)
-                                                .clickable (enabled = !isUpdating) { // Disable when loading
-                                                    previousAvailability = isAvailable // Store previous state
-                                                    isAvailable = !isAvailable // Optimistic update
-                                                    updateTradesmanActiveStatusViewModel.updateStatusState(isAvailable)
-                                                },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.Center
+                                        Row {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(100.dp)
+                                                    .height(30.dp)
+                                                    .clip(RoundedCornerShape(50.dp))
+                                                    .background(Color.White)
+                                                    .clickable (enabled = !isUpdating) { // Disable when loading
+                                                        previousAvailability = isAvailable // Store previous state
+                                                        isAvailable = !isAvailable // Optimistic update
+                                                        updateTradesmanActiveStatusViewModel.updateStatusState(isAvailable)
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Circle,
+                                                        contentDescription = if (isAvailable) "Available" else "Unavailable",
+                                                        tint = if (isAvailable) Color.Green else Color.Red, // Change color based on state
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                    Text(
+                                                        text = if (isAvailable) "Available" else "Unavailable",
+                                                        color = Color.Black,
+                                                        style = TextStyle(fontSize = 14.sp)
+                                                    )
+
+                                                }
+
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .padding(start = 10.dp)
+                                                    .size(26.dp)
+                                                    .background(Color.White, RoundedCornerShape(50.dp))
+                                                    .clickable { navController.navigate("availabilitystatus") }
+                                                    .border(1.dp, Color.Gray, RoundedCornerShape(50.dp)),
+                                                contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
-                                                    Icons.Default.Circle,
-                                                    contentDescription = if (isAvailable) "Available" else "Unavailable",
-                                                    tint = if (isAvailable) Color.Green else Color.Red, // Change color based on state
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(4.dp))
-                                                Text(
-                                                    text = if (isAvailable) "Available" else "Unavailable",
-                                                    color = Color.Black,
-                                                    style = TextStyle(fontSize = 14.sp)
+                                                    Icons.Default.QuestionMark,
+                                                    contentDescription = "Edit profile and skills",
+                                                    tint = Color.Black
                                                 )
                                             }
                                         }
+
                                     }
                                 }
                             }
@@ -699,27 +724,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         )
 
                 }
-                Spacer(modifier = Modifier.height(10.dp))
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "About Me:",
-                            fontSize = nameTextSize,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    Text(
-                        text = displayDetails.aboutMe ?: "N/A",
-                        fontSize = taskTextSize,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+
                 Spacer(modifier = Modifier.height(10.dp))
                 Column {
                     Row(
@@ -797,6 +802,27 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                                 }
                         )
 
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "About Me:",
+                            fontSize = nameTextSize,
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Text(
+                        text = displayDetails.aboutMe ?: "N/A",
+                        fontSize = taskTextSize,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }

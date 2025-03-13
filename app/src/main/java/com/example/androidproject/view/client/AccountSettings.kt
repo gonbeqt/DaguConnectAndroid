@@ -114,7 +114,7 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                         modifier = Modifier
                             .size(120.dp)
                             .clip(CircleShape)
-                            .background(Color.Gray),
+                            .background(Color.White),
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
