@@ -69,6 +69,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -80,6 +81,7 @@ import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowSize
@@ -330,9 +332,9 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
+        WindowType.SMALL -> 24.dp
+        WindowType.MEDIUM -> 32.dp
+        WindowType.LARGE -> 40.dp
     }
 
 
@@ -385,46 +387,46 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
         }
     }
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        navController.navigate("tradesmanapply/${getJobs.id}")
-                    },
-                colors = CardDefaults.cardColors(Color.White)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth()
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate("tradesmanapply/${getJobs.id}")
+            },
+        colors = CardDefaults.cardColors(Color.White)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp).fillMaxWidth()
+        ) {
+            Row {
+                AsyncImage(
+                    model = getJobs.clientProfilePicture, // Use URL here
+                    contentDescription = "Profile Image",
+                    modifier = Modifier
+                        .size(62.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row {
-                        AsyncImage(
-                            model = getJobs.clientProfilePicture, // Use URL here
-                            contentDescription = "Profile Image",
+                    Text(
+                        text = getJobs.clientFullname,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight(500),
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
+                    Box {
+                        Icon(
+                            painter = painterResource(id = R.drawable.meatball_ic),
+                            contentDescription = "Menu Icon",
                             modifier = Modifier
-                                .size(62.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
+                                .size(iconSize)
+                                .clickable { showMenu = true }
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = getJobs.clientFullname,
-                                fontSize = 16.sp,
-                                color = Color.Black,
-                                fontWeight = FontWeight(500),
-                                modifier = Modifier.padding(start = 20.dp)
-                            )
-                            Box {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Menu Icon",
-                                    modifier = Modifier
-                                        .size(iconSize)
-                                        .clickable { showMenu = true }
-                                )
 
                                 // Popup Menu
                                 DropdownMenu(
@@ -457,62 +459,62 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
                         }
                         Spacer(modifier = Modifier.weight(1f))
 
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        border = BorderStroke(1.dp, Color.Gray),
-                        colors = CardDefaults.cardColors(Color.White)
-                    ) {
-                        Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
-                            Text(text = getJobs.jobDescription, fontSize = 14.sp)
-                            Text(text = "Est. Budget: ${getJobs.salary} pesos", fontSize = 14.sp)
-                            Text(text = "Location: ${getJobs.address}", fontSize = 14.sp)
-                        }
-                        Row(modifier = Modifier.padding(start = 5.dp)) {
-                            TextButton(onClick = {}) {
-                                Text(
-                                    text = "${getJobs.totalApplicants} Applicant",
-                                    fontSize = 16.sp,
-                                    color = Color.Black,
-                                    fontWeight = FontWeight(500),
-                                    style = TextStyle(textDecoration = TextDecoration.Underline),
-                                )
-                            }
-                        }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(1.dp, Color.Gray),
+                colors = CardDefaults.cardColors(Color.White)
+            ) {
+                Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
+                    Text(text = getJobs.jobDescription, fontSize = 14.sp)
+                    Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
+                    Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
+                }
+                Row(modifier = Modifier.padding(start = 5.dp)) {
+                    TextButton(onClick = {}) {
+                        Text(
+                            text = "${getJobs.totalApplicants} Applicant",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight(500),
+                            style = TextStyle(textDecoration = TextDecoration.Underline),
+                        )
                     }
                 }
             }
-            if (showReportDialog) {
-                Dialog(onDismissRequest = { showReportDialog = false }) {
-                    Box(
+        }
+    }
+    if (showReportDialog) {
+        Dialog(onDismissRequest = { showReportDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                ,
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                        ,
-                        contentAlignment = Alignment.Center
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    "Reason for Report",
-                                    fontSize = 20.sp,
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold
-                                )
+                        Text(
+                            "Reason for Report",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
 
                                 Column(modifier = Modifier.padding(top = 16.dp)) {
                                     reasons.forEachIndexed { index, reason ->

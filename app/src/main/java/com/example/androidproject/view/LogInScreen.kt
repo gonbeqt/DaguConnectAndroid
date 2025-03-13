@@ -478,3 +478,4 @@ fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier:
         )
     }
 }
+
