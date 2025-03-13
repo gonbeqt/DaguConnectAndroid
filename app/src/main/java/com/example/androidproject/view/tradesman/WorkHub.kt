@@ -588,7 +588,6 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Tradesman image
                     Image(
                         painter = painterResource(R.drawable.pfp),
                         contentDescription = "Tradesman Image",

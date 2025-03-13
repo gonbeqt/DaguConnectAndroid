@@ -52,7 +52,6 @@ import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 
 @Composable
-
 fun HiringDetails(jobId: String, modifier: Modifier, navController: NavController, postJobApplicationViewModel: PostJobApplicationViewModel) {
     val postJobApplicationState by postJobApplicationViewModel.postJobApplicationState.collectAsState()
     var qualificationSummary by remember { mutableStateOf("") }
