@@ -1,5 +1,6 @@
 package com.example.androidproject.viewmodel.jobs.paginate
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.androidproject.api.ApiService
@@ -16,15 +17,18 @@ class GetMyJobsPagingSource(
             val response = apiService.getJobsByUserId(page = page, limit = params.loadSize)
             if (response.isSuccessful) {
                 val jobs = response.body()?.jobs ?: emptyList()
+                Log.d("GetMyJobsPagingSource", "Fetched ${jobs.size} jobs on page $page: $jobs")
                 LoadResult.Page(
                     data = jobs,
                     prevKey = if (page == 1) null else page - 1, // No previous key if first page
                     nextKey = if (jobs.isEmpty()) null else page + 1 // No next page if data is empty
                 )
             } else {
+                Log.e("GetMyJobsPagingSource", "Error: ${response.code()} ${response.message()}")
                 LoadResult.Error(Exception("Error: ${response.code()} ${response.message()}"))
             }
         } catch (e: Exception) {
+            Log.e("GetMyJobsPagingSource", "Exception: ${e.message}", e)
             LoadResult.Error(e)
         }
     }

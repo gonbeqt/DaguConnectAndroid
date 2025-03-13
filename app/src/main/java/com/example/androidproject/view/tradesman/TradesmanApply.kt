@@ -448,6 +448,7 @@ fun TradesmanApply(
                     )
                 }
             }
+
             is ViewJobViewModel.JobState.Error -> {
                 val errorMessage = (viewJobState as ViewJobViewModel.JobState.Error).message
                 Box(

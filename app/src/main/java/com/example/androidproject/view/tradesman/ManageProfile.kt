@@ -65,13 +65,28 @@ import com.google.accompanist.flowlayout.FlowRow
 
 
 @Composable
-fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,updateTradesmanDetailViewModel :UpdateTradesmanDetailViewModel){
+fun ManageProfile(
+        modifier: Modifier = Modifier,
+        navController: NavController,
+        updateTradesmanDetailViewModel :UpdateTradesmanDetailViewModel,
+        workLocation : String,
+        number : String,
+        rate : String,
+        about : String
+    ){
     val updateDetailState by updateTradesmanDetailViewModel.updateTradesmanDetailState.collectAsState()
     var selectedLocation by remember { mutableStateOf("Select location") }
     var phoneNumber by remember { mutableStateOf("")  }
     var estimatedRate by remember { mutableStateOf("") } // Changed to String for simplicity
     var aboutMe by remember { mutableStateOf("")}
     val context = LocalContext.current
+
+
+    // Handle "N/A" and "null" (case-insensitive) by setting phoneNumber to empty string
+    phoneNumber =if (number == "null") "" else number ?: ""
+    estimatedRate = rate ?: ""
+    selectedLocation = workLocation ?: "Select location"
+    aboutMe = about ?: ""
 
     LaunchedEffect(updateDetailState) {
         when(val updateDetails = updateDetailState){

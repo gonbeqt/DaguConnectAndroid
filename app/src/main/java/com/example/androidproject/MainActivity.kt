@@ -404,6 +404,7 @@ class MainActivity : ComponentActivity() {
                                 updateClientProfilePictureViewModel,
                                 updateTradesmanActiveStatusViewModel,
                                 reportClientViewModel,
+                                viewRatingsViewModel,
                                 initialSelectedItem = selectedItem,
                                 initialSelectedTab = selectedTab,
                                 initialSelectedSection = selectedSection,
@@ -527,7 +528,7 @@ class MainActivity : ComponentActivity() {
                             NotificationScreen(navController, getNotificationViewModel)
                         }
                         composable("accountsettings") {
-                            AccountSettings(navController, getClientProfileViewModel)
+                            AccountSettings(navController, getClientProfileViewModel,updateClientProfileAddressViewModel)
                         }
 
 
@@ -588,21 +589,29 @@ class MainActivity : ComponentActivity() {
                                 viewTradesmanProfileViewModel,
                                 updateTradesmanProfileViewModel,
                                 updateTradesmanActiveStatusViewModel,
+                                viewRatingsViewModel,
                                 { LoadingUI() })
                         }
-                        composable("manageprofile") {
+                        composable("manageprofile/{workLocation}/{phoneNumber}/{rate}/{aboutMe}") {backStackEntry ->
+                            val workLocation = backStackEntry.arguments?.getString("workLocation") ?: ""
+                            val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+                            val rate = backStackEntry.arguments?.getString("rate") ?: ""
+                            val aboutMe = backStackEntry.arguments?.getString("aboutMe") ?: ""
                             ManageProfile(
                                 modifier = Modifier,
                                 navController,
-                                updateTradesmanDetailViewModel
+                                updateTradesmanDetailViewModel,
+                                workLocation,
+                                phoneNumber,
+                                rate,
+                                aboutMe
                             )
                         }
                         composable("availabilitystatus") {
                             AvailabilityStatus(modifier = Modifier, navController)
                         }
                         composable("profileverification/{statusofapproval}") { backStackEntry ->
-                            val statusofapproval =
-                                backStackEntry.arguments?.getString("statusofapproval") ?: ""
+                            val statusofapproval = backStackEntry.arguments?.getString("statusofapproval") ?: ""
                             ProfileVerification(
                                 modifier = Modifier,
                                 navController,

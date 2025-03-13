@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -34,21 +35,48 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
+import com.example.androidproject.viewmodel.client_profile.UpdateClientProfileAddressViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountSettings(navController: NavController, getClientProfileViewModel: GetClientProfileViewModel) {
+fun AccountSettings(navController: NavController, getClientProfileViewModel: GetClientProfileViewModel, updateClientProfileAddressViewModel: UpdateClientProfileAddressViewModel) {
     val profileState by getClientProfileViewModel.getProfileState.collectAsState()
     var contactNumber by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val imageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            selectedImageUri = it
+    val updateClientDetailsState by updateClientProfileAddressViewModel.updateClientProfileState.collectAsState()
+    val context = LocalContext.current
+
+    // Update contactNumber and location when profile data is available
+    LaunchedEffect(profileState) {
+        if (profileState is GetClientProfileViewModel.ClientProfileState.Success) {
+            val profile = (profileState as GetClientProfileViewModel.ClientProfileState.Success).data
+            contactNumber = profile.phoneNumber ?: "" // Use empty string if phoneNumber is null
+            location = profile.address ?: "" // Use empty string if location is null
+        }
+    }
+
+    LaunchedEffect(updateClientDetailsState) {
+        when (val updateClientDetails = updateClientDetailsState) {
+            is UpdateClientProfileAddressViewModel.UpdateClientProfileAddressState.Loading -> {
+                // Show loading
+            }
+            is UpdateClientProfileAddressViewModel.UpdateClientProfileAddressState.Success -> {
+                val responseMessage = updateClientDetails.data?.message
+                Toast.makeText(context, responseMessage, Toast.LENGTH_SHORT).show()
+                navController.navigate("main_screen?selectedItem=4") {
+                    navController.popBackStack()
+                }
+                updateClientProfileAddressViewModel.resetState()
+            }
+            is UpdateClientProfileAddressViewModel.UpdateClientProfileAddressState.Error -> {
+                val error = updateClientDetails.message
+                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+            }
+            else -> Unit // Handles Idle state or any other unexpected state
         }
     }
 
@@ -67,23 +95,27 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
             // Header Card
             Card(
                 modifier = Modifier
-                    .fillMaxWidth(),  // Card already fills the width
+                    .fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White  // Explicitly set Card color to white
+                    containerColor = Color.White
                 )
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(70.dp)
-                        .padding(horizontal = 16.dp),  // Added padding for better spacing
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Arrow Back",
                         modifier = Modifier
-                            .clickable { navController.popBackStack() }
+                            .clickable {
+                                navController.navigate("main_screen?selectedItem=4") {
+                                    navController.popBackStack()
+                                }
+                            }
                             .size(24.dp),
                         tint = Color.Black
                     )
@@ -132,7 +164,7 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                     // User Details Column
                     Column(
                         modifier = Modifier
-                            .widthIn(max = 400.dp) // Limit max width for better centering
+                            .widthIn(max = 400.dp)
                             .padding(horizontal = 16.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
@@ -161,7 +193,7 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
-                        // Editable Fields
+                        // Editable Contact Number Field
                         OutlinedTextField(
                             value = contactNumber,
                             onValueChange = { contactNumber = it },
@@ -178,6 +210,7 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
 
                         Spacer(modifier = Modifier.height(8.dp))
 
+                        // Editable Location Field
                         OutlinedTextField(
                             value = location,
                             onValueChange = { location = it },
@@ -211,7 +244,9 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                             }
 
                             Button(
-                                onClick = { /* Handle Save */ },
+                                onClick = {
+                                    updateClientProfileAddressViewModel.updateClientProfile(location, contactNumber)
+                                },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3CC0B0)),
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier.weight(1f)
@@ -238,7 +273,7 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp)) // Bottom padding
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

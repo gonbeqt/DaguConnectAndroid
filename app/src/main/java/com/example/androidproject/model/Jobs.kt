@@ -39,7 +39,7 @@ data class GetJobs(
     val clientProfileId: Int,
     @SerializedName("client_profile_picture")
     val clientProfilePicture: String?,
-    val salary: Double,
+    val salary: Int,
     @SerializedName("applicant_limit_count")
     val applicantLimitCount: Int,
     @SerializedName("job_type")
@@ -69,7 +69,7 @@ data class ViewJob(
     val clientFullname: String,
     @SerializedName("client_profile_picture")
     val clientProfile: String?,
-    val salary: String?,
+    val salary: Int,
     @SerializedName("job_type")
     val jobType: String,
     @SerializedName("job_description")
@@ -90,7 +90,7 @@ data class GetMyJobs(
 )
 
 data class UpdateJob(
-    val salary: String,
+    val salary: Int,
     @SerializedName("job_description")
     val jobDescription: String,
     val address: String,

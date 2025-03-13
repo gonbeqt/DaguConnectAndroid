@@ -51,7 +51,9 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -64,6 +66,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -106,6 +109,7 @@ import com.example.androidproject.model.client.viewResume
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
+import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -117,6 +121,7 @@ fun ProfileTradesman(
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
     updateTradesmanProfileViewModel : UpdateTradesmanProfileViewModel,
     updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
+    viewRatingsViewModel: ViewRatingsViewModel,
     LoadingUI :  @Composable () -> Unit, // Add this parameter
     initialTabIndex: Int = 0, // Default to 0 if not provided
 
@@ -515,7 +520,7 @@ fun ProfileTradesman(
                                     .padding(10.dp)
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> JobProfile(navController, tradesmanDetails)
+                                    0 -> JobProfile(navController, tradesmanDetails,viewRatingsViewModel)
                                     1 -> SettingsTradesmanScreen(navController, logoutViewModel)
                                 }
                             }
@@ -578,12 +583,19 @@ fun ProfileTradesman(
 // Keep the other composables (JobProfile, GeneralTradesmanSettings, SettingsTradesmanScreen) unchanged unless you need specific adjustments.
 
 @Composable
-fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
+fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel) {
     var scale by remember { mutableStateOf(1f) }
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
     var downloadId by remember { mutableStateOf<Long?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
 
+    val ratingsState by viewRatingsViewModel.viewRatingsState.collectAsState()
+    val tradesmanId = tradesmanDetails.userid
+
+    LaunchedEffect(Unit) {
+        viewRatingsViewModel.viewRatings(tradesmanId)
+    }
 
         val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -689,7 +701,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .weight(1f)
-                            .clickable { navController.navigate("manageprofile") }
+                            .clickable { navController.navigate("manageprofile/${tradesmanDetails.preferredWorkLocation}/${tradesmanDetails.phoneNumber}/${tradesmanDetails.workFee}/${tradesmanDetails.aboutMe}") }
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -843,10 +855,195 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Column(modifier = Modifier.fillMaxWidth().padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 50.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 16.dp)) {
+
             Text(text = "Ratings", fontSize = nameTextSize, fontWeight = FontWeight.Bold)
             Text(text = "Feedback from satisfied clients", fontSize = taskTextSize, color = Color.Gray)
-            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+        }
+        when (val viewRatings = ratingsState) {
+            is ViewRatingsViewModel.ViewRatingsState.Loading -> {
+                // Loading state (Optional: Show a progress indicator)
+            }
+            is ViewRatingsViewModel.ViewRatingsState.Success -> {
+                val ratingsList = viewRatings.data
+
+                if (ratingsList.isEmpty()) {
+                    // Ensure the text is properly centered
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                        ,
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No ratings",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    Column {
+                        ratingsList.forEach { ratings ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp)
+                                    .padding(8.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { showDialog = true },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(8.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Profile Picture
+                                    AsyncImage(
+                                        model = ratings.client_profile,
+                                        contentDescription = "Profile Picture",
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .clip(CircleShape)
+                                            .border(2.dp, Color.Gray, CircleShape)
+                                    )
+
+                                    Text(
+                                        text = ratings.client_name,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black,
+                                        fontSize = 16.sp
+                                    )
+                                    Text(
+                                        text = "${ratings.ratings} stars",
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                            if (showDialog) {
+                                AlertDialog(
+                                    containerColor = Color.White,
+                                    onDismissRequest = { showDialog = false },
+                                    title = {
+
+                                        Text(
+                                            text = "Feedback Details",
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+
+                                    },
+                                    text = {
+                                        Column(
+                                            modifier = Modifier.padding(16.dp).verticalScroll(
+                                                rememberScrollState()
+                                            )
+                                        ) {
+                                            // Profile Section
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(bottom = 8.dp)
+                                            ) {
+                                                AsyncImage(
+                                                    model = ratings.client_profile,
+                                                    contentDescription = "Profile Picture",
+                                                    modifier = Modifier
+                                                        .size(75.dp)
+                                                        .clip(CircleShape)
+                                                        .border(1.dp, Color.Gray, CircleShape)
+                                                )
+                                                Column {
+                                                    Text(
+                                                        text = ratings?.client_name ?: "Unknown",
+                                                        modifier = Modifier.padding(start = 8.dp),
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 20.sp
+                                                    )
+                                                    Row(
+                                                        modifier = Modifier.padding(bottom = 8.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Star,
+                                                            contentDescription = "Rating",
+                                                            tint = Color.Yellow
+                                                        )
+                                                        Text(
+                                                            text = "${ratings?.ratings ?: 0} stars",
+                                                            modifier = Modifier.padding(start = 4.dp)
+                                                        )
+                                                    }
+                                                }
+
+                                            }
+
+                                            // Ratings Section
+
+
+                                            // Comments Section
+                                            Text(
+                                                text = "Comments:",
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(top = 8.dp),
+                                                fontSize = 20.sp
+                                            )
+
+                                            // Add state for showing full text
+                                            var showFullText by remember { mutableStateOf(false) }
+                                            val message = ratings?.message ?: "No comments available"
+                                            val maxPreviewLength = 100 // Adjust this value as needed
+
+                                            if (message.length > maxPreviewLength) {
+                                                Column {
+                                                    Text(
+                                                        text = if (showFullText) message else "${message.take(maxPreviewLength)}......",
+                                                        modifier = Modifier.padding(top = 4.dp),
+                                                        fontSize = 16.sp,
+                                                        color = if (message.isEmpty()) Color.Gray else Color.Black
+                                                    )
+                                                    TextButton(
+                                                        onClick = { showFullText = !showFullText },
+                                                        modifier = Modifier
+                                                            .align(Alignment.End)
+                                                            .padding(top = 4.dp)
+                                                    ) {
+                                                        Text(
+                                                            text = if (showFullText) "See Less" else "See More",
+                                                            color = Color.Blue,
+                                                            fontSize = 14.sp
+                                                        )
+                                                    }
+                                                }
+                                            } else {
+                                                Text(
+                                                    text = message,
+                                                    modifier = Modifier.padding(top = 4.dp),
+                                                    fontSize = 16.sp,
+                                                    color = if (message.isEmpty()) Color.Gray else Color.Black
+                                                )
+                                            }
+                                        }
+                                    },
+                                    confirmButton = {
+                                        TextButton(onClick = { showDialog = false }) {
+                                            Text("Close", fontSize = 16.sp, color = Color.Black)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+            }
+            is ViewRatingsViewModel.ViewRatingsState.Error -> {
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
                     Text(
@@ -856,6 +1053,9 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     )
                 }
             }
+
+            }
+            else -> Unit
         }
     }
 }
