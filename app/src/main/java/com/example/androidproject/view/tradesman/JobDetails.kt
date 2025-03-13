@@ -112,7 +112,7 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Arrow Back",
                         modifier = Modifier
-                            .clickable { }
+                            .clickable {  }
                             .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
                         tint = Color(0xFF81D796)
                     )

@@ -7,10 +7,8 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-
 import android.net.Uri
 import android.os.Environment
-
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -18,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
+import com.example.androidproject.view.theme.myGradient4
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -54,6 +53,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -106,6 +106,7 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
+import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
@@ -261,14 +262,14 @@ fun ProfileTradesman(
             // Left-aligned text
             Text(
                 text = "Profile",
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Medium
             )
 
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
+                    tint = Color.Black,
                     modifier = Modifier.size(32.dp)
                 )
 
@@ -345,12 +346,8 @@ fun ProfileTradesman(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(130.dp)
-                                        .background(
-                                            brush = Brush.linearGradient(
-                                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1))
-                                            ), shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(16.dp),
+                                        .background(myGradient4, shape = RoundedCornerShape(8.dp))
+                                        .padding(16.dp)
                                 ) {
                                     Box(
                                         modifier = Modifier
@@ -373,7 +370,7 @@ fun ProfileTradesman(
                                             modifier = Modifier
                                                 .size(28.dp)
                                                 .clip(CircleShape)
-                                                .background(Color.Green)
+                                                .background(Color(0xFF42C2AE))
                                                 .align(Alignment.BottomEnd)
                                                 .clickable {
                                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+

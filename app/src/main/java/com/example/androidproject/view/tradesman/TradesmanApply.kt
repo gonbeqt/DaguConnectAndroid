@@ -1,9 +1,7 @@
 package com.example.androidproject.view.tradesman
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material.icons.outlined.Money
 import androidx.compose.material.icons.outlined.PhoneIphone
 import androidx.compose.material3.*
@@ -22,10 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -103,11 +98,10 @@ fun TradesmanApply(
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             scaffoldState = scaffoldState,
             sheetContainerColor = Color.White,
-            sheetPeekHeight = screenHeightDp * 0.92f,
+            sheetPeekHeight = screenHeightDp * 0.90f,
             sheetContent = {
                 when (viewJobState) {
                     is ViewJobViewModel.JobState.Loading -> {
-                        LoadingUI()
                     }
 
                     is ViewJobViewModel.JobState.Success -> {
@@ -127,12 +121,11 @@ fun TradesmanApply(
                             Box(
                                 modifier = Modifier
                                     .background(Color.Transparent)
-                                    .padding(10.dp)
                                     .fillMaxWidth()
                             ) {
                                 Column(
                                     modifier = Modifier
-                                        .padding(10.dp)
+                                        .padding(12.dp)
                                         .verticalScroll(rememberScrollState())
                                 ) {
                                     // Client Info Section
@@ -206,11 +199,11 @@ fun TradesmanApply(
                                     // Job Title and Posting Info
                                     Column(modifier = Modifier.padding(horizontal = 10.dp)) {
                                         Row(
-                                            modifier = Modifier.fillMaxWidth(),
+                                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
                                             Text(
-                                                text = "Hiring: $jobType",
+                                                text = "Looking for $jobType",
                                                 fontSize = 24.sp,
                                                 fontWeight = FontWeight.Medium
                                             )
@@ -222,7 +215,7 @@ fun TradesmanApply(
                                             text = "Job Date: $deadline",
                                         )
                                         Text(
-                                            text = "Applicants: 0",
+                                            text = "Applicants(0)",
                                         )
 
                                         Spacer(Modifier.height(16.dp))
@@ -246,7 +239,7 @@ fun TradesmanApply(
                                         Column(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(vertical = 10.dp),
+                                                .padding(vertical = 4.dp),
                                             verticalArrangement = Arrangement.Center,
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
@@ -340,6 +333,7 @@ fun TradesmanApply(
                                         Column(modifier = Modifier.fillMaxWidth()) {
                                             Row(
                                                 modifier = Modifier
+                                                    .padding(bottom = 100.dp)
                                                     .fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.Start,
                                                 verticalAlignment = Alignment.CenterVertically
@@ -382,7 +376,7 @@ fun TradesmanApply(
                     modifier = Modifier
                         .background(myGradient3)
                         .fillMaxWidth()
-                        .size(80.dp)
+                        .size(100.dp)
                         .padding(top = 20.dp)
                 ) {
                     Row(
