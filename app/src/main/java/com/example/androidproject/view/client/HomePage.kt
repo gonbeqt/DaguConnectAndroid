@@ -93,7 +93,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
-fun     HomeScreen(modifier: Modifier = Modifier, navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit) {
+fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
 

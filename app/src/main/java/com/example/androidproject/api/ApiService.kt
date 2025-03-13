@@ -215,7 +215,7 @@ interface ApiService {
     @POST("/client/update/profile_picture")
     suspend fun updateClientProfilePicture(@Part profilePic: MultipartBody.Part): Response<UpdateProfilePictureResponse>
 
-    @PUT("/client/update/profile_address")
+    @PUT("/client/update/profile_details")
     suspend fun updateClientDetails(@Body request: UpdateAddress): Response<UpdateAddressResponse>
 
     @Multipart

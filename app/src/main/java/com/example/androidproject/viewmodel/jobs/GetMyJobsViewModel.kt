@@ -32,7 +32,6 @@ class GetMyJobsViewModel(private val apiService: ApiService, private val context
         ).flow.cachedIn(viewModelScope)
     }
 
-    // Call this to force a refresh
     fun refreshJobs() {
         refreshTrigger.value = Unit
     }

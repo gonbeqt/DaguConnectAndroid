@@ -527,7 +527,7 @@ class MainActivity : ComponentActivity() {
                             NotificationScreen(navController, getNotificationViewModel)
                         }
                         composable("accountsettings") {
-                            AccountSettings(navController, getClientProfileViewModel)
+                            AccountSettings(navController, getClientProfileViewModel,updateClientProfileAddressViewModel)
                         }
 
 

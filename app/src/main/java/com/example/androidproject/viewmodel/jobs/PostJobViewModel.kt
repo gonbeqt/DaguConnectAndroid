@@ -38,6 +38,9 @@ class PostJobViewModel(private val apiService: ApiService, context: Context) : V
             }
         }
     }
+    fun resetState() {
+        _postJobState.value = PostJobState.Idle
+    }
 
     sealed class PostJobState {
         data object Idle : PostJobState()

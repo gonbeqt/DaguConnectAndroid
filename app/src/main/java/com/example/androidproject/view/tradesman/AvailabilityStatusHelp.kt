@@ -55,7 +55,9 @@ fun AvailabilityStatus (modifier: Modifier = Modifier, navController: NavControl
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .clickable {
-                        navController.popBackStack()
+                        navController.navigate("main_screen?selectedItem=4"){
+                            navController.popBackStack()
+                        }
                                },
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",

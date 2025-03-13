@@ -289,7 +289,9 @@ fun ContentScreen(
                 getClientProfileViewModel,
                 putJobViewModel,
                 updateClientProfilePictureViewModel,
-                selectedTab
+                LoadingUI,
+                selectedTab,
+
             )
         }
     } else {

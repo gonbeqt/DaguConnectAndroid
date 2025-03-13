@@ -107,13 +107,13 @@ fun TradesmanApply(
         }
 
         // Main Content Based on ViewJobState
-        when (viewJobState) {
+        when (val viewJob = viewJobState) {
             is ViewJobViewModel.JobState.Loading -> {
                 LoadingUI()
             }
 
             is ViewJobViewModel.JobState.Success -> {
-                val job = (viewJobState as ViewJobViewModel.JobState.Success).data
+                val job = viewJob.data
                 val date = ViewModelSetups.formatDateTime(job.job.createdAt)
                 val deadline = ViewModelSetups.formatDateTime(job.job.deadline)
                 var jobType = job.job.jobType
