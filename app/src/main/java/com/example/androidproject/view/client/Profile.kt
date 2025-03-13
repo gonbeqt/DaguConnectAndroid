@@ -474,23 +474,17 @@ fun ProfileScreen(
 @Composable
 fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJobViewModel, putJobs: PutJobViewModel) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
-
+    val postJobState by postJobViewModel.postJobState.collectAsState()
     val putJobState by putJobs.putJobState.collectAsState()
+    val context = LocalContext.current
 
 
-    when (putJobState) {
-        is PutJobViewModel.PutJobState.Success -> {
-            Toast.makeText(LocalContext.current, "Job updated successfully", Toast.LENGTH_SHORT).show()
-            putJobs.resetState()
+
+    // Force recomposition and refresh when a new post is successful
+    LaunchedEffect(postJobState) {
+        if (postJobState is PostJobViewModel.PostJobState.Success) {
+            jobsList.refresh()
         }
-        is PutJobViewModel.PutJobState.Error -> {
-            Toast.makeText(LocalContext.current, (putJobState as PutJobViewModel.PutJobState.Error).message, Toast.LENGTH_SHORT).show()
-            putJobs.resetState()
-            Log.e("PutJobViewModel", "Error: $putJobState")
-        }
-        is PutJobViewModel.PutJobState.Loading -> {}
-        is PutJobViewModel.PutJobState.Idle -> {}
-        else -> {}
     }
 
     LazyColumn( // Make it scrollable
@@ -526,7 +520,8 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJob
             onDeadlineChange = { deadline ->
                 println("Selected Deadline: $deadline")
             },
-             postJobViewModel
+             postJobViewModel,
+
         )
     }
 }
@@ -567,9 +562,24 @@ fun PostsCard(
     var editableLocation by remember { mutableStateOf(getJobs.address) }
     var editableDeadline by remember { mutableStateOf(getJobs.deadline) }
     var editableBudget by remember { mutableIntStateOf(getJobs.salary) }
+    val context = LocalContext.current
 
 
-
+    when ( putJobState) {
+        is PutJobViewModel.PutJobState.Success -> {
+            Toast.makeText(context, "Job updated successfully", Toast.LENGTH_SHORT).show()
+            putJobs.resetState()
+            isDialogVisible = false
+        }
+        is PutJobViewModel.PutJobState.Error -> {
+            Toast.makeText(context,"No Changes In The Post", Toast.LENGTH_SHORT).show()
+            putJobs.resetState()
+            isDialogVisible = true
+        }
+        is PutJobViewModel.PutJobState.Loading -> {}
+        is PutJobViewModel.PutJobState.Idle -> {}
+        else -> {}
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -827,8 +837,6 @@ fun PostsCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = {
-                                // Save the new values
-                                isDialogVisible = false
                                 onEditClick(
                                     editableBudget,
                                     editableDescription,
@@ -1058,7 +1066,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
 @Composable
 fun FabPosting(
     onDeadlineChange: (String) -> Unit,
-    postJobViewModel: PostJobViewModel,
+    postJobViewModel: PostJobViewModel
 ) {
     val postJobState by postJobViewModel.postJobState.collectAsState()
     var isSubmitting by remember { mutableStateOf(false) }
@@ -1107,6 +1115,7 @@ fun FabPosting(
             is PostJobViewModel.PostJobState.Error -> {
                     val message = postJobState as PostJobViewModel.PostJobState.Error
                     postJobViewModel.resetState()
+
                     Toast.makeText(context, message.message, Toast.LENGTH_SHORT).show()
 
             }

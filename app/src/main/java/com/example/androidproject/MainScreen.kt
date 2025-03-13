@@ -63,6 +63,7 @@ import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
+import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 import com.example.androidproject.viewmodel.report.ReportClientViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
@@ -93,6 +94,7 @@ fun MainScreen(
     updateClientProfilePictureViewModel: UpdateClientProfilePictureViewModel,
     updateTradesmanActiveStatusViewModel: UpdateTradesmanActiveStatusViewModel,
     reportClientViewModel : ReportClientViewModel,
+    viewRatingsViewModel: ViewRatingsViewModel,
     initialSelectedItem: Int = 0,
     initialSelectedTab: Int = 0,
     initialSelectedSection: Int = 0,
@@ -237,6 +239,7 @@ fun MainScreen(
             updateClientProfilePictureViewModel,
             updateTradesmanActiveStatusViewModel,
             reportClientViewModel,
+            viewRatingsViewModel,
             LoadingUI
         )
     }
@@ -271,6 +274,7 @@ fun ContentScreen(
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
     updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
     reportClientViewModel:ReportClientViewModel,
+    viewRatingsViewModel: ViewRatingsViewModel,
     LoadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
@@ -280,19 +284,7 @@ fun ContentScreen(
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel, LoadingUI,selectedTab,selectedSection)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
-            4 -> ProfileScreen(
-                modifier = modifier.padding(bottom = 0.1.dp),
-                navController,
-                logoutViewModel,
-                postJobsViewModel,
-                getMyJobsViewModel,
-                getClientProfileViewModel,
-                putJobViewModel,
-                updateClientProfilePictureViewModel,
-                LoadingUI,
-                selectedTab,
-
-            )
+            4 -> ProfileScreen(modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel, putJobViewModel, updateClientProfilePictureViewModel, LoadingUI, selectedTab,)
         }
     } else {
         when (selectedItem) {
@@ -300,7 +292,7 @@ fun ContentScreen(
             1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,LoadingUI,selectedTab,  selectedSection )
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController,getClientsBooking)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,updateTradesmanActiveStatusViewModel,LoadingUI,selectedTab)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,updateTradesmanActiveStatusViewModel,viewRatingsViewModel,LoadingUI,selectedTab)
         }
     }
 }
