@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -87,6 +87,7 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
+import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
@@ -99,8 +100,15 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel, getRecentJobsViewModel: GetRecentJobsViewModel,reportClientViewModel: ReportClientViewModel,LoadingUI : @Composable () -> Unit,initialTabIndex: Int = 0,){
-
+fun HomeTradesman(
+    modifier: Modifier,
+    navController: NavController,
+    getJobsViewModel: GetJobsViewModel,
+    getRecentJobsViewModel: GetRecentJobsViewModel,
+    reportClientViewModel: ReportClientViewModel,
+    LoadingUI: @Composable () -> Unit,
+    initialTabIndex: Int = 0
+) {
     // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
@@ -113,12 +121,8 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-
     // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableIntStateOf(0) }
-
-
-
 
     var isLoading by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
@@ -129,6 +133,14 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
     }
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
 
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+
+    val onShowSnackbar: (String) -> Unit = { message ->
+        snackbarMessage = message
+        showSnackbar = true
+    }
+
     // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
         if (isConnected.value) {
@@ -137,41 +149,42 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
             isLoading = false // Reset loading state after fetching (or handle errors)
         }
     }
+
     // Tab titles
     val tabTitles = listOf("Top Matches", "Recent Posted Jobs")
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
             .background(Color.White)
     ) {
-        Column(modifier = Modifier .fillMaxWidth()
-            .wrapContentSize()
-            .background(Color.White)) {
-
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentSize()
+                .background(Color.White)
+        ) {
             // Provide navController to the SearchField
-            TopSectionHomeTradesman(navController,windowSize )
-            Box (
+            TopSectionHomeTradesman(navController, windowSize)
+            Box(
                 modifier = modifier
                     .fillMaxSize()
                     .background(Color.White)
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-
                     Column(modifier = Modifier.fillMaxSize()) {
                         // Tabs (Fixed Choices)
                         TabRow(
                             indicator = { tabPositions ->
                                 TabRowDefaults.Indicator(
-                                    modifier = Modifier
-                                        .tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                    color = Color(0xFF42C2AE), // Change this to your desired color
-                                    height = 2.dp // Adjust thickness if needed
+                                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                    color = Color(0xFF42C2AE),
+                                    height = 2.dp
                                 )
                             },
                             selectedTabIndex = selectedTabIndex,
-                            modifier = Modifier.fillMaxWidth(), // Ensures the TabRow fills the width
-                            containerColor = Color.White // Background for the TabRow
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = Color.White
                         ) {
                             tabTitles.forEachIndexed { index, title ->
                                 Tab(
@@ -182,11 +195,13 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                                             text = title,
                                             fontSize = headerTextSize,
                                             fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.fillMaxWidth().padding(4.dp), // Fills the width inside each Tab
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(4.dp),
                                             color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
                                         )
                                     },
-                                    modifier = Modifier.weight(1f) // Ensures equal distribution across the width
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
                         }
@@ -219,8 +234,8 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                                                     isLoading = true
                                                     refreshTrigger++
                                                 } else {
-                                                    // Optionally show a toast if still no internet
-                                                    Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                                    snackbarMessage = "Still no internet connection"
+                                                    showSnackbar = true
                                                 }
                                             }
                                             .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
@@ -236,27 +251,43 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
                                 }
                             }
                         } else {
-                            if (isLoading){
+                            if (isLoading) {
                                 LoadingUI()
-                            }else{
+                            } else {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .background(Color(0xFFD9D9D9))
                                 ) {
                                     when (selectedTabIndex) {
-                                        0 -> TopMatches(navController, getJobsViewModel,reportClientViewModel,LoadingUI)
-                                        1 -> RecentJobs(navController, getRecentJobsViewModel,reportClientViewModel)
+                                        0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI, onShowSnackbar)
+                                        1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel, onShowSnackbar)
                                     }
+
                                 }
+
                             }
                         }
                     }
-                }
+
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 16.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                CustomDurationSnackbar(
+                    message = snackbarMessage ,
+                    show = showSnackbar,
+                    duration = 3000L,
+                    onDismiss = { showSnackbar = false }
+                )
             }
         }
     }
 }
+
 @Composable
 fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize) {
     Box(
@@ -268,7 +299,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             .background(Color.White)
     ) {
         Row(
-            modifier = Modifier //top nav
+            modifier = Modifier
                 .padding(top = 8.dp, start = 25.dp, end = 25.dp, bottom = 8.dp)
                 .fillMaxWidth()
                 .height(50.dp),
@@ -295,12 +326,17 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             }
         }
     }
-
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel,reportClientViewModel: ReportClientViewModel,LoadingUI : @Composable () -> Unit) {
+fun TopMatches(
+    navController: NavController,
+    getJobsViewModel: GetJobsViewModel,
+    reportClientViewModel: ReportClientViewModel,
+    LoadingUI: @Composable () -> Unit,
+    onShowSnackbar: (String) -> Unit
+) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -321,7 +357,7 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel,
             items(jobsList.itemCount) { index ->
                 val job = jobsList[index]
                 if (job != null) {
-                    TopMatchesItem(job, navController,reportClientViewModel)
+                    TopMatchesItem(job, navController, reportClientViewModel, onShowSnackbar)
                 }
             }
             item {
@@ -340,9 +376,13 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel,
     }
 }
 
-
 @Composable
-fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientViewModel: ReportClientViewModel) {
+fun TopMatchesItem(
+    getJobs: GetJobs,
+    navController: NavController,
+    reportClientViewModel: ReportClientViewModel,
+    onShowSnackbar: (String) -> Unit
+) {
     val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val windowSize = rememberWindowSizeClass()
@@ -352,7 +392,6 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
         WindowType.MEDIUM -> 32.dp
         WindowType.LARGE -> 40.dp
     }
-
 
     var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
@@ -370,8 +409,6 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
         "Others"
     )
 
-
-
     val documentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> uri?.let { reportDocument = it } }
@@ -381,22 +418,23 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
         jobType = "AC Technician"
     }
 
-
     LaunchedEffect(reportClientState) {
-        when (val reportClient = reportClientState){
-            is ReportClientViewModel.ReportClientState.Loading->{
-                //nothing
+        when (val reportClient = reportClientState) {
+            is ReportClientViewModel.ReportClientState.Loading -> {
+                // nothing
             }
-            is ReportClientViewModel.ReportClientState.Success->{
+            is ReportClientViewModel.ReportClientState.Success -> {
                 val responseReport = reportClient.data?.message
-                Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
+                if (responseReport != null) {
+                    onShowSnackbar(responseReport)
+                }
                 showReportDialog = false
                 reportClientViewModel.resetState()
             }
-            is ReportClientViewModel.ReportClientState.Error->{
+            is ReportClientViewModel.ReportClientState.Error -> {
                 val error = reportClient.message
-                Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
-                 showReportDialog = true
+                onShowSnackbar(error)
+                showReportDialog = true
                 reportClientViewModel.resetState()
             }
             else -> Unit
@@ -416,7 +454,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
         ) {
             Row {
                 AsyncImage(
-                    model = getJobs.clientProfilePicture, // Use URL here
+                    model = getJobs.clientProfilePicture,
                     contentDescription = "Profile Image",
                     modifier = Modifier
                         .size(62.dp)
@@ -443,369 +481,6 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController,reportClientVi
                                 .size(iconSize)
                                 .clickable { showMenu = true }
                         )
-
-                                // Popup Menu
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false },
-                                    modifier = Modifier.background(Color.White)
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Report", textAlign = TextAlign.Center) },
-                                        onClick = {
-                                            showMenu = false
-                                            showReportDialog = true
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row {
-                        Column {
-                            Text(
-                                text = "Looking for $jobType",
-                                fontSize = 24.sp,
-                                color = Color.Black,
-                                fontWeight = FontWeight(500)
-                            )
-                            Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                border = BorderStroke(1.dp, Color.Gray),
-                colors = CardDefaults.cardColors(Color.White)
-            ) {
-                Column(modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 10.dp)) {
-                    Text(text = getJobs.jobDescription, fontSize = 14.sp)
-                    Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
-                    Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
-                }
-                Row(modifier = Modifier.padding(start = 5.dp)) {
-                    TextButton(onClick = {}) {
-                        Text(
-                            text = "${getJobs.totalApplicants} Applicant",
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Medium,
-                            style = TextStyle(textDecoration = TextDecoration.Underline),
-                        )
-                    }
-                }
-            }
-        }
-    }
-    if (showReportDialog) {
-        Dialog(onDismissRequest = { showReportDialog = false }) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                ,
-                contentAlignment = Alignment.Center
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Reason for Report",
-                            fontSize = 20.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                                Column(modifier = Modifier.padding(top = 16.dp)) {
-                                    reasons.forEachIndexed { index, reason ->
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 8.dp)
-                                        ) {
-                                            Checkbox(
-                                                checked = selectedIndex == index,
-                                                onCheckedChange = {
-                                                    selectedIndex = if (selectedIndex == index) -1 else index
-                                                },
-                                                colors = CheckboxDefaults.colors(
-                                                    uncheckedColor = Color.Black,
-                                                    checkedColor = Color(0xFF42C2AE)
-                                                )
-                                            )
-
-                                            if (reason == "Others") {
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        text = reason,
-                                                        fontSize = 16.sp,
-                                                        fontWeight = FontWeight.Medium,
-                                                        color = Color.Black
-                                                    )
-
-                                                    if (selectedIndex == index) {
-                                                        Spacer(modifier = Modifier.width(8.dp))
-                                                        TextField(
-                                                            value = otherReason,
-                                                            onValueChange = { otherReason = it },
-                                                            placeholder = { Text("Enter other reason") },
-                                                            singleLine = true,
-                                                            modifier = Modifier
-                                                                .weight(1f) // Pushes the field to the right
-                                                                .heightIn(min = 40.dp),
-                                                            colors = TextFieldDefaults.colors(
-                                                                focusedContainerColor = Color.Transparent,
-                                                                unfocusedContainerColor = Color.Transparent,
-                                                                focusedIndicatorColor = Color.Blue,
-                                                                unfocusedIndicatorColor = Color.Gray,
-                                                                cursorColor = Color.Black
-                                                            )
-                                                        )
-                                                    }
-                                                }
-                                            } else {
-                                                Text(
-                                                    text = reason,
-                                                    fontSize = 16.sp,
-                                                    fontWeight = FontWeight.Medium,
-                                                    color = Color.Black,
-                                                    modifier = Modifier.padding(start = 8.dp)
-                                                )
-                                            }
-                                        }
-                                    }
-                                    UploadFieldScreenShot(
-                                        label = "Screenshot",
-                                        uri = reportDocument,
-                                        fileType = "image",
-                                        onUploadClick = {
-                                            documentPickerLauncher.launch("image/*")
-                                        },
-                                        onViewClick = {
-                                            reportDocument?.let { uri ->
-                                                openScreenShot(context, uri)
-                                            }
-                                        }
-                                    )
-
-                                    OutlinedTextField(
-                                        value = reasonDescription,
-                                        onValueChange = { reasonDescription = it },
-                                        placeholder = { Text("Enter Your Explanation") },
-                                        shape = RoundedCornerShape(16.dp),
-                                        maxLines = 3,
-
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(min = 100.dp),
-                                        colors = TextFieldDefaults.colors(
-                                            focusedContainerColor = Color.Transparent,
-                                            unfocusedContainerColor = Color.Transparent,
-                                            focusedIndicatorColor = Color.Blue,
-                                            unfocusedIndicatorColor = Color.Gray,
-                                            focusedLabelColor = Color.Blue,
-                                            unfocusedLabelColor = Color.Gray,
-                                            cursorColor = Color.Black
-                                        )
-                                    )
-
-                                }
-
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Button(
-                                        onClick = { showReportDialog = false },
-                                        modifier = Modifier.size(110.dp, 45.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(
-                                                0xFF42C2AE
-                                            )
-                                        )
-                                    ) {
-                                        Text("Cancel", color = Color.White)
-                                    }
-                                    Button(
-                                        onClick = {
-                                            if (selectedIndex == -1) {
-                                                // Show a message to the user indicating that they need to select a reason
-                                                Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
-                                            } else {
-                                                val selectedReason = if (selectedIndex == reasons.size - 1) {
-                                                    // If "Others" is selected, use the value from the otherReason field
-                                                    otherReason
-                                                } else {
-                                                    // Otherwise, use the selected reason from the list
-                                                    reasons[selectedIndex]
-                                                }
-                                                reportClientViewModel.reportClient(getJobs.userId,selectedReason,reasonDescription,reportDocument!!,context)
-                                            }
-
-                                        },
-                                        modifier = Modifier.size(110.dp, 45.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(
-                                                0xFF42C2AE
-                                            )
-                                        )
-                                    ) {
-                                        Text("Submit", color = Color.White)
-                                    }
-
-                                }
-                            }
-
-                        }
-
-
-                    }
-                }
-            }
-        }
-
-
-
-
-
-
-@Composable
-fun RecentJobs(navController: NavController, getRecentJobsViewModel: GetRecentJobsViewModel,reportClientViewModel: ReportClientViewModel){
-    val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
-    LazyColumn(
-        modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-
-    ) {
-        items(jobList.itemCount) { index ->
-            val job = jobList[index]
-            if (job != null) {
-                RecentJobsItem(job, navController,reportClientViewModel)
-            }
-        }
-    }
-}
-
-@Composable
-fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientViewModel: ReportClientViewModel){
-    val reportClientState by reportClientViewModel.reportClientState.collectAsState()
-    val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
-    val windowSize = rememberWindowSizeClass()
-    val context =LocalContext.current
-    val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
-    }
-    var reportDocument by remember { mutableStateOf<Uri?>(null) }
-    var showMenu by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(-1) }
-    var otherReason by remember { mutableStateOf("") }
-    var reasonDescription by remember { mutableStateOf("") }
-    var showReportDialog by remember { mutableStateOf(false) }
-    val reasons = listOf(
-        "Abusive or Harassing Behavior",
-        "Inappropriate Content or Language",
-        "Fraudulent Activity or Scam",
-        "Poor Quality of Service",
-        "Unprofessional Conduct",
-        "Safety Concerns",
-        "Others"
-    )
-    val documentPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { reportDocument = it } }
-    var jobType = getJobs.jobType
-
-    if (jobType == "Ac_technician") {
-        jobType = "AC Technician"
-    }
-
-    LaunchedEffect(reportClientState) {
-        when(val reportClient = reportClientState){
-            is ReportClientViewModel.ReportClientState.Loading ->{
-                //nothing
-            }
-            is ReportClientViewModel.ReportClientState.Success ->{
-                val responseReport = reportClient.data?.message
-                Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
-                showReportDialog = false
-                reportClientViewModel.resetState()
-            }
-            is ReportClientViewModel.ReportClientState.Error ->{
-             val error = reportClient.message
-             Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-            }
-            else -> Unit
-        }
-    }
-
-
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                navController.navigate("tradesmanapply/${getJobs.id}")
-            },
-        colors = CardDefaults.cardColors(Color.White)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp).fillMaxWidth()
-        ) {
-            Row {
-                AsyncImage(
-                    model = getJobs.clientProfilePicture, // Use URL here
-                    contentDescription = "Profile Image",
-                    modifier = Modifier
-                        .size(62.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = getJobs.clientFullname,
-                        fontSize = 16.sp,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(start = 20.dp)
-                    )
-                    Box {
-                        Icon(
-                            painter = painterResource(id = R.drawable.meatball_ic),
-                            contentDescription = "Menu Icon",
-                            modifier = Modifier
-                                .size(iconSize)
-                                .clickable { showMenu = true }
-                        )
-
                         // Popup Menu
                         DropdownMenu(
                             expanded = showMenu,
@@ -826,12 +501,15 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
             Spacer(modifier = Modifier.height(16.dp))
             Row {
                 Column {
-                    Text(text = "Looking for $jobType", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
-                    Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
-
+                    Text(
+                        text = "Looking for $jobType",
+                        fontSize = 24.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight(500)
+                    )
+                    Text(text = "Posted on $getJobsDate - ${getJobs.status}")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-
             }
             Spacer(modifier = Modifier.height(16.dp))
             Card(
@@ -858,6 +536,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
             }
         }
     }
+
     if (showReportDialog) {
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
@@ -872,7 +551,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                         .padding(16.dp)
                         .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
                     Column(
@@ -899,8 +578,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                                     Checkbox(
                                         checked = selectedIndex == index,
                                         onCheckedChange = {
-                                            selectedIndex =
-                                                if (selectedIndex == index) -1 else index
+                                            selectedIndex = if (selectedIndex == index) -1 else index
                                         },
                                         colors = CheckboxDefaults.colors(
                                             uncheckedColor = Color.Black,
@@ -928,7 +606,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                                                     placeholder = { Text("Enter other reason") },
                                                     singleLine = true,
                                                     modifier = Modifier
-                                                        .weight(1f) // Pushes the field to the right
+                                                        .weight(1f)
                                                         .heightIn(min = 40.dp),
                                                     colors = TextFieldDefaults.colors(
                                                         focusedContainerColor = Color.Transparent,
@@ -952,7 +630,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                                 }
                             }
                             UploadFieldScreenShot(
-                                label = "reportDocument",
+                                label = "Screenshot",
                                 uri = reportDocument,
                                 fileType = "image",
                                 onUploadClick = {
@@ -971,7 +649,6 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                                 placeholder = { Text("Enter Your Explanation") },
                                 shape = RoundedCornerShape(16.dp),
                                 maxLines = 3,
-
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 100.dp),
@@ -985,9 +662,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                                     cursorColor = Color.Black
                                 )
                             )
-
                         }
-
 
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -999,9 +674,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                                 onClick = { showReportDialog = false },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                    containerColor = Color(0xFF42C2AE)
                                 )
                             ) {
                                 Text("Cancel", color = Color.White)
@@ -1009,33 +682,370 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                             Button(
                                 onClick = {
                                     if (selectedIndex == -1) {
-                                        // Show a message to the user indicating that they need to select a reason
-                                        Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                                        onShowSnackbar("Please select a reason for reporting")
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
-                                            // If "Others" is selected, use the value from the otherReason field
                                             otherReason
                                         } else {
-                                            // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportClientViewModel.reportClient(getJobs.userId,selectedReason,reasonDescription,reportDocument!!,context)
+                                        reportClientViewModel.reportClient(getJobs.userId, selectedReason, reasonDescription, reportDocument!!, context)
                                     }
-
                                 },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                    containerColor = Color(0xFF42C2AE)
                                 )
                             ) {
                                 Text("Submit", color = Color.White)
                             }
-
                         }
                     }
+                }
+            }
+        }
+    }
+}
 
+@Composable
+fun RecentJobs(
+    navController: NavController,
+    getRecentJobsViewModel: GetRecentJobsViewModel,
+    reportClientViewModel: ReportClientViewModel,
+    onShowSnackbar: (String) -> Unit
+) {
+    val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    LazyColumn(
+        modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(jobList.itemCount) { index ->
+            val job = jobList[index]
+            if (job != null) {
+                RecentJobsItem(job, navController, reportClientViewModel, onShowSnackbar)
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentJobsItem(
+    getJobs: GetJobs,
+    navController: NavController,
+    reportClientViewModel: ReportClientViewModel,
+    onShowSnackbar: (String) -> Unit
+) {
+    val reportClientState by reportClientViewModel.reportClientState.collectAsState()
+    val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
+    val windowSize = rememberWindowSizeClass()
+    val context = LocalContext.current
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 25.dp
+        WindowType.MEDIUM -> 35.dp
+        WindowType.LARGE -> 45.dp
+    }
+
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var reasonDescription by remember { mutableStateOf("") }
+    var showReportDialog by remember { mutableStateOf(false) }
+    val reasons = listOf(
+        "Abusive or Harassing Behavior",
+        "Inappropriate Content or Language",
+        "Fraudulent Activity or Scam",
+        "Poor Quality of Service",
+        "Unprofessional Conduct",
+        "Safety Concerns",
+        "Others"
+    )
+
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { reportDocument = it } }
+    var jobType = getJobs.jobType
+
+    if (jobType == "Ac_technician") {
+        jobType = "AC Technician"
+    }
+
+    LaunchedEffect(reportClientState) {
+        when (val reportClient = reportClientState) {
+            is ReportClientViewModel.ReportClientState.Loading -> {
+                // nothing
+            }
+            is ReportClientViewModel.ReportClientState.Success -> {
+                val responseReport = reportClient.data?.message
+                if (responseReport != null) {
+                    onShowSnackbar(responseReport)
+                }
+                showReportDialog = false
+                reportClientViewModel.resetState()
+            }
+            is ReportClientViewModel.ReportClientState.Error -> {
+                val error = reportClient.message
+                onShowSnackbar(error)
+            }
+            else -> Unit
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate("tradesmanapply/${getJobs.id}")
+            },
+        colors = CardDefaults.cardColors(Color.White)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp).fillMaxWidth()
+        ) {
+            Row {
+                AsyncImage(
+                    model = getJobs.clientProfilePicture,
+                    contentDescription = "Profile Image",
+                    modifier = Modifier
+                        .size(62.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = getJobs.clientFullname,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
+                    Box {
+                        Icon(
+                            painter = painterResource(id = R.drawable.meatball_ic),
+                            contentDescription = "Menu Icon",
+                            modifier = Modifier
+                                .size(iconSize)
+                                .clickable { showMenu = true }
+                        )
+                        // Popup Menu
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                            modifier = Modifier.background(Color.White)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Report", textAlign = TextAlign.Center) },
+                                onClick = {
+                                    showMenu = false
+                                    showReportDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row {
+                Column {
+                    Text(text = "Looking for $jobType", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
+                    Text(text = "Posted on $getJobsDate - ${getJobs.status}")
+                }
+                Spacer(modifier = Modifier.weight(1f))
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(1.dp, Color.Gray),
+                colors = CardDefaults.cardColors(Color.White)
+            ) {
+                Column(modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 10.dp)) {
+                    Text(text = getJobs.jobDescription, fontSize = 14.sp)
+                    Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
+                    Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
+                }
+                Row(modifier = Modifier.padding(start = 5.dp)) {
+                    TextButton(onClick = {}) {
+                        Text(
+                            text = "${getJobs.totalApplicants} Applicant",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Medium,
+                            style = TextStyle(textDecoration = TextDecoration.Underline),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (showReportDialog) {
+        Dialog(onDismissRequest = { showReportDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Reason for Report",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Column(modifier = Modifier.padding(top = 16.dp)) {
+                            reasons.forEachIndexed { index, reason ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    Checkbox(
+                                        checked = selectedIndex == index,
+                                        onCheckedChange = {
+                                            selectedIndex = if (selectedIndex == index) -1 else index
+                                        },
+                                        colors = CheckboxDefaults.colors(
+                                            uncheckedColor = Color.Black,
+                                            checkedColor = Color(0xFF42C2AE)
+                                        )
+                                    )
+
+                                    if (reason == "Others") {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = reason,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color.Black
+                                            )
+
+                                            if (selectedIndex == index) {
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                TextField(
+                                                    value = otherReason,
+                                                    onValueChange = { otherReason = it },
+                                                    placeholder = { Text("Enter other reason") },
+                                                    singleLine = true,
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .heightIn(min = 40.dp),
+                                                    colors = TextFieldDefaults.colors(
+                                                        focusedContainerColor = Color.Transparent,
+                                                        unfocusedContainerColor = Color.Transparent,
+                                                        focusedIndicatorColor = Color.Blue,
+                                                        unfocusedIndicatorColor = Color.Gray,
+                                                        cursorColor = Color.Black
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Text(
+                                            text = reason,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = reportDocument,
+                                fileType = "image",
+                                onUploadClick = {
+                                    documentPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    reportDocument?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
+
+                            OutlinedTextField(
+                                value = reasonDescription,
+                                onValueChange = { reasonDescription = it },
+                                placeholder = { Text("Enter Your Explanation") },
+                                shape = RoundedCornerShape(16.dp),
+                                maxLines = 3,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Blue,
+                                    unfocusedIndicatorColor = Color.Gray,
+                                    focusedLabelColor = Color.Blue,
+                                    unfocusedLabelColor = Color.Gray,
+                                    cursorColor = Color.Black
+                                )
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Button(
+                                onClick = { showReportDialog = false },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF42C2AE)
+                                )
+                            ) {
+                                Text("Cancel", color = Color.White)
+                            }
+                            Button(
+                                onClick = {
+                                    if (selectedIndex == -1) {
+                                        onShowSnackbar("Please select a reason for reporting")
+                                    } else {
+                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                            otherReason
+                                        } else {
+                                            reasons[selectedIndex]
+                                        }
+                                        reportClientViewModel.reportClient(getJobs.userId, selectedReason, reasonDescription, reportDocument!!, context)
+                                    }
+                                },
+                                modifier = Modifier.size(110.dp, 45.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF42C2AE)
+                                )
+                            ) {
+                                Text("Submit", color = Color.White)
+                            }
+                        }
+                    }
                 }
             }
         }

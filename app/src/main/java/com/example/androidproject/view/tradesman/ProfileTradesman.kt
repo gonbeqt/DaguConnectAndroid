@@ -12,6 +12,7 @@ import android.os.Environment
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -106,6 +107,7 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
+import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
@@ -120,15 +122,13 @@ fun ProfileTradesman(
     navController: NavController,
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
-    updateTradesmanProfileViewModel : UpdateTradesmanProfileViewModel,
-    updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
+    updateTradesmanProfileViewModel: UpdateTradesmanProfileViewModel,
+    updateTradesmanActiveStatusViewModel: UpdateTradesmanActiveStatusViewModel,
     viewRatingsViewModel: ViewRatingsViewModel,
-    LoadingUI :  @Composable () -> Unit, // Add this parameter
-    initialTabIndex: Int = 0, // Default to 0 if not provided
-
-
+    LoadingUI: @Composable () -> Unit,
+    initialTabIndex: Int = 0
 ) {
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    // Function to check network connectivity
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
@@ -137,43 +137,41 @@ fun ProfileTradesman(
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
     }
 
-
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
 
-    //state of changing profile
+    val onShowSnackbar: (String) -> Unit = { message ->
+        snackbarMessage = message
+        showSnackbar = true
+    }
+
+    // State for profile update
     val updateProfileState by updateTradesmanProfileViewModel.updateTradesmanProfileState.collectAsState()
 
     LaunchedEffect(updateProfileState) {
-        when (val updatingProfile = updateProfileState){
-            is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Success->{
+        when (val updatingProfile = updateProfileState) {
+            is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Success -> {
                 updateTradesmanProfileViewModel.resetState()
-                Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                onShowSnackbar("Profile updated successfully")
             }
-            is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Error ->{
+            is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Error -> {
                 val errorMessage = updatingProfile.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-
+                onShowSnackbar(errorMessage)
             }
-            else-> Unit
+            else -> Unit
         }
     }
 
     val updateTradesmanActiveStatusState by updateTradesmanActiveStatusViewModel.updateStatusState.collectAsState()
 
-
-
-    // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableIntStateOf(0) }
-
-    // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
-
-
-    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
     val tabNames = listOf("Job Profile", "General")
     val viewTradesmanProfilestate by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -182,34 +180,27 @@ fun ProfileTradesman(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            selectedImageUri = it  // Update the local state with the new image URI
-            //Here ata iimplement ung viewmodel
-            updateTradesmanProfileViewModel.updateTradesmanProfile(selectedImageUri!!,context)
-
+            selectedImageUri = it
+            updateTradesmanProfileViewModel.updateTradesmanProfile(selectedImageUri!!, context)
         }
     }
+
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         val imagesGranted = permissions[Manifest.permission.READ_MEDIA_IMAGES] == true
         val userSelectedGranted = permissions[Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED] == true
 
         when {
-            imagesGranted -> {
-                // Full access granted, launch your image picker
-                imageLauncher.launch("image/*")
-            }
-            userSelectedGranted -> {
-                // Partial access granted, handle selected media
-                imageLauncher.launch("image/*") // System picker will show only selected media
-            }
+            imagesGranted -> imageLauncher.launch("image/*")
+            userSelectedGranted -> imageLauncher.launch("image/*")
             else -> {
                 val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
                     context as Activity,
                     Manifest.permission.READ_MEDIA_IMAGES
                 )
                 if (shouldShowRationale) {
-                    Toast.makeText(context, "Permission is required to select a profile picture", Toast.LENGTH_LONG).show()
+                    onShowSnackbar("Permission is required to select a profile picture")
                 } else {
-                    Toast.makeText(context, "Permission denied. Enable it in Settings.", Toast.LENGTH_LONG).show()
+                    onShowSnackbar("Permission denied. Enable it in Settings.")
                     val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.parse("package:${context.packageName}")
                     context.startActivity(intent)
@@ -218,369 +209,409 @@ fun ProfileTradesman(
         }
     }
 
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
         if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
+            isLoading = true
+            delay(200.milliseconds)
             viewTradesmanProfileViewModel.viewTradesmanProfile()
-            isLoading = false // Reset loading state after fetching (or handle errors)
+            isLoading = false
         }
     }
+
     LaunchedEffect(updateTradesmanActiveStatusState) {
         when (val updatingStatus = updateTradesmanActiveStatusState) {
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
                 updateTradesmanActiveStatusViewModel.resetState()
-                viewTradesmanProfileViewModel.viewTradesmanProfile() // Refresh profile
-                Toast.makeText(context, "Status updated successfully", Toast.LENGTH_SHORT).show()
-                // isAvailable is already updated optimistically, no need to change unless server disagrees
+                viewTradesmanProfileViewModel.viewTradesmanProfile()
+                snackbarMessage = "Status updated successfully"
+                showSnackbar = true
             }
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
                 val errorMessage = updatingStatus.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                snackbarMessage = errorMessage
+                showSnackbar = true
             }
             else -> Unit
         }
     }
 
-    Column(
+    // Use a top-level Box to layer content and snackbar
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(WindowInsets.systemBars.asPaddingValues())
-
     ) {
-
-        Row(
-            modifier = Modifier
-                .padding(top = 10.dp, start = 25.dp, end = 25.dp)
-                .fillMaxWidth()
-                .height(50.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left-aligned text
-            Text(
-                text = "Profile",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Medium
-            )
-
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .padding(top = 10.dp, start = 25.dp, end = 25.dp)
+                    .fillMaxWidth()
+                    .height(50.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Profile",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium
+                )
                 Icon(
                     imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
                     modifier = Modifier.size(32.dp)
                 )
+            }
 
-
-        }
-        // Handle different states based on connectivity and data loading
-        if (!isConnected.value) {
-            // No internet connection
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No Internet Connection",
-                        fontSize = 18.sp,
-                        color = Color.Red,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Please check your internet and try again.",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Retry button (only fetch data when clicked)
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                // Re-check network connectivity
-                                isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                if (isConnected.value) {
-                                    // Show loading state and trigger data fetch
-                                    isLoading = true
-                                    refreshTrigger++
-                                } else {
-                                    // Optionally show a toast if still no internet
-                                    Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
+            if (!isConnected.value) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Retry",
-                            color = Color.White,
-                            fontSize = 16.sp,
+                            text = "No Internet Connection",
+                            fontSize = 18.sp,
+                            color = Color.Red,
                             fontWeight = FontWeight.Bold
                         )
-                    }
-                }
-            }
-        } else {
-            if (isLoading){
-                LoadingUI()
-            }else{
-                when (val profileState =viewTradesmanProfilestate){
-                    is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
-                        // Show loading indicator for initial or ongoing loading
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            LoadingUI()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Please check your internet and try again.",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .clickable {
+                                    isConnected.value =
+                                        checkNetworkConnectivity(connectivityManager)
+                                    if (isConnected.value) {
+                                        isLoading = true
+                                        refreshTrigger++
+                                    } else {
+                                        onShowSnackbar("Still no internet connection")
+                                    }
+                                }
+                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "Retry",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
-                    is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success -> {
-                        // Handle success state
-                        val isUpdating = updateTradesmanActiveStatusState is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Loading
-                        val tradesmanDetails =profileState.data
-                        var isAvailable by remember { mutableStateOf(tradesmanDetails.isActiveBoolean) } // State to track availability
-                        var previousAvailability by remember { mutableStateOf(isAvailable) } // Track previous state for rollback
-                        // Profile Info
-                        Column(
-                            modifier = Modifier.fillMaxWidth().background(Color.White)
-                        ) {
-                            Box(modifier = Modifier.padding(10.dp)) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(130.dp)
-                                        .background(myGradient4, shape = RoundedCornerShape(8.dp))
-                                        .padding(16.dp)
-                                ) {
-                                    Box(
+                }
+            } else {
+                if (isLoading) {
+                    LoadingUI()
+                } else {
+                    when (val profileState = viewTradesmanProfilestate) {
+                        is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                LoadingUI()
+                            }
+                        }
+
+                        is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success -> {
+                            val isUpdating =
+                                updateTradesmanActiveStatusState is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Loading
+                            val tradesmanDetails = profileState.data
+                            var isAvailable by remember { mutableStateOf(tradesmanDetails.isActiveBoolean) }
+                            var previousAvailability by remember { mutableStateOf(isAvailable) }
+
+                            Column(modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)) {
+                                Box(modifier = Modifier.padding(10.dp)) {
+                                    Row(
                                         modifier = Modifier
-                                            .size(100.dp)
-
-                                            .background(Color.White, RoundedCornerShape(50.dp))
+                                            .fillMaxWidth()
+                                            .height(130.dp)
+                                            .background(
+                                                myGradient4,
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .padding(16.dp)
                                     ) {
-                                        // Tradesman image
-                                        AsyncImage(
-                                            model = selectedImageUri ?: tradesmanDetails.profilePic,
-                                            contentDescription = "Tradesman Image",
-                                            modifier = Modifier
-                                                .size(100.dp)
-                                                .clip(CircleShape),
-                                            contentScale = ContentScale.Crop
-
-
-                                        )
                                         Box(
                                             modifier = Modifier
-                                                .size(28.dp)
-                                                .clip(CircleShape)
-                                                .background(Color(0xFF42C2AE))
-                                                .align(Alignment.BottomEnd)
-                                                .clickable {
-                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
-                                                        permissionLauncher.launch(arrayOf(
-                                                            Manifest.permission.READ_MEDIA_IMAGES,
-                                                            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-                                                        ))
-                                                    } else {
-                                                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
-                                                            imageLauncher.launch("image/*")
-                                                        } else {
-                                                            permissionLauncher.launch(arrayOf(Manifest.permission.READ_MEDIA_IMAGES))
-                                                        }
-                                                    }
-                                                },
-                                            contentAlignment = Alignment.Center
+                                                .size(100.dp)
+                                                .background(Color.White, RoundedCornerShape(50.dp))
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Edit,
-                                                contentDescription = "Edit Profile Picture",
-                                                tint = Color.White,
+                                            AsyncImage(
+                                                model = selectedImageUri
+                                                    ?: tradesmanDetails.profilePic,
+                                                contentDescription = "Tradesman Image",
                                                 modifier = Modifier
-                                                    .size(20.dp)
-
+                                                    .size(100.dp)
+                                                    .clip(CircleShape),
+                                                contentScale = ContentScale.Crop
                                             )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
-                                        Row{
-                                            Text(
-                                                text = tradesmanDetails.tradesmanFullName ?: "N/A",
-                                                color = Color.White,
-                                                style = TextStyle(
-                                                    fontSize = 18.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                                                Icon(
-                                                    painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),                                                contentDescription = "Profile Verified",
-                                                    tint = Color.Black,
-                                                    modifier = Modifier.size(24.dp)
-                                                )
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(28.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFF42C2AE))
+                                                    .align(Alignment.BottomEnd)
+                                                    .clickable {
+                                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                                            permissionLauncher.launch(
+                                                                arrayOf(
+                                                                    Manifest.permission.READ_MEDIA_IMAGES,
+                                                                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                                                                )
+                                                            )
+                                                        } else {
+                                                            if (ContextCompat.checkSelfPermission(
+                                                                    context,
+                                                                    Manifest.permission.READ_MEDIA_IMAGES
+                                                                ) == PackageManager.PERMISSION_GRANTED
+                                                            ) {
+                                                                imageLauncher.launch("image/*")
+                                                            } else {
+                                                                permissionLauncher.launch(
+                                                                    arrayOf(
+                                                                        Manifest.permission.READ_MEDIA_IMAGES
+                                                                    )
+                                                                )
+                                                            }
+                                                        }
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Edit,
                                                     contentDescription = "Edit Profile Picture",
                                                     tint = Color.White,
-                                                    modifier = Modifier
-                                                        .size(26.dp)
-                                                        .background(Color.Transparent, shape = CircleShape)
-                                                        .clickable{
-                                                            navController.navigate(navController.navigate("accountsettingstradesman")
-                                                            )
-                                                        }
+                                                    modifier = Modifier.size(20.dp)
                                                 )
                                             }
-
                                         }
-                                        Text(
-                                            text = tradesmanDetails.email ?: "N/A",
-                                            color = Color.White,
-                                            style = TextStyle(fontSize = 14.sp)
-                                        )
-
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Row {
-                                            Box(
-                                                modifier = Modifier
-                                                    .width(100.dp)
-                                                    .height(30.dp)
-                                                    .clip(RoundedCornerShape(50.dp))
-                                                    .background(Color.White)
-                                                    .clickable (enabled = !isUpdating) { // Disable when loading
-                                                        previousAvailability = isAvailable // Store previous state
-                                                        isAvailable = !isAvailable // Optimistic update
-                                                        updateTradesmanActiveStatusViewModel.updateStatusState(isAvailable)
-                                                    },
-                                                contentAlignment = Alignment.Center
-                                            ) {
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Column {
+                                            Row {
+                                                Text(
+                                                    text = tradesmanDetails.tradesmanFullName
+                                                        ?: "N/A",
+                                                    color = Color.White,
+                                                    style = TextStyle(
+                                                        fontSize = 18.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
                                                 Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.Center
+                                                    Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween
                                                 ) {
                                                     Icon(
-                                                        Icons.Default.Circle,
-                                                        contentDescription = if (isAvailable) "Available" else "Unavailable",
-                                                        tint = if (isAvailable) Color.Green else Color.Red, // Change color based on state
-                                                        modifier = Modifier.size(16.dp)
+                                                        painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),
+                                                        contentDescription = "Profile Verified",
+                                                        tint = Color.Black,
+                                                        modifier = Modifier.size(24.dp)
                                                     )
-                                                    Spacer(modifier = Modifier.width(4.dp))
-                                                    Text(
-                                                        text = if (isAvailable) "Available" else "Unavailable",
-                                                        color = Color.Black,
-                                                        style = TextStyle(fontSize = 14.sp)
+                                                    Icon(
+                                                        imageVector = Icons.Default.Edit,
+                                                        contentDescription = "Edit Profile",
+                                                        tint = Color.White,
+                                                        modifier = Modifier
+                                                            .size(26.dp)
+                                                            .background(
+                                                                Color.Transparent,
+                                                                shape = CircleShape
+                                                            )
+                                                            .clickable {
+                                                                navController.navigate("accountsettingstradesman")
+                                                            }
                                                     )
-
                                                 }
-
                                             }
-                                            Box(
-                                                modifier = Modifier
-                                                    .padding(start = 10.dp)
-                                                    .size(26.dp)
-                                                    .background(Color.White, RoundedCornerShape(50.dp))
-                                                    .clickable { navController.navigate("availabilitystatus") }
-                                                    .border(1.dp, Color.Gray, RoundedCornerShape(50.dp)),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.QuestionMark,
-                                                    contentDescription = "Edit profile and skills",
-                                                    tint = Color.Black
-                                                )
+                                            Text(
+                                                text = tradesmanDetails.email ?: "N/A",
+                                                color = Color.White,
+                                                style = TextStyle(fontSize = 14.sp)
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Row {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .width(100.dp)
+                                                        .height(30.dp)
+                                                        .clip(RoundedCornerShape(50.dp))
+                                                        .background(Color.White)
+                                                        .clickable(enabled = !isUpdating) {
+                                                            previousAvailability = isAvailable
+                                                            isAvailable = !isAvailable
+                                                            updateTradesmanActiveStatusViewModel.updateStatusState(
+                                                                isAvailable
+                                                            )
+                                                        },
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.Center
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Default.Circle,
+                                                            contentDescription = if (isAvailable) "Available" else "Unavailable",
+                                                            tint = if (isAvailable) Color.Green else Color.Red,
+                                                            modifier = Modifier.size(16.dp)
+                                                        )
+                                                        Spacer(modifier = Modifier.width(4.dp))
+                                                        Text(
+                                                            text = if (isAvailable) "Available" else "Unavailable",
+                                                            color = Color.Black,
+                                                            style = TextStyle(fontSize = 14.sp)
+                                                        )
+                                                    }
+                                                }
+                                                Box(
+                                                    modifier = Modifier
+                                                        .padding(start = 10.dp)
+                                                        .size(26.dp)
+                                                        .background(
+                                                            Color.White,
+                                                            RoundedCornerShape(50.dp)
+                                                        )
+                                                        .clickable { navController.navigate("availabilitystatus") }
+                                                        .border(
+                                                            1.dp,
+                                                            Color.Gray,
+                                                            RoundedCornerShape(50.dp)
+                                                        ),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.QuestionMark,
+                                                        contentDescription = "Edit profile and skills",
+                                                        tint = Color.Black
+                                                    )
+                                                }
                                             }
                                         }
+                                    }
+                                }
+                            }
 
+                            Column {
+                                TabRow(
+                                    selectedTabIndex = selectedTabIndex,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    tabNames.forEachIndexed { index, title ->
+                                        Tab(
+                                            selected = selectedTabIndex == index,
+                                            onClick = { selectedTabIndex = index },
+                                            text = { Text(title, fontSize = 14.sp) }
+                                        )
+                                    }
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White)
+                                        .padding(10.dp)
+                                ) {
+                                    when (selectedTabIndex) {
+                                        0 -> JobProfile(
+                                            navController,
+                                            tradesmanDetails,
+                                            viewRatingsViewModel,
+                                            onShowSnackbar
+                                        )
+
+                                        1 -> SettingsTradesmanScreen(navController, logoutViewModel,onShowSnackbar)
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(bottom = 80.dp),
+                                        contentAlignment = Alignment.BottomCenter
+                                    ) {
+                                        CustomDurationSnackbar(
+                                            message = snackbarMessage,
+                                            show = showSnackbar,
+                                            duration = 3000L,
+                                            onDismiss = { showSnackbar = false }
+                                        )
+                                        Log.d("Snackbar", snackbarMessage)
+                                    }
+                                }
+
+                            }
+
+                        }
+
+                        is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Error -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "Error: ${profileState.message}",
+                                        color = Color.Red,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .clickable {
+                                                isConnected.value =
+                                                    checkNetworkConnectivity(connectivityManager)
+                                                if (isConnected.value) {
+                                                    isLoading = true
+                                                    refreshTrigger++
+                                                } else {
+                                                    onShowSnackbar("Still no internet connection")
+                                                }
+                                            }
+                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Retry",
+                                            color = Color.White,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     }
                                 }
                             }
                         }
 
-                        // Tab Selection
-                        Column {
-                            TabRow(
-                                selectedTabIndex = selectedTabIndex,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                tabNames.forEachIndexed { index, title ->
-                                    Tab(
-                                        selected = selectedTabIndex == index,
-                                        onClick = { selectedTabIndex = index },
-                                        text = { Text(title, fontSize = 14.sp) },
-                                    )
-                                }
-                            }
-
-                            // Tab Content
+                        else -> {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color.White)
-                                    .padding(10.dp)
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                when (selectedTabIndex) {
-                                    0 -> JobProfile(navController, tradesmanDetails,viewRatingsViewModel)
-                                    1 -> SettingsTradesmanScreen(navController, logoutViewModel)
-                                }
+                                LoadingUI()
                             }
                         }
                     }
-                    is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Error -> {
-                        // Handle error state
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "Error: ${profileState.message}",
-                                    color = Color.Red,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                // Retry button (only fetch data when clicked)
-                                Box(
-                                    modifier = Modifier
-                                        .clickable {
-                                            // Re-check network connectivity
-                                            isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                            if (isConnected.value) {
-                                                // Show loading state and trigger data fetch
-                                                isLoading = true
-                                                refreshTrigger++
-                                            } else {
-                                                // Optionally show a toast if still no internet
-                                                Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = "Retry",
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    else -> {
-                        // Default case (e.g., initial state or unexpected state)
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            LoadingUI()
-                        }
-                    }
+
                 }
+
             }
-            // Handle different states including loading, success, error, and initial state
 
         }
+
     }
+
 }
 
 
-// Keep the other composables (JobProfile, GeneralTradesmanSettings, SettingsTradesmanScreen) unchanged unless you need specific adjustments.
-
 @Composable
-fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel) {
+fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel,onShowSnackbar: (String) -> Unit) {
     var scale by remember { mutableStateOf(1f) }
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
@@ -640,11 +671,14 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
         tradesmanDetails
     }
 
+
+
     // Rest of the composable remains the same...
     Column(modifier = Modifier
         .padding(2.dp)
         .padding(bottom = 100.dp)
-        .verticalScroll(rememberScrollState())) {
+        .verticalScroll(rememberScrollState()))
+    {
         Box(modifier = Modifier.border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier.padding(10.dp)) {
                 if (tradesmanDetails.isApprove == 0) {
@@ -678,7 +712,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                     horizontalArrangement = Arrangement.spacedBy(10.dp)){
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -693,7 +727,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
 
                     Box(
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { }
                             .background(
                                 color = Color(0xFF122826),
                                 shape = RoundedCornerShape(12.dp)
@@ -821,12 +855,14 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                                     if (fileUrl != null) {
                                         try {
                                             downloadId = downloadFileTradesman(context, fileUrl, fileName)
-                                            Toast.makeText(context, "Download success", Toast.LENGTH_SHORT).show()
+                                            onShowSnackbar("Download success")
                                         } catch (e: Exception) {
-                                            Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                            onShowSnackbar("Download failed")
+
                                         }
                                     } else {
-                                        Toast.makeText(context, "No file available", Toast.LENGTH_SHORT).show()
+                                        onShowSnackbar("No file available")
+
                                     }
                                 }
                         )
@@ -853,7 +889,9 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Column(modifier = Modifier.fillMaxWidth().padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 16.dp)) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 16.dp)) {
 
             Text(text = "Ratings", fontSize = nameTextSize, fontWeight = FontWeight.Bold)
             Text(text = "Feedback from satisfied clients", fontSize = taskTextSize, color = Color.Gray)
@@ -939,9 +977,11 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                                     },
                                     text = {
                                         Column(
-                                            modifier = Modifier.padding(16.dp).verticalScroll(
-                                                rememberScrollState()
-                                            )
+                                            modifier = Modifier
+                                                .padding(16.dp)
+                                                .verticalScroll(
+                                                    rememberScrollState()
+                                                )
                                         ) {
                                             // Profile Section
                                             Row(
@@ -1041,7 +1081,9 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
 
             }
             is ViewRatingsViewModel.ViewRatingsState.Error -> {
-                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
                     Text(
@@ -1055,6 +1097,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
             }
             else -> Unit
         }
+
     }
 }
 
@@ -1108,7 +1151,8 @@ fun GeneralTradesmanSettings(
                     contentDescription = null,
 
                     tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier
+                        .size(24.dp)
                         .clickable { onClick() }
 
                 )
@@ -1118,7 +1162,7 @@ fun GeneralTradesmanSettings(
 }
 
 @Composable
-fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel) {
+fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel,onShowSnackbar: (String) -> Unit) {
     var isChecked by remember { mutableStateOf(true) }
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
@@ -1127,14 +1171,17 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
             // Clear tokens and navigate regardless of result
             TokenManager.clearToken()
             AccountManager.clearAccountData()
-            Toast.makeText(context, "logout successful", Toast.LENGTH_SHORT).show()
+            onShowSnackbar("Logout successful")
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }
             logoutViewModel.resetLogoutResult()
         }
     }
-    Column(modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxSize().padding(bottom = 100.dp)) {
+    Column(modifier = Modifier
+        .verticalScroll(rememberScrollState())
+        .fillMaxSize()
+        .padding(bottom = 100.dp)) {
 
             Card(
                 modifier = Modifier
@@ -1240,7 +1287,9 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
                 modifier = Modifier.fillMaxSize()
             ) {
                 Row(
-                    modifier = Modifier.align(Alignment.CenterStart).padding(16.dp), // Aligns Row to center-start
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(16.dp), // Aligns Row to center-start
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
 

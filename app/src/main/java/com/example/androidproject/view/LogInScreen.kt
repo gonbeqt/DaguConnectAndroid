@@ -3,9 +3,12 @@ package com.example.androidproject.view
 import LogoutViewModel
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +29,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -36,6 +43,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
@@ -44,6 +52,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +72,7 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.LoginViewModel
+import kotlinx.coroutines.delay
 
 @Preview(showBackground = true)
 @Composable
@@ -77,8 +88,8 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     val context = LocalContext.current
     var showSuspendedDialog by remember { mutableStateOf(false) }
 
-
-
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
             // Clear tokens and navigate regardless of result
@@ -103,8 +114,8 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     showSuspendedDialog = true
                     return@LaunchedEffect
                 }else{
-                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-
+                    snackbarMessage = "Login successful"
+                    showSnackbar = true
                     navController.navigate("main_screen") {
                         popUpTo("login") { inclusive = true }
                     }
@@ -112,7 +123,8 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 viewModel.resetState()
             }
             is LoginViewModel.LoginState.Error -> {
-                Toast.makeText(context, loginStatus.message, Toast.LENGTH_SHORT).show()
+                snackbarMessage = loginStatus.message
+                showSnackbar = true
                 viewModel.resetState()
             }
             else -> {}
@@ -136,7 +148,8 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(myGradient),
+            .background(myGradient)
+            .padding(WindowInsets.systemBars.asPaddingValues()),
         contentAlignment = Alignment.Center
     ) {
         // Set an image as the background
@@ -236,6 +249,10 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     email = email,
                     password = password,
                     windowSize = windowSize,
+                    onShowSnackbar = { message ->
+                        snackbarMessage = message
+                        showSnackbar = true
+                    },
                     modifier = Modifier.constrainAs(loginButton) {
                         top.linkTo(forgotPassword.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
@@ -255,6 +272,19 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     }
                 )
             }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            CustomDurationSnackbar(
+                message = snackbarMessage,
+                show = showSnackbar,
+                duration = 3000L,
+                onDismiss = { showSnackbar = false }
+            )
         }
     }
     // Suspension Dialog
@@ -429,20 +459,17 @@ fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier,navCont
     )
 }
 @Composable
-fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-
+fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize,onShowSnackbar: (String) -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = {
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(context, "Fields cannot be empty", Toast.LENGTH_SHORT).show()
+                onShowSnackbar("Fields cannot be empty")
             } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
+                onShowSnackbar("Invalid email format")
             } else if (password.length < 8) {
-                Toast.makeText(context, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
-              
-            }
+                onShowSnackbar("Password must be at least 8 characters")
 
+            }
             else {
                 viewModel.login(email, password)
             }
@@ -453,6 +480,8 @@ fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: 
     ) {
         Text(text = "Log In", color = Color.White, fontSize = 16.sp)
     }
+
+
 }
 
 @Composable
@@ -479,3 +508,44 @@ fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier:
     }
 }
 
+@Composable
+fun CustomDurationSnackbar(
+    message: String,
+    show: Boolean,
+    duration: Long = 3000L,
+    onDismiss: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = show,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Snackbar(
+            modifier = Modifier
+                .wrapContentWidth()
+                .padding(bottom = 8.dp)
+                .padding(horizontal = 16.dp)
+                .shadow(5.dp)
+                ,
+            containerColor = Color.Gray,
+            contentColor = Color.White,
+
+            content = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = message, fontSize = 16.sp, color = Color.White)
+                }
+            }
+        )
+    }
+
+    // Handle duration
+    LaunchedEffect(show) {
+        if (show) {
+            delay(duration)
+            onDismiss()
+        }
+    }
+}
