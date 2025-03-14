@@ -1836,7 +1836,13 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
     if (jobType == "Electrical_work") {
         jobType = "Electrical Work"
     }
-
+    val statusColor = when (myJob.status.lowercase()) {
+        "pending" -> Color(0xFFFFA500) // Orange
+        "active" -> Color(0xFF00FF00)  // Green
+        "completed" -> Color(0xFF0000FF) // Blue
+        "declined", "cancelled" -> Color(0xFFFF0000) // Red
+        else -> Color.Gray // Default fallback
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -1877,7 +1883,7 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-                        Text(text = myJob.status, fontSize = 14.sp)
+                        Text(text = myJob.status, color = statusColor, fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -2055,7 +2061,7 @@ fun PendingMySubmissionsTradesmanItem(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("tradesmanapplicationpending/${myJob.jobId}")
+                                navController.navigate("tradesmanapplicationpending/${myJob.id}/${myJob.jobId}")
                             }
                             .background(
                                 color = Color.Transparent,
@@ -2247,7 +2253,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {"tradesmanapplicationactive" }, // Add implementation for click if needed
+            .clickable {navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2319,7 +2325,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}")}
                         .background(
                             color = Color.Transparent,
                         )
@@ -2367,7 +2373,7 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {navController.navigate("tradesmanapplicationdecline") }, // Add implementation for click if needed
+            .clickable {navController.navigate("tradesmanapplicationdecline/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2441,7 +2447,7 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                     Box(
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("hiringdetails/{jobId}")
+                                navController.navigate("tradesmanapply/${myJob.jobId}")
                             }
                             .background(
                                 color = Color.Transparent,
@@ -2457,7 +2463,7 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                     Box(
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("tradesmanapplicationdecline")
+                                navController.navigate("tradesmanapplicationdecline/${myJob.id}/${myJob.jobId}")
                             }
                             .background(
                                 color = Color.Transparent,
@@ -2509,7 +2515,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanapplicationcompleted") }, // Add implementation for click if needed
+            .clickable { navController.navigate("tradesmanapplicationcompleted/${myJob.id}/${myJob.jobId}") },
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2580,7 +2586,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable {navController.navigate("tradesmanapplicationcompleted/${myJob.id}/${myJob.jobId}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -2632,7 +2638,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { "tradesmanapplicationcancelled"}, // Add implementation for click if needed
+            .clickable {navController.navigate( "tradesmanapplicationcancelled/${myJob.id}/${myJob.jobId}")}, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2711,7 +2717,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { }
+                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}")}
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)

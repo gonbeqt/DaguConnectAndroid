@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,12 +23,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController import com.example.androidproject.R
+import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun TradesmanApplicationDeclineDetails(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanApplicationDeclineDetails(jobId:String,jobs:String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -45,6 +49,15 @@ fun TradesmanApplicationDeclineDetails(modifier: Modifier = Modifier, navControl
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    val jobID = jobId.toIntOrNull() ?: return
+    val jobS = jobs.toIntOrNull() ?: return
+
+    val bookingPendingState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        bookingPendingState.refresh()
+    }
+    val selectedBooking = bookingPendingState.itemSnapshotList.items
+        .firstOrNull { it.id == jobID && it.status == "Declined" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,10 +152,14 @@ fun TradesmanApplicationDeclineDetails(modifier: Modifier = Modifier, navControl
                                 color = Color.Gray,
                                 text = "Requested by"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "Client"
-                            )
+                            if (selectedBooking != null) {
+                                selectedBooking.cancelledBy?.let {
+                                    Text(
+                                        fontSize = smallTextSize,
+                                        text = it
+                                    )
+                                }
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -155,10 +172,12 @@ fun TradesmanApplicationDeclineDetails(modifier: Modifier = Modifier, navControl
                                 color = Color.Gray,
                                 text = "Request Date and Time"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "03-09-2025 10:30 AM"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.createdAt
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -171,10 +190,14 @@ fun TradesmanApplicationDeclineDetails(modifier: Modifier = Modifier, navControl
                                 color = Color.Gray,
                                 text = "Reason"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "Found already a tradesman"
-                            )
+                            if (selectedBooking != null) {
+                                selectedBooking.cancelledReason?.let {
+                                    Text(
+                                        fontSize = smallTextSize,
+                                        text = it
+                                    )
+                                }
+                            }
                         }
 
 
@@ -187,7 +210,7 @@ fun TradesmanApplicationDeclineDetails(modifier: Modifier = Modifier, navControl
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { navController.navigate("tradesmanapplicationdecline") }
+                    .clickable { navController.navigate("tradesmanapplicationdecline/${selectedBooking?.id}/${jobS}") }
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

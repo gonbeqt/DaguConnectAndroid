@@ -685,23 +685,35 @@ class MainActivity : ComponentActivity() {
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
                             TradesmanApplicationPending(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
                         }
-                        composable("tradesmanapplicationdecline") {
-                            TradesmanApplicationDecline(modifier = Modifier, navController)
+                        composable("tradesmanapplicationdecline/{jobId}/{jobs}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
+                            TradesmanApplicationDecline(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
                         }
-                        composable("tradesmanapplicationactive") {
-                            TradesmanApplicationActive(modifier = Modifier, navController)
+                        composable("tradesmanapplicationactive/{jobId}/{jobs}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
+                            TradesmanApplicationActive(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
                         }
-                        composable("tradesmanapplicationdeclinedetails") {
-                            TradesmanApplicationDeclineDetails(modifier = Modifier, navController)
+                        composable("tradesmanapplicationdeclinedetails/{jobId}/{jobs}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
+                            TradesmanApplicationDeclineDetails(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel)
                         }
-                        composable("tradesmanapplicationcompleted") {
-                            TradesmanApplicationCompleted(modifier = Modifier, navController)
+                        composable("tradesmanapplicationcompleted/{jobId}/{jobs}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
+                            TradesmanApplicationCompleted(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel,viewJobViewModel)
                         }
-                        composable("tradesmanapplicationcancelled") {
-                            TradesmanApplicationCancelled(modifier = Modifier, navController)
+                        composable("tradesmanapplicationcancelled/{jobId}/{jobs}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
+                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
                         }
-                        composable("tradesmanapplicationcanceldetails") {
-                            TradesmanApplicationCancelDetails(modifier = Modifier, navController)
+                        composable("tradesmanapplicationcanceldetails/{jobId}/{jobs}") {backStackEntry ->
+                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
+                            TradesmanApplicationCancelDetails(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel)
                         }
 
 
