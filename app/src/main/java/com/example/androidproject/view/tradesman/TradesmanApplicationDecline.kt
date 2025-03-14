@@ -38,17 +38,15 @@ import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
-import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
-import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanApplicationPending(jobId: String,jobs :String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel,getJobs: ViewJobViewModel) {
+fun TradesmanApplicationDecline(jobId: String, jobs :String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, getJobs: ViewJobViewModel) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -79,7 +77,7 @@ fun TradesmanApplicationPending(jobId: String,jobs :String, modifier: Modifier =
 
     // Find the booking with the matching jobId and "Pending" status
     val selectedBooking = bookingPendingState.itemSnapshotList.items
-        .firstOrNull { it.id == jobID && it.status == "Pending" }
+        .firstOrNull { it.id == jobID && it.status == "Declined" }
     when (val getjobs = jobsState ){
         is ViewJobViewModel.JobState.Loading -> {
 
@@ -149,7 +147,7 @@ fun TradesmanApplicationPending(jobId: String,jobs :String, modifier: Modifier =
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Your application is Pending",
+                                    text = "Your application is Declined",
                                     fontSize = nameTextSize,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
@@ -525,7 +523,7 @@ fun TradesmanApplicationPending(jobId: String,jobs :String, modifier: Modifier =
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {}
+                                .clickable {navController.navigate("tradesmanapplicationdeclinedetails/${selectedBooking?.id}/${jobS}")}
                                 .background(
                                     color = Color.Transparent,
                                     shape = RoundedCornerShape(12.dp)
@@ -534,7 +532,7 @@ fun TradesmanApplicationPending(jobId: String,jobs :String, modifier: Modifier =
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "OK", fontSize = nameTextSize)
+                            Text(text = "Declination Details", fontSize = nameTextSize)
                         }
                     }
                 }

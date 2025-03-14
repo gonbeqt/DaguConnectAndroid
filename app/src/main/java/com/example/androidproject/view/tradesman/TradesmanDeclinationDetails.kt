@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,13 +22,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController import com.example.androidproject.R
+import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 
 
 @Composable
-fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, navController: NavController ,getTradesmanBooking: GetTradesmanBookingViewModel
+) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -45,6 +51,15 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: Na
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    val jobID = jobId.toIntOrNull() ?: return
+    val bookingDeclinedState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        bookingDeclinedState.refresh()
+    }
+
+    // Find the booking with the matching jobId and "Pending" status
+    val selectedBooking = bookingDeclinedState.itemSnapshotList.items
+        .firstOrNull { it.id == jobID && it.bookingStatus == "Declined" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,10 +154,12 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: Na
                                 color = Color.Gray,
                                 text = "Requested by"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "You"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.clientFullName
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -155,10 +172,12 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: Na
                                 color = Color.Gray,
                                 text = "Request Date and Time"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "03-09-2025 10:30 AM"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.createdAt
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -171,13 +190,13 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: Na
                                 color = Color.Gray,
                                 text = "Reason"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "Conflict Schedule"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.cancelReason
+                                )
+                            }
                         }
-
-
                     }
 
                 }
@@ -187,7 +206,11 @@ fun TradesmanDeclinationDetails(modifier: Modifier = Modifier, navController: Na
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {navController.navigate("tradesmanjobdecline")}
+                    .clickable {
+                        if (selectedBooking != null) {
+                            navController.navigate("tradesmanjobdecline/${selectedBooking.id}")
+                        }
+                    }
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

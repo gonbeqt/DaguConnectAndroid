@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Notifications
@@ -39,6 +40,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -52,6 +55,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,6 +78,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -117,6 +122,7 @@ fun ProfileScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     putJobs: PutJobViewModel,
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
+    LoadingUI : @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
 
@@ -248,7 +254,7 @@ fun ProfileScreen(
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Medium
                 )
-                Row (){
+
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Notifications Icon",
@@ -257,14 +263,8 @@ fun ProfileScreen(
                             .size(35.dp)
                             .clickable { navController.navigate("notification") }
                     )
-                    Icon(imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings Icon",
-                        tint = Color.Black,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clickable { navController.navigate("accountsettings") }
-                    )
-                }
+
+
 
             }
         }
@@ -315,10 +315,8 @@ fun ProfileScreen(
                 }
             }
         } else {
-            if (isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    isLoading = true
-                }
+            if (isLoading){
+                LoadingUI()
             } else {
                 when (val state = profileState) {
                     is GetClientProfileViewModel.ClientProfileState.Loading -> {
@@ -393,12 +391,26 @@ fun ProfileScreen(
                                     }
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
-                                        Text(
-                                            text = profile.fullname,
-                                            color = Color.White,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                            Text(
+                                                text = profile.fullname,
+                                                color = Color.White,
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Edit Profile Picture",
+                                                tint = Color.White,
+                                                modifier = Modifier
+                                                    .size(26.dp)
+                                                    .background(Color.Transparent, shape = CircleShape)
+                                                    .clickable{
+                                                        navController.navigate("accountsettings")
+                                                    }
+                                            )
+                                        }
+
                                         Text(text = profile.email, color = Color.White)
                                         Text(text = profile.address, color = Color.White)
                                         Text(text = profile.phoneNumber, color = Color.White)
@@ -466,26 +478,19 @@ fun ProfileScreen(
 
 
 @Composable
-fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel,postJobViewModel: PostJobViewModel, putJobs: PutJobViewModel) {
+fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJobViewModel, putJobs: PutJobViewModel) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
-    var postsList by remember { mutableStateOf<List<ServicePosting>>(emptyList()) }
-
+    val postJobState by postJobViewModel.postJobState.collectAsState()
     val putJobState by putJobs.putJobState.collectAsState()
-    // Refresh when entering this screen again
-    LaunchedEffect(Unit) {
-        getMyJobsViewModel.refreshJobs()
-    }
+    val context = LocalContext.current
 
-    when (putJobState){
-        is PutJobViewModel.PutJobState.Success -> {
-            Toast.makeText(LocalContext.current, "Job updated successfully", Toast.LENGTH_SHORT).show()
-        } is PutJobViewModel.PutJobState.Error -> {
-            Toast.makeText(LocalContext.current, (putJobState as PutJobViewModel.PutJobState.Error).message, Toast.LENGTH_SHORT).show()
-            Log.e("PutJobViewModel", "Error: $putJobState")
+
+
+    // Force recomposition and refresh when a new post is successful
+    LaunchedEffect(postJobState) {
+        if (postJobState is PostJobViewModel.PostJobState.Success) {
+            jobsList.refresh()
         }
-        is PutJobViewModel.PutJobState.Loading -> {}
-        is PutJobViewModel.PutJobState.Idle -> {}
-        else -> {}
     }
 
     LazyColumn( // Make it scrollable
@@ -518,13 +523,11 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel,postJobViewModel: PostJobV
     ) {
         Log.d("fab", "fab")
         FabPosting(
-            onPostNewService = { newPost ->
-                postsList = postsList + newPost
-            },
             onDeadlineChange = { deadline ->
                 println("Selected Deadline: $deadline")
             },
-            postJobViewModel
+             postJobViewModel,
+
         )
     }
 }
@@ -532,12 +535,11 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel,postJobViewModel: PostJobV
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PostsCard(
-    onEditClick: (String, String, String,String) -> Unit,
+    onEditClick: (Int, String, String, String) -> Unit,
     onApplicantsClick: () -> Unit,
     getJobs: GetJobs,
     putJobs: PutJobViewModel
 ) {
-
     val windowSize = rememberWindowSizeClass()
 
     val nameTextSize = when (windowSize.width) {
@@ -559,29 +561,65 @@ fun PostsCard(
     val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
     var isDialogVisible by remember { mutableStateOf(false) }
+
+    // Initialize editable states with the current job data
     var editableJobType by remember { mutableStateOf(getJobs.jobType) }
     var editableDescription by remember { mutableStateOf(getJobs.jobDescription) }
     var editableLocation by remember { mutableStateOf(getJobs.address) }
-    var editableDeadline by remember { mutableStateOf(getJobs.deadline) } // Added deadline
-    var editableBudget by remember { mutableDoubleStateOf(getJobs.salary) }
-
-    val originalJobType = remember { mutableStateOf("") }
-    val originalDescription = remember { mutableStateOf("") }
-    val originalBudget = remember { mutableDoubleStateOf(0.0) }
-    val originalDeadline = remember { mutableStateOf("") }
-
-    var selectedCategories = remember { mutableStateListOf<String>() }
-
+    var editableDeadline by remember { mutableStateOf(getJobs.deadline) }
+    var editableBudget by remember { mutableIntStateOf(getJobs.salary) }
+    val context = LocalContext.current
+    val today = LocalDate.now()
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val pickedDate = LocalDate.of(year, month + 1, dayOfMonth)
+            if (!pickedDate.isBefore(today)) {
+                selectedDate = pickedDate
+                val formattedDate = pickedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                editableDeadline = formattedDate
+            } else {
+                Toast.makeText(context, "You cannot select a past date!", Toast.LENGTH_SHORT).show()
+            }
+        },
+        today.year,
+        today.monthValue - 1,
+        today.dayOfMonth
+    ).apply {
+        datePicker.minDate = System.currentTimeMillis()
+    }
+    val locationOptions = listOf(
+        "Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
+        "Bayambang", "Binalonan", "Binmaley", "Bolinao", "Bugallon", "Burgos", "Calasiao",
+        "Dagupan City", "Dasol", "Infanta", "Labrador", "Laoac", "Lingayen", "Mabini", "Malasiqui",
+        "Manaoag", "Mangaldan", "Mangatarem", "Mapandan", "Natividad", "Pozorrubio", "Rosales",
+        "San Fabian", "San Jacinto", "San Manuel", "San Nicolas", "San Quintin", "Santa Barbara",
+        "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
+        "Urdaneta City", "Villasis"
+    )
+    when ( putJobState) {
+        is PutJobViewModel.PutJobState.Success -> {
+            Toast.makeText(context, "Job updated successfully", Toast.LENGTH_SHORT).show()
+            putJobs.resetState()
+            isDialogVisible = false
+        }
+        is PutJobViewModel.PutJobState.Error -> {
+            Toast.makeText(context,"No Changes In The Post", Toast.LENGTH_SHORT).show()
+            putJobs.resetState()
+            isDialogVisible = true
+        }
+        is PutJobViewModel.PutJobState.Loading -> {}
+        is PutJobViewModel.PutJobState.Idle -> {}
+        else -> {}
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = Color.White)
-            .clip(RoundedCornerShape(8.dp)
-            )
-
+            .clip(RoundedCornerShape(8.dp))
     ) {
-        Box(modifier = Modifier.background(color = Color.White).shadow(1.dp)
-        ) {
+        Box(modifier = Modifier.background(color = Color.White).shadow(1.dp)) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -591,14 +629,13 @@ fun PostsCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-
                     Text(
-                        text = "Looking for $editableJobType",
+                        text = "Looking for ${getJobs.jobType}",
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
                     TextButton(
-                        onClick = { isDialogVisible = true }, // Show dialog when clicked
+                        onClick = { isDialogVisible = true },
                         colors = ButtonDefaults.buttonColors(Color.White),
                         modifier = Modifier
                             .border(1.dp, Color.Black, shape = RoundedCornerShape(8.dp))
@@ -631,12 +668,11 @@ fun PostsCard(
                     color = Color.Black,
                     fontWeight = FontWeight.Normal
                 )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)){
-                    Text(text = "Job Address:",
-                        fontWeight = FontWeight.Bold, color = Color.Gray, fontSize =taskTextSize)
-                    Text(text = editableLocation, fontSize = smallTextSize,fontWeight = FontWeight.Bold, color = Color.Black,)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = "Job Address:", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = taskTextSize)
+                    Text(text = editableLocation, fontSize = smallTextSize, fontWeight = FontWeight.Bold, color = Color.Black)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)){
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = "Budget:",
                         fontSize = taskTextSize,
@@ -644,7 +680,7 @@ fun PostsCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${editableBudget.toInt()} ₱",
+                        text = "₱ ${editableBudget.toInt()} ",
                         fontSize = taskTextSize,
                         color = Color.Black,
                         fontWeight = FontWeight.Bold
@@ -656,19 +692,14 @@ fun PostsCard(
                         fontSize = taskTextSize,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray
-
                     )
                     Text(
                         text = "${getJobs.jobType}",
                         fontSize = taskTextSize,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
-
                     )
                 }
-
-
-
 
                 Text(
                     text = "Applicants: ${getJobs.totalApplicants}",
@@ -677,9 +708,8 @@ fun PostsCard(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onApplicantsClick() }
                 )
-                Text(text = "Job Deadline: $deadline", fontSize = 16.sp, color = Color.Red) // Display Deadline
+                Text(text = "Job Deadline: $deadline", fontSize = 16.sp, color = Color.Red)
 
-                // Other card content
                 Text(
                     text = "Posted on $date - ${getJobs.status}",
                     fontSize = 14.sp,
@@ -689,7 +719,7 @@ fun PostsCard(
         }
     }
 
-    // pop up dialog for editing posting
+    // Pop-up dialog for editing posting
     if (isDialogVisible) {
         Dialog(onDismissRequest = { isDialogVisible = false }) {
             Card(
@@ -717,190 +747,137 @@ fun PostsCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
-                    // Title TextField with Border
 
-                        OutlinedTextField(
-                            value = editableJobType,
-                            onValueChange = { editableJobType = it },
-                            label = { Text("Job type") },
-                            shape = RoundedCornerShape(16.dp),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 56.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
+                    // Job Type (Read-only)
+                    OutlinedTextField(
+                        value = getJobs.jobType,
+                        onValueChange = { /* No action, read-only */ },
+                        label = { Text("Job Type") },
+                        enabled = false,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Gray,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Gray,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Gray
                         )
+                    )
+
+                    // Location
+                    DropDown(
+                        label = "Location",
+                        options = locationOptions,
+                        selectedOption = editableLocation,
+                        onOptionSelected = { editableLocation = it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
 
-                    // Description TextField with Border
-                        OutlinedTextField(
-                            value = editableDescription,
-                            onValueChange = { editableDescription = it },
-                            label = { Text("Description") },
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 56.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
+                    // Estimated Budget
+                    OutlinedTextField(
+                        value = editableBudget.toString(),
+                        onValueChange = { newValue ->
+                            editableBudget = newValue.toIntOrNull() ?: 0
+                        },
+                        label = { Text("Estimated Budget") },
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Blue,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Blue,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
                         )
+                    )
 
-
-                        OutlinedTextField(value = editableLocation,
-                            onValueChange = { editableLocation = it },
-                            label = { Text("Location") },
-                            shape = RoundedCornerShape(16.dp),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 56.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                        )
-
-                    // Rate TextField with Border
-
-                        OutlinedTextField(
-                            value = editableBudget.toString(),
-                            onValueChange = { editableBudget = it.toDoubleOrNull() ?: 0.0 },
-                            label = { Text("Estimated Budget") },
-                            shape = RoundedCornerShape(16.dp),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 56.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                        )
-                        OutlinedTextField(
-                            value = editableDeadline,
-                            onValueChange = { editableDeadline = it },
-                            label = { Text("Deadline") },
-                            shape = RoundedCornerShape(16.dp),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 56.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                        )
-
-                    Column(
-                        modifier = Modifier.padding(5.dp),
-                        verticalArrangement = Arrangement.spacedBy(5.dp)
-
+                    Button(
+                        onClick = { datePickerDialog.show() },
+                        modifier = Modifier
+                            .width(360.dp)
+                            .heightIn(min = 56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        border = BorderStroke(1.dp, Color.Gray)
                     ) {
-                        Text(
-                            text = "Select Service Category",
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-
+                        Row(
+                            modifier = Modifier.fillMaxWidth().offset(x = (-10).dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val categories = listOf(
-                                "Carpenter",
-                                "Painter",
-                                "Welder",
-                                "Electrician",
-                                "Plumber",
-                                "Mason",
-                                "Roofer",
-                                "AC Technician",
-                                "Mechanic",
-                                "Cleaner"
+                            Icon(
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = "Calendar Icon",
+                                tint = Color.Gray
                             )
-
-                            categories.forEach { category ->
-                                val isSelected = selectedCategories.contains(category)
-                                Box(
-                                    modifier = Modifier
-
-                                        .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
-                                        .clip(RoundedCornerShape(30.dp))
-                                        .background(if (isSelected) Color(0xFF3CC0B0) else Color.White)
-                                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = category,
-                                        color = if (isSelected) Color.White else Color.Black
-                                    )
-                                }
-                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (editableDeadline.isNotEmpty()) editableDeadline else "Select Deadline",
+                                fontSize = 16.sp,
+                                color = if (editableDeadline.isNotEmpty()) Color.Black else Color.Gray                            )
                         }
                     }
 
+                    // Description
+                    OutlinedTextField(
+                        value = editableDescription,
+                        onValueChange = { editableDescription = it },
+                        label = { Text("Description") },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Blue,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Blue,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
+                        )
+                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        Button(onClick = {
-                            // Restore the original values if cancel is clicked
-                            editableJobType = originalJobType.value
-                            editableDescription = originalDescription.value
-                            editableBudget = originalBudget.doubleValue
-                            editableDeadline = originalDeadline.value
-                            isDialogVisible = false
-                        }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
-                            ) {
+                        Button(
+                            onClick = {
+                                isDialogVisible = false
+                            },
+                            colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
+                        ) {
                             Text("Cancel")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = {
-                            // Save the new values
-                            isDialogVisible = false
-                            onEditClick(
-                                editableBudget.toString(),
-                                editableDescription,
-                                editableLocation,
-                                editableDeadline
-                            )
-                        }, colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))) {
+                        Button(
+                            onClick = {
+                                onEditClick(
+                                    editableBudget,
+                                    editableDescription,
+                                    editableLocation,
+                                    editableDeadline
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
+                        ) {
                             Text("Save")
                         }
                     }
                 }
-
             }
         }
     }
@@ -1113,34 +1090,48 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-    fun FabPosting(
-        onPostNewService: (ServicePosting) -> Unit,
-        onDeadlineChange:(String) ->Unit,
-        postJobViewModel: PostJobViewModel,
-    ) {
-        val postJobState by postJobViewModel.postJobState.collectAsState()
-        var isSubmitting by remember { mutableStateOf(false) }
-        var isDialogVisible by remember { mutableStateOf(false) }
-        var applicantCount by remember { mutableStateOf("") } // Use simple variables for input
-        var description by remember { mutableStateOf("") }
-        var location by remember { mutableStateOf("") }
-        var rate by remember { mutableStateOf("") }
-        var selectedCategories = remember { mutableStateListOf<String>() }
-        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val context = LocalContext.current
-        val today = LocalDate.now() // Get today's date
-        var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
-        var deadline by remember { mutableStateOf("") }
-        var jobType by remember { mutableStateOf("") }
+fun FabPosting(
+    onDeadlineChange: (String) -> Unit,
+    postJobViewModel: PostJobViewModel
+) {
+    val postJobState by postJobViewModel.postJobState.collectAsState()
+    var isSubmitting by remember { mutableStateOf(false) }
+    var isDialogVisible by remember { mutableStateOf(false) }
+    var applicantCount by remember { mutableStateOf("Select applicant count") }
+    var description by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("Select location") }
+    var rate by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("Select job category") }
+    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    val context = LocalContext.current
+    val today = LocalDate.now()
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var deadline by remember { mutableStateOf("") }
+    var jobType by remember { mutableStateOf("") }
 
+    val applicantOptions = (1..10).map { it.toString() }
+    val locationOptions = listOf(
+        "Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
+        "Bayambang", "Binalonan", "Binmaley", "Bolinao", "Bugallon", "Burgos", "Calasiao",
+        "Dagupan City", "Dasol", "Infanta", "Labrador", "Laoac", "Lingayen", "Mabini", "Malasiqui",
+        "Manaoag", "Mangaldan", "Mangatarem", "Mapandan", "Natividad", "Pozorrubio", "Rosales",
+        "San Fabian", "San Jacinto", "San Manuel", "San Nicolas", "San Quintin", "Santa Barbara",
+        "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
+        "Urdaneta City", "Villasis"
+    )
+    val categoryOptions = listOf(
+        "Carpenter", "Painter", "Welder", "Electrician", "Plumber",
+        "Mason", "Roofer", "AC Technician", "Mechanic", "Cleaner"
+    )
 
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
             val pickedDate = LocalDate.of(year, month + 1, dayOfMonth)
-            if (!pickedDate.isBefore(today)) { // Ensure it's today or later
+            if (!pickedDate.isBefore(today)) {
                 selectedDate = pickedDate
                 val formattedDate = pickedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 deadline = formattedDate
@@ -1149,261 +1140,206 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                 Toast.makeText(context, "You cannot select a past date!", Toast.LENGTH_SHORT).show()
             }
         },
-        today.year,  // Default year
-        today.monthValue - 1, // Default month (zero-based index)
-        today.dayOfMonth // Default day
+        today.year,
+        today.monthValue - 1,
+        today.dayOfMonth
     ).apply {
-        datePicker.minDate = System.currentTimeMillis() // Set minimum selectable date to today
+        datePicker.minDate = System.currentTimeMillis()
     }
 
-    when (postJobState) {
-        is PostJobViewModel.PostJobState.Success -> {
-            if (isSubmitting) { // Only show toast if post was triggered by user
+    LaunchedEffect(postJobState) {
+        when (postJobState) {
+            is PostJobViewModel.PostJobState.Success -> {
                 val message = postJobState as PostJobViewModel.PostJobState.Success
                 Toast.makeText(context, message.message.message, Toast.LENGTH_SHORT).show()
-                isSubmitting = false // Reset after showing toast
+                postJobViewModel.resetState()
             }
-        }
-
-        is PostJobViewModel.PostJobState.Error -> {
-            if (isSubmitting) {
+            is PostJobViewModel.PostJobState.Error -> {
                 val message = postJobState as PostJobViewModel.PostJobState.Error
+                postJobViewModel.resetState()
                 Toast.makeText(context, message.message, Toast.LENGTH_SHORT).show()
-                isSubmitting = false
             }
+            is PostJobViewModel.PostJobState.Loading -> {}
+            else -> Unit
         }
-        is PostJobViewModel.PostJobState.Loading -> {}
-        is PostJobViewModel.PostJobState.Idle -> {}
-        else -> {}
     }
 
-        FloatingActionButton(
-            onClick = {
-                applicantCount = ""
-                description = ""
-                location = ""
-                rate = ""
-                selectedCategories.clear()
-                selectedDate = null
-                deadline = ""
-                jobType = ""
-                isDialogVisible = true },
-            containerColor = Color.Gray,
-            contentColor = Color.White,
-            shape = CircleShape
-        ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Icon")
-        }
+    FloatingActionButton(
+        onClick = {
+            applicantCount = "Select applicant count"
+            description = ""
+            location = "Select location"
+            rate = ""
+            selectedCategory = "Select job category"
+            selectedDate = null
+            deadline = ""
+            jobType = ""
+            isDialogVisible = true
+        },
+        containerColor = Color.Gray,
+        contentColor = Color.White,
+        shape = CircleShape
+    ) {
+        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Icon")
+    }
 
-        if (isDialogVisible) {
-            Dialog(onDismissRequest = { isDialogVisible = false }) {
-                Card(
+    if (isDialogVisible) {
+        Dialog(onDismissRequest = { isDialogVisible = false }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .verticalScroll(rememberScrollState()),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(16.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .verticalScroll(rememberScrollState()),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    Column(
+                    Text(
+                        text = "Create New Post",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = "Provide details of your new service",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+
+                    // Applicants Count Dropdown
+                    DropDown(
+                        label = "Applicants Count",
+                        options = applicantOptions,
+                        selectedOption = applicantCount,
+                        onOptionSelected = { applicantCount = it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Description TextField
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Description") },
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                            .fillMaxWidth()
+                            .heightIn(min = 50.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Blue,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Blue,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
+                        )
+                    )
+
+                    // Location Dropdown
+                    DropDown(
+                        label = "Location",
+                        options = locationOptions,
+                        selectedOption = location,
+                        onOptionSelected = { location = it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Estimated Budget TextField
+                    OutlinedTextField(
+                        value = rate,
+                        onValueChange = { rate = it },
+                        label = { Text("Estimated Budget") },
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 50.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Blue,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Blue,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
+                        )
+                    )
+
+                    // Deadline Button
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Button(
+                        onClick = { datePickerDialog.show() },
+                        modifier = Modifier
+                            .width(360.dp)
+                            .heightIn(min = 56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        border = BorderStroke(1.dp, Color.Gray)
                     ) {
-                        Text(
-                            text = "Create New Post",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                        Text(
-                            text = "Provide details of your new service",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
-
-                        // Title TextField
-                        OutlinedTextField(
-                            value = applicantCount,
-                            onValueChange = { applicantCount = it },
-                            label = { Text("Applicants Count") },
-                            shape = RoundedCornerShape(12.dp),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 26.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                        )
-
-                        // Description TextField
-                        OutlinedTextField(
-                            value = description,
-                            onValueChange = { description = it },
-                            label = { Text("Description") },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 50.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                        )
-                        OutlinedTextField(
-                            value = location,
-                            onValueChange = { location = it },
-                            label = { Text("Location") },
-                            shape = RoundedCornerShape(12.dp),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 50.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                        )
-
-                        // Rate TextField
-                        OutlinedTextField(
-                            value = rate,
-                            onValueChange = { rate = it },
-                            label = { Text("Estimated Budget") },
-                            shape = RoundedCornerShape(12.dp),
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 50.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Button(
-                            onClick = { datePickerDialog.show() },
-                            modifier = Modifier
-                                .width(360.dp)
-                                .heightIn(min = 56.dp)
-                                ,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White
-                            ),
-                            border = BorderStroke(1.dp, Color.Gray),
-
-                            ) {
-                            Row (Modifier.fillMaxWidth().offset(x = (-10).dp),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically){
-                                Icon(imageVector = Icons.Default.CalendarToday,
-                                    contentDescription = "Calendar Icon",
-                                    tint = Color.Gray)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (deadline.isNotEmpty()) deadline else "Select Deadline",
-                                    fontSize = 16.sp,
-                                    color = Color.Gray
-                                )
-                            }
-
-                        }
-
-                        Column(
-                            modifier = Modifier.padding(5.dp),
-                            verticalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Text(text = "Select Service Category", fontWeight = FontWeight.Bold)
-
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                val categories = listOf(
-                                    "Carpenter",
-                                    "Painter",
-                                    "Welder",
-                                    "Electrician",
-                                    "Plumber",
-                                    "Mason",
-                                    "Roofer",
-                                    "AC Technician",
-                                    "Mechanic",
-                                    "Cleaner"
-                                )
-
-                                categories.forEach { category ->
-                                    val isSelected = selectedCategories.contains(category)
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable(interactionSource = MutableInteractionSource(), indication = null) {
-                                                if (isSelected) {
-                                                    selectedCategories.remove(category) // Remove if already selected
-                                                    jobType = ""
-                                                } else if (selectedCategories.size < 1) {
-                                                    selectedCategories.add(category)
-                                                    jobType = category// Add only if less than 3
-                                                }
-                                            }
-                                            .border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
-                                            .clip(RoundedCornerShape(30.dp))
-                                            .background(if (isSelected) Color(0xFF3CC0B0) else Color.White)
-                                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                                    ) {
-                                        Text(
-                                            text = category,
-                                            color = if (isSelected) Color.White else Color.Black
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
+                            modifier = Modifier.fillMaxWidth().offset(x = (-10).dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Button(onClick = { isDialogVisible = false }
-                                ,colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))) {
-                                Text("Cancel")
-                            }
+                            Icon(
+                                imageVector = Icons.Default.CalendarToday,
+                                contentDescription = "Calendar Icon",
+                                tint = Color.Gray
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Button(onClick = {
+                            Text(
+                                text = if (deadline.isNotEmpty()) deadline else "Select Deadline",
+                                fontSize = 16.sp,
+                                color = if (deadline.isNotEmpty()) Color.Black else Color.Gray                            )
+                        }
+                    }
+
+                    // Category Dropdown
+                    DropDown(
+                        label = "Service Category",
+                        options = categoryOptions,
+                        selectedOption = selectedCategory,
+                        onOptionSelected = {
+                            selectedCategory = it
+                            jobType = it
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            onClick = { isDialogVisible = false },
+                            colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
+                        ) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
                                 isSubmitting = true
 
-                                // Validate empty fields first
-                                if (rate.isEmpty() || applicantCount.isEmpty() || jobType.isEmpty() || description.isEmpty() || location.isEmpty() || deadline.isEmpty()) {
+                                // Validate empty fields or placeholder values
+                                if (rate.isEmpty() ||
+                                    applicantCount == "Select applicant count" ||
+                                    selectedCategory == "Select job category" ||
+                                    description.isEmpty() ||
+                                    location == "Select location" ||
+                                    deadline.isEmpty()
+                                ) {
                                     Toast.makeText(context, "Please fill in all fields.", Toast.LENGTH_SHORT).show()
                                     isSubmitting = false
                                     return@Button
                                 }
 
-                                // Validate if rate and applicantCount are numbers
                                 val rateInt = rate.toDoubleOrNull()
                                 val applicantCountInt = applicantCount.toIntOrNull()
 
@@ -1419,13 +1355,12 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                     return@Button
                                 }
 
-                                if (jobType == "AC Technician") jobType = "Ac_technician"
+                                val finalJobType = if (jobType == "AC Technician") "Ac_technician" else jobType
 
-                                // Post job only if all inputs are valid
                                 postJobViewModel.postJob(
                                     salary = rateInt,
                                     applicantLimitCount = applicantCountInt,
-                                    jobType = jobType,
+                                    jobType = finalJobType,
                                     jobDescription = description,
                                     location = location,
                                     status = "available",
@@ -1433,15 +1368,72 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                                 )
 
                                 isDialogVisible = false
-                                //onPostNewService(newPost) // Send the new post to the parent Composable
-
-                            },colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
-                            ) {
-                                Text("Post")
-                            }
+                            },
+                            colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
+                        ) {
+                            Text("Post")
                         }
                     }
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropDown(
+    label: String,
+    options: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors()
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val isPlaceholder = selectedOption == "Select job category" ||
+            selectedOption == "Select location" ||
+            selectedOption == "Select applicant count"
+    val textColor = if (isPlaceholder) Color.Gray else Color.Black
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = selectedOption,
+            onValueChange = {},
+            label = { Text(label) },
+            readOnly = true,
+            textStyle = TextStyle(color = textColor),
+            trailingIcon = {
+                Icon(
+                    Icons.Filled.ArrowDropDown,
+                    contentDescription = "Dropdown",
+                    modifier = Modifier.clickable { expanded = true }
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color.Transparent,
+                focusedBorderColor = Color.LightGray,
+                unfocusedBorderColor = Color.Gray,
+            ),
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.width(310.dp).background(Color.White)
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}

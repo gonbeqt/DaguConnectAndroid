@@ -65,12 +65,28 @@ import com.google.accompanist.flowlayout.FlowRow
 
 
 @Composable
-fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,updateTradesmanDetailViewModel :UpdateTradesmanDetailViewModel){
+fun ManageProfile(
+        modifier: Modifier = Modifier,
+        navController: NavController,
+        updateTradesmanDetailViewModel :UpdateTradesmanDetailViewModel,
+        workLocation : String,
+        number : String,
+        rate : String,
+        about : String
+    ){
     val updateDetailState by updateTradesmanDetailViewModel.updateTradesmanDetailState.collectAsState()
     var selectedLocation by remember { mutableStateOf("Select location") }
+    var phoneNumber by remember { mutableStateOf("")  }
     var estimatedRate by remember { mutableStateOf("") } // Changed to String for simplicity
     var aboutMe by remember { mutableStateOf("")}
     val context = LocalContext.current
+
+
+    // Handle "N/A" and "null" (case-insensitive) by setting phoneNumber to empty string
+    phoneNumber =if (number == "null") "" else number ?: ""
+    estimatedRate = rate ?: ""
+    selectedLocation = workLocation ?: "Select location"
+    aboutMe = about ?: ""
 
     LaunchedEffect(updateDetailState) {
         when(val updateDetails = updateDetailState){
@@ -82,9 +98,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
                 updateTradesmanDetailViewModel.resetState()
                 // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=0") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
+                    navController.popBackStack()
                 }
 
             }
@@ -175,56 +189,6 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
                 }
             }
 
-            item {
-                var isAvailable by remember { mutableStateOf(true) } // track toggle state
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Status:", fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.DarkGray)
-                        Text(
-                            modifier = Modifier.padding(start = 8.dp),
-                            text = if (isAvailable) "Available" else "Unavailable", // change text dynamically
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = if (isAvailable) Color.Blue else Color.Red // green when available, red when unavailable
-                        )
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 10.dp)
-                                .size(26.dp)
-                                .background(Color.White, RoundedCornerShape(50.dp))
-                                .clickable { navController.navigate("availabilitystatus") }
-                                .border(2.dp, Color.Black, RoundedCornerShape(50.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.QuestionMark,
-                                contentDescription = "Edit profile and skills",
-                                tint = Color.Black
-                            )
-                        }
-                    }
-
-                    // Toggle Icon
-                    Icon(
-                        modifier = Modifier
-                            .padding(start = 10.dp)
-                            .size(50.dp)
-                            .clickable { isAvailable = !isAvailable }, // Toggle state on click
-                        imageVector = if (isAvailable) Icons.Default.ToggleOn else Icons.Default.ToggleOff, // Change icon
-                        contentDescription = "Toggle status",
-                        tint = Color.Black
-                    )
-                }
-            }
 
 
             item {
@@ -238,9 +202,43 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
                     ) {
                         CustomDropdown(
                             selectedOption = selectedLocation,
-                            onOptionSelected = { selectedLocation = "$it, Pangasinan" }
+                            onOptionSelected = { selectedLocation = it }
                         )
 
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            item {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    Text(text = "Phone Number:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                            .padding(12.dp)
+                    ) {
+                        // Placeholder
+                        if (phoneNumber.isEmpty()) {
+                            Text(" Enter your phone number", color = Color.Gray, fontSize = 16.sp)
+                        }
+
+                        BasicTextField(
+                            value = phoneNumber,
+                            onValueChange = { newValue ->
+                                // Allow only digits
+                                phoneNumber = newValue.filter { it.isDigit() }
+                            },
+                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                            modifier = Modifier.fillMaxWidth(),
+                            decorationBox = { innerTextField ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(" ", fontSize = 16.sp)
+                                    innerTextField()
+                                }
+                            }
+                        )
                     }
                 }
 
@@ -309,7 +307,7 @@ fun ManageProfile(modifier: Modifier = Modifier, navController: NavController,up
             item {
                 Button(
                     onClick = {
-                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,selectedLocation,estimatedRate.toInt(), "090712312322")
+                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,selectedLocation,estimatedRate.toInt(), phoneNumber)
                               },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
                     modifier = Modifier.padding(16.dp).fillMaxWidth().background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))

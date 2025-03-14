@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -88,11 +90,13 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient2
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
-fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel) {
+fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
@@ -138,7 +142,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
                 CategoryRow(categories,navController)
 
                 Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(getResumesViewModel,navController,reportViewModel)
+                TradesmanColumn(getResumesViewModel,navController,reportTradesmanViewModel,LoadingUI)
             }
         }
     }
@@ -293,7 +297,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 
 
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportViewModel: ReportViewModel) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
@@ -308,6 +312,35 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
             .filter { it.ratings != null && it.id != null } // Add more validation
             .sortedByDescending { it.ratings }
             .take(5)
+    }
+
+    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
+
+
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    // State to trigger refresh/recomposition
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    // State to track loading during retry
+    var isLoading by remember { mutableStateOf(false) }
+
+    // Trigger data fetching only when retry is clicked (not automatically on network change)
+    LaunchedEffect(refreshTrigger) {
+        if (isConnected.value) {
+            isLoading = true // Set loading state before fetching
+            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
+            isLoading = false // Reset loading state after fetching (or handle errors)
+        }
     }
 
     val cardHeight = when (windowSize.width) {
@@ -343,30 +376,91 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
         }
     }
 
-    Card(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .background(Color.White),
-        shape = RoundedCornerShape(8.dp),
-    ) {
-        Column(
+    if (!isConnected.value) {
+        // No internet connection
+        Box(
             modifier = Modifier
-                .fillMaxHeight()
-                .background(Color(0xFFECECEC)),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .padding(16.dp), // Optional padding to avoid edge clipping
+            contentAlignment = Alignment.Center
         ) {
-            displayedResumes.forEach { resume ->
-                TradesmanItem(
-                    resumes = resume,
-                    navController = navController,
-                    cardHeight = cardHeight,
-                    textSize = textSize,
-                    reportViewModels = reportViewModel
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center // Ensures vertical centering within the Column
+            ) {
+                Text(
+                    text = "No Internet Connection",
+                    fontSize = 18.sp,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Please check your internet and try again.",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center // Ensures the text is centered if it wraps
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                // Retry button (only fetch data when clicked)
+                Box(
+                    modifier = Modifier
+                        .clickable {
+                            // Re-check network connectivity
+                            isConnected.value = checkNetworkConnectivity(connectivityManager)
+                            if (isConnected.value) {
+                                // Show loading state and trigger data fetch
+                                isLoading = true
+                                refreshTrigger++
+                            } else {
+                                // Optionally show a toast if still no internet
+                                Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "Retry",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    } else {
+        if (isLoading){
+            LoadingUI()
+        }else{
+            Card(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .background(Color.White),
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(Color(0xFFECECEC)),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    displayedResumes.forEach { resume ->
+                        TradesmanItem(
+                            resumes = resume,
+                            navController = navController,
+                            cardHeight = cardHeight,
+                            textSize = textSize,
+                            reportTradesmanViewModels = reportTradesmanViewModel
+                        )
+                    }
+                }
             }
         }
     }
+
+
 }
 
 
@@ -527,11 +621,11 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
 }
 
 @Composable
-fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportViewModels: ReportViewModel) {
-    var selectedIndex by remember { mutableStateOf(-1) }
+fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportTradesmanViewModels: ReportTradesmanViewModel) {
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
-    val reportState by reportViewModels.reportState.collectAsState()
+    val reportState by reportTradesmanViewModels.reportState.collectAsState()
     val context = LocalContext.current
 
     val reasons = listOf(
@@ -566,13 +660,13 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         WindowType.LARGE -> 16.sp
     }
     var showReportDialog by remember { mutableStateOf(false) }
-    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
 
 
-    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+    val documentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { screenShot = it } }
+    ) { uri -> uri?.let { reportDocument = it } }
 
     // Permission launcher for storage access
 
@@ -582,9 +676,32 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             selectedIndex = -1
             otherReason = ""
             reasonDescription = ""
-            screenShot = null
+            reportDocument = null
         }
     }
+
+
+    LaunchedEffect(reportState) {
+        when(val report = reportState){
+            is ReportTradesmanViewModel.ReportState.Loading -> {
+                //do nothing
+            }
+            is ReportTradesmanViewModel.ReportState.Success -> {
+                val responseReport = report.data?.message
+                Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
+                reportTradesmanViewModels.resetState()
+                showReportDialog = false
+            }
+            is ReportTradesmanViewModel.ReportState.Error -> {
+                val errorMessage = report.message
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                showReportDialog = true
+                reportTradesmanViewModels.resetState()
+            }
+            else -> Unit
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -803,13 +920,13 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             }
                             UploadFieldScreenShot(
                                 label = "Screenshot",
-                                uri = screenShot,
+                                uri = reportDocument,
                                 fileType = "image",
                                 onUploadClick = {
-                                    screenshotPickerLauncher.launch("image/*")
+                                    documentPickerLauncher.launch("image/*")
                                 },
                                 onViewClick = {
-                                    screenShot?.let { uri ->
+                                    reportDocument?.let { uri ->
                                         openScreenShot(context, uri)
                                     }
                                 }
@@ -870,7 +987,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModels.report(selectedReason, reasonDescription, resumes.userid)
+                                        reportTradesmanViewModels.report(selectedReason, reasonDescription, reportDocument!!,context,resumes.userid)
                                     }
                                           },
                                 modifier = Modifier.size(110.dp, 45.dp),
@@ -882,28 +999,6 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             ) {
                                 Text("Submit", color = Color.White)
                             }
-                            LaunchedEffect(reportState) {
-                                when(val report = reportState){
-                                    is ReportViewModel.ReportState.Loading -> {
-                                        //do nothing
-                                    }
-                                    is ReportViewModel.ReportState.Success -> {
-                                        val responsereport = report.data?.message
-                                        Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
-
-                                        reportViewModels.resetState()
-                                        // Close the dialog
-                                        showReportDialog = false
-                                    }
-                                    is ReportViewModel.ReportState.Error -> {
-                                        val errorMessage = report.message
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                        showReportDialog = true
-                                        reportViewModels.resetState()
-                                    }
-                                    else -> Unit
-                                    }
-                                }
                             }
 
                         }

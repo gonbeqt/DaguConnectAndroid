@@ -1,112 +1,415 @@
 package com.example.androidproject.view.tradesman
 
-import androidx.compose.foundation.BorderStroke
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.outlined.Money
+import androidx.compose.material.icons.outlined.PhoneIphone
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.example.androidproject.ViewModelSetups
-import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.theme.myGradient3
+import coil.compose.AsyncImage
+import com.example.androidproject.LoadingUI
+import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TradesmanApply(
     jobId: String,
     navController: NavController,
     viewModel: ViewJobViewModel
 ) {
+    val windowSize = rememberWindowSizeClass()
+    val configuration = LocalConfiguration.current
+    val screenHeightDp = configuration.screenHeightDp.dp // Get screen height in dp
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+    val smallTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
+    }
     val viewJobState by viewModel.jobState.collectAsState()
     val jobID = jobId.toIntOrNull() ?: return
+    val coroutineScope = rememberCoroutineScope()
+
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        confirmValueChange = { it != SheetValue.Hidden }
+    )
+    val scaffoldState = BottomSheetScaffoldState(
+        bottomSheetState = bottomSheetState,
+        snackbarHostState = remember { SnackbarHostState() }
+    )
 
     LaunchedEffect(Unit) {
         viewModel.getJobById(jobID)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(myGradient3)
-            .padding(WindowInsets.systemBars.asPaddingValues())
+    ConstraintLayout(
+        modifier = Modifier.fillMaxSize()
 
     ) {
-        // Top Bar with Back Arrow and Title
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier
-                    .background(myGradient3)
-                    .fillMaxWidth()
-                    .size(80.dp)
-                    .padding(top = 20.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+        val (scaffoldRef, buttonRef) = createRefs()
+
+        BottomSheetScaffold(
+            modifier = Modifier
+                .constrainAs(scaffoldRef) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(buttonRef.top)
+                    height = Dimension.fillToConstraints
+                },
+            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            scaffoldState = scaffoldState,
+            sheetContainerColor = Color.White,
+            sheetPeekHeight = screenHeightDp * 0.90f,
+            sheetContent = {
+                when (viewJobState) {
+                    is ViewJobViewModel.JobState.Loading -> {
+                    }
+
+                    is ViewJobViewModel.JobState.Success -> {
+                        val job = (viewJobState as ViewJobViewModel.JobState.Success).data
+                        val date = ViewModelSetups.formatDateTime(job.job.createdAt)
+                        val deadline = ViewModelSetups.formatDateTime(job.job.deadline)
+                        var jobType = job.job.jobType
+                        if (jobType == "Ac_technician") {
+                            jobType = "AC Technician"
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Color.Transparent)
+                                    .fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(12.dp)
+                                        .verticalScroll(rememberScrollState())
+                                ) {
+                                    // Client Info Section
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp, vertical = 0.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        AsyncImage(
+                                            model = job.job.clientProfile,
+                                            contentDescription = "Profile Image",
+                                            modifier = Modifier
+                                                .size(100.dp)
+                                                .clip(CircleShape),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(start = 15.dp)
+                                        ) {
+                                            Text(
+                                                text = job.job.clientFullname.orEmpty(),
+                                                color = Color.Black,
+                                                fontWeight = FontWeight(500),
+                                                fontSize = 20.sp,
+                                                modifier = Modifier.padding(top = 2.dp)
+                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.PhoneIphone,
+                                                    contentDescription = "Phone Number",
+                                                    tint = Color(0xFF3CC0B0),
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.size(4.dp))
+                                                Text(
+                                                    text = "099384773839",
+                                                    fontSize = taskTextSize,
+                                                    fontWeight = FontWeight.Normal
+                                                )
+                                            }
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.LocationOn,
+                                                    contentDescription = "Location",
+                                                    tint = Color(0xFF3CC0B0),
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.size(4.dp))
+                                                Text(
+                                                    text = "${job.job.address}, Pangasinan",
+                                                    fontSize = taskTextSize,
+                                                    fontWeight = FontWeight.Normal
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Spacer(Modifier.height(16.dp))
+
+                                    Divider(
+                                        modifier = Modifier.padding(horizontal = 10.dp),
+                                        color = Color.Gray,
+                                        thickness = 0.3.dp,
+                                    )
+
+                                    Spacer(Modifier.height(8.dp))
+
+                                    // Job Title and Posting Info
+                                    Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Looking for $jobType",
+                                                fontSize = 24.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                        Text(
+                                            text = "Posted on $date - ${job.job.status}",
+                                        )
+                                        Text(
+                                            text = "Job Date: $deadline",
+                                        )
+                                        Text(
+                                            text = "Applicants(0)",
+                                        )
+
+                                        Spacer(Modifier.height(16.dp))
+
+                                        Divider(
+                                            color = Color.Gray,
+                                            thickness = 0.3.dp,
+                                        )
+
+                                        Spacer(Modifier.height(16.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Job Description",
+                                                fontSize = 24.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(text = job.job.jobDescription)
+                                        }
+
+                                        Spacer(Modifier.height(16.dp))
+
+                                        Divider(
+                                            color = Color.Gray,
+                                            thickness = 0.3.dp,
+                                        )
+
+                                        Spacer(Modifier.height(16.dp))
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Location and Salary",
+                                                fontSize = 24.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 10.dp),
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.LocationOn,
+                                                    contentDescription = " Preferred Location",
+                                                    tint = Color(0xFF3CC0B0),
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.size(4.dp))
+                                                Text(
+                                                    text = "Preferred Location",
+                                                    fontSize = taskTextSize,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                            Text(
+                                                text = "${job.job.address}, Pangasinan",
+                                                fontSize = taskTextSize,
+                                                fontWeight = FontWeight.Normal,
+                                                modifier = Modifier.padding(start = 28.dp)
+                                            )
+                                        }
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.Money,
+                                                    contentDescription = "Estimated Budget",
+                                                    tint = Color(0xFF3CC0B0),
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.size(4.dp))
+                                                Text(
+                                                    text = "Estimated Budget",
+                                                    fontSize = taskTextSize,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                            Text(
+                                                text = "₱${job.job.salary}",
+                                                fontSize = taskTextSize,
+                                                fontWeight = FontWeight.Normal,
+                                                modifier = Modifier.padding(start = 28.dp)
+                                            )
+                                        }
+
+                                        Spacer(Modifier.height(16.dp))
+
+                                        Divider(
+                                            color = Color.Gray,
+                                            thickness = 0.3.dp,
+                                        )
+
+                                        Spacer(Modifier.height(16.dp))
+
+                                        // Other Services and Status
+                                        Column(modifier = Modifier.fillMaxWidth()) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .padding(bottom = 100.dp)
+                                                    .fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.Start,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "Other services needed by this client (0)",
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    is ViewJobViewModel.JobState.Error -> {
+                        val errorMessage = (viewJobState as ViewJobViewModel.JobState.Error).message
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Error: $errorMessage",
+                                fontSize = 18.sp,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    is ViewJobViewModel.JobState.Idle -> {
+                        // No UI to display in Idle state
+                    }
+                }
+            },
+            topBar = {
+                Column(
+                    modifier = Modifier
+                        .background(myGradient3)
+                        .fillMaxWidth()
+                        .size(100.dp)
+                        .padding(top = 20.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Arrow Back",
-                        modifier = Modifier
-                            .clickable { navController.navigate("main_screen") }
-                            .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
-                        tint = Color(0xFF81D796)
-                    )
-                    Text(
-                        text = "Job Details",
-                        fontSize = 20.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .padding(top = 10.dp)
-                            .weight(1f)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Arrow Back",
+                            modifier = Modifier
+                                .clickable { navController.navigate("main_screen") }
+                                .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
+                            tint = Color(0xFF81D796)
+                        )
+                        Text(
+                            text = "Job Details",
+                            fontSize = 20.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier
+                                .padding(top = 10.dp)
+                                .weight(1f)
+                        )
+                    }
                 }
             }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent)
+            )
         }
-
-        // Main Content Based on ViewJobState
         when (viewJobState) {
             is ViewJobViewModel.JobState.Loading -> {
                 LoadingUI()
@@ -114,258 +417,29 @@ fun TradesmanApply(
 
             is ViewJobViewModel.JobState.Success -> {
                 val job = (viewJobState as ViewJobViewModel.JobState.Success).data
-                val date = ViewModelSetups.formatDateTime(job.job.createdAt)
-                val deadline = ViewModelSetups.formatDateTime(job.job.deadline)
-                var jobType = job.job.jobType
-                if (jobType == "Ac_technician") {
-                    jobType = "AC Technician"
-                }
-                val items = listOf(jobType)
-                Card(
+                Button(
+                    onClick = {
+                        navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}")
+                    },
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                    colors = CardDefaults.cardColors(Color.White)
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .padding(horizontal = 16.dp)
+                        .constrainAs(buttonRef) {
+                            bottom.linkTo(parent.bottom, margin = 44.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF3CC0B0)
+                    )
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp)
-                    ) {
-                        // Client Info Section
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AsyncImage(
-                                model = job.job.clientProfile,
-                                contentDescription = "Profile Image",
-                                modifier = Modifier
-                                    .size(62.dp)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 15.dp)
-                            ) {
-                                Text(
-                                    text = "Client",
-                                    color = Color.Black,
-                                    fontSize = 16.sp
-                                )
-                                Text(
-                                    text = job.job.clientFullname.orEmpty(),
-                                    color = Color.Black,
-                                    fontWeight = FontWeight(500),
-                                    fontSize = 20.sp,
-                                    modifier = Modifier.padding(top = 2.dp)
-                                )
-                                Box(
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.LocationOn,
-                                            contentDescription = "Bookmark Icon",
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.size(4.dp))
-                                        Text(
-                                            text = "Deadline: $deadline",
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-
-                        // Job Title and Posting Info
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Hiring: $jobType",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight(500)
-                            )
-                        }
-                        Text(
-                            text = "Posted on $date - Active",
-                            modifier = Modifier.padding(horizontal = 20.dp)
-                        )
-
-                        // Job Description Card
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp),
-                            border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
-                            colors = CardDefaults.cardColors(Color.White),
-                            shape = RectangleShape
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp, horizontal = 20.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(text = job.job.jobDescription)
-                            }
-                        }
-
-                        // Salary and Location Card
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
-                            colors = CardDefaults.cardColors(Color.White),
-                            shape = RectangleShape
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp, horizontal = 20.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(text = "Estimated Salary")
-                                    Text(
-                                        text = "${job.job.salary} Pesos",
-                                        color = Color.Gray
-                                    )
-                                }
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.LocationOn,
-                                            contentDescription = "Location Icon",
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(text = job.job.address.orEmpty())
-                                    }
-                                }
-                            }
-                        }
-
-                        // Specialty Required Card
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            border = BorderStroke(0.5.dp, Color(0xFFD9D9D9)),
-                            colors = CardDefaults.cardColors(Color.White),
-                            shape = RectangleShape
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp, horizontal = 10.dp),
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "Specialty Required",
-                                    color = Color.Black,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight(500),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(10.dp)
-                                )
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    items.forEach { item ->
-                                        Box(
-                                            modifier = Modifier
-                                                .size(110.dp, 50.dp)
-                                                .background(Color(0xFFF1F1F1))
-                                                .padding(4.dp)
-                                                .clip(RoundedCornerShape(12.dp))
-                                        ) {
-                                            Text(
-                                                text = item,
-                                                modifier = Modifier.align(Alignment.Center),
-                                                color = Color.Black
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(Modifier.height(20.dp))
-
-                        // Other Services and Status
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 20.dp),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Other services needed by this client (0)",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight(500)
-                                )
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(50.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Status: ${job.job.status}",
-                                    fontSize = 14.sp,
-                                    fontStyle = FontStyle.Normal,
-                                    color = Color.Gray
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Apply Button at the Bottom
-                Column(
-                    modifier = Modifier
-                        .background(Color.Black)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Button(
-                        onClick = { navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}") },
-                        modifier = Modifier.width(200.dp),
-                        colors = ButtonDefaults.buttonColors(Color.White),
-                        border = BorderStroke(1.dp, Color.Black)
-                    ) {
-                        Text(
-                            text = "Apply Now",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight(500),
-                            color = Color.Black
-                        )
-                    }
+                    Text(
+                        text = "Apply for Job",
+                        fontSize = nameTextSize,
+                        color = Color.White
+                    )
                 }
             }
 
@@ -387,5 +461,6 @@ fun TradesmanApply(
                 // No UI to display in Idle state
             }
         }
+
     }
 }

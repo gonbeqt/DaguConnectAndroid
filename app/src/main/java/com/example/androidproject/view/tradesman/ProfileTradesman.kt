@@ -7,10 +7,8 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-
 import android.net.Uri
 import android.os.Environment
-
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -18,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
+import com.example.androidproject.view.theme.myGradient4
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -49,8 +48,12 @@ import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -63,6 +66,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -87,6 +91,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -102,8 +107,11 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
+import com.example.androidproject.view.theme.myGradient4
+import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.ViewTradesmanProfileViewModel
+import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -114,6 +122,8 @@ fun ProfileTradesman(
     logoutViewModel: LogoutViewModel,
     viewTradesmanProfileViewModel: ViewTradesmanProfileViewModel,
     updateTradesmanProfileViewModel : UpdateTradesmanProfileViewModel,
+    updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
+    viewRatingsViewModel: ViewRatingsViewModel,
     LoadingUI :  @Composable () -> Unit, // Add this parameter
     initialTabIndex: Int = 0, // Default to 0 if not provided
 
@@ -152,15 +162,17 @@ fun ProfileTradesman(
         }
     }
 
+    val updateTradesmanActiveStatusState by updateTradesmanActiveStatusViewModel.updateStatusState.collectAsState()
+
 
 
     // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableStateOf(0) }
+    var refreshTrigger by remember { mutableIntStateOf(0) }
 
     // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
-    var isAvailable by remember { mutableStateOf(true) } // State to track availability
+
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
     val tabNames = listOf("Job Profile", "General")
@@ -216,6 +228,21 @@ fun ProfileTradesman(
             isLoading = false // Reset loading state after fetching (or handle errors)
         }
     }
+    LaunchedEffect(updateTradesmanActiveStatusState) {
+        when (val updatingStatus = updateTradesmanActiveStatusState) {
+            is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
+                updateTradesmanActiveStatusViewModel.resetState()
+                viewTradesmanProfileViewModel.viewTradesmanProfile() // Refresh profile
+                Toast.makeText(context, "Status updated successfully", Toast.LENGTH_SHORT).show()
+                // isAvailable is already updated optimistically, no need to change unless server disagrees
+            }
+            is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
+                val errorMessage = updatingStatus.message
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+            else -> Unit
+        }
+    }
 
     Column(
         modifier = modifier
@@ -236,28 +263,18 @@ fun ProfileTradesman(
             // Left-aligned text
             Text(
                 text = "Profile",
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Medium
             )
 
-            // Right-aligned icons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
-                    tint = Color(0xFF3CC0B0),
+                    tint = Color.Black,
                     modifier = Modifier.size(32.dp)
                 )
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "User Account Settings",
-                    tint = Color(0xFF3CC0B0),
-                    modifier = Modifier.size(32.dp).clickable { navController.navigate("accountsettingstradesman") }
-                )
-            }
+
+
         }
         // Handle different states based on connectivity and data loading
         if (!isConnected.value) {
@@ -312,14 +329,15 @@ fun ProfileTradesman(
                     is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
                         // Show loading indicator for initial or ongoing loading
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
+                            LoadingUI()
                         }
                     }
                     is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success -> {
                         // Handle success state
-                        val tradesmanDetails = (viewTradesmanProfilestate as ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success).data
-
-
+                        val isUpdating = updateTradesmanActiveStatusState is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Loading
+                        val tradesmanDetails =profileState.data
+                        var isAvailable by remember { mutableStateOf(tradesmanDetails.isActiveBoolean) } // State to track availability
+                        var previousAvailability by remember { mutableStateOf(isAvailable) } // Track previous state for rollback
                         // Profile Info
                         Column(
                             modifier = Modifier.fillMaxWidth().background(Color.White)
@@ -329,12 +347,8 @@ fun ProfileTradesman(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(130.dp)
-                                        .background(
-                                            brush = Brush.linearGradient(
-                                                colors = listOf(Color(0xFF81D796), Color(0xFF39BFB1))
-                                            ), shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(16.dp),
+                                        .background(myGradient4, shape = RoundedCornerShape(8.dp))
+                                        .padding(16.dp)
                                 ) {
                                     Box(
                                         modifier = Modifier
@@ -357,7 +371,7 @@ fun ProfileTradesman(
                                             modifier = Modifier
                                                 .size(28.dp)
                                                 .clip(CircleShape)
-                                                .background(Color.Green)
+                                                .background(Color(0xFF42C2AE))
                                                 .align(Alignment.BottomEnd)
                                                 .clickable {
                                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
@@ -397,53 +411,85 @@ fun ProfileTradesman(
                                                 )
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
-                                            Icon(
-                                                painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),                                                contentDescription = "Profile Verified",
-                                                tint = Color.Black,
-                                                modifier = Modifier.size(24.dp)
+                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                                Icon(
+                                                    painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),                                                contentDescription = "Profile Verified",
+                                                    tint = Color.Black,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = "Edit Profile Picture",
+                                                    tint = Color.White,
+                                                    modifier = Modifier
+                                                        .size(26.dp)
+                                                        .background(Color.Transparent, shape = CircleShape)
+                                                        .clickable{
+                                                            navController.navigate(navController.navigate("accountsettingstradesman")
+                                                            )
+                                                        }
+                                                )
+                                            }
 
-                                            )
                                         }
                                         Text(
                                             text = tradesmanDetails.email ?: "N/A",
                                             color = Color.White,
                                             style = TextStyle(fontSize = 14.sp)
                                         )
-                                        Text(
-                                            text = tradesmanDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
-                                            color = Color.White,
-                                            style = TextStyle(fontSize = 14.sp)
-                                        )
+
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .width(100.dp)
-                                                .height(30.dp)
-                                                .clip(RoundedCornerShape(50.dp))
-                                                .background(Color.White)
-                                                .clickable {
-                                                    isAvailable = !isAvailable // Toggle state on click
-                                                },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.Center
+                                        Row {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(100.dp)
+                                                    .height(30.dp)
+                                                    .clip(RoundedCornerShape(50.dp))
+                                                    .background(Color.White)
+                                                    .clickable (enabled = !isUpdating) { // Disable when loading
+                                                        previousAvailability = isAvailable // Store previous state
+                                                        isAvailable = !isAvailable // Optimistic update
+                                                        updateTradesmanActiveStatusViewModel.updateStatusState(isAvailable)
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.Center
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Circle,
+                                                        contentDescription = if (isAvailable) "Available" else "Unavailable",
+                                                        tint = if (isAvailable) Color.Green else Color.Red, // Change color based on state
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                    Text(
+                                                        text = if (isAvailable) "Available" else "Unavailable",
+                                                        color = Color.Black,
+                                                        style = TextStyle(fontSize = 14.sp)
+                                                    )
+
+                                                }
+
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .padding(start = 10.dp)
+                                                    .size(26.dp)
+                                                    .background(Color.White, RoundedCornerShape(50.dp))
+                                                    .clickable { navController.navigate("availabilitystatus") }
+                                                    .border(1.dp, Color.Gray, RoundedCornerShape(50.dp)),
+                                                contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
-                                                    Icons.Default.Circle,
-                                                    contentDescription = if (isAvailable) "Available" else "Unavailable",
-                                                    tint = if (isAvailable) Color.Green else Color.Red, // Change color based on state
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(4.dp))
-                                                Text(
-                                                    text = if (isAvailable) "Available" else "Unavailable",
-                                                    color = Color.Black,
-                                                    style = TextStyle(fontSize = 14.sp)
+                                                    Icons.Default.QuestionMark,
+                                                    contentDescription = "Edit profile and skills",
+                                                    tint = Color.Black
                                                 )
                                             }
                                         }
+
                                     }
                                 }
                             }
@@ -472,7 +518,7 @@ fun ProfileTradesman(
                                     .padding(10.dp)
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> JobProfile(navController, tradesmanDetails)
+                                    0 -> JobProfile(navController, tradesmanDetails,viewRatingsViewModel)
                                     1 -> SettingsTradesmanScreen(navController, logoutViewModel)
                                 }
                             }
@@ -533,13 +579,21 @@ fun ProfileTradesman(
 
 
 // Keep the other composables (JobProfile, GeneralTradesmanSettings, SettingsTradesmanScreen) unchanged unless you need specific adjustments.
+
 @Composable
-fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
+fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel) {
     var scale by remember { mutableStateOf(1f) }
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
     var downloadId by remember { mutableStateOf<Long?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
 
+    val ratingsState by viewRatingsViewModel.viewRatingsState.collectAsState()
+    val tradesmanId = tradesmanDetails.userid
+
+    LaunchedEffect(Unit) {
+        viewRatingsViewModel.viewRatings(tradesmanId)
+    }
 
         val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -590,6 +644,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
     // Rest of the composable remains the same...
     Column(modifier = Modifier
         .padding(2.dp)
+        .padding(bottom = 100.dp)
         .verticalScroll(rememberScrollState())) {
         Box(modifier = Modifier.border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier.padding(10.dp)) {
@@ -645,7 +700,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .weight(1f)
-                            .clickable { navController.navigate("manageprofile") }
+                            .clickable { navController.navigate("manageprofile/${tradesmanDetails.preferredWorkLocation}/${tradesmanDetails.phoneNumber}/${tradesmanDetails.workFee}/${tradesmanDetails.aboutMe}") }
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -676,27 +731,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         )
 
                 }
-                Spacer(modifier = Modifier.height(10.dp))
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "About Me:",
-                            fontSize = nameTextSize,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    Text(
-                        text = displayDetails.aboutMe ?: "N/A",
-                        fontSize = taskTextSize,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+
                 Spacer(modifier = Modifier.height(10.dp))
                 Column {
                     Row(
@@ -710,13 +745,36 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                             fontSize = nameTextSize,
                             fontWeight = FontWeight.Medium
                         )
+                        Text(
+                            text = displayDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
-                    Text(
-                        text = displayDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
-                        color = Color.Black,
-                        fontSize = taskTextSize,
-                        fontWeight = FontWeight.Medium
-                    )
+
+                }
+                Spacer(Modifier.height(10.dp))
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Phone Number :",
+                            color = Color.Gray,
+                            fontSize = nameTextSize,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = tradesmanDetails.phoneNumber ?: "N/A",
+                            color = Color.Black,
+                            fontSize = taskTextSize,
+                            fontWeight = FontWeight.Medium
+
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
@@ -775,13 +833,216 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                         )
 
                 }
+                Spacer(modifier = Modifier.height(10.dp))
+                Column {
+
+                   Text(
+                       text = "About Me:",
+                       fontSize = nameTextSize,
+                       color = Color.Gray,
+                       fontWeight = FontWeight.Medium
+                   )
+
+                    Text(
+                        text = displayDetails.aboutMe ?: "N/A",
+                        fontSize = taskTextSize,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Column(modifier = Modifier.fillMaxWidth().padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 50.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 16.dp)) {
+
             Text(text = "Ratings", fontSize = nameTextSize, fontWeight = FontWeight.Bold)
             Text(text = "Feedback from satisfied clients", fontSize = taskTextSize, color = Color.Gray)
-            Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+        }
+        when (val viewRatings = ratingsState) {
+            is ViewRatingsViewModel.ViewRatingsState.Loading -> {
+                // Loading state (Optional: Show a progress indicator)
+            }
+            is ViewRatingsViewModel.ViewRatingsState.Success -> {
+                val ratingsList = viewRatings.data
+
+                if (ratingsList.isEmpty()) {
+                    // Ensure the text is properly centered
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                        ,
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No ratings",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    Column {
+                        ratingsList.forEach { ratings ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp)
+                                    .padding(8.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { showDialog = true },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(8.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Profile Picture
+                                    AsyncImage(
+                                        model = ratings.client_profile,
+                                        contentDescription = "Profile Picture",
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .clip(CircleShape)
+                                            .border(2.dp, Color.Gray, CircleShape)
+                                    )
+
+                                    Text(
+                                        text = ratings.client_name,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black,
+                                        fontSize = 16.sp
+                                    )
+                                    Text(
+                                        text = "${ratings.ratings} stars",
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                            if (showDialog) {
+                                AlertDialog(
+                                    containerColor = Color.White,
+                                    onDismissRequest = { showDialog = false },
+                                    title = {
+
+                                        Text(
+                                            text = "Feedback Details",
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+
+                                    },
+                                    text = {
+                                        Column(
+                                            modifier = Modifier.padding(16.dp).verticalScroll(
+                                                rememberScrollState()
+                                            )
+                                        ) {
+                                            // Profile Section
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(bottom = 8.dp)
+                                            ) {
+                                                AsyncImage(
+                                                    model = ratings.client_profile,
+                                                    contentDescription = "Profile Picture",
+                                                    modifier = Modifier
+                                                        .size(75.dp)
+                                                        .clip(CircleShape)
+                                                        .border(1.dp, Color.Gray, CircleShape)
+                                                )
+                                                Column {
+                                                    Text(
+                                                        text = ratings?.client_name ?: "Unknown",
+                                                        modifier = Modifier.padding(start = 8.dp),
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 20.sp
+                                                    )
+                                                    Row(
+                                                        modifier = Modifier.padding(bottom = 8.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Star,
+                                                            contentDescription = "Rating",
+                                                            tint = Color.Yellow
+                                                        )
+                                                        Text(
+                                                            text = "${ratings?.ratings ?: 0} stars",
+                                                            modifier = Modifier.padding(start = 4.dp)
+                                                        )
+                                                    }
+                                                }
+
+                                            }
+
+                                            // Ratings Section
+
+
+                                            // Comments Section
+                                            Text(
+                                                text = "Comments:",
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(top = 8.dp),
+                                                fontSize = 20.sp
+                                            )
+
+                                            // Add state for showing full text
+                                            var showFullText by remember { mutableStateOf(false) }
+                                            val message = ratings?.message ?: "No comments available"
+                                            val maxPreviewLength = 100 // Adjust this value as needed
+
+                                            if (message.length > maxPreviewLength) {
+                                                Column {
+                                                    Text(
+                                                        text = if (showFullText) message else "${message.take(maxPreviewLength)}......",
+                                                        modifier = Modifier.padding(top = 4.dp),
+                                                        fontSize = 16.sp,
+                                                        color = if (message.isEmpty()) Color.Gray else Color.Black
+                                                    )
+                                                    TextButton(
+                                                        onClick = { showFullText = !showFullText },
+                                                        modifier = Modifier
+                                                            .align(Alignment.End)
+                                                            .padding(top = 4.dp)
+                                                    ) {
+                                                        Text(
+                                                            text = if (showFullText) "See Less" else "See More",
+                                                            color = Color.Blue,
+                                                            fontSize = 14.sp
+                                                        )
+                                                    }
+                                                }
+                                            } else {
+                                                Text(
+                                                    text = message,
+                                                    modifier = Modifier.padding(top = 4.dp),
+                                                    fontSize = 16.sp,
+                                                    color = if (message.isEmpty()) Color.Gray else Color.Black
+                                                )
+                                            }
+                                        }
+                                    },
+                                    confirmButton = {
+                                        TextButton(onClick = { showDialog = false }) {
+                                            Text("Close", fontSize = 16.sp, color = Color.Black)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+            }
+            is ViewRatingsViewModel.ViewRatingsState.Error -> {
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
                     Text(
@@ -791,6 +1052,9 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume) {
                     )
                 }
             }
+
+            }
+            else -> Unit
         }
     }
 }

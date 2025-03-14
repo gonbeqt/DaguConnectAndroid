@@ -40,7 +40,9 @@ data class GetClientsBooking(
     @SerializedName("tradesman_id")
     val tradesmanId: Int,
     @SerializedName("user_id")
-    val userid: Int
+    val userid: Int,
+    @SerializedName("cancel_reason")
+    val cancelReason: String
 
 )
 
@@ -56,31 +58,35 @@ data class GetTradesmanBooking(
     val address: String,
     val ratings: Float,
     @SerializedName("booking_date")
-    val bookingdate: String,
+    val bookingDate: String,
     @SerializedName("booking_status")
-    val bookingstatus: String,
+    val bookingStatus: String,
     @SerializedName("created_at")
-    val createdat: String,
+    val createdAt: String,
     val id: Int,
     @SerializedName("phone_number")
-    val phonenumber: String,
+    val phoneNumber: String,
     @SerializedName("tradesman_fullname")
-    val tradesmanfullname : String,
+    val tradesmanFullName : String,
     @SerializedName("tradesman_profile")
-    val tradesmanprofile : String,
+    val tradesmanProfile : String,
     @SerializedName("work_fee")
-    val workfee: Int,
+    val workFee: Int,
     @SerializedName("client_fullname")
-    val clientfullname: String,
+    val clientFullName: String,
     @SerializedName("resume_id")
-    val resumeid: Int,
+    val resumeId: Int,
+    @SerializedName("client_profile")
+    val clientProfile: String,
     @SerializedName("task_description")
-    val taskdescription: String,
+    val taskDescription: String,
     @SerializedName("task_type")
-    val tasktype: String,
+    val taskType: String,
     @SerializedName("tradesman_id")
-    val tradesmanid: Int,
+    val tradesmanId: Int,
     @SerializedName("user_id")
-    val userid: Int
+    val userId: Int,
+    @SerializedName("cancel_reason")
+    val cancelReason: String
 
 )

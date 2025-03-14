@@ -40,12 +40,14 @@ import com.example.androidproject.model.client.ClientWorkStatusRequest
 import com.example.androidproject.model.client.ClientWorkStatusResponse
 import com.example.androidproject.model.client.GetClientsBookingResponse
 import com.example.androidproject.model.client.GetTradesmanBookingResponse
-import com.example.androidproject.model.client.ReportRequest
-import com.example.androidproject.model.client.ReportResponse
+import com.example.androidproject.model.client.ReportClientResponse
+import com.example.androidproject.model.client.ReportTradesmanResponse
 import com.example.androidproject.model.client.ResumesResponse
 import com.example.androidproject.model.client.SubmitResumeResponse
 import com.example.androidproject.model.client.TradesmanWorkStatusRequest
 import com.example.androidproject.model.client.TradesmanWorkStatusResponse
+import com.example.androidproject.model.client.UpdateActiveStatusRequest
+import com.example.androidproject.model.client.UpdateActiveStatusResponse
 import com.example.androidproject.model.client.UpdateTradesmanDetailsRequest
 import com.example.androidproject.model.client.UpdateTradesmanDetailsResponse
 import com.example.androidproject.model.client.UpdateTradesmanProfileResponse
@@ -127,11 +129,23 @@ interface ApiService {
         @Path("tradesman_Id") tradesman_Id: Int
     ): Response<BookTradesmanResponse>
 
-    @POST("/user/client/reporttradesman/{tradesmanId}")
-    suspend fun report(
-        @Body request: ReportRequest,
+    @Multipart
+    @POST("/user/client/report/tradesman/{tradesmanId}")
+    suspend fun reportTradesman(
+        @Part("report_reason") report_reason: RequestBody,
+        @Part("report_details") report_details: RequestBody,
+        @Part report_attachment: MultipartBody.Part, // File upload
         @Path("tradesmanId") tradesmanId: Int
-    ): Response<ReportResponse>
+    ): Response<ReportTradesmanResponse>
+
+    @Multipart
+    @POST("/user/tradesman/report/client/{clientId}")
+    suspend fun reportClient(
+        @Part("report_reason") report_reason: RequestBody,
+        @Part("report_details") preferedLocation: RequestBody,
+        @Part report_attachment: MultipartBody.Part, // File upload
+        @Path("clientId") clientId: Int
+    ): Response<ReportClientResponse>
 
     @GET("/user/client/view/tradesman/rating/{tradesmanId}")
     suspend fun getRatingsById(@Path("tradesmanId") resumeId: Int): Response<List<ratingsItem>>
@@ -203,7 +217,7 @@ interface ApiService {
     @POST("/client/update/profile_picture")
     suspend fun updateClientProfilePicture(@Part profilePic: MultipartBody.Part): Response<UpdateProfilePictureResponse>
 
-    @PUT("/client/update/profile_address")
+    @PUT("/client/update/profile_details")
     suspend fun updateClientDetails(@Body request: UpdateAddress): Response<UpdateAddressResponse>
 
     @Multipart
@@ -214,6 +228,8 @@ interface ApiService {
     @PUT("/user/tradesman/update/resume/details")
     suspend fun  updateTradesmanDetail(@Body request: UpdateTradesmanDetailsRequest) : Response<UpdateTradesmanDetailsResponse>
 
-    @POST("/user/message/send")
-    suspend fun sendMessage(@Body request: PostMessage): Response<PostMessageResponse>
+    @PUT("/user/tradesman/update/activeStatus")
+    suspend fun  updateTradesmanActiveStatus(@Body request: UpdateActiveStatusRequest) : Response<UpdateActiveStatusResponse>
+
+
 }
