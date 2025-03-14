@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,16 +38,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -61,12 +57,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.WindowType
@@ -76,7 +72,6 @@ import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewM
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
-import java.sql.Types.NULL
 
 
 @Composable
@@ -2234,6 +2229,9 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
     var buttonSubmit by remember { mutableStateOf(false) }
+    var reason by remember { mutableStateOf("") }
+    var declined by remember { mutableStateOf(false) }
+
     when(val jobput =putJob) {
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
@@ -2249,10 +2247,23 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatus.resetState()
                 if(jobput.status == "Active"){
+                    WebSocketManager.sendNotificationJobToTradesman(
+                        myJob.resumeId.toString(),
+                        "Job Application accepted!",
+                        "Job",
+                        "Your job application from ${myJob.clientFullname} has been accepted!"
+                    )
+
                     navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
-                       navController.popBackStack()
+                        navController.popBackStack()
                     }
                 }else if(jobput.status == "Declined"){
+                    WebSocketManager.sendNotificationJobToTradesman(
+                        myJob.resumeId.toString(),
+                        "${myJob.clientFullname} Declined Your Job Application.",
+                        "Job",
+                        "Your application was declined by ${myJob.clientFullname} due to $reason."
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
                         navController.popBackStack()
                     }
@@ -2425,6 +2436,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 confirmButton = {
                     Button(
                         onClick = {
+                            declined = false
                             showApproveDialog = false
                             showJobApproveDialog = true
                             putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Active", "")
@@ -2568,6 +2580,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 confirmButton = {
                     Button(
                         onClick = {
+                            reason = selectedReason ?: ""
+                            declined = true
                             buttonSubmit = true
                             showDeclineReasons = false
                             selectedReason?.let {
@@ -2813,6 +2827,8 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             showCompletedDialog = false
                             showJobCompletedDialog = true
                             putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Active", "")
+                            WebSocketManager.sendNotificationJobToTradesman(myJob.resumeId.toString(), "Job completed", "Job", "Your job application to ${myJob.clientFullname} is now completed!")
+
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
                     ) {
@@ -2898,6 +2914,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                                 "Completed",
                                 "",
                             )
+
                             completedClicked = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
@@ -2965,6 +2982,12 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                                     myJob.id,
                                     "Cancelled",
                                     it
+                                )
+                                WebSocketManager.sendNotificationJobToTradesman(
+                                    myJob.resumeId.toString(),
+                                    "Active has been cancelled",
+                                    "Job",
+                                    "${myJob.clientFullname} cancelled your active job ${myJob.jobType} because of $selectedReason!"
                                 )
                             }
                             completedClicked = true

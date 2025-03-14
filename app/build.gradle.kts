@@ -74,7 +74,7 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-flowlayout:0.31.2-alpha")
     //Firebase Cloud Messaging
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
-
+    implementation("com.google.firebase:firebase-messaging-ktx")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0") // Check for the latest version
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -40,10 +40,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
 import com.example.androidproject.view.theme.myGradient
-import com.example.androidproject.viewmodel.LoginViewModel
 
 
 @Composable

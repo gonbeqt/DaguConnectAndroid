@@ -86,6 +86,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
@@ -981,6 +982,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }
             logoutViewModel.resetLogoutResult()
+            WebSocketManager.disconnect()
         }
     }
     Column (modifier = Modifier.verticalScroll(rememberScrollState())){

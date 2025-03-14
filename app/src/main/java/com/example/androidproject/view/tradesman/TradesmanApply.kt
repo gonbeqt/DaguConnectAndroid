@@ -354,7 +354,7 @@ fun TradesmanApply(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(
-                        onClick = { navController.navigate("hiringdetails/${job.job.id}") },
+                        onClick = { navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}") },
                         modifier = Modifier.width(200.dp),
                         colors = ButtonDefaults.buttonColors(Color.White),
                         border = BorderStroke(1.dp, Color.Black)

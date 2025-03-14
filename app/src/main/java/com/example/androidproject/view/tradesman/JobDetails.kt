@@ -48,19 +48,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 
 @Composable
 
-fun HiringDetails(jobId: String, modifier: Modifier, navController: NavController, postJobApplicationViewModel: PostJobApplicationViewModel) {
+fun HiringDetails(jobId: String, clientId: String, modifier: Modifier, navController: NavController, postJobApplicationViewModel: PostJobApplicationViewModel) {
     val postJobApplicationState by postJobApplicationViewModel.postJobApplicationState.collectAsState()
     var qualificationSummary by remember { mutableStateOf("") }
     val currentJobId = jobId.toIntOrNull()
     val context = LocalContext.current
     var isSubmitClicked by remember { mutableStateOf(false) }
     val characterCount by remember(qualificationSummary) { mutableStateOf(qualificationSummary.length) }
-
+    val tradesmanFullname = AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName
     LaunchedEffect(postJobApplicationState) {
         if (isSubmitClicked) { // Show messages only after submit is clicked
             when (postJobApplicationState) {
@@ -71,7 +73,12 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
 
                     postJobApplicationViewModel.resetState()
                     isSubmitClicked = false
-
+                    WebSocketManager.sendNotificationJobToClient(
+                        clientId,
+                        "New Tradesman Applicant!",
+                        "Job",
+                        "$tradesmanFullname has applied to your job post."
+                    )
                     navController.navigate("main_screen")
                 }
                 is PostJobApplicationViewModel.PostJobApplicationState.Error -> {

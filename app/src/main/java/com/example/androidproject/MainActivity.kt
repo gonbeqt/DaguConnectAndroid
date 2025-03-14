@@ -2,6 +2,7 @@ package com.example.androidproject
 
 import LogoutViewModel
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -21,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -543,10 +543,12 @@ class MainActivity : ComponentActivity() {
                             Log.e("Job ID", jobId)
                             TradesmanApply(jobId, navController, viewJobViewModel)
                         }
-                        composable("hiringdetails/{jobId}") { backStackEntry ->
+                        composable("hiringdetails/{jobId}/{clientId}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val clientId = backStackEntry.arguments?.getString("clientId") ?: ""
                             HiringDetails(
                                 jobId,
+                                clientId,
                                 modifier = Modifier,
                                 navController,
                                 postJobApplicationViewModel

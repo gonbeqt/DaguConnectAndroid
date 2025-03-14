@@ -1,6 +1,7 @@
 package com.example.androidproject.view.client
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -133,7 +135,6 @@ fun MessagingScreen(
 
     LaunchedEffect(Unit) {
         Log.d("MessagingScreen", "profile: $receipientProfile")
-        WebSocketManager.connect(userId.toString())
         getMessages.refreshMessages()
     }
 
@@ -170,7 +171,6 @@ fun MessagingScreen(
         bottomBar = {
             BottomInputBar(onSend = { newMessage ->
                 WebSocketManager.sendMessage(userId.toString(), receiverId.toString(), newMessage)
-                //getMessages.addLocalMessage(newMessage, receiverId, chatId)
                 getMessages.refreshMessages()
                 sentMessage = true
             })
@@ -207,19 +207,13 @@ fun MessagingScreen(
             }
         }
     }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            WebSocketManager.disconnect()
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomInputBar(onSend: (String) -> Unit) {
     var messageText by remember { mutableStateOf("") }
-
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -247,6 +241,8 @@ fun BottomInputBar(onSend: (String) -> Unit) {
                 if (messageText.isNotBlank()) {
                     onSend(messageText) // Send the message
                     messageText = ""    // Clear the input field
+                } else {
+                    Toast.makeText(context, "Message cannot be empty", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.size(48.dp)

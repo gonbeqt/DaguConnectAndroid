@@ -95,6 +95,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.example.androidproject.R
+import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.WindowType
@@ -868,6 +869,7 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }
             logoutViewModel.resetLogoutResult()
+            WebSocketManager.disconnect()
         }
     }
     Column(modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxSize().padding(bottom = 100.dp)) {

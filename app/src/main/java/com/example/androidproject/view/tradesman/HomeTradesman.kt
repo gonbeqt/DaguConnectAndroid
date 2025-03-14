@@ -1,8 +1,9 @@
 package com.example.androidproject.view.tradesman
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
-import android.widget.Toast
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -71,11 +72,15 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.WebSocketNotificationManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
@@ -84,10 +89,16 @@ import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
 
 @Composable
 fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel, getRecentJobsViewModel: GetRecentJobsViewModel){
+    val userId = AccountManager.getAccount()?.id
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        WebSocketManager.connect(userId.toString())
+        WebSocketNotificationManager.initialize(context, userId.toString())
+    }
 
     val windowSize = rememberWindowSizeClass()
     val textSize = when (windowSize.width) {

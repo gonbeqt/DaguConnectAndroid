@@ -1,11 +1,9 @@
 package com.example.androidproject.view.client
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -76,19 +74,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.WebSocketNotificationManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Categories
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient2
-import com.example.androidproject.view.tradesman.UploadField
-import com.example.androidproject.view.tradesman.openFile
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportViewModel
 
@@ -97,7 +95,13 @@ import com.example.androidproject.viewmodel.report.ReportViewModel
 fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getResumesViewModel: GetResumesViewModel,reportViewModel: ReportViewModel) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
+    val context = LocalContext.current
 
+    val userId = AccountManager.getAccount()?.id
+    LaunchedEffect(Unit) {
+        WebSocketManager.connect(userId.toString())
+        WebSocketNotificationManager.initialize(context, userId.toString())
+    }
 
     val categories = listOf(    
         Categories(R.drawable.carpentry, "Carpentry"),
@@ -112,10 +116,6 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
         Categories(R.drawable.cleaning, "Cleaning")
 
     )
-
-
-
-
 
     Box(
         modifier = modifier
