@@ -643,6 +643,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
     // Rest of the composable remains the same...
     Column(modifier = Modifier
         .padding(2.dp)
+        .padding(bottom = 100.dp)
         .verticalScroll(rememberScrollState())) {
         Box(modifier = Modifier.border(0.5.dp, Color.LightGray, RoundedCornerShape(10.dp))) {
             Column(modifier = Modifier.padding(10.dp)) {

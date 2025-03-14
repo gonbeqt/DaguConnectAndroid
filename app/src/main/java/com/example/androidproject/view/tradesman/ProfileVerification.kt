@@ -208,7 +208,8 @@ fun ProfileVerification(
                             JobSelectionDropdown(
                                 label = "",
                                 options = listOf(
-                                    "Plumber", "Carpenter", "Mason", "Cleaner", "Electrician"
+                                    "Carpenter", "Painter", "Welder", "Electrician", "Plumber",
+                                    "Mason", "Roofer", "AC Technician", "Mechanic", "Cleaner"
                                 ),
                                 selectedOption = selectedJob,
                                 onOptionSelected = { selectedJob = it }

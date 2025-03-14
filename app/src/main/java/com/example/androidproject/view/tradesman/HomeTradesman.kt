@@ -799,7 +799,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController,reportClientVi
                     )
                     Box {
                         Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
+                            painter = painterResource(id = R.drawable.meatball_ic),
                             contentDescription = "Menu Icon",
                             modifier = Modifier
                                 .size(iconSize)
