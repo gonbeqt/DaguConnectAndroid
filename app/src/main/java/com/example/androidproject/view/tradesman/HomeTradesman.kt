@@ -399,6 +399,7 @@ fun TopMatchesItem(
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showReportDialog by remember { mutableStateOf(false) }
+    var reportSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
     val reasons = listOf(
         "Abusive or Harassing Behavior",
         "Inappropriate Content or Language",
@@ -418,7 +419,8 @@ fun TopMatchesItem(
         jobType = "AC Technician"
     }
 
-    LaunchedEffect(reportClientState) {
+    LaunchedEffect(reportClientState, reportSubmissionKey) {
+        if (reportSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet
         when (val reportClient = reportClientState) {
             is ReportClientViewModel.ReportClientState.Loading -> {
                 // nothing
@@ -426,6 +428,7 @@ fun TopMatchesItem(
             is ReportClientViewModel.ReportClientState.Success -> {
                 val responseReport = reportClient.data?.message
                 if (responseReport != null) {
+                    reportSubmissionKey = null // Reset key after handling
                     onShowSnackbar(responseReport)
                 }
                 showReportDialog = false
@@ -434,6 +437,7 @@ fun TopMatchesItem(
             is ReportClientViewModel.ReportClientState.Error -> {
                 val error = reportClient.message
                 onShowSnackbar(error)
+                reportSubmissionKey = null // Reset key after handling
                 showReportDialog = true
                 reportClientViewModel.resetState()
             }
@@ -689,6 +693,7 @@ fun TopMatchesItem(
                                         } else {
                                             reasons[selectedIndex]
                                         }
+                                        reportSubmissionKey = System.currentTimeMillis() // Set unique key
                                         reportClientViewModel.reportClient(getJobs.userId, selectedReason, reasonDescription, reportDocument!!, context)
                                     }
                                 },
@@ -751,6 +756,7 @@ fun RecentJobsItem(
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showReportDialog by remember { mutableStateOf(false) }
+    var reportSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
     val reasons = listOf(
         "Abusive or Harassing Behavior",
         "Inappropriate Content or Language",
@@ -770,7 +776,8 @@ fun RecentJobsItem(
         jobType = "AC Technician"
     }
 
-    LaunchedEffect(reportClientState) {
+    LaunchedEffect(reportClientState, reportSubmissionKey) {
+        if (reportSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet
         when (val reportClient = reportClientState) {
             is ReportClientViewModel.ReportClientState.Loading -> {
                 // nothing
@@ -780,10 +787,12 @@ fun RecentJobsItem(
                 if (responseReport != null) {
                     onShowSnackbar(responseReport)
                 }
+                reportSubmissionKey = null // Reset key after handling
                 showReportDialog = false
                 reportClientViewModel.resetState()
             }
             is ReportClientViewModel.ReportClientState.Error -> {
+                reportSubmissionKey = null // Reset key after handling
                 val error = reportClient.message
                 onShowSnackbar(error)
             }
@@ -1034,6 +1043,7 @@ fun RecentJobsItem(
                                         } else {
                                             reasons[selectedIndex]
                                         }
+                                        reportSubmissionKey = System.currentTimeMillis() // Set unique key
                                         reportClientViewModel.reportClient(getJobs.userId, selectedReason, reasonDescription, reportDocument!!, context)
                                     }
                                 },
