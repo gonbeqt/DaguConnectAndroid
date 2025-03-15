@@ -417,7 +417,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
             Text(
                 text = "No Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -462,7 +462,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             Text(
                 text = "No Pending Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -507,7 +507,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
             Text(
                 text = "No Declined Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -551,7 +551,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
             Text(
                 text = "No Active Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -597,7 +597,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
             Text(
                 text = "No Completed Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -642,7 +642,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
             Text(
                 text = "No Cancelled Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1579,9 +1579,9 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
             // Display "No Submissions" when the list is empty
             Text(
                 text = "No Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1634,9 +1634,9 @@ fun PendingMySubmissionsTradesmanContent(
             // Display "No Pending Submissions" when the list is empty
             Text(
                 text = "No Pending Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1682,9 +1682,9 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
             // Display "No Active Submissions" when the list is empty
             Text(
                 text = "No Decline Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1729,9 +1729,9 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
             // Display "No Active Submissions" when the list is empty
             Text(
                 text = "No Active Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1776,9 +1776,9 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
             // Display "No Completed Submissions" when the list is empty
             Text(
                 text = "No Completed Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1822,9 +1822,9 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
             // Display "No Declined Submissions" when the list is empty
             Text(
                 text = "No Cancelled Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
