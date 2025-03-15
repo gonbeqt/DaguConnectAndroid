@@ -85,6 +85,7 @@ import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Categories
 import com.example.androidproject.view.WindowSize
@@ -97,6 +98,11 @@ import com.example.androidproject.view.tradesman.openFile
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 import kotlinx.coroutines.delay
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -178,6 +184,18 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
 }
 @Composable
 fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor: Color, textColor: Color) {
+    val firstName = AccountManager.getAccount()?.firstName
+    val createdAt = AccountManager.getAccount()?.createdAt
+    val newUser = LocalDate.now()
+    val createdAtDate = createdAt?.let { creationTime ->
+        try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val dateTime = LocalDateTime.parse(creationTime, formatter)
+            dateTime.toLocalDate()
+        } catch (e: Exception) {
+            null
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -188,24 +206,36 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor:
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
-                .padding(horizontal = 25.dp), // Added padding inside for spacing
+                .padding(horizontal = 25.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
                 // Left-aligned text
                 Text(
-                    text = "Hi User,",
+                    text = "Hi ${firstName},",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     color = textColor
                 )
-                Text(
-                    text = "Welcome back!",
-                    fontSize = 24.sp,
-                    color = textColor,
-                    fontWeight = FontWeight.Medium
-                )
+
+
+                if (createdAtDate == newUser) {
+                    Text(
+                        text = "Let's get started!",
+                        fontSize = 24.sp,
+                        color = textColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                } else {
+                    Text(
+                        text = "Welcome back!",
+                        fontSize = 24.sp,
+                        color = textColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
             }
             Icon(
                 imageVector = Icons.Outlined.Notifications,
