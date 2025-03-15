@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -87,6 +88,7 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient2
+import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.view.tradesman.UploadField
 import com.example.androidproject.view.tradesman.openFile
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
@@ -120,7 +122,7 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFECECEC))
+            .background(Color(0xFFEDEFEF))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -131,13 +133,13 @@ fun HomeScreen( modifier: Modifier = Modifier,navController: NavController,getRe
             Column(modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())) {
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 ExploreNow(windowSize)
 
                 Spacer(modifier = Modifier.height(20.dp))
                 CategoryRow(categories,navController)
 
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 TradesmanColumn(getResumesViewModel,navController,reportViewModel)
             }
         }
@@ -162,12 +164,12 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
             // Left-aligned text
             Text(
                 text = "Home",
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Medium
             )
 
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
                     modifier = Modifier
@@ -199,13 +201,13 @@ fun CategoryScrollIndicator(scrollState: LazyListState, itemCount: Int, visibleI
         }
     }
 
-    val trackWidth = 100.dp
+    val trackWidth = 50.dp
     val handleWidth = 15.dp
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -246,7 +248,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp, vertical = 15.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             Text(
@@ -265,7 +267,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(cardSize.second)
-                .background(Color(0xFFECECEC)),
+                .background(Color.Transparent),
         ) {
             items(categories) { category ->
                 CategoryItem(category) {
@@ -325,14 +327,14 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, end = 25.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = "Top-Rated",
             fontSize = 18.sp,
             fontWeight = FontWeight(500),
-            modifier = Modifier.padding(top = 15.dp)
+            modifier = Modifier.padding(top = 12.dp)
         )
         TextButton(onClick = { navController.navigate("alltradesman") }) {
             Text(
@@ -346,7 +348,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     Card(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
             .background(Color.White),
         shape = RoundedCornerShape(8.dp),
     ) {
@@ -376,9 +378,9 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
 @Composable
 fun ExploreNow(windowSize: WindowSize) {
     val titleTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
     }
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 16.sp
@@ -409,7 +411,7 @@ fun ExploreNow(windowSize: WindowSize) {
             .height(boxHeight)
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(myGradient2)
+            .background(myGradient4)
     ) {
         // DaguConnect Row positioned at the top-left
         Row(
@@ -434,12 +436,13 @@ fun ExploreNow(windowSize: WindowSize) {
 
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 30.dp, top = 20.dp, end = 16.dp),
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier.weight(1f)
+                    .padding(start = 20.dp, top = 16.dp),
             ) {
                 Text(
                     text = "What service do you need today?",
@@ -470,8 +473,8 @@ fun ExploreNow(windowSize: WindowSize) {
                 contentDescription = "Workers Images",
                 modifier = Modifier
                     .size(imageSize.first, imageSize.second)
-                    .padding(start = 12.dp)
             )
+
         }
     }
 }
@@ -492,7 +495,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFECECEC)),
+                .background(Color(0xFFEDEFEF)),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -504,7 +507,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
                         .size(50.dp)
                         .shadow(3.dp, shape = CircleShape)
                         .background(
-                            color = Color.White,
+                            color = Color(0xFFFFD9C1),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -518,7 +521,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
                 Text(
                     text = category.name,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -631,8 +634,8 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         // Menu Icon
                         Box {
                             Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Menu Icon",
+                                painter = painterResource(R.drawable.meatball_ic),
+                                contentDescription = "Report Icon",
                                 modifier = Modifier
                                     .size(iconSize)
                                     .clickable { showMenu = true }
