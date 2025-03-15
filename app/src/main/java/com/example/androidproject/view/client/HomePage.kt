@@ -11,6 +11,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -102,6 +105,32 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
 
+    // ✅ Correctly remember LazyListState for scrolling detection
+    val listState = rememberLazyListState()
+
+    val isScrolled by remember {
+        derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 50 }
+    }
+
+    // ✅ Smoothly animate colors based on scroll position
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isScrolled) Color.White else Color(0xFF42C2AE),
+        animationSpec = tween(durationMillis = 300),
+        label = "backgroundColor"
+    )
+
+    val textColor by animateColorAsState(
+        targetValue = if (isScrolled) Color.Black else Color.White,
+        animationSpec = tween(durationMillis = 300),
+        label = "textColor"
+    )
+
+    val boxColor by animateColorAsState(
+        targetValue = if (isScrolled) Color(0xFFEDEFEF) else Color(0xFF42C2AE),
+        animationSpec = tween(durationMillis = 300),
+        label = "boxColor"
+    )
+
 
     val categories = listOf(    
         Categories(R.drawable.carpentry, "Carpentry"),
@@ -117,43 +146,43 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
 
     )
 
-
-
-
-
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color(0xFFEDEFEF))
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(boxColor, RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp))
+        ){}
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Provide navController to the SearchField
-            HomeTopSection(navController,windowSize )
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())) {
-                Spacer(modifier = Modifier.height(20.dp))
-                ExploreNow(windowSize)
-
-                Spacer(modifier = Modifier.height(20.dp))
-                CategoryRow(categories,navController)
-
-                Spacer(modifier = Modifier.height(20.dp))
-                TradesmanColumn(getResumesViewModel,navController,reportTradesmanViewModel,LoadingUI)
+            HomeTopSection(navController,windowSize, backgroundColor, textColor )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState // ✅ Ensure listState is used properly
+            ) {
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+                item { ExploreNow(windowSize) }
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+                item { CategoryRow(categories, navController) }
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel, LoadingUI) }
             }
         }
+
     }
 }
 @Composable
-fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
+fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor: Color, textColor: Color) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(1.dp)
-            .background(Color.White)
+            .background(bgColor)
     ) {
         Row(
             modifier = Modifier
@@ -169,21 +198,21 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
                     text = "Hi User,",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.DarkGray
+                    color = textColor
                 )
                 Text(
                     text = "Welcome Back!",
                     fontSize = 24.sp,
-                    color = Color.Black,
+                    color = textColor,
                     fontWeight = FontWeight.Medium
                 )
             }
             Icon(
                 imageVector = Icons.Outlined.Notifications,
                 contentDescription = "Notifications Icon",
-                tint = Color.Black,
+                tint = textColor,
                 modifier = Modifier
-                    .size(35.dp)
+                    .size(32.dp)
                     .clickable { navController.navigate("notification") }
             )
         }
