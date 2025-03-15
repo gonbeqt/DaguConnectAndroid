@@ -35,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 
@@ -58,7 +61,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
     val tradesman_Id = tradesmanId.toIntOrNull()?: return
     val ratetradesmanState by rateTradesmanViewModel.rateTradesmanState.collectAsState()
     val context = LocalContext.current
-
+    var rateStar by remember { mutableStateOf("") }
     val viewBookingState by viewClientBookingViewModel.viewClientBookingState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -71,6 +74,11 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                 // do nothing
             }
             is RateTradesmanViewModel.RateTradesman.Success -> {
+                WebSocketManager.sendNotificationReviewToTradesman(
+                    resumeId,
+                    "A client has rated your service!",
+                    "${AccountManager.getAccount()?.firstName + AccountManager.getAccount()?.lastName} has rated you $rateStar start for your service!",
+                )
                 val successMessage = ratetradesman.data?.message
                 Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
                 // Pass result to MainScreen to switch to Bookings tab with Cancelled selected
@@ -223,6 +231,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                         Button(
                             onClick = {
                                 rateTradesmanViewModel.rateTradesman(reviewText.value, rating.value, tradesman_Id)
+                                rateStar = rating.value.toString()
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

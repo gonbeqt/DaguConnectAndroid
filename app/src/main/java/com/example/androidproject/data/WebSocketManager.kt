@@ -42,6 +42,7 @@ object WebSocketManager {
 
         val request = Request.Builder().url(URL).build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
+
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d(TAG, "WebSocket connected!")
                 val authMessage = """{"type": "auth", "user_id": "$userId"}"""
@@ -100,13 +101,13 @@ object WebSocketManager {
         }
     }
 
-    fun sendNotificationJobToTradesman(resumeId: String, notificationTitle: String, notificationType: String, message: String) {
+    fun sendNotificationJobToTradesman(resumeId: String, notificationTitle: String,  message: String) {
         val notification = mapOf(
             "type" to "notification",
             "client" to true,
             "resume_id" to resumeId,
             "notification_title" to notificationTitle,
-            "notificationType" to notificationType,
+            "notificationType" to "Job",
             "message" to message
         )
         val json = gson.toJson(notification)
@@ -118,15 +119,71 @@ object WebSocketManager {
         }
     }
 
-    fun sendNotificationJobToClient(clientId: String, notificationTitle: String, notificationType: String, message: String) {
+    fun sendNotificationJobToClient(clientId: String, notificationTitle: String, message: String) {
         val notification = mapOf(
             "type" to "notification",
             "tradesman" to true,
             "client_id" to clientId,
             "notification_title" to notificationTitle,
-            "notificationType" to notificationType,
+            "notificationType" to "Job",
             "message" to message
         )
+        val json = gson.toJson(notification)
+        if (webSocket != null) {
+            val success = webSocket?.send(json) == true
+            Log.d(TAG, if (success) "Sent: $json" else "Failed to send: $json")
+        } else {
+            Log.e(TAG, "WebSocket is not connected. Cannot send message: $json")
+        }
+    }
+
+    fun sendNotificationBookingToTradesman(resumeId: String, notificationTitle: String, message: String){
+        val notification = mapOf(
+            "type" to "notification",
+            "client" to true,
+            "resume_id" to resumeId,
+            "notification_title" to notificationTitle,
+            "notificationType" to "Booking",
+            "message" to message
+        )
+        val json = gson.toJson(notification)
+        if (webSocket != null) {
+            val success = webSocket?.send(json) == true
+            Log.d(TAG, if (success) "Sent: $json" else "Failed to send: $json")
+        } else {
+            Log.e(TAG, "WebSocket is not connected. Cannot send message: $json")
+        }
+    }
+
+    fun sendNotificationBookingToClient(clientId: String, notificationTitle: String, message: String) {
+        val notification = mapOf(
+            "type" to "notification",
+            "tradesman" to true,
+            "client_id" to clientId,
+            "notification_title" to notificationTitle,
+            "notificationType" to "Booking",
+            "message" to message
+        )
+
+        val json = gson.toJson(notification)
+        if (webSocket != null) {
+            val success = webSocket?.send(json) == true
+            Log.d(TAG, if (success) "Sent: $json" else "Failed to send: $json")
+        } else {
+            Log.e(TAG, "WebSocket is not connected. Cannot send message: $json")
+        }
+    }
+
+    fun sendNotificationReviewToTradesman(resumeId: String, notificationTitle: String, message: String) {
+        val notification = mapOf(
+            "type" to "notification",
+            "client" to true,
+            "resume_id" to resumeId,
+            "notification_title" to notificationTitle,
+            "notificationType" to "Review",
+            "message" to message
+        )
+
         val json = gson.toJson(notification)
         if (webSocket != null) {
             val success = webSocket?.send(json) == true

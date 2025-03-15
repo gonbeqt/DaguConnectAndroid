@@ -124,7 +124,7 @@ fun MessagingScreen(
         }
     }
 
-// Ensure scrolling when sending a message
+    // Ensure scrolling when sending a message
     LaunchedEffect(sentMessage) {
         if (sentMessage) {
             getMessages.refreshMessages()

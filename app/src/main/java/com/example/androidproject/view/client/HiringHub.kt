@@ -66,6 +66,7 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.WindowType
@@ -819,7 +820,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
     var showJobCompletedDialog by remember { mutableStateOf(false) }
     var showCancelledReason by remember { mutableStateOf(false) }
     var buttonSubmit by remember { mutableStateOf(false) }
-
+    var cancelReason by remember { mutableStateOf("") }
     val  context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val cardWidth = when (windowSize.width) {
@@ -850,11 +851,21 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                 updateWorkStatusViewModel.resetState()
                 if(updateWorkStatusState.status == "Completed"){
                     // Navigate to the "profile" screen and clear the back stack
+                    WebSocketManager.sendNotificationBookingToTradesman(
+                        activeBooking.resumeId.toString(),
+                        "A book job has been marked as completed!!",
+                        "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has marked the active book into completed."
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
                         navController.popBackStack()
                     }
                 }else if(updateWorkStatusState.status == "Cancelled"){
                     // Navigate to the "profile" screen and clear the back stack
+                    WebSocketManager.sendNotificationBookingToTradesman(
+                        activeBooking.resumeId.toString(),
+                        "An active booked job has been cancelled!",
+                        "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the active service. due to $cancelReason"
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
                         navController.popBackStack()
                     }
@@ -1192,6 +1203,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                                 it,
                                 activeBooking.id
                             )
+                            cancelReason = it
                         }
 
                     },
@@ -1213,10 +1225,15 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
     val updateBookingState by updateBookingTradesmanViewModel.workStatusState.collectAsState()
     var showCancelDialog by remember { mutableStateOf(false) }
     var showCancelReasons by remember { mutableStateOf(false) }
-
+    var cancelReason by remember { mutableStateOf("") }
     LaunchedEffect(updateBookingState) {
         when (updateBookingState) {
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
+                WebSocketManager.sendNotificationBookingToTradesman(
+                    pendingBooking.resumeId.toString(),
+                    "A client has cancelled a booking!",
+                    "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the booking request, due to $cancelReason."
+                )
                 Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
                 updateBookingTradesmanViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
@@ -1471,7 +1488,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
                             showCancelReasons = false
                             selectedReason?.let {
                                 updateBookingTradesmanViewModel.updateWorkStatus("Cancelled", it, pendingBooking.id)
-
+                                cancelReason = it
                             }
                         },
                         enabled = selectedReason != null,
@@ -2336,7 +2353,6 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                     WebSocketManager.sendNotificationJobToTradesman(
                         myJob.resumeId.toString(),
                         "Job Application accepted!",
-                        "Job",
                         "Your job application from ${myJob.clientFullname} has been accepted!"
                     )
 
@@ -2347,7 +2363,6 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                     WebSocketManager.sendNotificationJobToTradesman(
                         myJob.resumeId.toString(),
                         "${myJob.clientFullname} Declined Your Job Application.",
-                        "Job",
                         "Your application was declined by ${myJob.clientFullname} due to $reason."
                     )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
@@ -2728,7 +2743,6 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                         WebSocketManager.sendNotificationJobToTradesman(
                             myJob.resumeId.toString(),
                             "Job was marked as completed!",
-                            "Job",
                             "${myJob.clientFullname} has marked your ${myJob.jobType} service as completed!"
                         )
                         Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
@@ -2739,7 +2753,6 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                         WebSocketManager.sendNotificationJobToTradesman(
                             myJob.resumeId.toString(),
                             "An active job was cancelled!",
-                            "Job",
                             "${myJob.clientFullname} has cancelled ${myJob.jobType} service due to $cancelReason!"
                         )
                         Toast.makeText(context, "Job Cancelled", Toast.LENGTH_SHORT).show()

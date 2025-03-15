@@ -67,6 +67,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
 import com.example.androidproject.view.WindowType
@@ -745,7 +746,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
     val date = ViewModelSetups.formatDateTime(pending.bookingDate)
-
+    var cancelReason by remember { mutableStateOf("") }
     LaunchedEffect(updateWorkStatus) {
         when (val updateStatus = updateWorkStatus) {
             is UpdateBookingClientViewModel.UpdateClientWorkStatus.Loading -> {
@@ -755,10 +756,20 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                 updateBookingClientViewModel.resetState()
                 // Set the selectedTab based on the work status
                 if (updateStatus.status == "Accepted") {
+                    WebSocketManager.sendNotificationBookingToClient(
+                        pending.id.toString(),
+                        "Tradesman has accepted your booking request!",
+                        "${pending.tradesmanFullName} has accepted your booked service request. Start a conversation to futhermore give details.",
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=3"){
                         navController.popBackStack()
                     }
                 } else if (updateStatus.status == "Declined") {
+                    WebSocketManager.sendNotificationBookingToClient(
+                        pending.userId.toString(),
+                        "Tradesman has declined your booking request!",
+                        "${pending.tradesmanFullName} has declined your booked service request due to $cancelReason.",
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=2") {
                         navController.popBackStack()
                     }
@@ -1079,6 +1090,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                                 it,
                                 pending.id
                             )
+                            cancelReason = it
                         }
                     },
                     enabled = selectedReason != null,

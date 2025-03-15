@@ -1,11 +1,14 @@
 package com.example.androidproject.view.tradesman
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -122,9 +125,40 @@ fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsView
     var refreshTrigger by remember { mutableIntStateOf(0) }
     val userId = AccountManager.getAccount()?.id
 
+    // Permission launcher for POST_NOTIFICATIONS
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Monitor network state dynamically
     LaunchedEffect(Unit) {
-        WebSocketManager.connect(userId.toString())
-        WebSocketNotificationManager.initialize(context, userId.toString())
+        while (true) {
+            isConnected.value = checkNetworkConnectivity(connectivityManager)
+            delay(5000) // Check every 5 seconds (adjust as needed)
+        }
+    }
+
+    // Initialize WebSocket and notifications
+    LaunchedEffect(isConnected.value) {
+        if (isConnected.value) {
+            // Request notification permission for Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permission = Manifest.permission.POST_NOTIFICATIONS
+                if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    permissionLauncher.launch(permission)
+                }
+            }
+
+            // Connect WebSocket and initialize notifications
+            WebSocketManager.connect(userId.toString())
+            WebSocketNotificationManager.initialize(context, userId.toString())
+        } else {
+            WebSocketNotificationManager.cleanup() // Cleanup if disconnected
+        }
     }
 
 

@@ -76,7 +76,6 @@ fun HiringDetails(jobId: String, clientId: String, modifier: Modifier, navContro
                     WebSocketManager.sendNotificationJobToClient(
                         clientId,
                         "New Tradesman Applicant!",
-                        "Job",
                         "$tradesmanFullname has applied to your job post."
                     )
                     navController.navigate("main_screen")

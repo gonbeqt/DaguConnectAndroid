@@ -55,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
@@ -456,6 +458,12 @@ fun ConfirmBook(
                                         is BooktradesmanViewModel.BookTradesmanState.Success -> {
                                             Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
                                             bookingTradesmanViewModel.resetState()
+                                            WebSocketManager.sendNotificationBookingToTradesman(
+                                                resume.id.toString(),
+                                                "A client has requested for your service!",
+                                                "${AccountManager.getAccount()?.firstName + AccountManager.getAccount()?.lastName} has requested your service. Will you accept the book or decline?"
+                                            )
+
                                             navController.navigate("main_screen?selectedItem=1&selectedTab=1") {
                                                 popUpTo(navController.graph.startDestinationId) {
                                                     inclusive = false
