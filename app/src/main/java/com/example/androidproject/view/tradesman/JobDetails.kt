@@ -185,7 +185,10 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                         }
                         BasicTextField(
                             value = qualificationSummary,
-                            onValueChange = { qualificationSummary = it },
+                            onValueChange = {newText ->
+                                if (newText.length <= 500) {
+                                    qualificationSummary = newText
+                                }},
                             textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -197,7 +200,7 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                         horizontalArrangement = Arrangement.End,
 
                     ) {
-                        Text("Character: ${characterCount}/150", color = Color.Gray, fontSize = 12.sp)
+                        Text("Character: ${characterCount}/500", color = Color.Gray, fontSize = 12.sp)
                     }
 
                     Spacer(modifier = Modifier.weight(1f)) // pushes the buttons to the bottom

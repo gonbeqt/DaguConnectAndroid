@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -140,7 +141,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
                 CategoryRow(categories,navController)
 
                 Spacer(modifier = Modifier.height(20.dp))
-                TradesmanColumn(getResumesViewModel,navController,reportViewModel)
+                TradesmanColumn(getResumesViewModel,navController,reportTradesmanViewModel,LoadingUI)
             }
         }
     }

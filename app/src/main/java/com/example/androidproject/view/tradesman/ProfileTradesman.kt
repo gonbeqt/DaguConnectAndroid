@@ -406,31 +406,15 @@ fun ProfileTradesman(
                                                     )
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
-                                                Row(
-                                                    Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween
-                                                ) {
+
                                                     Icon(
                                                         painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),
                                                         contentDescription = "Profile Verified",
                                                         tint = Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
-                                                    Icon(
-                                                        imageVector = Icons.Default.Edit,
-                                                        contentDescription = "Edit Profile",
-                                                        tint = Color.White,
-                                                        modifier = Modifier
-                                                            .size(26.dp)
-                                                            .background(
-                                                                Color.Transparent,
-                                                                shape = CircleShape
-                                                            )
-                                                            .clickable {
-                                                                navController.navigate("accountsettingstradesman")
-                                                            }
-                                                    )
-                                                }
+
+
                                             }
                                             Text(
                                                 text = tradesmanDetails.email ?: "N/A",

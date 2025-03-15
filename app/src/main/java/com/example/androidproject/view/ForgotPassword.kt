@@ -331,9 +331,12 @@ fun ResetPassword(
                                     Spacer(modifier = Modifier.height(16.dp))
                                     OutlinedTextField(
                                         value = otp.replace(" ", ""),
-                                        onValueChange = { otp = it },
+                                        onValueChange = {
+                                                newValue ->
+                                            if (newValue.all { it.isDigit() } && newValue.length <= 5) {
+                                                otp = newValue
+                                            } },
                                         label = { Text("OTP") },
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(12.dp)
                                     )
