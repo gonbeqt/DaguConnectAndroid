@@ -1,5 +1,6 @@
 package com.example.androidproject.view.tradesman
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,6 +61,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
+import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanDetailViewModel
 import com.google.accompanist.flowlayout.FlowRow
 
@@ -81,7 +83,8 @@ fun ManageProfile(
     var aboutMe by remember { mutableStateOf("")}
     val context = LocalContext.current
 
-
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
     // Handle "N/A" and "null" (case-insensitive) by setting phoneNumber to empty string
     phoneNumber =if (number == "null") "" else number ?: ""
     estimatedRate = rate ?: ""
@@ -94,7 +97,8 @@ fun ManageProfile(
                 //loading
             }
             is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Success->{
-                Toast.makeText(context, "Updated Successfully", Toast.LENGTH_SHORT).show()
+                snackbarMessage = "Updated Successfully"
+                showSnackbar = true
                 updateTradesmanDetailViewModel.resetState()
                 // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=0") {
@@ -104,219 +108,263 @@ fun ManageProfile(
             }
             is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Error -> {
                 val error = updateDetails.message
-                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                snackbarMessage = error
+                showSnackbar = true
                 updateTradesmanDetailViewModel.resetState()
             }
             else -> Unit
         }
     }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(WindowInsets.systemBars.asPaddingValues())
-
-    ) {
-        // tob bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(elevation = 8.dp)
-                .background(Color.White)
-                .padding(horizontal = 8.dp, vertical = 16.dp),
-        ) {
-            Icon(
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clickable{  navController.navigate("main_screen?selectedItem=4&selectedTab=0") },
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close",
-                tint = Color.Black
-            )
-            Text(
-                text = "Manage Profile and Skills",
-                fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        LazyColumn(
-            modifier = Modifier
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            modifier = modifier
                 .fillMaxSize()
                 .background(Color.White)
+                .padding(WindowInsets.systemBars.asPaddingValues())
+
         ) {
-            item {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Image(
-                        painter = painterResource(R.drawable.profileandskills),
-                        contentDescription = "Workers Images",
-                        modifier = Modifier
-                            .padding(top = 20.dp, bottom = 10.dp)
-                            .height(150.dp)
-                            .width(240.dp)
-                    )
-                }
-            }
-
-            item {
-                Row(
+            // tob bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 8.dp)
+                    .background(Color.White)
+                    .padding(horizontal = 8.dp, vertical = 16.dp),
+            ) {
+                Icon(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Showcase Your Profile & Expertise",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                        .padding(end = 16.dp)
+                        .clickable { navController.navigate("main_screen?selectedItem=4&selectedTab=0") },
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.Black
+                )
+                Text(
+                    text = "Manage Profile and Skills",
+                    fontSize = 20.sp,
+                    modifier = Modifier.weight(1f)
+                )
             }
-
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Update availability, set rates, share your bio, and showcase specialties to attract opportunities.",
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-
-
-            item {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(text = "Preferred location:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                    ) {
-                        CustomDropdown(
-                            selectedOption = selectedLocation,
-                            onOptionSelected = { selectedLocation = it }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Image(
+                            painter = painterResource(R.drawable.profileandskills),
+                            contentDescription = "Workers Images",
+                            modifier = Modifier
+                                .padding(top = 20.dp, bottom = 10.dp)
+                                .height(150.dp)
+                                .width(240.dp)
                         )
-
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-            item {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(text = "Phone Number:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
-                    Box(
+                item {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(12.dp)
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        // Placeholder
-                        if (phoneNumber.isEmpty()) {
-                            Text(" Enter your phone number", color = Color.Gray, fontSize = 16.sp)
+                        Text(
+                            text = "Showcase Your Profile & Expertise",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Update availability, set rates, share your bio, and showcase specialties to attract opportunities.",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+
+
+                item {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "Preferred location:",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                        ) {
+                            CustomDropdown(
+                                selectedOption = selectedLocation,
+                                onOptionSelected = { selectedLocation = it }
+                            )
+
                         }
-
-                        BasicTextField(
-                            value = phoneNumber,
-                            onValueChange = { newValue ->
-                                // Allow only digits
-                                phoneNumber = newValue.filter { it.isDigit() }
-                            },
-                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                            modifier = Modifier.fillMaxWidth(),
-                            decorationBox = { innerTextField ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(" ", fontSize = 16.sp)
-                                    innerTextField()
-                                }
-                            }
-                        )
                     }
+
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
-
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-            item {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(text = "Estimated rate:", fontWeight = FontWeight.Normal, fontSize = 16.sp)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(12.dp)
-                    ) {
-                        // Placeholder
-                        if (estimatedRate.isEmpty()) {
-                            Text("₱ Enter amount", color = Color.Gray, fontSize = 16.sp)
-                        }
-
-                        BasicTextField(
-                            value = estimatedRate,
-                            onValueChange = { newValue ->
-                                // Allow only digits
-                                estimatedRate = newValue.filter { it.isDigit() }
-                            },
-                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                            modifier = Modifier.fillMaxWidth(),
-                            decorationBox = { innerTextField ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("₱ ", fontSize = 16.sp) // Peso sign as static prefix
-                                    innerTextField()
-                                }
-                            }
+                item {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "Phone Number:",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp
                         )
-                    }
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-            item {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    Text(text = "About Me:", fontWeight = FontWeight.Normal, fontSize = 16.sp, color = Color.DarkGray)
-
-                    // textfield with placeholder
-                    BasicTextField(
-                        value = aboutMe,
-                        onValueChange = { aboutMe = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(10.dp),
-                        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                        decorationBox = { innerTextField ->
-                            if (aboutMe.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                                .padding(12.dp)
+                        ) {
+                            // Placeholder
+                            if (phoneNumber.isEmpty()) {
                                 Text(
-                                    text = "Example: I'm a licensed plumber with over 7 years of experience handling everything from leak repairs to full plumbing system installations.",
-                                    fontSize = 16.sp,
-                                    color = Color.Gray
+                                    " Enter your phone number",
+                                    color = Color.Gray,
+                                    fontSize = 16.sp
                                 )
                             }
-                            innerTextField()
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-            item {
-                Button(
-                    onClick = {
-                        updateTradesmanDetailViewModel.updateTradesmanDetails(aboutMe,selectedLocation,estimatedRate.toInt(), phoneNumber)
-                              },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
-                    modifier = Modifier.padding(16.dp).fillMaxWidth().background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))
-                ) {
-                    Text(text = "Save Changes")
-                }
-            }
-        }
 
+                            BasicTextField(
+                                value = phoneNumber,
+                                onValueChange = { newValue ->
+                                    // Allow only digits
+                                    phoneNumber = newValue.filter { it.isDigit() }
+                                },
+                                textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                                modifier = Modifier.fillMaxWidth(),
+                                decorationBox = { innerTextField ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(" ", fontSize = 16.sp)
+                                        innerTextField()
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                item {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "Estimated rate:",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                                .padding(12.dp)
+                        ) {
+                            // Placeholder
+                            if (estimatedRate.isEmpty()) {
+                                Text("₱ Enter amount", color = Color.Gray, fontSize = 16.sp)
+                            }
+
+                            BasicTextField(
+                                value = estimatedRate,
+                                onValueChange = { newValue ->
+                                    // Allow only digits
+                                    estimatedRate = newValue.filter { it.isDigit() }
+                                },
+                                textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                                modifier = Modifier.fillMaxWidth(),
+                                decorationBox = { innerTextField ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text("₱ ", fontSize = 16.sp) // Peso sign as static prefix
+                                        innerTextField()
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                item {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "About Me:",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp,
+                            color = Color.DarkGray
+                        )
+
+                        // textfield with placeholder
+                        BasicTextField(
+                            value = aboutMe,
+                            onValueChange = { aboutMe = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                                .padding(10.dp),
+                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                            decorationBox = { innerTextField ->
+                                if (aboutMe.isEmpty()) {
+                                    Text(
+                                        text = "Example: I'm a licensed plumber with over 7 years of experience handling everything from leak repairs to full plumbing system installations.",
+                                        fontSize = 16.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                item {
+                    Button(
+                        onClick = {
+                            updateTradesmanDetailViewModel.updateTradesmanDetails(
+                                aboutMe,
+                                selectedLocation,
+                                estimatedRate.toInt(),
+                                phoneNumber
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
+                        modifier = Modifier.padding(16.dp).fillMaxWidth()
+                            .background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))
+                    ) {
+                        Text(text = "Save Changes")
+                    }
+                }
+            }
+
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            CustomDurationSnackbar(
+                message = snackbarMessage,
+                show = showSnackbar,
+                duration = 5000L,
+                onDismiss = { showSnackbar = false }
+            )
+            Log.d("SnackbarDebug", "Rendering: Show=$showSnackbar, Message=$snackbarMessage")
+        }
     }
 }
 

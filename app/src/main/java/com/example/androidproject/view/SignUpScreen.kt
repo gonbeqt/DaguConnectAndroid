@@ -346,7 +346,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         CustomDurationSnackbar(
             message = snackbarMessage,
             show = showSnackbar,
-            duration = 3000L,
+            duration = 5000L,
             onDismiss = { showSnackbar = false }
         )
     }

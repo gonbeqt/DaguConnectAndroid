@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -109,7 +110,6 @@ fun HomeTradesman(
     LoadingUI: @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
@@ -121,9 +121,7 @@ fun HomeTradesman(
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableIntStateOf(0) }
-
     var isLoading by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val headerTextSize = when (windowSize.width) {
@@ -132,25 +130,23 @@ fun HomeTradesman(
         WindowType.LARGE -> 18.sp
     }
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
-
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
 
     val onShowSnackbar: (String) -> Unit = { message ->
         snackbarMessage = message
         showSnackbar = true
+        Log.d("SnackbarDebug", "onShowSnackbar called: $message")
     }
 
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
         if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
+            isLoading = true
+            delay(200.milliseconds)
+            isLoading = false
         }
     }
 
-    // Tab titles
     val tabTitles = listOf("Top Matches", "Recent Posted Jobs")
 
     Box(
@@ -159,131 +155,127 @@ fun HomeTradesman(
             .padding(WindowInsets.systemBars.asPaddingValues())
             .background(Color.White)
     ) {
+        // Main content
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentSize()
                 .background(Color.White)
         ) {
-            // Provide navController to the SearchField
             TopSectionHomeTradesman(navController, windowSize)
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // Tabs (Fixed Choices)
-                        TabRow(
-                            indicator = { tabPositions ->
-                                TabRowDefaults.Indicator(
-                                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                    color = Color(0xFF42C2AE),
-                                    height = 2.dp
-                                )
-                            },
-                            selectedTabIndex = selectedTabIndex,
-                            modifier = Modifier.fillMaxWidth(),
-                            containerColor = Color.White
-                        ) {
-                            tabTitles.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            fontSize = headerTextSize,
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(4.dp),
-                                            color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                        // Content changes based on the selected tab
-                        if (!isConnected.value) {
-                            // No internet connection
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = "No Internet Connection",
-                                        fontSize = 18.sp,
-                                        color = Color.Red,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Text(
-                                        text = "Please check your internet and try again.",
-                                        fontSize = 14.sp,
-                                        color = Color.Gray
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    // Retry button (only fetch data when clicked)
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable {
-                                                // Re-check network connectivity
-                                                isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                                if (isConnected.value) {
-                                                    // Show loading state and trigger data fetch
-                                                    isLoading = true
-                                                    refreshTrigger++
-                                                } else {
-                                                    snackbarMessage = "Still no internet connection"
-                                                    showSnackbar = true
-                                                }
-                                            }
-                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    ) {
-                                        Text(
-                                            text = "Retry",
-                                            color = Color.White,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
-                            if (isLoading) {
-                                LoadingUI()
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color(0xFFD9D9D9))
-                                ) {
-                                    when (selectedTabIndex) {
-                                        0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI, onShowSnackbar)
-                                        1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel, onShowSnackbar)
-                                    }
-
-                                }
-
-                            }
-                        }
-                    }
-
-            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 16.dp),
-                contentAlignment = Alignment.BottomCenter
+                    .background(Color.White)
             ) {
-                CustomDurationSnackbar(
-                    message = snackbarMessage ,
-                    show = showSnackbar,
-                    duration = 3000L,
-                    onDismiss = { showSnackbar = false }
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp) // Consistent padding for content
+                ) {
+                    TabRow(
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                color = Color(0xFF42C2AE),
+                                height = 2.dp
+                            )
+                        },
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier.fillMaxWidth(),
+                        containerColor = Color.White
+                    ) {
+                        tabTitles.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = { selectedTabIndex = index },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        fontSize = headerTextSize,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(4.dp),
+                                        color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    if (!isConnected.value) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    fontSize = 18.sp,
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Please check your internet and try again.",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clickable {
+                                            isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                            if (isConnected.value) {
+                                                isLoading = true
+                                                refreshTrigger++
+                                            } else {
+                                                onShowSnackbar("Still no internet connection")
+                                            }
+                                        }
+                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Retry",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        if (isLoading) {
+                            LoadingUI()
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFFD9D9D9))
+                            ) {
+                                when (selectedTabIndex) {
+                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI, onShowSnackbar)
+                                    1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel, onShowSnackbar)
+                                }
+                            }
+                        }
+                    }
+                }
             }
+        }
+        // Snackbar layered above content
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 80.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            CustomDurationSnackbar(
+                message = snackbarMessage,
+                show = showSnackbar,
+                duration = 5000L,
+                onDismiss = { showSnackbar = false }
+            )
+            Log.d("SnackbarDebug", "Rendering: Show=$showSnackbar, Message=$snackbarMessage")
         }
     }
 }

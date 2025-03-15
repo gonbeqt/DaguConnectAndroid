@@ -282,7 +282,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
             CustomDurationSnackbar(
                 message = snackbarMessage,
                 show = showSnackbar,
-                duration = 3000L,
+                duration = 5000L,
                 onDismiss = { showSnackbar = false }
             )
         }
@@ -512,7 +512,7 @@ fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier:
 fun CustomDurationSnackbar(
     message: String,
     show: Boolean,
-    duration: Long = 3000L,
+    duration: Long = 5000L,
     onDismiss: () -> Unit
 ) {
     AnimatedVisibility(

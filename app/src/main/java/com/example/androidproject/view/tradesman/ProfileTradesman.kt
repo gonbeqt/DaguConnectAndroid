@@ -539,7 +539,7 @@ fun ProfileTradesman(
                                         CustomDurationSnackbar(
                                             message = snackbarMessage,
                                             show = showSnackbar,
-                                            duration = 3000L,
+                                            duration = 5000L,
                                             onDismiss = { showSnackbar = false }
                                         )
                                         Log.d("Snackbar", snackbarMessage)
