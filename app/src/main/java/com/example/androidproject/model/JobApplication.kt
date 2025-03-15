@@ -54,14 +54,6 @@ data class JobApplicationData(
     val updatedAt: String,
     @SerializedName("created_at")
     val createdAt: String,
-    @SerializedName("updated_at")
-    val updatedAt: String,
-    @SerializedName("cancelled_reason")
-    val cancelledReason: String?,
-    @SerializedName("cancelled_by")
-    val cancelledBy: String?
-
-
 )
 
 data class UpdateStatus(

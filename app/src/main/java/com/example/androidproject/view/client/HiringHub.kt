@@ -2706,7 +2706,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
     val context = LocalContext.current
     var cancelledClicked by remember { mutableStateOf(false) }
     var completedClicked by remember { mutableStateOf(false) }
-
+    var cancelReason by remember { mutableStateOf("") }
 
     LaunchedEffect(putJobState) {
         if (cancelledClicked || completedClicked) {
@@ -2725,11 +2725,23 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                     if (putJob.status =="Completed"){
+                        WebSocketManager.sendNotificationJobToTradesman(
+                            myJob.resumeId.toString(),
+                            "Job was marked as completed!",
+                            "Job",
+                            "${myJob.clientFullname} has marked your ${myJob.jobType} service as completed!"
+                        )
                         Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
                         navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
                             navController.popBackStack()
                         }
                     }else if(putJob.status == "Cancelled"){
+                        WebSocketManager.sendNotificationJobToTradesman(
+                            myJob.resumeId.toString(),
+                            "An active job was cancelled!",
+                            "Job",
+                            "${myJob.clientFullname} has cancelled ${myJob.jobType} service due to $cancelReason!"
+                        )
                         Toast.makeText(context, "Job Cancelled", Toast.LENGTH_SHORT).show()
                         navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                             navController.popBackStack()
@@ -2836,7 +2848,6 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
-
                     ) {
                         Box(
                             modifier = Modifier
@@ -2913,8 +2924,6 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             showCompletedDialog = false
                             showJobCompletedDialog = true
                             putJobApplicationStatus.updateJobApplicationStatus(myJob.id, "Active", "")
-                            WebSocketManager.sendNotificationJobToTradesman(myJob.resumeId.toString(), "Job completed", "Job", "Your job application to ${myJob.clientFullname} is now completed!")
-
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
                     ) {
@@ -3069,12 +3078,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                                     "Cancelled",
                                     it
                                 )
-                                WebSocketManager.sendNotificationJobToTradesman(
-                                    myJob.resumeId.toString(),
-                                    "Active has been cancelled",
-                                    "Job",
-                                    "${myJob.clientFullname} cancelled your active job ${myJob.jobType} because of $selectedReason!"
-                                )
+                                cancelReason = it
                             }
                             completedClicked = true
 
@@ -3215,6 +3219,11 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
 
 @Composable
 fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
+    var jobType = myJob.jobType
+
+    if (jobType == "Electrical_work") {
+        jobType = "Electrical Work"
+    }
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 250.dp
@@ -3280,7 +3289,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: ${myJob.jobType}",
+                            text = "Service: $jobType",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
@@ -3332,9 +3341,13 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
     }
 }
 
-
 @Composable
 fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavController) {
+    var jobType = myJob.jobType
+
+    if (jobType == "Electrical_work") {
+        jobType = "Electrical Work"
+    }
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 250.dp
@@ -3400,7 +3413,7 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: ${myJob.jobType}",
+                            text = "Service: $jobType",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )
@@ -3423,7 +3436,6 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                         )
                     }
                 }
-
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center // Aligns content to the end
@@ -3436,7 +3448,6 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
-
                             .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
                             .padding(
                                 vertical = 8.dp,

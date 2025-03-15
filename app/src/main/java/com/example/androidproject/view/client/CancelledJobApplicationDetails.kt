@@ -329,7 +329,7 @@ fun CancelledJobApplicationDetails(navController: NavController, viewJobApplicat
                                     .padding(horizontal = 10.dp, vertical = 10.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Row() {
+                                Row {
                                     Icon(
                                         imageVector = Icons.Default.Message,
                                         contentDescription = "Message Icon",

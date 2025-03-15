@@ -27,8 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -64,7 +62,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.MotionScene
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -74,16 +71,12 @@ import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
-import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateBookingClientViewModel
-import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
-import com.example.androidproject.viewmodel.factories.bookings.UpdateBookingClientViewModelFactory
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import kotlinx.coroutines.delay
-import org.jetbrains.annotations.Async
 import java.sql.Types.NULL
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -1716,7 +1709,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
             ) {
                 items(activeApplication.size) { index ->
                     val activeJobs = activeApplication[index]
-                    ActiveMySubmissionsTradesmanItem(activeJobs,navController, putJobApplicationStatusViewModel)
+                    ActiveMySubmissionsTradesmanItem(activeJobs,navController)
                 }
             }
         }
@@ -1768,7 +1761,6 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
             }
         }
     }
-
 }
 @Composable
 fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
@@ -2191,7 +2183,7 @@ fun PendingMySubmissionsTradesmanItem(
     }
 }
 @Composable
-fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
+fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -2210,35 +2202,6 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
     }
     val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
-    val putJobState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
-    var cancelledClicked by remember { mutableStateOf(false) }
-    var completedClicked by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    LaunchedEffect(putJobState) {
-        if (cancelledClicked || completedClicked) {
-            when (val putJob = putJobState) {
-                is PutJobApplicationStatusViewModel.PutJobApplicationState.Idle -> {
-
-                }
-
-                is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
-
-                }
-
-                is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
-                    Toast.makeText(context, putJob.message, Toast.LENGTH_SHORT).show()
-                }
-
-                is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
-                    Toast.makeText(context, putJob.data.message(), Toast.LENGTH_SHORT).show()
-                    putJobApplicationStatusViewModel.resetState()
-                    navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
-                        navController.popBackStack()
-                    }
-                }else -> Unit
-            }
-        }
-    }
 
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 410.dp to 270.dp
@@ -2623,8 +2586,6 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
-    val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
