@@ -457,7 +457,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                             navController = navController,
                             cardHeight = cardHeight,
                             textSize = textSize,
-                            reportViewModels = reportViewModel
+                            reportTradesmanViewModels = reportTradesmanViewModel
                         )
                     }
                 }
