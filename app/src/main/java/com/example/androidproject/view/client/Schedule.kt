@@ -69,7 +69,6 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
             .filter { it.bookingStatus == "Active" } // Filter for Active bookings
@@ -112,8 +111,6 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                 false
             }
         }
-
-    val windowSizeClass = rememberWindowSizeClass()
 
     val selectedDate = if (selectedFilter == "My Clients") selectedClientDate else selectedApplicantDate
 
@@ -259,17 +256,6 @@ fun FilterSection(
 @Composable
 fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val allBookingDates = remember(clientBooking) {
-        clientBooking.itemSnapshotList.filterNotNull()
-            .filter { it.bookingStatus == "Active" } // Filter for Active bookingStatus
-            .mapNotNull { booking ->
-                try {
-                    LocalDate.parse(booking.bookingDate, dateFormatter)
-                } catch (e: Exception) {
-                    null
-                }
-            }.toSet()
-    }
 
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
@@ -281,7 +267,7 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
             }
         }
 
-    Log.d("MyClientsList", "Selected Date: $selectedDate, Filtered Clients: $filteredClients, All Booking Dates: $allBookingDates")
+
 
     if (filteredClients.isEmpty()) {
         Box(
@@ -315,17 +301,6 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
 fun MyApplicantsList(allApplicants: LazyPagingItems<JobApplicantData>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    val allApplicantDates = remember(allApplicants) {
-        allApplicants.itemSnapshotList.filterNotNull()
-            .filter { it.status == "Active" }
-            .mapNotNull { applicants ->
-                try {
-                    LocalDate.parse(applicants.createdAt, dateFormatter)
-                } catch (e: Exception) {
-                    null
-                }
-            }.toSet()
-    }
     val filteredApplicants = allApplicants.itemSnapshotList.filterNotNull()
         .filter {
             try {

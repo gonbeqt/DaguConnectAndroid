@@ -1565,7 +1565,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
     val myJobs = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.refreshJobApplicants()
+        myJobs.refresh()
     }
 
     Box(
