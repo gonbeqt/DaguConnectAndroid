@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -162,15 +163,15 @@ fun BookingsScreen(
                 ) {
                     Text(
                         text = "Bookings",
-                        fontSize = 28.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Medium
                     )
                     Icon(
-                        imageVector = Icons.Default.Notifications,
+                        imageVector = Icons.Outlined.Notifications,
                         contentDescription = "Notifications Icon",
                         tint = Color.Black,
                         modifier = Modifier
-                            .size(35.dp)
+                            .size(32.dp)
                             .clickable { navController.navigate("notification") }
                     )
                 }
