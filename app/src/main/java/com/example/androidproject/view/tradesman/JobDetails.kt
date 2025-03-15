@@ -220,7 +220,8 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                                     color = Color.White,
                                     shape = RoundedCornerShape(12.dp)
                                 )
-                                .clickable { }
+                                .clickable {
+                                }
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {

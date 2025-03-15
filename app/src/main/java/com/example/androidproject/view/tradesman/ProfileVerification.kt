@@ -72,10 +72,11 @@ fun ProfileVerification(
     var backIdUri by remember { mutableStateOf<Uri?>(null) }
     var tradeCredentialUri by remember { mutableStateOf<Uri?>(null) }
      var isPhoneValid by remember { mutableStateOf(false) }
+    val phoneRegex = "^9[0-9]{9}$".toRegex()
+
     val isTyping = estimatedRate.isNotEmpty()
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
-    val phoneRegex = "^9[0-9]{9}$".toRegex()
     val onShowSnackbar: (String) -> Unit = { message ->
         snackbarMessage = message
         showSnackbar = true

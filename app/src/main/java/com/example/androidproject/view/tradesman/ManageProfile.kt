@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ToggleOff
 import androidx.compose.material3.Button
@@ -61,6 +62,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanDetailViewModel
 import com.google.accompanist.flowlayout.FlowRow
@@ -82,6 +85,8 @@ fun ManageProfile(
     var estimatedRate by remember { mutableStateOf("") } // Changed to String for simplicity
     var aboutMe by remember { mutableStateOf("")}
     val context = LocalContext.current
+    var isPhoneValid by remember { mutableStateOf(false) }
+    val phoneRegex = "^9[0-9]{9}$".toRegex()
 
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
@@ -223,39 +228,68 @@ fun ManageProfile(
                 item {
                     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                         Text(
+                            modifier = Modifier.padding(bottom = 8.dp),
                             text = "Phone Number:",
                             fontWeight = FontWeight.Normal,
-                            fontSize = 16.sp
+                            fontSize = 14.sp,
+                            color = Color.DarkGray
                         )
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                                .padding(12.dp)
+                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                .padding(horizontal = 14.dp, vertical = 18.dp)
                         ) {
-                            // Placeholder
-                            if (phoneNumber.isEmpty()) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    " Enter your phone number",
-                                    color = Color.Gray,
-                                    fontSize = 16.sp
+                                    text = "+63",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    style = TextStyle(fontSize = 14.sp),
+                                    color = if (phoneNumber.isNotEmpty()) Color.Black else Color.Gray
                                 )
-                            }
 
-                            BasicTextField(
-                                value = phoneNumber,
-                                onValueChange = { newValue ->
-                                    // Allow only digits
-                                    phoneNumber = newValue.filter { it.isDigit() }
-                                },
-                                textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                                modifier = Modifier.fillMaxWidth(),
-                                decorationBox = { innerTextField ->
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(" ", fontSize = 16.sp)
+                                BasicTextField(
+                                    value = phoneNumber,
+                                    onValueChange = { newValue ->
+                                        // Filter to digits only and limit to 10 characters
+                                        val filteredValue = newValue.filter { it.isDigit() }.take(10)
+                                        // Enforce "9" prefix
+                                        phoneNumber = when {
+                                            filteredValue.isEmpty() -> ""
+                                            filteredValue.length == 1 && filteredValue != "9" -> "9$filteredValue"
+                                            else -> filteredValue
+                                        }
+                                        // Validate using regex
+                                        isPhoneValid = phoneNumber.isEmpty() || phoneRegex.matches(phoneNumber)
+                                    },
+                                    textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Number
+                                    ),
+                                    modifier = Modifier
+                                        .padding(start = 4.dp)
+                                        .fillMaxWidth(),
+                                    decorationBox = { innerTextField ->
+                                        if (phoneNumber.isEmpty()) {
+                                            Text(
+                                                text = "eg. 9123456789",
+                                                color = Color.Gray,
+                                                style = TextStyle(fontSize = 14.sp),
+                                                fontSize = 14.sp
+                                            )
+                                        }
                                         innerTextField()
                                     }
-                                }
+                                )
+                            }
+                        }
+                        if (!isPhoneValid && phoneNumber.isNotEmpty()) {
+                            Text(
+                                text = "Phone number must be 10 digits starting with 9 (e.g., 9123456789)",
+                                color = Color.Red,
+                                style = TextStyle(fontSize = 12.sp),
+                                modifier = Modifier.padding(top = 4.dp)
                             )
                         }
                     }
@@ -276,22 +310,33 @@ fun ManageProfile(
                                 .padding(12.dp)
                         ) {
                             // Placeholder
-                            if (estimatedRate.isEmpty()) {
-                                Text("₱ Enter amount", color = Color.Gray, fontSize = 16.sp)
-                            }
 
                             BasicTextField(
                                 value = estimatedRate,
-                                onValueChange = { newValue ->
-                                    // Allow only digits
-                                    estimatedRate = newValue.filter { it.isDigit() }
+                                onValueChange = { newText ->
+                                    val filteredText = newText.filter { it.isDigit() }
+                                    val trimmedText = if (filteredText.startsWith("0") && filteredText.length > 1) {
+                                        filteredText.dropWhile { it == '0' }
+                                    } else {
+                                        filteredText
+                                    }
+                                    estimatedRate = trimmedText
                                 },
-                                textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                                modifier = Modifier.fillMaxWidth(),
+                                textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number
+                                ),
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .fillMaxWidth(),
                                 decorationBox = { innerTextField ->
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text("₱ ", fontSize = 16.sp) // Peso sign as static prefix
-                                        innerTextField()
+                                    if (estimatedRate.isEmpty()) {
+                                        Text("₱ Enter amount", color = Color.Gray, fontSize = 16.sp)
+                                    }
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text("₱ ", fontSize = 16.sp) // Peso sign as static prefix
+                                            innerTextField()
+
                                     }
                                 }
                             )
@@ -311,7 +356,15 @@ fun ManageProfile(
                         // textfield with placeholder
                         BasicTextField(
                             value = aboutMe,
-                            onValueChange = { aboutMe = it },
+                            onValueChange = { newText ->
+                                if (newText.length <= 500) {
+                                    aboutMe = newText
+                                } else {
+                                    aboutMe = newText.substring(0, 500)
+                                    snackbarMessage = "Character count exceeds"
+                                    showSnackbar = true
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
