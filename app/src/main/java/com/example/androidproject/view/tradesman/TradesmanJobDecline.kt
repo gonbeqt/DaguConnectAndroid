@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,16 +28,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import java.sql.Types.NULL
 
 
 @Composable
-fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanJobDecline(jobId:String, modifier: Modifier = Modifier, navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -54,6 +57,15 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    val jobID = jobId.toIntOrNull() ?: return
+    val bookingPendingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        bookingPendingState.refresh()
+    }
+
+    // Find the booking with the matching jobId and "Pending" status
+    val selectedBooking = bookingPendingState.itemSnapshotList.items
+        .firstOrNull { it.id == jobID && it.bookingStatus == "Declined" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -119,7 +131,7 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Job offer has been Declined by you",
+                            text = "Job offer has been Declined by ${selectedBooking?.clientFullName}",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
@@ -160,12 +172,14 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Client image
-                            Image(
-                                painter = painterResource(id = R.drawable.pfp),
-                                contentDescription = "Tradesman Image",
-                                modifier = Modifier
-                                    .size(100.dp)
-                            )
+                            if (selectedBooking != null) {
+                                AsyncImage(
+                                    model = selectedBooking.clientProfile,
+                                    contentDescription = "Tradesman Image",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                )
+                            }
 
                             // Tradesman details
                             Column(
@@ -173,25 +187,31 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
                                     .weight(1f)
                                     .padding(start = 10.dp)
                             ) {
-                                Text(
-                                    text = "Ezekiel Vidal",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = nameTextSize,
-                                )
-                                Text(
-                                    text = "09576947632",
-                                    color = Color.Gray,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = smallTextSize,
-                                )
+                                if (selectedBooking != null) {
+                                    Text(
+                                        text = selectedBooking.clientFullName,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = nameTextSize,
+                                    )
+                                }
+                                if (selectedBooking != null) {
+                                    Text(
+                                        text =selectedBooking.phoneNumber,
+                                        color = Color.Gray,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = smallTextSize,
+                                    )
+                                }
 
 
-                                Text(
-                                    text = "21 Road St. Dagupan City, Pangasinan",
-                                    color = Color.Gray,
-                                    fontSize = smallTextSize,
-                                )
+                                if (selectedBooking != null) {
+                                    Text(
+                                        text = selectedBooking.address,
+                                        color = Color.Gray,
+                                        fontSize = smallTextSize,
+                                    )
+                                }
                             }
                         }
 
@@ -244,11 +264,19 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
                                             .size(32.dp)
                                     )
                                     Text(
-                                        text = "Job Date: March 23, 2025",
+                                        text = "Job Date:",
                                         fontSize = nameTextSize,
                                         color = Color.Black,
                                         modifier = Modifier.padding(start = 10.dp)
                                     )
+                                    if (selectedBooking != null) {
+                                        Text(
+                                            text = selectedBooking.bookingDate,
+                                            fontSize = nameTextSize,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 10.dp)
+                                        )
+                                    }
                                 }
                             }
                             Row(
@@ -285,10 +313,12 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
                                                 shape = RoundedCornerShape(12.dp)
                                             )
                                     ) {
-                                        Text(
-                                            modifier = Modifier.padding(16.dp),
-                                            text = "Our house needs to be repainted. For further details just contact or chat me."
-                                        )
+                                        if (selectedBooking != null) {
+                                            Text(
+                                                modifier = Modifier.padding(16.dp),
+                                                text = selectedBooking.taskDescription,
+                                            )
+                                        }
                                     }
                                 }
 
@@ -397,7 +427,11 @@ fun TradesmanJobDecline(modifier: Modifier = Modifier, navController: NavControl
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {navController.navigate("tradesmandeclineddetails")   }
+                    .clickable {
+                        if (selectedBooking != null) {
+                            navController.navigate("tradesmandeclineddetails/${selectedBooking.id}")
+                        }
+                    }
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

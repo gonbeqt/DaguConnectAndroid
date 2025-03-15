@@ -55,7 +55,8 @@ fun ResetPassword(
     var isLoading by remember { mutableStateOf(false) } // Added loading state
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
     // Countdown logic
     LaunchedEffect(showOtpDialog) {
         if (showOtpDialog) {
@@ -101,8 +102,9 @@ fun ResetPassword(
             }
             is ResetPassViewModel.ResetPassState.Success -> {
                 resetPass.resetState()
-                Toast.makeText(context, "Password Reset Successfully", Toast.LENGTH_SHORT).show()
                 // Navigate to the "login" screen and clear the back stack
+                snackbarMessage = "Password Reset Successfully"
+                showSnackbar = true
                 navController.navigate("login") {
                     navController.popBackStack()
                     isLoading = false // Hide loading UI
@@ -111,7 +113,8 @@ fun ResetPassword(
             is ResetPassViewModel.ResetPassState.Error -> {
                 isLoading = false // Hide loading UI
                 val error = resetPassword.message
-                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                snackbarMessage = error
+                showSnackbar = true
             }
             else -> Unit
         }
@@ -125,19 +128,22 @@ fun ResetPassword(
             }
             is ForgotPassViewModel.ForgotPasswordState.Success -> {
                 isLoading = false // Hide loading UI
-                Toast.makeText(context, "OTP Sent", Toast.LENGTH_SHORT).show()
+                snackbarMessage = "OTP Sent"
+                showSnackbar = true
                 showOtpDialog = true // Show OTP dialog
             }
             is ForgotPassViewModel.ForgotPasswordState.Error -> {
                 isLoading = false // Hide loading UI
                 val error = state.message
-                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                snackbarMessage = error
+                showSnackbar = true
             }
             else -> Unit
         }
     }
 
-    Box(Modifier.fillMaxSize().padding(paddingValues = WindowInsets.statusBars.asPaddingValues())) {
+    Box(Modifier.fillMaxSize()
+        .padding(paddingValues = WindowInsets.statusBars.asPaddingValues())) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -297,6 +303,7 @@ fun ResetPassword(
                         }
                     }
                 }
+
             }
 
             when (val forgotPassVerification = forgotPassState) {
@@ -324,9 +331,12 @@ fun ResetPassword(
                                     Spacer(modifier = Modifier.height(16.dp))
                                     OutlinedTextField(
                                         value = otp.replace(" ", ""),
-                                        onValueChange = { otp = it },
+                                        onValueChange = {
+                                                newValue ->
+                                            if (newValue.all { it.isDigit() } && newValue.length <= 5) {
+                                                otp = newValue
+                                            } },
                                         label = { Text("OTP") },
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(12.dp)
                                     )
@@ -341,16 +351,19 @@ fun ResetPassword(
                                         onClick = {
                                             //IF OTP IS CORRECT
                                             if(otp.isEmpty()){
-                                                Toast.makeText(context, "Please enter OTP", Toast.LENGTH_SHORT).show()
+                                                snackbarMessage = "Please enter OTP"
+                                                showSnackbar = true
                                                 return@Button
                                             }
                                             if (verification != null) {
                                                 if (otp.toInt() == verification.token) {
                                                     isOtpVerified = true
                                                     showOtpDialog = false
-                                                    Toast.makeText(context, "OTP Verified", Toast.LENGTH_SHORT).show()
+                                                    snackbarMessage = "OTP Verified"
+                                                    showSnackbar = true
                                                 } else {
-                                                    Toast.makeText(context, "Invalid OTP", Toast.LENGTH_SHORT).show()
+                                                    snackbarMessage = "Invalid OTP"
+                                                    showSnackbar = true
                                                 }
                                             }
                                         },
@@ -371,6 +384,19 @@ fun ResetPassword(
         // Place LoadingUI here, outside the Column but inside the Box
         if (isLoading) {
             LoadingUI()
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            CustomDurationSnackbar(
+                message = snackbarMessage,
+                show = showSnackbar,
+                duration = 5000L,
+                onDismiss = { showSnackbar = false }
+            )
         }
     }
 }

@@ -1,8 +1,11 @@
 package com.example.androidproject.view.tradesman
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -56,7 +60,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,6 +88,7 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
+import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
@@ -89,89 +96,190 @@ import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportClientViewModel
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun HomeTradesman( modifier: Modifier, navController: NavController, getJobsViewModel: GetJobsViewModel, getRecentJobsViewModel: GetRecentJobsViewModel){
+fun HomeTradesman(
+    modifier: Modifier,
+    navController: NavController,
+    getJobsViewModel: GetJobsViewModel,
+    getRecentJobsViewModel: GetRecentJobsViewModel,
+    reportClientViewModel: ReportClientViewModel,
+    LoadingUI: @Composable () -> Unit,
+    initialTabIndex: Int = 0
+) {
+    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+    var isLoading by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val headerTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
     }
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
 
-    // Tab titles
+    val onShowSnackbar: (String) -> Unit = { message ->
+        snackbarMessage = message
+        showSnackbar = true
+        Log.d("SnackbarDebug", "onShowSnackbar called: $message")
+    }
+
+    LaunchedEffect(refreshTrigger) {
+        if (isConnected.value) {
+            isLoading = true
+            delay(200.milliseconds)
+            isLoading = false
+        }
+    }
+
     val tabTitles = listOf("Top Matches", "Recent Posted Jobs")
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
             .background(Color.White)
     ) {
-        Column(modifier = Modifier .fillMaxWidth()
-            .wrapContentSize()
-            .background(Color.White)) {
-
-            // Provide navController to the SearchField
-            TopSectionHomeTradesman(navController,windowSize )
-            Box (
-                modifier = modifier
+        // Main content
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentSize()
+                .background(Color.White)
+        ) {
+            TopSectionHomeTradesman(navController, windowSize)
+            Box(
+                modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White)
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // Tabs (Fixed Choices)
-                        TabRow(
-                            indicator = { tabPositions ->
-                                TabRowDefaults.Indicator(
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp) // Consistent padding for content
+                ) {
+                    TabRow(
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                color = Color(0xFF42C2AE),
+                                height = 2.dp
+                            )
+                        },
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier.fillMaxWidth(),
+                        containerColor = Color.White
+                    ) {
+                        tabTitles.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = { selectedTabIndex = index },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        fontSize = headerTextSize,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(4.dp),
+                                        color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    if (!isConnected.value) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    fontSize = 18.sp,
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Please check your internet and try again.",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Box(
                                     modifier = Modifier
-                                        .tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                    color = Color(0xFF42C2AE), // Change this to your desired color
-                                    height = 2.dp // Adjust thickness if needed
-                                )
-                            },
-                            selectedTabIndex = selectedTabIndex,
-                            modifier = Modifier.fillMaxWidth(), // Ensures the TabRow fills the width
-                            containerColor = Color.White // Background for the TabRow
-                        ) {
-                            tabTitles.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            fontSize = headerTextSize,
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.fillMaxWidth().padding(4.dp), // Fills the width inside each Tab
-                                            color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f) // Ensures equal distribution across the width
-                                )
+                                        .clickable {
+                                            isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                            if (isConnected.value) {
+                                                isLoading = true
+                                                refreshTrigger++
+                                            } else {
+                                                onShowSnackbar("Still no internet connection")
+                                            }
+                                        }
+                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Retry",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
-                        // Content changes based on the selected tab
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFFD9D9D9))
-                        ) {
-                            when (selectedTabIndex) {
-                                0 -> TopMatches(navController, getJobsViewModel)
-                                1 -> RecentJobs(navController, getRecentJobsViewModel)
+                    } else {
+                        if (isLoading) {
+                            LoadingUI()
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFFD9D9D9))
+                            ) {
+                                when (selectedTabIndex) {
+                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI, onShowSnackbar)
+                                    1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel, onShowSnackbar)
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        // Snackbar layered above content
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 80.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            CustomDurationSnackbar(
+                message = snackbarMessage,
+                show = showSnackbar,
+                duration = 5000L,
+                onDismiss = { showSnackbar = false }
+            )
+            Log.d("SnackbarDebug", "Rendering: Show=$showSnackbar, Message=$snackbarMessage")
+        }
     }
 }
+
 @Composable
 fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize) {
     Box(
@@ -183,7 +291,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             .background(Color.White)
     ) {
         Row(
-            modifier = Modifier //top nav
+            modifier = Modifier
                 .padding(top = 8.dp, start = 25.dp, end = 25.dp, bottom = 8.dp)
                 .fillMaxWidth()
                 .height(50.dp),
@@ -210,22 +318,28 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             }
         }
     }
-
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel) {
+fun TopMatches(
+    navController: NavController,
+    getJobsViewModel: GetJobsViewModel,
+    reportClientViewModel: ReportClientViewModel,
+    LoadingUI: @Composable () -> Unit,
+    onShowSnackbar: (String) -> Unit
+) {
+    val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        getJobsViewModel.refreshJobs()
+    }
     val windowSize = rememberWindowSizeClass()
 
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 24.dp
         WindowType.MEDIUM -> 32.dp
         WindowType.LARGE -> 40.dp
-    }
-    val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
-    LaunchedEffect(Unit) {
-        getJobsViewModel.refreshJobs()
     }
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFE9E9E9))) {
         LazyColumn(
@@ -235,7 +349,7 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
             items(jobsList.itemCount) { index ->
                 val job = jobsList[index]
                 if (job != null) {
-                    TopMatchesItem(job, navController)
+                    TopMatchesItem(job, navController, reportClientViewModel, onShowSnackbar)
                 }
             }
             item {
@@ -246,7 +360,7 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        CircularProgressIndicator()
+                        LoadingUI()
                     }
                 }
             }
@@ -254,25 +368,30 @@ fun TopMatches(navController: NavController, getJobsViewModel: GetJobsViewModel)
     }
 }
 
-
 @Composable
-fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
+fun TopMatchesItem(
+    getJobs: GetJobs,
+    navController: NavController,
+    reportClientViewModel: ReportClientViewModel,
+    onShowSnackbar: (String) -> Unit
+) {
+    val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val windowSize = rememberWindowSizeClass()
-
+    val context = LocalContext.current
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 24.dp
         WindowType.MEDIUM -> 32.dp
         WindowType.LARGE -> 40.dp
     }
-    val context = LocalContext.current
 
-    var screenShot by remember { mutableStateOf<Uri?>(null) }
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showReportDialog by remember { mutableStateOf(false) }
+    var reportSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
     val reasons = listOf(
         "Abusive or Harassing Behavior",
         "Inappropriate Content or Language",
@@ -282,16 +401,41 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
         "Safety Concerns",
         "Others"
     )
-    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+
+    val documentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { screenShot = it } }
+    ) { uri -> uri?.let { reportDocument = it } }
     var jobType = getJobs.jobType
 
     if (jobType == "Ac_technician") {
         jobType = "AC Technician"
     }
 
-    val profilePicture = getJobs.clientProfilePicture
+    LaunchedEffect(reportClientState, reportSubmissionKey) {
+        if (reportSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet
+        when (val reportClient = reportClientState) {
+            is ReportClientViewModel.ReportClientState.Loading -> {
+                // nothing
+            }
+            is ReportClientViewModel.ReportClientState.Success -> {
+                val responseReport = reportClient.data?.message
+                if (responseReport != null) {
+                    reportSubmissionKey = null // Reset key after handling
+                    onShowSnackbar(responseReport)
+                }
+                showReportDialog = false
+                reportClientViewModel.resetState()
+            }
+            is ReportClientViewModel.ReportClientState.Error -> {
+                val error = reportClient.message
+                onShowSnackbar(error)
+                reportSubmissionKey = null // Reset key after handling
+                showReportDialog = true
+                reportClientViewModel.resetState()
+            }
+            else -> Unit
+        }
+    }
 
     Card(
         modifier = Modifier
@@ -306,7 +450,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
         ) {
             Row {
                 AsyncImage(
-                    model = getJobs.clientProfilePicture, // Use URL here
+                    model = getJobs.clientProfilePicture,
                     contentDescription = "Profile Image",
                     modifier = Modifier
                         .size(62.dp)
@@ -333,7 +477,6 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                                 .size(iconSize)
                                 .clickable { showMenu = true }
                         )
-
                         // Popup Menu
                         DropdownMenu(
                             expanded = showMenu,
@@ -350,7 +493,6 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                         }
                     }
                 }
-
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row {
@@ -361,10 +503,9 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                         color = Color.Black,
                         fontWeight = FontWeight(500)
                     )
-                    Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
+                    Text(text = "Posted on $getJobsDate - ${getJobs.status}")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-
             }
             Spacer(modifier = Modifier.height(16.dp))
             Card(
@@ -391,13 +532,13 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
             }
         }
     }
+
     if (showReportDialog) {
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                ,
+                    .verticalScroll(rememberScrollState()),
                 contentAlignment = Alignment.Center
             ) {
                 Card(
@@ -406,7 +547,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                         .padding(16.dp)
                         .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
                     Column(
@@ -461,7 +602,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                                                     placeholder = { Text("Enter other reason") },
                                                     singleLine = true,
                                                     modifier = Modifier
-                                                        .weight(1f) // Pushes the field to the right
+                                                        .weight(1f)
                                                         .heightIn(min = 40.dp),
                                                     colors = TextFieldDefaults.colors(
                                                         focusedContainerColor = Color.Transparent,
@@ -486,13 +627,13 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                             }
                             UploadFieldScreenShot(
                                 label = "Screenshot",
-                                uri = screenShot,
+                                uri = reportDocument,
                                 fileType = "image",
                                 onUploadClick = {
-                                    screenshotPickerLauncher.launch("image/*")
+                                    documentPickerLauncher.launch("image/*")
                                 },
                                 onViewClick = {
-                                    screenShot?.let { uri ->
+                                    reportDocument?.let { uri ->
                                         openScreenShot(context, uri)
                                     }
                                 }
@@ -504,7 +645,6 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                                 placeholder = { Text("Enter Your Explanation") },
                                 shape = RoundedCornerShape(16.dp),
                                 maxLines = 3,
-
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 100.dp),
@@ -518,9 +658,7 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                                     cursorColor = Color.Black
                                 )
                             )
-
                         }
-
 
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -532,73 +670,85 @@ fun TopMatchesItem(getJobs: GetJobs, navController: NavController) {
                                 onClick = { showReportDialog = false },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                    containerColor = Color(0xFF42C2AE)
                                 )
                             ) {
                                 Text("Cancel", color = Color.White)
                             }
                             Button(
                                 onClick = {
-
-
+                                    if (selectedIndex == -1) {
+                                        onShowSnackbar("Please select a reason for reporting")
+                                    } else {
+                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                            otherReason
+                                        } else {
+                                            reasons[selectedIndex]
+                                        }
+                                        reportSubmissionKey = System.currentTimeMillis() // Set unique key
+                                        reportClientViewModel.reportClient(getJobs.userId, selectedReason, reasonDescription, reportDocument!!, context)
+                                    }
                                 },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                    containerColor = Color(0xFF42C2AE)
                                 )
                             ) {
                                 Text("Submit", color = Color.White)
                             }
-
-                            }
                         }
-
                     }
-
-
-        }
-    }
-}
-}
-
-
-@Composable
-fun RecentJobs(navController: NavController, getRecentJobsViewModel: GetRecentJobsViewModel){
-    val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
-    LazyColumn(
-        modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-
-    ) {
-        items(jobList.itemCount) { index ->
-            val job = jobList[index]
-            if (job != null) {
-                RecentJobsItem(job, navController)
+                }
             }
         }
     }
 }
 
 @Composable
-fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
+fun RecentJobs(
+    navController: NavController,
+    getRecentJobsViewModel: GetRecentJobsViewModel,
+    reportClientViewModel: ReportClientViewModel,
+    onShowSnackbar: (String) -> Unit
+) {
+    val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    LazyColumn(
+        modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(jobList.itemCount) { index ->
+            val job = jobList[index]
+            if (job != null) {
+                RecentJobsItem(job, navController, reportClientViewModel, onShowSnackbar)
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentJobsItem(
+    getJobs: GetJobs,
+    navController: NavController,
+    reportClientViewModel: ReportClientViewModel,
+    onShowSnackbar: (String) -> Unit
+) {
+    val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val windowSize = rememberWindowSizeClass()
-    val context =LocalContext.current
+    val context = LocalContext.current
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 25.dp
         WindowType.MEDIUM -> 35.dp
         WindowType.LARGE -> 45.dp
     }
-    var screenShot by remember { mutableStateOf<Uri?>(null) }
+
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showReportDialog by remember { mutableStateOf(false) }
+    var reportSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
     val reasons = listOf(
         "Abusive or Harassing Behavior",
         "Inappropriate Content or Language",
@@ -608,13 +758,38 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
         "Safety Concerns",
         "Others"
     )
-    val screenshotPickerLauncher = rememberLauncherForActivityResult(
+
+    val documentPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { screenShot = it } }
+    ) { uri -> uri?.let { reportDocument = it } }
     var jobType = getJobs.jobType
 
     if (jobType == "Ac_technician") {
         jobType = "AC Technician"
+    }
+
+    LaunchedEffect(reportClientState, reportSubmissionKey) {
+        if (reportSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet
+        when (val reportClient = reportClientState) {
+            is ReportClientViewModel.ReportClientState.Loading -> {
+                // nothing
+            }
+            is ReportClientViewModel.ReportClientState.Success -> {
+                val responseReport = reportClient.data?.message
+                if (responseReport != null) {
+                    onShowSnackbar(responseReport)
+                }
+                reportSubmissionKey = null // Reset key after handling
+                showReportDialog = false
+                reportClientViewModel.resetState()
+            }
+            is ReportClientViewModel.ReportClientState.Error -> {
+                reportSubmissionKey = null // Reset key after handling
+                val error = reportClient.message
+                onShowSnackbar(error)
+            }
+            else -> Unit
+        }
     }
 
     Card(
@@ -630,7 +805,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
         ) {
             Row {
                 AsyncImage(
-                    model = getJobs.clientProfilePicture, // Use URL here
+                    model = getJobs.clientProfilePicture,
                     contentDescription = "Profile Image",
                     modifier = Modifier
                         .size(62.dp)
@@ -651,13 +826,12 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                     )
                     Box {
                         Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
+                            painter = painterResource(id = R.drawable.meatball_ic),
                             contentDescription = "Menu Icon",
                             modifier = Modifier
                                 .size(iconSize)
                                 .clickable { showMenu = true }
                         )
-
                         // Popup Menu
                         DropdownMenu(
                             expanded = showMenu,
@@ -679,11 +853,9 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
             Row {
                 Column {
                     Text(text = "Looking for $jobType", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight(500))
-                    Text(text = "Posted on $getJobsDate - ${getJobs.status} ")
-
+                    Text(text = "Posted on $getJobsDate - ${getJobs.status}")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-
             }
             Spacer(modifier = Modifier.height(16.dp))
             Card(
@@ -710,6 +882,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
             }
         }
     }
+
     if (showReportDialog) {
         Dialog(onDismissRequest = { showReportDialog = false }) {
             Box(
@@ -724,7 +897,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                         .padding(16.dp)
                         .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
                     Column(
@@ -751,8 +924,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                                     Checkbox(
                                         checked = selectedIndex == index,
                                         onCheckedChange = {
-                                            selectedIndex =
-                                                if (selectedIndex == index) -1 else index
+                                            selectedIndex = if (selectedIndex == index) -1 else index
                                         },
                                         colors = CheckboxDefaults.colors(
                                             uncheckedColor = Color.Black,
@@ -780,7 +952,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                                                     placeholder = { Text("Enter other reason") },
                                                     singleLine = true,
                                                     modifier = Modifier
-                                                        .weight(1f) // Pushes the field to the right
+                                                        .weight(1f)
                                                         .heightIn(min = 40.dp),
                                                     colors = TextFieldDefaults.colors(
                                                         focusedContainerColor = Color.Transparent,
@@ -805,13 +977,13 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                             }
                             UploadFieldScreenShot(
                                 label = "Screenshot",
-                                uri = screenShot,
+                                uri = reportDocument,
                                 fileType = "image",
                                 onUploadClick = {
-                                    screenshotPickerLauncher.launch("image/*")
+                                    documentPickerLauncher.launch("image/*")
                                 },
                                 onViewClick = {
-                                    screenShot?.let { uri ->
+                                    reportDocument?.let { uri ->
                                         openScreenShot(context, uri)
                                     }
                                 }
@@ -823,7 +995,6 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                                 placeholder = { Text("Enter Your Explanation") },
                                 shape = RoundedCornerShape(16.dp),
                                 maxLines = 3,
-
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 100.dp),
@@ -837,9 +1008,7 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                                     cursorColor = Color.Black
                                 )
                             )
-
                         }
-
 
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -851,34 +1020,35 @@ fun RecentJobsItem(getJobs: GetJobs, navController: NavController){
                                 onClick = { showReportDialog = false },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                    containerColor = Color(0xFF42C2AE)
                                 )
                             ) {
                                 Text("Cancel", color = Color.White)
                             }
                             Button(
                                 onClick = {
-
-
+                                    if (selectedIndex == -1) {
+                                        onShowSnackbar("Please select a reason for reporting")
+                                    } else {
+                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                            otherReason
+                                        } else {
+                                            reasons[selectedIndex]
+                                        }
+                                        reportSubmissionKey = System.currentTimeMillis() // Set unique key
+                                        reportClientViewModel.reportClient(getJobs.userId, selectedReason, reasonDescription, reportDocument!!, context)
+                                    }
                                 },
                                 modifier = Modifier.size(110.dp, 45.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                    containerColor = Color(0xFF42C2AE)
                                 )
                             ) {
                                 Text("Submit", color = Color.White)
                             }
-
                         }
                     }
-
                 }
-
-
             }
         }
     }

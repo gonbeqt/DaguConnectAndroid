@@ -18,6 +18,8 @@ import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,15 +35,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
+import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanApplicationCompleted(modifier: Modifier = Modifier, navController: NavController) {
+fun TradesmanApplicationCompleted(jobId: String, jobs :String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, getJobs: ViewJobViewModel) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -59,439 +64,485 @@ fun TradesmanApplicationCompleted(modifier: Modifier = Modifier, navController: 
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
-            .padding(WindowInsets.systemBars.asPaddingValues())
+    val jobID = jobId.toIntOrNull() ?: return
+    val jobS = jobs.toIntOrNull() ?: return
 
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White),
-            shape = RoundedCornerShape(0.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .background(Color.White)
-                    .fillMaxWidth()
-            ) {
-                Row(modifier = Modifier
-                    .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.clickable {},
-                        tint = Color(0xFF81D796)
-                    )
-                    Text(
-                        text = "Job Details",
-                        fontSize = 24.sp,
-                        color = Color.Black,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp)
-                    )
-                }
-            }
+    val jobsState by getJobs.jobState.collectAsState()
+
+    val bookingPendingState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        bookingPendingState.refresh()
+        getJobs.getJobById(jobS)
+    }
+
+    // Find the booking with the matching jobId and "Pending" status
+    val selectedBooking = bookingPendingState.itemSnapshotList.items
+        .firstOrNull { it.id == jobID && it.status == "Completed" }
+    when (val getjobs = jobsState ){
+        is ViewJobViewModel.JobState.Loading -> {
+
         }
-
-
-        Column(modifier = Modifier.fillMaxWidth()){
-
+        is ViewJobViewModel.JobState.Success ->{
+            val myjobs = getjobs.data.job
             Column(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(10.dp)
+                    .fillMaxSize()
+                    .background(Color(0xFFF5F5F5))
+                    .padding(WindowInsets.systemBars.asPaddingValues())
+
             ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(brush = myGradient3)
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Your application is Completed",
-                            fontSize = nameTextSize,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .size(200.dp),
-                    colors = CardDefaults.cardColors(Color.White),
-                    shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp) // Keep card shape
+                        .background(Color.White),
+                    shape = RoundedCornerShape(0.dp)
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(vertical = 18.dp, horizontal = 16.dp)
+                            .background(Color.White)
                             .fillMaxWidth()
                     ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Client’s Information",
-                            fontSize = nameTextSize,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Black,
-                        )
-                        Divider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 10.dp),
-                            thickness = 0.5.dp,
-                            color = Color.Gray
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                        Row(modifier = Modifier
+                            .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Client image
-                            Image(
-                                painter = painterResource(id = R.drawable.pfp),
-                                contentDescription = "Tradesman Image",
-                                modifier = Modifier
-                                    .size(100.dp)
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                modifier = Modifier.clickable {},
+                                tint = Color(0xFF81D796)
                             )
-
-                            // Tradesman details
-                            Column(
+                            Text(
+                                text = "Job Details",
+                                fontSize = 24.sp,
+                                color = Color.Black,
+                                textAlign = TextAlign.Left,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .padding(start = 10.dp)
+                                    .padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+
+
+                Column(modifier = Modifier.fillMaxWidth()){
+
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    ) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(brush = myGradient3)
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Ezekiel Vidal",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Medium,
+                                    text = "Your application is Completed",
                                     fontSize = nameTextSize,
-                                )
-                                Text(
-                                    text = "09576947632",
-                                    color = Color.Gray,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = smallTextSize,
-                                )
-
-
-                                Text(
-                                    text = "21 Road St. Dagupan City, Pangasinan",
-                                    color = Color.Gray,
-                                    fontSize = smallTextSize,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .size(200.dp),
+                            colors = CardDefaults.cardColors(Color.White),
+                            shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp) // Keep card shape
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(vertical = 18.dp, horizontal = 16.dp)
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Client’s Information",
+                                    fontSize = nameTextSize,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black,
+                                )
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 10.dp),
+                                    thickness = 0.5.dp,
+                                    color = Color.Gray
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Client image
+                                    if (selectedBooking != null) {
+                                        AsyncImage(
+                                            model = selectedBooking.clientProfilePicture,
+                                            contentDescription = "Tradesman Image",
+                                            modifier = Modifier
+                                                .size(100.dp)
+                                        )
+                                    }
 
-                    }
+                                    // Tradesman details
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(start = 10.dp)
+                                    ) {
+                                        if (selectedBooking != null) {
+                                            Text(
+                                                text = selectedBooking.clientFullname,
+                                                color = Color.Black,
+                                                fontWeight = FontWeight.Medium,
+                                                fontSize = nameTextSize,
+                                            )
+                                        }
 
-                }
-                Spacer(Modifier.height(10.dp))
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        colors = CardDefaults.cardColors(Color.White),
-                        shape = RoundedCornerShape(15.dp) // Keep card shape
-                    ) {
+
+                                        if (selectedBooking != null) {
+                                            Text(
+                                                text = selectedBooking.jobAddress,
+                                                color = Color.Gray,
+                                                fontSize = smallTextSize,
+                                            )
+                                        }
+                                    }
+                                }
+
+                            }
+
+                        }
+                        Spacer(Modifier.height(10.dp))
+
                         Column(
                             modifier = Modifier
-                                .padding(16.dp)
                                 .fillMaxWidth()
                         ) {
-                            Text(
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(Color.White),
+                                shape = RoundedCornerShape(15.dp) // Keep card shape
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth()
+                                ) {
+                                    Text(
 
-                                text = "Task Information",
-                                fontSize = nameTextSize,
-                                color = Color.Black,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp),
-                                thickness = 0.5.dp,
-                                color = Color.Gray
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Work,
-                                        tint = Color.Black,
-                                        contentDescription = "Job type",
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                    )
-                                    Text(
-                                        text = "Job Type: Carpentry",
+                                        text = "Task Information",
                                         fontSize = nameTextSize,
                                         color = Color.Black,
-                                        modifier = Modifier.padding(start = 10.dp)
+                                        fontWeight = FontWeight.Medium
                                     )
-                                }
-                            }
+                                    Divider(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 10.dp),
+                                        thickness = 0.5.dp,
+                                        color = Color.Gray
+                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Work,
+                                                tint = Color.Black,
+                                                contentDescription = "Job type",
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                            )
+                                            Text(
+                                                text = "Job Type:",
+                                                fontSize = nameTextSize,
+                                                color = Color.Black,
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            )
+                                            if (selectedBooking != null) {
+                                                Text(
+                                                    text = selectedBooking.jobType,
+                                                    fontSize = nameTextSize,
+                                                    color = Color.Black,
+                                                    modifier = Modifier.padding(start = 10.dp)
+                                                )
+                                            }
+                                        }
+                                    }
 
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.DateRange,
-                                        contentDescription = "Job Date",
+                                    Row(
                                         modifier = Modifier
-                                            .size(32.dp)
-                                    )
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.DateRange,
+                                                contentDescription = "Job Date",
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                            )
+                                            Text(
+                                                text = "Job Date:",
+                                                fontSize = nameTextSize,
+                                                color = Color.Black,
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            )
+                                            if (myjobs != null) {
+                                                Text(
+                                                    text = myjobs.deadline,
+                                                    fontSize = nameTextSize,
+                                                    color = Color.Black,
+                                                    modifier = Modifier.padding(start = 10.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.LocationOn,
+                                                contentDescription = "Job Date",
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                            )
+                                            Text(
+                                                text = "Job Location:",
+                                                fontSize = nameTextSize,
+                                                color = Color.Black,
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            )
+                                            if (selectedBooking != null) {
+                                                Text(
+                                                    text =" ${selectedBooking.jobAddress}, Pangasinan",
+                                                    fontSize = nameTextSize,
+                                                    color = Color.Black,
+                                                    modifier = Modifier.padding(start = 10.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+
+                                                    imageVector = Icons.Outlined.Work,
+                                                    contentDescription = "Task Details",
+                                                    modifier = Modifier
+                                                        .size(32.dp)
+                                                )
+                                                Text(
+                                                    text = "Task:",
+                                                    fontSize = nameTextSize,
+                                                    color = Color.Black,
+                                                    modifier = Modifier.padding(start = 10.dp)
+                                                )
+
+                                            }
+                                            Spacer(Modifier.height(10.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(Color(0xFFF5F5F5))
+                                                    .border(
+                                                        1.dp,
+                                                        Color.Gray,
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    )
+                                            ) {
+                                                if (myjobs != null) {
+                                                    Text(modifier = Modifier.padding(16.dp),text = myjobs.jobDescription, fontSize = taskTextSize)
+                                                }
+                                            }
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+                        }
+                        Spacer(Modifier.height(10.dp))
+
+                        // Third Column with Card and content
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(Color.White),
+                                shape = RoundedCornerShape(15.dp) // Keep card shape
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth()
+                                ) {
                                     Text(
-                                        text = "Job Date: March 23, 2025",
+
+                                        text = "Support Center",
                                         fontSize = nameTextSize,
                                         color = Color.Black,
-                                        modifier = Modifier.padding(start = 10.dp)
+                                        fontWeight = FontWeight.Medium
                                     )
-                                }
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.LocationOn,
-                                        contentDescription = "Job Date",
+                                    Divider(
                                         modifier = Modifier
-                                            .size(32.dp)
+                                            .fillMaxWidth()
+                                            .padding(vertical = 10.dp),
+                                        thickness = 0.5.dp,
+                                        color = Color.Gray
                                     )
-                                    Text(
-                                        text = "Job Location: Dagupan City, Pangasinan",
-                                        fontSize = nameTextSize,
-                                        color = Color.Black,
-                                        modifier = Modifier.padding(start = 10.dp)
-                                    )
-                                }
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp, vertical = 2.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Message,
+                                                contentDescription = "Message Icon",
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                            )
+                                            Text(
+                                                text = "Contact Client",
+                                                fontSize = nameTextSize,
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            )
+                                        }
                                         Icon(
-
-                                            imageVector = Icons.Outlined.Work,
-                                            contentDescription = "Task Details",
+                                            imageVector = Icons.Default.KeyboardArrowRight,
+                                            contentDescription = "Arrow Right Icon",
                                             modifier = Modifier
                                                 .size(32.dp)
                                         )
-                                        Text(
-                                            text = "Task:",
-                                            fontSize = nameTextSize,
-                                            color = Color.Black,
-                                            modifier = Modifier.padding(start = 10.dp)
-                                        )
-
                                     }
-                                    Spacer(Modifier.height(10.dp))
-                                    Box(
+                                    Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFF5F5F5))
-                                            .border(
-                                                1.dp,
-                                                Color.Gray,
-                                                shape = RoundedCornerShape(12.dp)
-                                            )
+                                            .padding(horizontal = 10.dp, vertical = 2.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Text(modifier = Modifier.padding(16.dp),text = "Our house needs to be repainted. For further details just contact or chat me.")
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Help,
+                                                contentDescription = "Help Icon",
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                            )
+                                            Text(
+                                                text = "Help",
+                                                fontSize = nameTextSize,
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowRight,
+                                            contentDescription = "Arrow Right Icon",
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                        )
                                     }
+
+
                                 }
 
                             }
-
                         }
-
-                    }
-                }
-                Spacer(Modifier.height(10.dp))
-
-                // Third Column with Card and content
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        colors = CardDefaults.cardColors(Color.White),
-                        shape = RoundedCornerShape(15.dp) // Keep card shape
-                    ) {
+                        Spacer(Modifier.height(10.dp))
                         Column(
                             modifier = Modifier
-                                .padding(16.dp)
                                 .fillMaxWidth()
                         ) {
-                            Text(
-
-                                text = "Support Center",
-                                fontSize = nameTextSize,
-                                color = Color.Black,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Divider(
+                            Card(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp),
-                                thickness = 0.5.dp,
-                                color = Color.Gray
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(Color.White),
+                                shape = RoundedCornerShape(15.dp) // Keep card shape
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Message,
-                                        contentDescription = "Message Icon",
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                    )
-                                    Text(
-                                        text = "Contact Client",
-                                        fontSize = nameTextSize,
-                                        modifier = Modifier.padding(start = 10.dp)
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowRight,
-                                    contentDescription = "Arrow Right Icon",
+                                Column(
                                     modifier = Modifier
-                                        .size(32.dp)
-                                )
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Help,
-                                        contentDescription = "Help Icon",
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                    )
-                                    Text(
-                                        text = "Help",
-                                        fontSize = nameTextSize,
-                                        modifier = Modifier.padding(start = 10.dp)
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowRight,
-                                    contentDescription = "Arrow Right Icon",
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                )
-                            }
+                                        .padding(16.dp)
+                                        .fillMaxWidth()
+                                ) {
+                                    Row(modifier = Modifier
+                                        .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(fontWeight = FontWeight.Normal,
+                                            fontSize = smallTextSize,
+                                            color = Color.Gray,
+                                            text = "Posted on")
+                                        if (myjobs != null) {
+                                            Text(fontSize = smallTextSize,
+                                                text = myjobs.createdAt)
+                                        }
+                                    }
 
 
+                                }
+
+                            }
                         }
-
-                    }
-                }
-                Spacer(Modifier.height(10.dp))
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        colors = CardDefaults.cardColors(Color.White),
-                        shape = RoundedCornerShape(15.dp) // Keep card shape
-                    ) {
-                        Column(
+                        Spacer(Modifier.height(10.dp))
+                        Box(
                             modifier = Modifier
-                                .padding(16.dp)
                                 .fillMaxWidth()
+                                .clickable {}
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Row(modifier = Modifier
-                                .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween){
-                                Text(fontWeight = FontWeight.Normal,
-                                    fontSize = smallTextSize,
-                                    color = Color.Gray,
-                                    text = "Posted on")
-                                Text(fontSize = smallTextSize,
-                                    text = "You")
-                            }
-                            Row(modifier = Modifier
-                                .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween){
-                                Text(fontWeight = FontWeight.Normal,
-                                    fontSize = smallTextSize,
-                                    color = Color.Gray,
-                                    text = "Applied at")
-                                Text(fontSize = smallTextSize,
-                                    text = "03-09-2025 10:30 AM")
-                            }
-
+                            Text(text = "OK", fontSize = nameTextSize)
                         }
-
                     }
                 }
-                Spacer(Modifier.height(10.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {}
-                        .background(
-                            color = Color.Transparent,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "OK", fontSize = nameTextSize)
-                }
+
             }
-        }
 
+        }
+        else -> Unit
     }
+
+
 }
 

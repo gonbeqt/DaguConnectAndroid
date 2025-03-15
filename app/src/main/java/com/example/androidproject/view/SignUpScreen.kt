@@ -31,7 +31,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -82,7 +85,8 @@ fun SignUpScreenPreview() {
 fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,LoadingUI : @Composable () -> Unit) {
     val windowSize = rememberWindowSizeClass()
     val registerState by viewModel.registerState.collectAsState()
-
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
 
     var firstName by remember {
         mutableStateOf("")
@@ -142,8 +146,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         }
         is RegisterViewModel.RegisterState.Success -> {
             if (ifToast){
-                Toast.makeText(context, resgister.data?.message, Toast.LENGTH_SHORT)
-                    .show()
+                snackbarMessage = resgister.data?.message.toString()
+                showSnackbar = true
                 navController.navigate("login"){
                     popUpTo("signup") { inclusive = true }
 
@@ -156,8 +160,8 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         }
 
         is RegisterViewModel.RegisterState.Error -> {
-            Toast.makeText(context, resgister.message, Toast.LENGTH_SHORT)
-                .show()
+            snackbarMessage =resgister.message.toString()
+            showSnackbar = true
             Log.i("Register screen error", "Register error $registerState.message")
             isLoading = false
             viewModel.resetState()
@@ -217,7 +221,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
                 val (titleText, FirstnameField, LastnameField, username, birthdatelayout, emaillayout, passwordlayout, roles, signUpButton, loginButton) = createRefs()
                 val verticalGuideline1 = createGuidelineFromStart(0.05f)
                 val verticalGuideline2 = createGuidelineFromStart(0.95f)
-                val horizontalGuideline = createGuidelineFromTop(0.03f)
+                val horizontalGuideline = createGuidelineFromTop(0.05f)
 
                 Text(
                     text = "Create an Account",
@@ -330,7 +334,21 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
                     }
                 )
             }
+
         }
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 36.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        CustomDurationSnackbar(
+            message = snackbarMessage,
+            show = showSnackbar,
+            duration = 5000L,
+            onDismiss = { showSnackbar = false }
+        )
     }
 }
 
@@ -576,6 +594,7 @@ fun BirthdayCalendar(
                 )
             }
         }
+
     }
 }
 

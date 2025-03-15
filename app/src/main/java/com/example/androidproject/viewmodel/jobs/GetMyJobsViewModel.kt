@@ -19,6 +19,7 @@ class GetMyJobsViewModel(private val apiService: ApiService, private val context
 
     // This will trigger a refresh when updated
     private val refreshTrigger = MutableStateFlow(Unit)
+    private var currentPagingSource: GetMyJobsPagingSource? = null
 
     val jobsPagingData: Flow<PagingData<GetJobs>> = refreshTrigger.flatMapLatest {
         Pager(
@@ -32,8 +33,11 @@ class GetMyJobsViewModel(private val apiService: ApiService, private val context
         ).flow.cachedIn(viewModelScope)
     }
 
-    // Call this to force a refresh
     fun refreshJobs() {
+        // Invalidate the current paging source to force a reload
+        currentPagingSource?.invalidate()
+        // Trigger a new data load
         refreshTrigger.value = Unit
+
     }
 }

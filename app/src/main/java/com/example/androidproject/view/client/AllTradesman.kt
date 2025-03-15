@@ -1,6 +1,12 @@
 package com.example.androidproject.view.client
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,10 +70,12 @@ import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
-import com.example.androidproject.viewmodel.report.ReportViewModel
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,reportViewModel: ReportViewModel) {
+fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI: @Composable () ->Unit) {
     val resumeList = getResumes.resumePagingData.collectAsLazyPagingItems()
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
@@ -83,7 +91,34 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
         getResumes.refreshResumes()
     }
 
+    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
 
+
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    // State to trigger refresh/recomposition
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    // State to track loading during retry
+    var isLoading by remember { mutableStateOf(false) }
+
+    // Trigger data fetching only when retry is clicked (not automatically on network change)
+    LaunchedEffect(refreshTrigger) {
+        if (isConnected.value) {
+            isLoading = true // Set loading state before fetching
+            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
+            isLoading = false // Reset loading state after fetching (or handle errors)
+        }
+    }
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -137,7 +172,63 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
                     }
                 }
             }
-
+            if (!isConnected.value) {
+                // No internet connection
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp), // Optional padding to avoid edge clipping
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center // Ensures vertical centering within the Column
+                    ) {
+                        Text(
+                            text = "No Internet Connection",
+                            fontSize = 18.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Please check your internet and try again.",
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center // Ensures the text is centered if it wraps
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Retry button (only fetch data when clicked)
+                        Box(
+                            modifier = Modifier
+                                .clickable {
+                                    // Re-check network connectivity
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    if (isConnected.value) {
+                                        // Show loading state and trigger data fetch
+                                        isLoading = true
+                                        refreshTrigger++
+                                    } else {
+                                        // Optionally show a toast if still no internet
+                                        Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "Retry",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            } else {
+                if (isLoading){
+                    LoadingUI()
+                }else{
                     LazyColumn(
 
                         modifier = Modifier
@@ -168,7 +259,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
                             items(filteredList.size) { index ->
                                 val resume = filteredList[index]
                                 if (resume.id !in dismissedResumes) { // Filter directly
-                                    AllTradesmanItem (resume,navController, cardHeight,reportViewModel) {
+                                    AllTradesmanItem (resume,navController, cardHeight,reportTradesmanViewModel) {
                                         getResumes.dismissResume(resume.id)
                                     }
                                 }
@@ -182,20 +273,25 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel,r
                                         .padding(16.dp),
                                     horizontalArrangement = Arrangement.Center
                                 ) {
-                                    CircularProgressIndicator()
+                                    LoadingUI()
                                 }
                             }
                         }
                     }
+                }
+            }
+
+
         }
     }
 }
 @Composable
-fun         AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp,reportViewModel: ReportViewModel,onUninterested: () -> Unit) {
+fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showReportDialog by remember { mutableStateOf(false) }
     val reasons = listOf(
         "Abusive or Harassing Behavior",
@@ -206,7 +302,20 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
         "Safety Concerns",
         "Others"
     )
-    val reportState by reportViewModel.reportState.collectAsState()
+
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { reportDocument = it } }
+
+    LaunchedEffect(showReportDialog) {
+        if(showReportDialog){
+            selectedIndex = -1
+            otherReason = ""
+            reasonDescription = ""
+            reportDocument = null
+        }
+    }
+    val reportState by reportTradesmanViewModel.reportState.collectAsState()
     val context = LocalContext.current
 
 
@@ -454,6 +563,20 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                                 }
                             }
 
+                            UploadFieldScreenShot(
+                                label = "Screenshot",
+                                uri = reportDocument,
+                                fileType = "image",
+                                onUploadClick = {
+                                    documentPickerLauncher.launch("image/*")
+                                },
+                                onViewClick = {
+                                    reportDocument?.let { uri ->
+                                        openScreenShot(context, uri)
+                                    }
+                                }
+                            )
+
                             OutlinedTextField(
                                 value = reasonDescription,
                                 onValueChange = { reasonDescription = it },
@@ -509,7 +632,7 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
-                                        reportViewModel.report(selectedReason, reasonDescription, resumes.userid)
+                                        reportTradesmanViewModel.report(selectedReason, reasonDescription,  reportDocument!!,context, resumes.userid)
                                     }
                                           },
                                 modifier = Modifier.size(110.dp, 45.dp),
@@ -524,22 +647,22 @@ fun         AllTradesmanItem(resumes: resumesItem, navController: NavController,
 
                             LaunchedEffect(reportState) {
                                 when(val report = reportState){
-                                    is ReportViewModel.ReportState.Loading -> {
+                                    is ReportTradesmanViewModel.ReportState.Loading -> {
                                         //do nothing
                                     }
-                                    is ReportViewModel.ReportState.Success -> {
+                                    is ReportTradesmanViewModel.ReportState.Success -> {
                                         val responsereport = report.data?.message
                                         Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
 
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                         // Close the dialog
                                         showReportDialog = false
                                     }
-                                    is ReportViewModel.ReportState.Error -> {
+                                    is ReportTradesmanViewModel.ReportState.Error -> {
                                         val errorMessage = report.message
                                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         showReportDialog = true
-                                        reportViewModel.resetState()
+                                        reportTradesmanViewModel.resetState()
                                     }
                                     else -> Unit
                                 }
