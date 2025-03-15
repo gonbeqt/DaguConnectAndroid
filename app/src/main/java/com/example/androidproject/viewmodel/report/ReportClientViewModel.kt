@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.JsonErrorParser
 import com.example.androidproject.model.client.ReportClientResponse
+import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel.ReportState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ class ReportClientViewModel(private val apiService: ApiService):ViewModel() {
 
     fun reportClient( clientId: Int, report_reason: String, report_details: String, report_attachment: Uri,context: Context){
         viewModelScope.launch {
+            if (_reportClientState.value is ReportClientState.Loading) return@launch // Prevent multiple simultaneous reports
             _reportClientState.value = ReportClientState.Loading
             try {
                 val reportReason = report_reason.toRequestBody("text/plain".toMediaType())

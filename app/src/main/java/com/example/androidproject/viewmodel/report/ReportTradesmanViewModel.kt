@@ -24,6 +24,7 @@ class ReportTradesmanViewModel (private val apiService: ApiService): ViewModel()
 
     fun report(report_reason: String, report_details: String, report_attachment : Uri, context: Context, tradesmanId: Int) {
         viewModelScope.launch {
+            if (_reportState.value is ReportState.Loading) return@launch // Prevent multiple simultaneous reports
             _reportState.value = ReportState.Loading
             try{
                 val reportReason = report_reason.toRequestBody("text/plain".toMediaType())

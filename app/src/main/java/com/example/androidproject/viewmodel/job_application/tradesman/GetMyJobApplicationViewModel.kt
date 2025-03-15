@@ -15,10 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 
 class GetMyJobApplicationViewModel(private val apiService: ApiService, private val context: Context) : ViewModel() {
-    private val refreshTrigger = MutableStateFlow(Unit)
     private val _pagingSource = MutableStateFlow<GetMyJobApplicationPagingSource?>(null)
 
-    val jobApplicationPagingData: Flow<PagingData<JobApplicationData>> = refreshTrigger.flatMapLatest {
+    val jobApplicationPagingData: Flow<PagingData<JobApplicationData>> =
         Pager(
             config = PagingConfig(
                 pageSize = 10,
@@ -32,12 +31,7 @@ class GetMyJobApplicationViewModel(private val apiService: ApiService, private v
         ).flow.cachedIn(viewModelScope)
     }
 
-    fun invalidatePagingSource() {
-        _pagingSource.value?.invalidate()
-    }
 
-    // Call this to force a refresh
-    fun refreshJobApplicants() {
-        refreshTrigger.value = Unit
-    }
-}
+
+
+

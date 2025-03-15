@@ -13,9 +13,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 
 
@@ -70,7 +73,13 @@ fun ProfileVerification(
     var tradeCredentialUri by remember { mutableStateOf<Uri?>(null) }
 
     val isTyping = estimatedRate.isNotEmpty()
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
 
+    val onShowSnackbar: (String) -> Unit = { message ->
+        snackbarMessage = message
+        showSnackbar = true
+    }
     // Validation function
     fun validateStep(step: Int): Boolean {
         return when (step) {
@@ -95,491 +104,512 @@ fun ProfileVerification(
             3 -> "Please upload Front ID, Back ID, and Trade Credential."
             else -> "Please complete all required fields."
         }
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        snackbarMessage = message
+        showSnackbar = true
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(myGradient3)
-            .padding(WindowInsets.systemBars.asPaddingValues())
-
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(myGradient3)
+                .padding(WindowInsets.systemBars.asPaddingValues())
         ) {
-            Icon(
-                modifier = Modifier
-                    .padding(end = 10.dp)
-                    .clickable {
-                        if (currentStep > 1) {
-                            if (currentStep == 5) {
-                                navController.navigate("main_screen")
-                                currentStep++
-                                progressPercentage += 25
-                            }
-                            currentStep--
-                            progressPercentage -= 25
-                        } else if (currentStep == 1) {
-                            navController.navigate("main_screen")
-                        }
-                    },
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Arrow Back",
-                tint = Color.White
-            )
-            Text(text = "Verify Profile", fontSize = 20.sp, color = Color.White)
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Column(Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp, start = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // Main content
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    modifier = Modifier.padding(end = 10.dp),
-                    text = "$progressPercentage%",
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Complete",
-                    color = Color(0xFFC1C1C1),
-                    fontSize = 14.sp
-                )
-            }
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    modifier = Modifier.padding(start = 20.dp),
-                    text = when (currentStep) {
-                        1 -> "Job Details"
-                        2 -> "Personal Details"
-                        3 -> "Credential and Verification"
-                        4 -> "Preview and Submit"
-                        else -> "Profile Verification"
-                    },
-                    color = Color(0xFFC1C1C1),
-                    fontSize = 14.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(5.dp))
-            StepProgressIndicator(currentStep = currentStep, totalSteps = 5)
-
-            Card(
-                modifier = Modifier
-                    .padding(top = 7.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                colors = CardDefaults.cardColors(Color.White)
-            ) {
-                Column(
+                Row(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(10.dp)
                 ) {
-                    if (currentStep == 1) { // First page
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp, top = 14.dp),
-                            text = "Please provide your job details to continue.",
-                            fontSize = 14.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp),
-                            text = "Job Title",
-                            fontSize = 14.sp,
-                            color = Color.DarkGray
-                        )
-
-                        Box(modifier = Modifier.padding(start = 14.dp, end = 14.dp)) {
-                            JobSelectionDropdown(
-                                label = "",
-                                options = listOf(
-                                    "Carpenter", "Painter", "Welder", "Electrician", "Plumber",
-                                    "Mason", "Roofer", "AC Technician", "Mechanic", "Cleaner"
-                                ),
-                                selectedOption = selectedJob,
-                                onOptionSelected = { selectedJob = it }
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp),
-                            text = "Preferred Location",
-                            fontSize = 14.sp,
-                            color = Color.DarkGray
-                        )
-
-                        Box(modifier = Modifier.padding(start = 14.dp, end = 14.dp)) {
-                            JobSelectionDropdown(
-                                label = "",
-                                options = listOf(
-                                    "Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
-                                    "Bayambang", "Binalonan", "Binmaley", "Bolinao", "Bugallon", "Burgos", "Calasiao",
-                                    "Dagupan City", "Dasol", "Infanta", "Labrador", "Laoac", "Lingayen", "Mabini", "Malasiqui",
-                                    "Manaoag", "Mangaldan", "Mangatarem", "Mapandan", "Natividad", "Pozorrubio", "Rosales",
-                                    "San Fabian", "San Jacinto", "San Manuel", "San Nicolas", "San Quintin", "Santa Barbara",
-                                    "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
-                                    "Urdaneta City", "Villasis"
-                                ),
-                                selectedOption = selectedLocation,
-                                onOptionSelected = { selectedLocation = "$it, Pangasinan" }
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Column(modifier = Modifier.padding(horizontal = 14.dp)) {
-                            Text(
-                                modifier = Modifier.padding(bottom = 8.dp),
-                                text = "Estimated rate:",
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp,
-                                color = Color.DarkGray
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                                    .padding(horizontal = 14.dp, vertical = 18.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "₱",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        style = TextStyle(fontSize = 14.sp),
-                                        color = if (isTyping) Color.Black else Color.Gray
-                                    )
-
-                                    BasicTextField(
-                                        value = estimatedRate,
-                                        onValueChange = { newText ->
-                                            estimatedRate = if (newText.startsWith("₱")) {
-                                                newText.substring(1) // remove extra peso signs
-                                            } else newText
-                                        },
-                                        textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
-                                        keyboardOptions = KeyboardOptions(
-                                            keyboardType = KeyboardType.Number),
-                                        modifier = Modifier
-                                            .padding(start = 4.dp)
-                                            .fillMaxWidth(),
-                                        decorationBox = { innerTextField ->
-                                            if (estimatedRate.isEmpty()) {
-                                                Text(text = "Enter Amount",
-                                                    color = Color.Gray,
-                                                    style = TextStyle(fontSize = 14.sp),
-                                                    fontSize = 14.sp,
-                                                )
-                                            }
-                                            innerTextField()
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Column(modifier = Modifier.padding(horizontal = 14.dp)) {
-                            Text(
-                                modifier = Modifier.padding(bottom = 8.dp),
-                                text = "Phone Number:",
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp,
-                                color = Color.DarkGray
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                                    .padding(horizontal = 14.dp, vertical = 18.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "+63",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        style = TextStyle(fontSize = 14.sp),
-                                        color = if (isTyping) Color.Black else Color.Gray
-                                    )
-
-                                    BasicTextField(
-                                        value = phoneNumber,
-                                        onValueChange = { newText ->
-                                            phoneNumber = if (newText.startsWith("+63")) {
-                                                newText.substring(1) // remove extra +63
-                                            } else newText
-                                        },
-                                        textStyle = TextStyle(
-                                            fontSize = 14.sp,
-                                            color = Color.Black
-                                        ),
-                                        keyboardOptions = KeyboardOptions(
-                                            keyboardType = KeyboardType.Number
-                                        ),
-                                        modifier = Modifier
-                                            .padding(start = 4.dp)
-                                            .fillMaxWidth(),
-                                        decorationBox = { innerTextField ->
-                                            if (phoneNumber.isEmpty()) {
-                                                Text(
-                                                    text = "Enter Your Number",
-                                                    color = Color.Gray,
-                                                    style = TextStyle(fontSize = 14.sp),
-                                                    fontSize = 14.sp,
-                                                )
-                                            }
-                                            innerTextField()
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    } else if (currentStep == 2) { // Second page
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp, top = 14.dp),
-                            text = "Tell us about yourself.",
-                            fontSize = 14.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp),
-                            text = "About Me",
-                            fontSize = 14.sp,
-                            color = Color.DarkGray
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .padding(top = 4.dp, start = 14.dp, end = 14.dp)
-                                .fillMaxWidth()
-                                .height(300.dp)
-                                .border(1.dp, Color.Gray, RoundedCornerShape(6.dp))
-                                .padding(10.dp)
-                        ) {
-                            BasicTextField(
-                                value = aboutMe,
-                                onValueChange = { newText ->
-                                    if (newText.length <= 1000) {
-                                        aboutMe = newText
-                                    } else {
-                                        aboutMe = newText.substring(0, 1000)
-                                        Toast.makeText(context, "Character count exceeds", Toast.LENGTH_SHORT).show()
+                    Icon(
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .clickable {
+                                if (currentStep > 1) {
+                                    if (currentStep == 5) {
+                                        navController.navigate("main_screen")
+                                        currentStep++
+                                        progressPercentage += 25
                                     }
-                                },
-                                textStyle = TextStyle(fontSize = 14.sp),
-                                modifier = Modifier.fillMaxSize(),
-                                decorationBox = { innerTextField ->
-                                    if (aboutMe.isEmpty()) {
-                                        Text(text = "Enter response here...",
-                                            fontSize = 14.sp,
-                                            color = Color.Gray,
-                                            style = TextStyle(fontSize = 14.sp)
-                                        )
-                                    }
-                                    innerTextField()
+                                    currentStep--
+                                    progressPercentage -= 25
+                                } else if (currentStep == 1) {
+                                    navController.navigate("main_screen")
                                 }
-                            )
-                        }
+                            },
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Arrow Back",
+                        tint = Color.White
+                    )
+                    Text(text = "Verify Profile", fontSize = 20.sp, color = Color.White)
+                }
 
-                        Row(
-                            modifier = Modifier
-                                .padding(end = 16.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Text(
-                                text = "${aboutMe.length}/1000",
-                                fontSize = 14.sp,
-                                color = if (aboutMe.length >= 910) Color.Red else Color.Black
-                            )
-                        }
-                    } else if (currentStep == 3) {
-                        UploadDocumentsScreen(
-                            context = context,
-                            frontIdUri = frontIdUri,
-                            backIdUri = backIdUri,
-                            tradeCredentialUri = tradeCredentialUri,
-                            onFrontIdSelected = { frontIdUri = it },
-                            onBackIdSelected = { backIdUri = it },
-                            onTradeCredentialSelected = { tradeCredentialUri = it }
-                        )
-                    } else if (currentStep == 4) { // Fourth page
+                Column(Modifier.weight(1f)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            modifier = Modifier.padding(start = 14.dp, top = 14.dp),
-                            text = "You're almost done! Kindly review your details and submit when ready.",
+                            modifier = Modifier.padding(end = 10.dp),
+                            text = "$progressPercentage%",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Complete",
+                            color = Color(0xFFC1C1C1),
                             fontSize = 14.sp
                         )
+                    }
+                    Spacer(modifier = Modifier.height(5.dp))
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Column(modifier = Modifier.padding(start = 14.dp, end = 14.dp)) {
-                            Text("Job: $selectedJob")
-                            Text("Preferred Location: $selectedLocation")
-                            Text("Estimated Rate: $estimatedRate")
-                            Text("Phone Number: $phoneNumber")
-                            Text("About Me: $aboutMe")
-
-                            frontIdUri?.let {
-                                Text(
-                                    text = "Front ID: ${it.lastPathSegment}",
-                                    color = Color.Blue,
-                                    modifier = Modifier.clickable { openFile(context, it) }
-                                )
-                            } ?: Text("Front ID: No file uploaded")
-
-                            backIdUri?.let {
-                                Text(
-                                    text = "Back ID: ${it.lastPathSegment}",
-                                    color = Color.Blue,
-                                    modifier = Modifier.clickable { openFile(context, it) }
-                                )
-                            } ?: Text("Back ID: No file uploaded")
-
-                            tradeCredentialUri?.let {
-                                Text(
-                                    text = "Trade Credential: ${it.lastPathSegment}",
-                                    color = Color.Blue,
-                                    modifier = Modifier.clickable { openFile(context, it) }
-                                )
-                            } ?: Text("Trade Credential: No file uploaded")
-                        }
-                    } else if (currentStep == 5) { // Fifth page
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.pendingapproval_ic),
-                                contentDescription = "Pending Approval",
-                                modifier = Modifier.size(100.dp)
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                "Pending Approval",
-                                fontSize = 20.sp,
-                                color = Color.Black
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                                Text(
-                                    text = "Profile submitted! Please wait for confirmation to complete verification. This may take a few minutes.",
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = 14.sp,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(start = 20.dp),
+                            text = when (currentStep) {
+                                1 -> "Job Details"
+                                2 -> "Personal Details"
+                                3 -> "Credential and Verification"
+                                4 -> "Preview and Submit"
+                                else -> "Profile Verification"
+                            },
+                            color = Color(0xFFC1C1C1),
+                            fontSize = 14.sp
+                        )
                     }
 
-                    Column(
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .padding(start = 14.dp, end = 14.dp, bottom = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom
+                    Spacer(modifier = Modifier.height(5.dp))
+                    StepProgressIndicator(currentStep = currentStep, totalSteps = 5)
+
+                    Card(
+                        modifier = Modifier
+                            .padding(top = 7.dp)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                        colors = CardDefaults.cardColors(Color.White)
                     ) {
-                        Box(
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color(0xFF42C2AE), shape = RoundedCornerShape(6.dp))
-                                .clickable {
-                                    if (validateStep(currentStep)) {
-                                        when (currentStep) {
-                                            1 -> {
-                                                currentStep = 2
-                                                progressPercentage = 25
-                                            }
-                                            2 -> {
-                                                currentStep = 3
-                                                progressPercentage = 50
-                                            }
-                                            3 -> {
-                                                currentStep = 4
-                                                progressPercentage = 75
-                                            }
-                                            4 -> {
-                                                val workFee = estimatedRate.toIntOrNull() ?: 0 // Safe conversion
-                                                submitResumeViewModel.submitResume(
-                                                    specialty = selectedJob,
-                                                    aboutme = aboutMe,
-                                                    workfee = workFee,
-                                                    preferedworklocation = selectedLocation,
-                                                    valididfront = frontIdUri!!,
-                                                    valididback = backIdUri!!,
-                                                    documents = tradeCredentialUri!!, // Ensure these are not null due to validation
-                                                    context = context
-                                                )
-                                                currentStep = 5
-                                                progressPercentage = 100
-                                            }
+                                .padding(10.dp)
+                        ) {
+                            if (currentStep == 1) { // First page
+                                Text(
+                                    modifier = Modifier.padding(start = 14.dp, top = 14.dp),
+                                    text = "Please provide your job details to continue.",
+                                    fontSize = 14.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Text(
+                                    modifier = Modifier.padding(start = 14.dp),
+                                    text = "Job Title",
+                                    fontSize = 14.sp,
+                                    color = Color.DarkGray
+                                )
+
+                                Box(modifier = Modifier.padding(start = 14.dp, end = 14.dp)) {
+                                    JobSelectionDropdown(
+                                        label = "",
+                                        options = listOf(
+                                            "Carpenter", "Painter", "Welder", "Electrician", "Plumber",
+                                            "Mason", "Roofer", "AC Technician", "Mechanic", "Cleaner"
+                                        ),
+                                        selectedOption = selectedJob,
+                                        onOptionSelected = { selectedJob = it }
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Text(
+                                    modifier = Modifier.padding(start = 14.dp),
+                                    text = "Preferred Location",
+                                    fontSize = 14.sp,
+                                    color = Color.DarkGray
+                                )
+
+                                Box(modifier = Modifier.padding(horizontal = 14.dp)) {
+                                    JobSelectionDropdown(
+                                        label = "",
+                                        options = listOf(
+                                            "Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
+                                            "Bayambang", "Binalonan", "Binmaley", "Bolinao", "Bugallon", "Burgos", "Calasiao",
+                                            "Dagupan City", "Dasol", "Infanta", "Labrador", "Laoac", "Lingayen", "Mabini", "Malasiqui",
+                                            "Manaoag", "Mangaldan", "Mangatarem", "Mapandan", "Natividad", "Pozorrubio", "Rosales",
+                                            "San Fabian", "San Jacinto", "San Manuel", "San Nicolas", "San Quintin", "Santa Barbara",
+                                            "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
+                                            "Urdaneta City", "Villasis"
+                                        ),
+                                        selectedOption = selectedLocation,
+                                        onOptionSelected = { selectedLocation = "$it, Pangasinan" }
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Column(modifier = Modifier.padding(horizontal = 14.dp)) {
+                                    Text(
+                                        modifier = Modifier.padding(bottom = 8.dp),
+                                        text = "Estimated rate:",
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 14.sp,
+                                        color = Color.DarkGray
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 14.dp, vertical = 18.dp)
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = "₱",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Normal,
+                                                style = TextStyle(fontSize = 14.sp),
+                                                color = if (isTyping) Color.Black else Color.Gray
+                                            )
+
+                                            BasicTextField(
+                                                value = estimatedRate,
+                                                onValueChange = { newText ->
+                                                    estimatedRate = if (newText.startsWith("₱")) {
+                                                        newText.substring(1) // remove extra peso signs
+                                                    } else newText
+                                                },
+                                                textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
+                                                keyboardOptions = KeyboardOptions(
+                                                    keyboardType = KeyboardType.Number
+                                                ),
+                                                modifier = Modifier
+                                                    .padding(start = 4.dp)
+                                                    .fillMaxWidth(),
+                                                decorationBox = { innerTextField ->
+                                                    if (estimatedRate.isEmpty()) {
+                                                        Text(
+                                                            text = "Enter Amount",
+                                                            color = Color.Gray,
+                                                            style = TextStyle(fontSize = 14.sp),
+                                                            fontSize = 14.sp
+                                                        )
+                                                    }
+                                                    innerTextField()
+                                                }
+                                            )
                                         }
-                                    } else {
-                                        showErrorMessage()
                                     }
                                 }
-                                .padding(vertical = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = when (progressPercentage) {
-                                    75 -> "Submit"
-                                    100 -> "Done"
-                                    else -> "Next"
-                                },
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        }
-                        LaunchedEffect(submitResumeState) {
-                            when(val submitresume = submitResumeState){
-                                is SubmitResumeViewModel.SubmitResumeState.Loading -> {
-                                    // nothing
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Column(modifier = Modifier.padding(horizontal = 14.dp)) {
+                                    Text(
+                                        modifier = Modifier.padding(bottom = 8.dp),
+                                        text = "Phone Number:",
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 14.sp,
+                                        color = Color.DarkGray
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 14.dp, vertical = 18.dp)
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = "+63",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Normal,
+                                                style = TextStyle(fontSize = 14.sp),
+                                                color = if (isTyping) Color.Black else Color.Gray
+                                            )
+
+                                            BasicTextField(
+                                                value = phoneNumber,
+                                                onValueChange = { newText ->
+                                                    phoneNumber = if (newText.startsWith("+63")) {
+                                                        newText.substring(1) // remove extra +63
+                                                    } else newText
+                                                },
+                                                textStyle = TextStyle(
+                                                    fontSize = 14.sp,
+                                                    color = Color.Black
+                                                ),
+                                                keyboardOptions = KeyboardOptions(
+                                                    keyboardType = KeyboardType.Number
+                                                ),
+                                                modifier = Modifier
+                                                    .padding(start = 4.dp)
+                                                    .fillMaxWidth(),
+                                                decorationBox = { innerTextField ->
+                                                    if (phoneNumber.isEmpty()) {
+                                                        Text(
+                                                            text = "Enter Your Number",
+                                                            color = Color.Gray,
+                                                            style = TextStyle(fontSize = 14.sp),
+                                                            fontSize = 14.sp
+                                                        )
+                                                    }
+                                                    innerTextField()
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
-                                is SubmitResumeViewModel.SubmitResumeState.Success -> {
-                                    Toast.makeText(context,"Resume submitted successfully", Toast.LENGTH_SHORT).show()
-                                    submitResumeViewModel.resetState()
+                            } else if (currentStep == 2) { // Second page
+                                Text(
+                                    modifier = Modifier.padding(start = 14.dp, top = 14.dp),
+                                    text = "Tell us about yourself.",
+                                    fontSize = 14.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Text(
+                                    modifier = Modifier.padding(start = 14.dp),
+                                    text = "About Me",
+                                    fontSize = 14.sp,
+                                    color = Color.DarkGray
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .padding(top = 4.dp, start = 14.dp, end = 14.dp)
+                                        .fillMaxWidth()
+                                        .height(300.dp)
+                                        .border(1.dp, Color.Gray, RoundedCornerShape(6.dp))
+                                        .padding(10.dp)
+                                ) {
+                                    BasicTextField(
+                                        value = aboutMe,
+                                        onValueChange = { newText ->
+                                            if (newText.length <= 1000) {
+                                                aboutMe = newText
+                                            } else {
+                                                aboutMe = newText.substring(0, 1000)
+                                                onShowSnackbar("Character count exceeds")
+                                            }
+                                        },
+                                        textStyle = TextStyle(fontSize = 14.sp),
+                                        modifier = Modifier.fillMaxSize(),
+                                        decorationBox = { innerTextField ->
+                                            if (aboutMe.isEmpty()) {
+                                                Text(
+                                                    text = "Enter response here...",
+                                                    fontSize = 14.sp,
+                                                    color = Color.Gray,
+                                                    style = TextStyle(fontSize = 14.sp)
+                                                )
+                                            }
+                                            innerTextField()
+                                        }
+                                    )
                                 }
-                                is SubmitResumeViewModel.SubmitResumeState.Error -> {
-                                    val error = submitresume.message
-                                    Toast.makeText(context,error, Toast.LENGTH_SHORT).show()
-                                    Log.d("testerrerro", error)
-                                    submitResumeViewModel.resetState()
+
+                                Row(
+                                    modifier = Modifier
+                                        .padding(end = 16.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Text(
+                                        text = "${aboutMe.length}/1000",
+                                        fontSize = 14.sp,
+                                        color = if (aboutMe.length >= 910) Color.Red else Color.Black
+                                    )
                                 }
-                                else -> Unit
+                            } else if (currentStep == 3) {
+                                UploadDocumentsScreen(
+                                    context = context,
+                                    frontIdUri = frontIdUri,
+                                    backIdUri = backIdUri,
+                                    tradeCredentialUri = tradeCredentialUri,
+                                    onFrontIdSelected = { frontIdUri = it },
+                                    onBackIdSelected = { backIdUri = it },
+                                    onTradeCredentialSelected = { tradeCredentialUri = it }
+                                )
+                            } else if (currentStep == 4) { // Fourth page
+                                Text(
+                                    modifier = Modifier.padding(start = 14.dp, top = 14.dp),
+                                    text = "You're almost done! Kindly review your details and submit when ready.",
+                                    fontSize = 14.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Column(modifier = Modifier.padding(start = 14.dp, end = 14.dp)) {
+                                    Text("Job: $selectedJob")
+                                    Text("Preferred Location: $selectedLocation")
+                                    Text("Estimated Rate: $estimatedRate")
+                                    Text("Phone Number: $phoneNumber")
+                                    Text("About Me: $aboutMe")
+
+                                    frontIdUri?.let {
+                                        Text(
+                                            text = "Front ID: ${it.lastPathSegment}",
+                                            color = Color.Blue,
+                                            modifier = Modifier.clickable { openFile(context, it) }
+                                        )
+                                    } ?: Text("Front ID: No file uploaded")
+
+                                    backIdUri?.let {
+                                        Text(
+                                            text = "Back ID: ${it.lastPathSegment}",
+                                            color = Color.Blue,
+                                            modifier = Modifier.clickable { openFile(context, it) }
+                                        )
+                                    } ?: Text("Back ID: No file uploaded")
+
+                                    tradeCredentialUri?.let {
+                                        Text(
+                                            text = "Trade Credential: ${it.lastPathSegment}",
+                                            color = Color.Blue,
+                                            modifier = Modifier.clickable { openFile(context, it) }
+                                        )
+                                    } ?: Text("Trade Credential: No file uploaded")
+                                }
+                            } else if (currentStep == 5) { // Fifth page
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.pendingapproval_ic),
+                                        contentDescription = "Pending Approval",
+                                        modifier = Modifier.size(100.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        "Pending Approval",
+                                        fontSize = 20.sp,
+                                        color = Color.Black
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                                        Text(
+                                            text = "Profile submitted! Please wait for confirmation to complete verification. This may take a few minutes.",
+                                            fontWeight = FontWeight.Normal,
+                                            fontSize = 14.sp,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(start = 14.dp, end = 14.dp, bottom = 20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Bottom
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0xFF42C2AE), shape = RoundedCornerShape(6.dp))
+                                        .clickable {
+                                            if (validateStep(currentStep)) {
+                                                when (currentStep) {
+                                                    1 -> {
+                                                        currentStep = 2
+                                                        progressPercentage = 25
+                                                    }
+                                                    2 -> {
+                                                        currentStep = 3
+                                                        progressPercentage = 50
+                                                    }
+                                                    3 -> {
+                                                        currentStep = 4
+                                                        progressPercentage = 75
+                                                    }
+                                                    4 -> {
+                                                        val workFee = estimatedRate.toIntOrNull() ?: 0 // Safe conversion
+                                                        submitResumeViewModel.submitResume(
+                                                            specialty = selectedJob,
+                                                            aboutme = aboutMe,
+                                                            workfee = workFee,
+                                                            preferedworklocation = selectedLocation,
+                                                            valididfront = frontIdUri!!,
+                                                            valididback = backIdUri!!,
+                                                            documents = tradeCredentialUri!!, // Ensure these are not null due to validation
+                                                            context = context
+                                                        )
+                                                        currentStep = 5
+                                                        progressPercentage = 100
+                                                    }
+                                                }
+                                            } else {
+                                                showErrorMessage()
+                                            }
+                                        }
+                                        .padding(vertical = 12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = when (progressPercentage) {
+                                            75 -> "Submit"
+                                            100 -> "Done"
+                                            else -> "Next"
+                                        },
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                                LaunchedEffect(submitResumeState) {
+                                    when (val submitresume = submitResumeState) {
+                                        is SubmitResumeViewModel.SubmitResumeState.Loading -> {
+                                            // nothing
+                                        }
+                                        is SubmitResumeViewModel.SubmitResumeState.Success -> {
+                                            onShowSnackbar("Resume submitted successfully")
+                                            submitResumeViewModel.resetState()
+                                        }
+                                        is SubmitResumeViewModel.SubmitResumeState.Error -> {
+                                            val error = submitresume.message
+                                            onShowSnackbar(error)
+                                            Log.d("testerrerro", error)
+                                            submitResumeViewModel.resetState()
+                                        }
+                                        else -> Unit
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+
+            // Snackbar overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 80.dp), // Increased padding for visibility
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                CustomDurationSnackbar(
+                    message = snackbarMessage,
+                    show = showSnackbar,
+                    duration = 3000L,
+                    onDismiss = { showSnackbar = false }
+                )
+                Log.d("SnackbarDebug", "Rendering: $snackbarMessage, show = $showSnackbar")
+            }
         }
     }
-}
 @Composable
 fun StepProgressIndicator(currentStep: Int, totalSteps: Int = 5) {
     Row(
@@ -626,13 +656,16 @@ fun JobSelectionDropdown(
     val isPlaceholder = selectedOption == "Select job category" || selectedOption == "Select location" || selectedOption == "Select type of valid ID" || selectedOption == "Select type of document"
     val textColor = if (isPlaceholder) Color.Gray else Color.Black  // text gray when unselected
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier.fillMaxWidth().height(55.dp)) {
         OutlinedTextField(
             value = selectedOption,
             onValueChange = {},
             label = { Text(label) },  // keep label gray
             readOnly = true,
-            textStyle = TextStyle(color = textColor),  // apply correct text color
+            textStyle = TextStyle(
+                color = textColor,
+                fontSize = 12.sp // Smaller font size for selected option
+            ),  // apply correct text color
             trailingIcon = {
                 Icon(
                     Icons.Filled.ArrowDropDown,
@@ -656,7 +689,7 @@ fun JobSelectionDropdown(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option) },
+                    text = { Text(option,fontSize = 14.sp) },
                     onClick = {
                         onOptionSelected(option)
                         expanded = false
@@ -718,6 +751,7 @@ fun UploadDocumentsScreen(
             onUploadClick = {
                 if (selectedID.isEmpty()) {
                     Toast.makeText(context, "Please choose a type of ID first", Toast.LENGTH_SHORT).show()
+
                 } else {
                     frontIdPickerLauncher.launch("image/*")
                 }
@@ -776,7 +810,7 @@ fun UploadDocumentsScreen(
 @Composable
 fun UploadField(label: String, uri: Uri?, fileType: String = "image", onUploadClick: () -> Unit, onViewClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().padding(vertical = 5.dp).padding(top = 5.dp),
+        Modifier.fillMaxWidth().height(50.dp).padding(vertical = 5.dp).padding(top = 5.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

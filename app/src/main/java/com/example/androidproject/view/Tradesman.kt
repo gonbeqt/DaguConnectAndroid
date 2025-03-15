@@ -17,6 +17,12 @@ data class Tradesmandate(
     val bookmark: Int,
     val date: String
 )
+data class ApplicantsDate(
+    val imageResId: String,
+    val username: String,
+    val category: String,
+    val date : String
+)
 
 
 /*

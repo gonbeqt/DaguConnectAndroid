@@ -662,6 +662,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
     var showReportDialog by remember { mutableStateOf(false) }
     var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
+    var reportSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
 
 
     val documentPickerLauncher = rememberLauncherForActivityResult(
@@ -680,22 +681,26 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         }
     }
 
-
-    LaunchedEffect(reportState) {
-        when(val report = reportState){
-            is ReportTradesmanViewModel.ReportState.Loading -> {
-                //do nothing
-            }
+    // Handle report state changes with a unique key to prevent multiple triggers
+    LaunchedEffect(reportState, reportSubmissionKey) {
+        if (reportSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet
+        when (val report = reportState) {
             is ReportTradesmanViewModel.ReportState.Success -> {
                 val responseReport = report.data?.message
                 Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
-                reportTradesmanViewModels.resetState()
+                Log.d("ReportState", "Success: $responseReport")
                 showReportDialog = false
+                reportSubmissionKey = null // Reset key after handling
+                delay(1000)
+                reportTradesmanViewModels.resetState()
             }
             is ReportTradesmanViewModel.ReportState.Error -> {
                 val errorMessage = report.message
                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                Log.d("ReportState", "Error: $errorMessage")
                 showReportDialog = true
+                reportSubmissionKey = null // Reset key after handling
+                delay(1000)
                 reportTradesmanViewModels.resetState()
             }
             else -> Unit
@@ -987,6 +992,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                             // Otherwise, use the selected reason from the list
                                             reasons[selectedIndex]
                                         }
+                                        reportSubmissionKey = System.currentTimeMillis() // Set unique key
                                         reportTradesmanViewModels.report(selectedReason, reasonDescription, reportDocument!!,context,resumes.userid)
                                     }
                                           },

@@ -32,12 +32,16 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.view.ApplicantsDate
 import com.example.androidproject.view.Tradesmandate
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -46,12 +50,15 @@ import java.util.Locale
 
 
 @Composable
-fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, getClientsBooking: GetClientBookingViewModel) {
+fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, getClientsBooking: GetClientBookingViewModel, getMyJobApplicantsViewModel: GetMyJobApplicantsViewModel) {
     val clientBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    val clientApplicants = getMyJobApplicantsViewModel.jobApplicantsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         clientBooking.refresh()
+        clientApplicants.refresh()
     }
+
     Log.i("Screen", "ScheduleScreen")
 
     var selectedClientDate by remember { mutableStateOf(LocalDate.now()) }
@@ -59,12 +66,9 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var selectedFilter by remember { mutableStateOf("My Clients") }
 
-    val applicants = listOf(
-        Tradesmandate("${R.drawable.pfp}", "Sarah", "Carpenter", "P550/hr", 4.3f, R.drawable.bookmark, "2025-02-19"),
-        Tradesmandate("${R.drawable.pfp}", "Mike", "Painter", "P480/hr", 4.0f, R.drawable.bookmark, "2025-02-20")
-    )
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
             .filter { it.bookingStatus == "Active" } // Filter for Active bookings
@@ -86,8 +90,56 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                 false
             }
         }
+    val allApplicantDates = remember(clientApplicants) {
+        clientApplicants.itemSnapshotList.filterNotNull()
+            .filter { it.status == "Active"}
+            .mapNotNull { applicants ->
+                try {
+                    LocalDate.parse(applicants.createdAt, dateFormatter)
+                }catch (e: Exception){
+                    null
+                }
+            }.toSet()
+    }
+
+    val filteredApplicants = clientApplicants.itemSnapshotList.filterNotNull()
+        .filter {
+            try {
+                val dateApplicants = LocalDate.parse(it.createdAt, dateFormatter)
+                dateApplicants.isEqual(selectedApplicantDate) && it.status == "Active"
+            } catch (e: Exception) {
+                false
+            }
+        }
 
     val selectedDate = if (selectedFilter == "My Clients") selectedClientDate else selectedApplicantDate
+
+    // Convert both types to Tradesmandate
+    val tradesmenList = if (selectedFilter == "My Clients") {
+        filteredClients.map {
+            Tradesmandate(
+                it.tradesmanProfile ?: "",
+                it.tradesmanFullName,
+                it.taskType,
+                "P${it.workFee}",
+                it.ratings,
+                R.drawable.bookmark,
+                it.bookingDate
+            )
+        }
+    } else {
+        filteredApplicants.map {
+            Tradesmandate(
+                it.tradesmanProfilePicture ?: "",
+                it.tradesmanFullname,
+                it.jobType,
+                "", // No rate available
+                0f, // No rating available
+                R.drawable.bookmark,
+                it.createdAt
+            )
+        }
+    }
 
     Box(
         Modifier
@@ -114,26 +166,17 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                     }
                 },
                 onMonthChange = { month -> currentMonth = month },
-                allBookingDates = allBookingDates,
-                tradesmen = if (selectedFilter == "My Clients") filteredClients.map {
-                    Tradesmandate(
-                        it.tradesmanProfile,
-                        it.tradesmanFullName,
-                        it.taskType,
-                        "P${it.workFee}",
-                        it.ratings,
-                        R.drawable.bookmark,
-                        it.bookingDate
-                    )
-                } else applicants
+                allBookingDates = if (selectedFilter == "My Clients") allBookingDates else allApplicantDates,
+                tradesmen = tradesmenList
             )
+
 
             FilterSection(selectedDate, selectedFilter) { selectedFilter = it }
 
             if (selectedFilter == "My Clients") {
                 MyClientsList(clientBooking, selectedClientDate)
             } else {
-                MyApplicantsList(applicants, selectedApplicantDate)
+                MyApplicantsList(clientApplicants, selectedApplicantDate)
             }
         }
     }
@@ -213,17 +256,6 @@ fun FilterSection(
 @Composable
 fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val allBookingDates = remember(clientBooking) {
-        clientBooking.itemSnapshotList.filterNotNull()
-            .filter { it.bookingStatus == "Active" } // Filter for Active bookingStatus
-            .mapNotNull { booking ->
-                try {
-                    LocalDate.parse(booking.bookingDate, dateFormatter)
-                } catch (e: Exception) {
-                    null
-                }
-            }.toSet()
-    }
 
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
@@ -235,7 +267,7 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
             }
         }
 
-    Log.d("MyClientsList", "Selected Date: $selectedDate, Filtered Clients: $filteredClients, All Booking Dates: $allBookingDates")
+
 
     if (filteredClients.isEmpty()) {
         Box(
@@ -266,11 +298,22 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
     }
 }
 @Composable
-fun MyApplicantsList(applicants: List<Tradesmandate>, selectedDate: LocalDate) {
+fun MyApplicantsList(allApplicants: LazyPagingItems<JobApplicantData>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val filteredApplicants = applicants.filter {
-        LocalDate.parse(it.date, dateFormatter).isEqual(selectedDate)
-    }
+
+    val filteredApplicants = allApplicants.itemSnapshotList.filterNotNull()
+        .filter {
+            try {
+                val applicantDate = LocalDate.parse(it.createdAt, dateFormatter)
+                applicantDate.isEqual(selectedDate) && it.status == "Active" // Filter for Active bookingStatus
+            } catch (e: Exception) {
+                false // Skip invalid dates
+            }
+        }
+
+
+
+
     if (filteredApplicants.isEmpty()) {
         Box(
             modifier = Modifier
@@ -636,7 +679,7 @@ fun MyClientsItem(Clients: GetClientsBooking) {
 
 
 @Composable
-fun MyApplicantItem(trade: Tradesmandate) {
+fun MyApplicantItem(trade: JobApplicantData) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -670,7 +713,8 @@ fun MyApplicantItem(trade: Tradesmandate) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Image( painterResource(trade.imageResId.toInt()),
+            AsyncImage(
+                model = trade.tradesmanProfilePicture,
                 contentDescription = "Tradesman Image",
                 modifier = Modifier
                     .size(120.dp, 120.dp)
@@ -684,71 +728,24 @@ fun MyApplicantItem(trade: Tradesmandate) {
                 Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
                         modifier = Modifier.padding( top = 5.dp),
-                        text = trade.username,
+                        text = trade.tradesmanFullname,
                         color = Color.Black,
                         fontSize = nameTextSize
                     )
                     Text(
                         modifier = Modifier.padding( top = 5.dp, end = 15.dp),
-                        text = "Pending",
+                        text = trade.status,
                         color = Color.Black,
                         fontSize = smallTextSize
                     )
                 }
 
                 Text(
-                    text = trade.category,
+                    text = trade.jobType,
                     color = Color.Gray,
                     fontSize = taskTextSize
                 )
-                Row(
-                    modifier = Modifier.padding(top = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier
-                        .padding(end = 5.dp)
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                    ) {
-                        Row()
-                        {
-                            Text(
-                                modifier = Modifier.padding(5.dp),
-                                text = trade.rate,
-                                fontSize = smallTextSize
-                            )
-                        }
-                    }
 
-                    Box(modifier = Modifier
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp),
-                        ),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(5.dp)
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .padding(top = 5.dp),
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Rating",
-
-                                tint = Color.Yellow,
-
-                                )
-                            Text(
-                                text = trade.reviews.toString(),
-                                fontSize = smallTextSize
-
-                            )
-                        }
-                    }
-                }
 
                 Row(
                     modifier = Modifier
@@ -764,22 +761,11 @@ fun MyApplicantItem(trade: Tradesmandate) {
 
                         )
                         Text(
-                            text = trade.date,
+                            text = trade.createdAt,
                             fontSize = smallTextSize
                         )
                     }
-                    Column {
-                        Text(
-                            text = "Time",
-                            fontSize = taskTextSize
 
-                        )
-                        Text(
-                            text = "8:00 AM",
-                            fontSize = smallTextSize
-
-                        )
-                    }
                 }
             }
 

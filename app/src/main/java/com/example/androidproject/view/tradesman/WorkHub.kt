@@ -70,6 +70,7 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
+import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
@@ -134,6 +135,14 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
+
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+
+    val onShowSnackbar: (String) -> Unit = { message ->
+        snackbarMessage = message
+        showSnackbar = true
+    }
 
     Column(
         modifier = modifier
@@ -239,7 +248,9 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                                 refreshTrigger++
                                             } else {
                                                 // Optionally show a toast if still no internet
-                                                Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                                snackbarMessage = "Still no internet connection"
+
+                                                showSnackbar = true
                                             }
                                         }
                                         .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
@@ -268,7 +279,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                 when (selectedSection) {
                                     0 -> when (selectedTabIndex) {
                                         0 -> AllBookingsTradesmanContent(getTradesmanBooking)
-                                        1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel)
+                                        1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel,onShowSnackbar)
                                         2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
                                         3 -> ActiveBookingsTradesmanContent(navController,getTradesmanBooking)
                                         4 -> CompletedBookingsTradesmanContent(navController,getTradesmanBooking)
@@ -277,9 +288,9 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
                                     1 -> when (selectedTabIndex) {
                                         0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
-                                        1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel)
+                                        1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel,onShowSnackbar)
                                         2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
-                                        3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel)
+                                        3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel,onShowSnackbar)
                                         4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
                                         5 -> CancelledMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication )
                                     }
@@ -287,7 +298,23 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             }
                         }
                     }
+
                 }
+
+
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 80.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                CustomDurationSnackbar(
+                    message = snackbarMessage ,
+                    show = showSnackbar,
+                    duration = 5000L,
+                    onDismiss = { showSnackbar = false }
+                )
             }
         }
     }
@@ -409,7 +436,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
     }
 }
 @Composable
-fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel, updateBookingClientViewModel: UpdateBookingClientViewModel) {
+fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel, updateBookingClientViewModel: UpdateBookingClientViewModel,onShowSnackbar:(String) -> Unit) {
     val bookingPendingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
@@ -445,7 +472,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             ) {
                 items(bookingPending.size) { index ->
                     val Pending = bookingPending[index]
-                    PendingTradesmanItem(Pending,navController,updateBookingClientViewModel)
+                    PendingTradesmanItem(Pending,navController,updateBookingClientViewModel,onShowSnackbar)
                 }
             }
         }
@@ -738,7 +765,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
 
 
 @Composable
-fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavController, updateBookingClientViewModel :  UpdateBookingClientViewModel) {
+fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavController, updateBookingClientViewModel :  UpdateBookingClientViewModel,onShowSnackbar:(String) ->Unit) {
     val updateWorkStatus by updateBookingClientViewModel.clientWorkStatusState.collectAsState()
     val  context = LocalContext.current
     var showApproveDialog by remember { mutableStateOf(false) }
@@ -756,6 +783,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                 updateBookingClientViewModel.resetState()
                 // Set the selectedTab based on the work status
                 if (updateStatus.status == "Accepted") {
+                    onShowSnackbar("Jobs has been Accepted")
                     WebSocketManager.sendNotificationBookingToClient(
                         pending.id.toString(),
                         "Tradesman has accepted your booking request!",
@@ -765,6 +793,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                         navController.popBackStack()
                     }
                 } else if (updateStatus.status == "Declined") {
+                    onShowSnackbar("Jobs has been Declined")
                     WebSocketManager.sendNotificationBookingToClient(
                         pending.userId.toString(),
                         "Tradesman has declined your booking request!",
@@ -780,7 +809,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
 
             is UpdateBookingClientViewModel.UpdateClientWorkStatus.Error -> {
                 val errorMessage = updateStatus.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                onShowSnackbar(errorMessage)
                 updateBookingClientViewModel.resetState()
             }
 
@@ -1540,7 +1569,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
     val myJobs = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.refreshJobApplicants()
+        myJobs.refresh()
     }
 
     Box(
@@ -1590,6 +1619,7 @@ fun PendingMySubmissionsTradesmanContent(
     navController: NavController,
     getMyJobApplications: GetMyJobApplicationViewModel,
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
+    ,onShowSnackbar:(String) -> Unit
 ) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
@@ -1627,7 +1657,8 @@ fun PendingMySubmissionsTradesmanContent(
                     PendingMySubmissionsTradesmanItem(
                         pendingJobs,
                         navController,
-                        putJobApplicationStatusViewModel
+                        putJobApplicationStatusViewModel,
+                        onShowSnackbar
                     )
                 }
             }
@@ -1682,7 +1713,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
 }
 
 @Composable
-fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
+fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,onShowSnackbar:(String) -> Unit) {
 
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
@@ -1721,7 +1752,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
             ) {
                 items(activeApplication.size) { index ->
                     val activeJobs = activeApplication[index]
-                    ActiveMySubmissionsTradesmanItem(activeJobs,navController)
+                    ActiveMySubmissionsTradesmanItem(activeJobs,navController, putJobApplicationStatusViewModel,onShowSnackbar)
                 }
             }
         }
@@ -1922,7 +1953,8 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
 fun PendingMySubmissionsTradesmanItem(
     myJob: JobApplicationData,
     navController: NavController,
-    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
+    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
+    onShowSnackbar:(String)-> Unit
 ) {
     val windowSize = rememberWindowSizeClass()
 
@@ -1960,7 +1992,7 @@ fun PendingMySubmissionsTradesmanItem(
     LaunchedEffect(putState) {
         when (putState) {
             is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
-                Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
+                onShowSnackbar("Application cancelled")
                 putJobApplicationStatusViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                     navController.popBackStack()
@@ -2195,7 +2227,7 @@ fun PendingMySubmissionsTradesmanItem(
     }
 }
 @Composable
-fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
+fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,onShowSnackbar:(String)->Unit) {
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
