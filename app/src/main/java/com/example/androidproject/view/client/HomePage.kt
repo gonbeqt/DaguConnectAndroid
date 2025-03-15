@@ -349,13 +349,12 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 10.dp)
-            .background(Color.White),
-        shape = RoundedCornerShape(8.dp),
+            .background(Color.Transparent)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .background(Color(0xFFECECEC)),
+                .background(Color(0xFFEDEFEF)),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             displayedResumes.forEach { resume ->
@@ -549,9 +548,9 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
     val windowSize = rememberWindowSizeClass()
 
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 24.dp
+        WindowType.LARGE -> 32.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -594,7 +593,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             .height(cardHeight)
             .clickable { navController.navigate("booknow/${resumes.id}") }, //implementation here
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
+        elevation = CardDefaults.cardElevation(1.dp)
 
 
         ) {
@@ -637,6 +636,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 painter = painterResource(R.drawable.meatball_ic),
                                 contentDescription = "Report Icon",
                                 modifier = Modifier
+                                    .padding(end = 10.dp)
                                     .size(iconSize)
                                     .clickable { showMenu = true }
                             )
@@ -663,45 +663,52 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         color = Color.Black,
                         fontSize = taskTextSize,
                         )
-                    Row(modifier = Modifier.size(185.dp, 110.dp)) {
+                    Row(modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(70.dp, 50.dp)
-                                .padding(top = 15.dp, end = 5.dp)
+                                .size(70.dp, 30.dp)
                                 .background(
                                     color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
-                                )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "P${resumes.workFee}/hr",
-                                fontSize = smallTextSize,
-                                modifier = Modifier.padding(top = 5.dp, start = 8.dp)
+                                fontSize = smallTextSize
                             )
                         }
                         Box(
                             modifier = Modifier
-                                .size(70.dp, 50.dp)
-                                .padding(top = 15.dp, start = 10.dp, end = 10.dp)
+                                .size(50.dp, 30.dp)
                                 .background(
                                     color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
-                                )
+                                ),
+                            contentAlignment = Alignment.Center
+
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Star, contentDescription = "Start Icon",
-                                tint = Color(0xFFFFA500), modifier = Modifier
-                                    .size(25.dp)
-                                    .padding(top = 7.dp, start = 2.dp)
-                            )
-                            Text(
-                                when {
-                                    resumes.ratings == 0f -> "0"
-                                    else -> String.format("%.1f", resumes.ratings)
-                                },
-                                fontSize = smallTextSize,
-                                modifier = Modifier.padding(top = 5.dp, start = 28.dp)
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Start Icon",
+                                    tint = Color(0xFFFFA500),
+                                    modifier = Modifier
+                                        .size(iconSize)
+                                )
+                                Text(
+                                    when {
+                                        resumes.ratings == 0f -> "0"
+                                        else -> String.format("%.1f", resumes.ratings)
+                                    },
+                                    fontSize = smallTextSize,
+                                )
+                            }
                         }
                     }
 
