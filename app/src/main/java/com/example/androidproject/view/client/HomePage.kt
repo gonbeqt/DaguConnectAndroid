@@ -201,7 +201,7 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor:
                     color = textColor
                 )
                 Text(
-                    text = "Welcome Back!",
+                    text = "Welcome back!",
                     fontSize = 24.sp,
                     color = textColor,
                     fontWeight = FontWeight.Medium
