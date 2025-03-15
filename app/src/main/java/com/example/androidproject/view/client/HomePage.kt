@@ -151,33 +151,38 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
         modifier = Modifier
             .fillMaxWidth()
             .shadow(1.dp)
-            .background(Color.White)
+            .background(Color(0xFFEDEFEF))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp)
                 .padding(horizontal = 25.dp), // Added padding inside for spacing
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left-aligned text
-            Text(
-                text = "Home",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Medium
-            )
-
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color.Black,
-                    modifier = Modifier
-                        .size(35.dp)
-                        .clickable { navController.navigate("notification") }
+            Column {
+                // Left-aligned text
+                Text(
+                    text = "Hi User,",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.DarkGray
                 )
-
-
+                Text(
+                    text = "Welcome Back!",
+                    fontSize = 24.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Icon(
+                imageVector = Icons.Outlined.Notifications,
+                contentDescription = "Notifications Icon",
+                tint = Color.Black,
+                modifier = Modifier
+                    .size(35.dp)
+                    .clickable { navController.navigate("notification") }
+            )
         }
     }
 }
