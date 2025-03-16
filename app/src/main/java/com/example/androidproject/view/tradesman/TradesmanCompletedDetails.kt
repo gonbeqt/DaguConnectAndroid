@@ -449,7 +449,7 @@ fun TradesmanCompletedDetails(jobId: String, modifier: Modifier = Modifier, navC
                                     text = "Completed Date")
                                 if (selectedBooking != null) {
                                     Text(fontSize = smallTextSize,
-                                        text = selectedBooking.bookingDate)
+                                        text = selectedBooking.bookingDateStatus)
                                 }
                             }
 

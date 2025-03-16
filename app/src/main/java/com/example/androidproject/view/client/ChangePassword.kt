@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.androidproject.view.CustomDurationSnackbar
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
 
 @Composable
@@ -43,15 +43,13 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
     var lengthError by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+
     LaunchedEffect(changePasswordState) {
         when (val changePass =changePasswordState){
 
             is ChangePasswordViewModel.ChangePassState.Success->{
                 changePassword.resetState()
-                snackbarMessage = "Password changed successfully"
-                showSnackbar = true
+                SnackbarController.show("Password changed successfully")
                 // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=1") {
                     popUpTo(navController.graph.startDestinationId) {
@@ -60,8 +58,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                 }
             }
             is ChangePasswordViewModel.ChangePassState.Error -> {
-                snackbarMessage =  changePass.message
-                showSnackbar = true
+                SnackbarController.show(changePass.message)
             }
           else -> Unit
         }
@@ -250,20 +247,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
         if (isLoading) {
             LoadingUI()
         }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 16.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            CustomDurationSnackbar(
-                message = snackbarMessage,
-                show = showSnackbar,
-                duration = 5000L,
-                onDismiss = { showSnackbar = false }
-            )
-            Log.d("SnackbarDebug", "Rendering: Show=$showSnackbar, Message=$snackbarMessage")
-        }
+
     }
 }
 

@@ -53,7 +53,9 @@ data class JobApplicationData(
     @SerializedName("cancelled_reason")
     val cancelledReason: String?,
     @SerializedName("cancelled_by")
-    val cancelledBy: String?
+    val cancelledBy: String?,
+    @SerializedName("job_date_status")
+    val jobDateStatus: String
 
 
 )

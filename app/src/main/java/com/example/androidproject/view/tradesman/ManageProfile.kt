@@ -64,7 +64,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import com.example.androidproject.view.CustomDurationSnackbar
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanDetailViewModel
 import com.google.accompanist.flowlayout.FlowRow
 
@@ -88,8 +88,7 @@ fun ManageProfile(
     var isPhoneValid by remember { mutableStateOf(false) }
     val phoneRegex = "^9[0-9]{9}$".toRegex()
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+
     // Handle "N/A" and "null" (case-insensitive) by setting phoneNumber to empty string
     phoneNumber =if (number == "null") "" else number ?: ""
     estimatedRate = rate ?: ""
@@ -102,8 +101,8 @@ fun ManageProfile(
                 //loading
             }
             is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Success->{
-                snackbarMessage = "Updated Successfully"
-                showSnackbar = true
+
+                SnackbarController.show("Updated Successfully")
                 updateTradesmanDetailViewModel.resetState()
                 // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=0") {
@@ -113,8 +112,8 @@ fun ManageProfile(
             }
             is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Error -> {
                 val error = updateDetails.message
-                snackbarMessage = error
-                showSnackbar = true
+                SnackbarController.show(error)
+
                 updateTradesmanDetailViewModel.resetState()
             }
             else -> Unit
@@ -361,8 +360,8 @@ fun ManageProfile(
                                     aboutMe = newText
                                 } else {
                                     aboutMe = newText.substring(0, 500)
-                                    snackbarMessage = "Character count exceeds"
-                                    showSnackbar = true
+                                    SnackbarController.show("Character count exceeds")
+
                                 }
                             },
                             modifier = Modifier
@@ -407,16 +406,10 @@ fun ManageProfile(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 26.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            CustomDurationSnackbar(
-                message = snackbarMessage,
-                show = showSnackbar,
-                duration = 5000L,
-                onDismiss = { showSnackbar = false }
-            )
-            Log.d("SnackbarDebug", "Rendering: Show=$showSnackbar, Message=$snackbarMessage")
+            SnackbarController.ObserveSnackbar()
         }
     }
 }

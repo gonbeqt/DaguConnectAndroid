@@ -88,11 +88,11 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
-import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
@@ -130,14 +130,7 @@ fun HomeTradesman(
         WindowType.LARGE -> 18.sp
     }
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
 
-    val onShowSnackbar: (String) -> Unit = { message ->
-        snackbarMessage = message
-        showSnackbar = true
-        Log.d("SnackbarDebug", "onShowSnackbar called: $message")
-    }
 
     LaunchedEffect(refreshTrigger) {
         if (isConnected.value) {
@@ -228,7 +221,7 @@ fun HomeTradesman(
                                                 isLoading = true
                                                 refreshTrigger++
                                             } else {
-                                                onShowSnackbar("Still no internet connection")
+                                                SnackbarController.show("Still no internet connection")
                                             }
                                         }
                                         .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
@@ -253,8 +246,8 @@ fun HomeTradesman(
                                     .background(Color(0xFFD9D9D9))
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI, onShowSnackbar)
-                                    1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel, onShowSnackbar)
+                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI )
+                                    1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel )
                                 }
                             }
                         }
@@ -262,20 +255,13 @@ fun HomeTradesman(
                 }
             }
         }
-        // Snackbar layered above content
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 80.dp),
+                .padding(bottom = 100.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            CustomDurationSnackbar(
-                message = snackbarMessage,
-                show = showSnackbar,
-                duration = 5000L,
-                onDismiss = { showSnackbar = false }
-            )
-            Log.d("SnackbarDebug", "Rendering: Show=$showSnackbar, Message=$snackbarMessage")
+            SnackbarController.ObserveSnackbar()
         }
     }
 }
@@ -327,7 +313,7 @@ fun TopMatches(
     getJobsViewModel: GetJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
     LoadingUI: @Composable () -> Unit,
-    onShowSnackbar: (String) -> Unit
+
 ) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
 
@@ -349,7 +335,7 @@ fun TopMatches(
             items(jobsList.itemCount) { index ->
                 val job = jobsList[index]
                 if (job != null) {
-                    TopMatchesItem(job, navController, reportClientViewModel, onShowSnackbar)
+                    TopMatchesItem(job, navController, reportClientViewModel)
                 }
             }
             item {
@@ -373,7 +359,6 @@ fun TopMatchesItem(
     getJobs: GetJobs,
     navController: NavController,
     reportClientViewModel: ReportClientViewModel,
-    onShowSnackbar: (String) -> Unit
 ) {
     val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
@@ -421,14 +406,14 @@ fun TopMatchesItem(
                 val responseReport = reportClient.data?.message
                 if (responseReport != null) {
                     reportSubmissionKey = null // Reset key after handling
-                    onShowSnackbar(responseReport)
+                    SnackbarController.show(responseReport)
                 }
                 showReportDialog = false
                 reportClientViewModel.resetState()
             }
             is ReportClientViewModel.ReportClientState.Error -> {
                 val error = reportClient.message
-                onShowSnackbar(error)
+                SnackbarController.show(error)
                 reportSubmissionKey = null // Reset key after handling
                 showReportDialog = true
                 reportClientViewModel.resetState()
@@ -678,7 +663,7 @@ fun TopMatchesItem(
                             Button(
                                 onClick = {
                                     if (selectedIndex == -1) {
-                                        onShowSnackbar("Please select a reason for reporting")
+                                        SnackbarController.show("Please select a reason for reporting")
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
                                             otherReason
@@ -709,7 +694,6 @@ fun RecentJobs(
     navController: NavController,
     getRecentJobsViewModel: GetRecentJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
-    onShowSnackbar: (String) -> Unit
 ) {
     val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     LazyColumn(
@@ -719,7 +703,7 @@ fun RecentJobs(
         items(jobList.itemCount) { index ->
             val job = jobList[index]
             if (job != null) {
-                RecentJobsItem(job, navController, reportClientViewModel, onShowSnackbar)
+                RecentJobsItem(job, navController, reportClientViewModel)
             }
         }
     }
@@ -730,7 +714,6 @@ fun RecentJobsItem(
     getJobs: GetJobs,
     navController: NavController,
     reportClientViewModel: ReportClientViewModel,
-    onShowSnackbar: (String) -> Unit
 ) {
     val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
@@ -777,7 +760,7 @@ fun RecentJobsItem(
             is ReportClientViewModel.ReportClientState.Success -> {
                 val responseReport = reportClient.data?.message
                 if (responseReport != null) {
-                    onShowSnackbar(responseReport)
+                    SnackbarController.show(responseReport)
                 }
                 reportSubmissionKey = null // Reset key after handling
                 showReportDialog = false
@@ -786,7 +769,7 @@ fun RecentJobsItem(
             is ReportClientViewModel.ReportClientState.Error -> {
                 reportSubmissionKey = null // Reset key after handling
                 val error = reportClient.message
-                onShowSnackbar(error)
+                SnackbarController.show(error)
             }
             else -> Unit
         }
@@ -1028,7 +1011,7 @@ fun RecentJobsItem(
                             Button(
                                 onClick = {
                                     if (selectedIndex == -1) {
-                                        onShowSnackbar("Please select a reason for reporting")
+                                        SnackbarController.show("Please select a reason for reporting")
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
                                             otherReason

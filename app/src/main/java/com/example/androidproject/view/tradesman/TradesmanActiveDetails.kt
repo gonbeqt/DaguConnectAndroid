@@ -449,7 +449,7 @@ fun TradesmanActiveDetails(jobId:String, modifier: Modifier = Modifier, navContr
                                     text = "Confirmed Date")
                                 if (selectedBooking != null) {
                                     Text(fontSize = smallTextSize,
-                                        text = selectedBooking.bookingDate)
+                                        text = selectedBooking.bookingDateStatus)
                                 }
                             }
 

@@ -170,12 +170,12 @@ fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, na
                                 fontWeight = FontWeight.Normal,
                                 fontSize = smallTextSize,
                                 color = Color.Gray,
-                                text = "Request Date and Time"
+                                text = "Request Date"
                             )
                             if (selectedBooking != null) {
                                 Text(
                                     fontSize = smallTextSize,
-                                    text = selectedBooking.createdAt
+                                    text = selectedBooking.bookingDateStatus
                                 )
                             }
                         }

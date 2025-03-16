@@ -69,6 +69,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.RegisterViewModel
 import java.time.LocalDate
@@ -85,8 +86,6 @@ fun SignUpScreenPreview() {
 fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,LoadingUI : @Composable () -> Unit) {
     val windowSize = rememberWindowSizeClass()
     val registerState by viewModel.registerState.collectAsState()
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
 
     var firstName by remember {
         mutableStateOf("")
@@ -146,13 +145,12 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         }
         is RegisterViewModel.RegisterState.Success -> {
             if (ifToast){
-                snackbarMessage = resgister.data?.message.toString()
-                showSnackbar = true
+                SnackbarController.show (resgister.data?.message.toString()
+                )
                 navController.navigate("login"){
                     popUpTo("signup") { inclusive = true }
 
                 }
-
                 viewModel.resetState()
                 ifToast = false
                 isLoading = false
@@ -160,8 +158,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         }
 
         is RegisterViewModel.RegisterState.Error -> {
-            snackbarMessage =resgister.message.toString()
-            showSnackbar = true
+            SnackbarController.show(resgister.message.toString())
             Log.i("Register screen error", "Register error $registerState.message")
             isLoading = false
             viewModel.resetState()
@@ -336,20 +333,16 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
             }
 
         }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
+        }
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 36.dp),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        CustomDurationSnackbar(
-            message = snackbarMessage,
-            show = showSnackbar,
-            duration = 5000L,
-            onDismiss = { showSnackbar = false }
-        )
-    }
+
 }
 
 @Composable

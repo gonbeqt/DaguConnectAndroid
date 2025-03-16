@@ -70,6 +70,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.view.extras.CustomDurationSnackbar
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.LoginViewModel
 import kotlinx.coroutines.delay
@@ -88,8 +90,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     val context = LocalContext.current
     var showSuspendedDialog by remember { mutableStateOf(false) }
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
             // Clear tokens and navigate regardless of result
@@ -114,8 +115,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     showSuspendedDialog = true
                     return@LaunchedEffect
                 }else{
-                    snackbarMessage = "Login successful"
-                    showSnackbar = true
+                    SnackbarController.show("Login successful")
                     navController.navigate("main_screen") {
                         popUpTo("login") { inclusive = true }
                     }
@@ -123,8 +123,8 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 viewModel.resetState()
             }
             is LoginViewModel.LoginState.Error -> {
-                snackbarMessage = loginStatus.message
-                showSnackbar = true
+                SnackbarController.show(loginStatus.message)
+
                 viewModel.resetState()
             }
             else -> {}
@@ -249,10 +249,6 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     email = email,
                     password = password,
                     windowSize = windowSize,
-                    onShowSnackbar = { message ->
-                        snackbarMessage = message
-                        showSnackbar = true
-                    },
                     modifier = Modifier.constrainAs(loginButton) {
                         top.linkTo(forgotPassword.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
@@ -279,12 +275,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 .padding(bottom = 16.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            CustomDurationSnackbar(
-                message = snackbarMessage,
-                show = showSnackbar,
-                duration = 5000L,
-                onDismiss = { showSnackbar = false }
-            )
+            SnackbarController.ObserveSnackbar()
         }
     }
     // Suspension Dialog
@@ -459,15 +450,16 @@ fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier,navCont
     )
 }
 @Composable
-fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize,onShowSnackbar: (String) -> Unit, modifier: Modifier = Modifier) {
+fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize, modifier: Modifier = Modifier) {
     Button(
         onClick = {
             if (email.isEmpty() || password.isEmpty()) {
-                onShowSnackbar("Fields cannot be empty")
+                SnackbarController.show("Fields cannot be empty")
             } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                onShowSnackbar("Invalid email format")
+                SnackbarController.show("Invalid email format")
+
             } else if (password.length < 8) {
-                onShowSnackbar("Password must be at least 8 characters")
+                SnackbarController.show("Password must be at least 8 characters")
 
             }
             else {
@@ -505,47 +497,5 @@ fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier:
             },
             modifier = Modifier.clickable { navController.navigate("signup") }
         )
-    }
-}
-
-@Composable
-fun CustomDurationSnackbar(
-    message: String,
-    show: Boolean,
-    duration: Long = 5000L,
-    onDismiss: () -> Unit
-) {
-    AnimatedVisibility(
-        visible = show,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Snackbar(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(bottom = 8.dp)
-                .padding(horizontal = 16.dp)
-                .shadow(5.dp)
-                ,
-            containerColor = Color.Gray,
-            contentColor = Color.White,
-
-            content = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(text = message, fontSize = 16.sp, color = Color.White)
-                }
-            }
-        )
-    }
-
-    // Handle duration
-    LaunchedEffect(show) {
-        if (show) {
-            delay(duration)
-            onDismiss()
-        }
     }
 }
