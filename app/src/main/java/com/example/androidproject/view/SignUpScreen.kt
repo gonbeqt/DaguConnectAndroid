@@ -68,9 +68,16 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.androidproject.R
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.RegisterViewModel
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -85,8 +92,6 @@ fun SignUpScreenPreview() {
 fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,LoadingUI : @Composable () -> Unit) {
     val windowSize = rememberWindowSizeClass()
     val registerState by viewModel.registerState.collectAsState()
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
 
     var firstName by remember {
         mutableStateOf("")
@@ -112,11 +117,23 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
     }
 
     // Animatable for the card's Y offset
-    val cardOffsetY = remember { Animatable(500f) } // Start off-screen to the bottom
+    val cardOffsetY = remember { Animatable(800f) } // Start off-screen to the bottom
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
-
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.lottie_animation)
+    )
+    var isAnimationPlaying by remember { mutableStateOf(true) }
+    // Animate the Lottie composition with looping
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = isAnimationPlaying,
+        speed = 0.5f,
+        restartOnPlay = false
+    )
     // Launch animation when composable is composed
     LaunchedEffect(currentBackStackEntry.value) {
+        delay(750)
         cardOffsetY.animateTo(
             targetValue = 0f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
@@ -146,13 +163,12 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         }
         is RegisterViewModel.RegisterState.Success -> {
             if (ifToast){
-                snackbarMessage = resgister.data?.message.toString()
-                showSnackbar = true
+                SnackbarController.show (resgister.data?.message.toString()
+                )
                 navController.navigate("login"){
                     popUpTo("signup") { inclusive = true }
 
                 }
-
                 viewModel.resetState()
                 ifToast = false
                 isLoading = false
@@ -160,11 +176,11 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         }
 
         is RegisterViewModel.RegisterState.Error -> {
-            snackbarMessage =resgister.message.toString()
-            showSnackbar = true
+            SnackbarController.show(resgister.message.toString())
             Log.i("Register screen error", "Register error $registerState.message")
             isLoading = false
             viewModel.resetState()
+                isAnimationPlaying = true
         }
 
         RegisterViewModel.RegisterState.Idle -> {
@@ -179,12 +195,12 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
         contentAlignment = Alignment.Center
     ) {
         // Set an image as the background
-        Image(
-            painter = painterResource(id = R.drawable.authbg),
-            contentDescription = "Background Image",
+        LottieAnimation(
+            composition = composition,
             modifier = Modifier
-                .fillMaxSize()
-                .offset(y = (-150).dp)
+                .size(300.dp)
+                .offset(y = (-80).dp),
+            progress = { progress }
         )
 
         // Loading overlay at the top level
@@ -327,6 +343,7 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
                 )
                 RegistrationLoginButton(
                     navController = navController,
+                    onSignUpClick = { isAnimationPlaying = false },
                     modifier = Modifier.constrainAs(loginButton) {
                         top.linkTo(signUpButton.bottom)
                         start.linkTo(verticalGuideline1)
@@ -336,20 +353,16 @@ fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,Load
             }
 
         }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
+        }
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 36.dp),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        CustomDurationSnackbar(
-            message = snackbarMessage,
-            show = showSnackbar,
-            duration = 3000L,
-            onDismiss = { showSnackbar = false }
-        )
-    }
+
 }
 
 @Composable
@@ -822,7 +835,7 @@ fun RegistrationButton(navController: NavController, viewModel: RegisterViewMode
 
 }
 @Composable
-fun RegistrationLoginButton(navController: NavController,modifier: Modifier = Modifier){
+fun RegistrationLoginButton(navController: NavController,modifier: Modifier = Modifier,onSignUpClick: () -> Unit){
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
@@ -833,13 +846,19 @@ fun RegistrationLoginButton(navController: NavController,modifier: Modifier = Mo
         {
             Row {
                 Text(
-                    modifier = Modifier.clickable(onClick = { navController.navigate("login") }),
+                    modifier = Modifier.clickable(onClick = {
+                        onSignUpClick()
+                        navController.navigate("login")
+                    }),
                     text = "Don't have an account? ",
                     color = Color.Gray,
                     fontSize = 12.sp
                 )
                 Text(
-                    modifier = Modifier.clickable(onClick = { navController.navigate("login") }),
+                    modifier = Modifier.clickable(onClick = {
+                        onSignUpClick()
+                        navController.navigate("login")
+                    }),
                     text = "Sign In",
                     color = Color.Black,
                     fontSize = 12.sp,

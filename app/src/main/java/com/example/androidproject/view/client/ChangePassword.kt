@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
 
 @Composable
@@ -41,12 +43,13 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
     var lengthError by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
+
     LaunchedEffect(changePasswordState) {
         when (val changePass =changePasswordState){
 
             is ChangePasswordViewModel.ChangePassState.Success->{
                 changePassword.resetState()
-                Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Password changed successfully")
                 // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=1") {
                     popUpTo(navController.graph.startDestinationId) {
@@ -55,7 +58,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                 }
             }
             is ChangePasswordViewModel.ChangePassState.Error -> {
-                Toast.makeText(context, changePass.message, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(changePass.message)
             }
           else -> Unit
         }
@@ -244,6 +247,7 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
         if (isLoading) {
             LoadingUI()
         }
+
     }
 }
 

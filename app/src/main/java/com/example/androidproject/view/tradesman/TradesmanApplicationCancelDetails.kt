@@ -166,12 +166,10 @@ fun TradesmanApplicationCancelDetails(jobId:String,jobs:String, modifier: Modifi
                                 fontWeight = FontWeight.Normal,
                                 fontSize = smallTextSize,
                                 color = Color.Gray,
-                                text = "Request Date and Time"
+                                text = "Request Date"
                             )
                             if (selectedBooking != null) {
-                                Text(
-                                    fontSize = smallTextSize,
-                                    text = selectedBooking.createdAt
+                                Text(text = selectedBooking.jobDateStatus,                                        fontSize = smallTextSize,
                                 )
                             }
                         }

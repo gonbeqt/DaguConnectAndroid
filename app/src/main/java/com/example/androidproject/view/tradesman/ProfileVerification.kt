@@ -40,7 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.example.androidproject.R
-import com.example.androidproject.view.CustomDurationSnackbar
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 
 
@@ -71,15 +71,12 @@ fun ProfileVerification(
     var frontIdUri by remember { mutableStateOf<Uri?>(null) }
     var backIdUri by remember { mutableStateOf<Uri?>(null) }
     var tradeCredentialUri by remember { mutableStateOf<Uri?>(null) }
+     var isPhoneValid by remember { mutableStateOf(false) }
+    val phoneRegex = "^9[0-9]{9}$".toRegex()
 
     val isTyping = estimatedRate.isNotEmpty()
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+    var isValid by remember { mutableStateOf(false) }
 
-    val onShowSnackbar: (String) -> Unit = { message ->
-        snackbarMessage = message
-        showSnackbar = true
-    }
     // Validation function
     fun validateStep(step: Int): Boolean {
         return when (step) {
@@ -104,8 +101,7 @@ fun ProfileVerification(
             3 -> "Please upload Front ID, Back ID, and Trade Credential."
             else -> "Please complete all required fields."
         }
-        snackbarMessage = message
-        showSnackbar = true
+        SnackbarController.show(message)
     }
         Box(
             modifier = modifier
@@ -281,9 +277,13 @@ fun ProfileVerification(
                                             BasicTextField(
                                                 value = estimatedRate,
                                                 onValueChange = { newText ->
-                                                    estimatedRate = if (newText.startsWith("₱")) {
-                                                        newText.substring(1) // remove extra peso signs
-                                                    } else newText
+                                                    val filteredText = newText.filter { it.isDigit() }
+                                                    val trimmedText = if (filteredText.startsWith("0") && filteredText.length > 1) {
+                                                        filteredText.dropWhile { it == '0' }
+                                                    } else {
+                                                        filteredText
+                                                    }
+                                                    estimatedRate = trimmedText
                                                 },
                                                 textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
                                                 keyboardOptions = KeyboardOptions(
@@ -295,7 +295,7 @@ fun ProfileVerification(
                                                 decorationBox = { innerTextField ->
                                                     if (estimatedRate.isEmpty()) {
                                                         Text(
-                                                            text = "Enter Amount",
+                                                            text = " eg. 200",
                                                             color = Color.Gray,
                                                             style = TextStyle(fontSize = 14.sp),
                                                             fontSize = 14.sp
@@ -330,20 +330,24 @@ fun ProfileVerification(
                                                 fontSize = 14.sp,
                                                 fontWeight = FontWeight.Normal,
                                                 style = TextStyle(fontSize = 14.sp),
-                                                color = if (isTyping) Color.Black else Color.Gray
+                                                color = if (phoneNumber.isNotEmpty()) Color.Black else Color.Gray
                                             )
 
                                             BasicTextField(
                                                 value = phoneNumber,
-                                                onValueChange = { newText ->
-                                                    phoneNumber = if (newText.startsWith("+63")) {
-                                                        newText.substring(1) // remove extra +63
-                                                    } else newText
+                                                onValueChange = { newValue ->
+                                                    // Filter to digits only and limit to 10 characters
+                                                    val filteredValue = newValue.filter { it.isDigit() }.take(10)
+                                                    // Enforce "9" prefix
+                                                    phoneNumber = when {
+                                                        filteredValue.isEmpty() -> ""
+                                                        filteredValue.length == 1 && filteredValue != "9" -> "9$filteredValue"
+                                                        else -> filteredValue
+                                                    }
+                                                    // Validate using regex
+                                                    isPhoneValid = phoneNumber.isEmpty() || phoneRegex.matches(phoneNumber)
                                                 },
-                                                textStyle = TextStyle(
-                                                    fontSize = 14.sp,
-                                                    color = Color.Black
-                                                ),
+                                                textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
                                                 keyboardOptions = KeyboardOptions(
                                                     keyboardType = KeyboardType.Number
                                                 ),
@@ -353,7 +357,7 @@ fun ProfileVerification(
                                                 decorationBox = { innerTextField ->
                                                     if (phoneNumber.isEmpty()) {
                                                         Text(
-                                                            text = "Enter Your Number",
+                                                            text = "eg. 9123456789",
                                                             color = Color.Gray,
                                                             style = TextStyle(fontSize = 14.sp),
                                                             fontSize = 14.sp
@@ -364,6 +368,15 @@ fun ProfileVerification(
                                             )
                                         }
                                     }
+                                    if (!isPhoneValid && phoneNumber.isNotEmpty()) {
+                                        Text(
+                                            text = "Phone number must be 10 digits starting with 9 (e.g., 9123456789)",
+                                            color = Color.Red,
+                                            style = TextStyle(fontSize = 12.sp),
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        )
+                                    }
+
                                 }
                             } else if (currentStep == 2) { // Second page
                                 Text(
@@ -392,11 +405,11 @@ fun ProfileVerification(
                                     BasicTextField(
                                         value = aboutMe,
                                         onValueChange = { newText ->
-                                            if (newText.length <= 1000) {
+                                            if (newText.length <= 500) {
                                                 aboutMe = newText
                                             } else {
-                                                aboutMe = newText.substring(0, 1000)
-                                                onShowSnackbar("Character count exceeds")
+                                                aboutMe = newText.substring(0, 500)
+                                                SnackbarController.show("Character count exceeds")
                                             }
                                         },
                                         textStyle = TextStyle(fontSize = 14.sp),
@@ -423,7 +436,7 @@ fun ProfileVerification(
                                     horizontalArrangement = Arrangement.End
                                 ) {
                                     Text(
-                                        text = "${aboutMe.length}/1000",
+                                        text = "${aboutMe.length}/500",
                                         fontSize = 14.sp,
                                         color = if (aboutMe.length >= 910) Color.Red else Color.Black
                                     )
@@ -575,12 +588,12 @@ fun ProfileVerification(
                                             // nothing
                                         }
                                         is SubmitResumeViewModel.SubmitResumeState.Success -> {
-                                            onShowSnackbar("Resume submitted successfully")
+                                            SnackbarController.show("Resume submitted successfully")
                                             submitResumeViewModel.resetState()
                                         }
                                         is SubmitResumeViewModel.SubmitResumeState.Error -> {
                                             val error = submitresume.message
-                                            onShowSnackbar(error)
+                                            SnackbarController.show(error)
                                             Log.d("testerrerro", error)
                                             submitResumeViewModel.resetState()
                                         }
@@ -592,21 +605,13 @@ fun ProfileVerification(
                     }
                 }
             }
-
-            // Snackbar overlay
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 80.dp), // Increased padding for visibility
+                    .padding(bottom = 26.dp),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                CustomDurationSnackbar(
-                    message = snackbarMessage,
-                    show = showSnackbar,
-                    duration = 3000L,
-                    onDismiss = { showSnackbar = false }
-                )
-                Log.d("SnackbarDebug", "Rendering: $snackbarMessage, show = $showSnackbar")
+                SnackbarController.ObserveSnackbar()
             }
         }
     }

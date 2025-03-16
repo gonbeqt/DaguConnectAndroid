@@ -108,7 +108,7 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
-import com.example.androidproject.view.CustomDurationSnackbar
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
@@ -142,13 +142,7 @@ fun ProfileTradesman(
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
 
-    val onShowSnackbar: (String) -> Unit = { message ->
-        snackbarMessage = message
-        showSnackbar = true
-    }
 
     // State for profile update
     val updateProfileState by updateTradesmanProfileViewModel.updateTradesmanProfileState.collectAsState()
@@ -157,11 +151,11 @@ fun ProfileTradesman(
         when (val updatingProfile = updateProfileState) {
             is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Success -> {
                 updateTradesmanProfileViewModel.resetState()
-                onShowSnackbar("Profile updated successfully")
+                SnackbarController.show("Profile updated successfully")
             }
             is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Error -> {
                 val errorMessage = updatingProfile.message
-                onShowSnackbar(errorMessage)
+                SnackbarController.show(errorMessage)
             }
             else -> Unit
         }
@@ -199,9 +193,9 @@ fun ProfileTradesman(
                     Manifest.permission.READ_MEDIA_IMAGES
                 )
                 if (shouldShowRationale) {
-                    onShowSnackbar("Permission is required to select a profile picture")
+                    SnackbarController.show("Permission is required to select a profile picture")
                 } else {
-                    onShowSnackbar("Permission denied. Enable it in Settings.")
+                    SnackbarController.show("Permission denied. Enable it in Settings.")
                     val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.parse("package:${context.packageName}")
                     context.startActivity(intent)
@@ -224,13 +218,12 @@ fun ProfileTradesman(
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
                 updateTradesmanActiveStatusViewModel.resetState()
                 viewTradesmanProfileViewModel.viewTradesmanProfile()
-                snackbarMessage = "Status updated successfully"
-                showSnackbar = true
+                SnackbarController.show ("Status updated successfully")
+
             }
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
                 val errorMessage = updatingStatus.message
-                snackbarMessage = errorMessage
-                showSnackbar = true
+                SnackbarController.show(errorMessage)
             }
             else -> Unit
         }
@@ -290,7 +283,7 @@ fun ProfileTradesman(
                                         isLoading = true
                                         refreshTrigger++
                                     } else {
-                                        onShowSnackbar("Still no internet connection")
+                                        SnackbarController.show("Still no internet connection")
                                     }
                                 }
                                 .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
@@ -407,31 +400,15 @@ fun ProfileTradesman(
                                                     )
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
-                                                Row(
-                                                    Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween
-                                                ) {
+
                                                     Icon(
                                                         painter = painterResource(id = if (tradesmanDetails.isApprove == 0) R.drawable.unverified_ic else R.drawable.verified_ic),
                                                         contentDescription = "Profile Verified",
                                                         tint = Color.Black,
                                                         modifier = Modifier.size(24.dp)
                                                     )
-                                                    Icon(
-                                                        imageVector = Icons.Default.Edit,
-                                                        contentDescription = "Edit Profile",
-                                                        tint = Color.White,
-                                                        modifier = Modifier
-                                                            .size(26.dp)
-                                                            .background(
-                                                                Color.Transparent,
-                                                                shape = CircleShape
-                                                            )
-                                                            .clickable {
-                                                                navController.navigate("accountsettingstradesman")
-                                                            }
-                                                    )
-                                                }
+
+
                                             }
                                             Text(
                                                 text = tradesmanDetails.email ?: "N/A",
@@ -526,26 +503,20 @@ fun ProfileTradesman(
                                             navController,
                                             tradesmanDetails,
                                             viewRatingsViewModel,
-                                            onShowSnackbar
                                         )
 
-                                        1 -> SettingsTradesmanScreen(navController, logoutViewModel,onShowSnackbar)
+                                        1 -> SettingsTradesmanScreen(navController, logoutViewModel)
                                     }
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .padding(bottom = 80.dp),
+                                            .padding(bottom = 76.dp),
                                         contentAlignment = Alignment.BottomCenter
                                     ) {
-                                        CustomDurationSnackbar(
-                                            message = snackbarMessage,
-                                            show = showSnackbar,
-                                            duration = 3000L,
-                                            onDismiss = { showSnackbar = false }
-                                        )
-                                        Log.d("Snackbar", snackbarMessage)
+                                        SnackbarController.ObserveSnackbar()
                                     }
                                 }
+
 
                             }
 
@@ -573,7 +544,7 @@ fun ProfileTradesman(
                                                     isLoading = true
                                                     refreshTrigger++
                                                 } else {
-                                                    onShowSnackbar("Still no internet connection")
+                                                    SnackbarController.show("Still no internet connection")
                                                 }
                                             }
                                             .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
@@ -612,7 +583,7 @@ fun ProfileTradesman(
 
 
 @Composable
-fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel,onShowSnackbar: (String) -> Unit) {
+fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel) {
     var scale by remember { mutableStateOf(1f) }
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
@@ -856,13 +827,13 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                                     if (fileUrl != null) {
                                         try {
                                             downloadId = downloadFileTradesman(context, fileUrl, fileName)
-                                            onShowSnackbar("Download success")
+                                            SnackbarController.show("Download success")
                                         } catch (e: Exception) {
-                                            onShowSnackbar("Download failed")
+                                            SnackbarController.show("Download failed")
 
                                         }
                                     } else {
-                                        onShowSnackbar("No file available")
+                                        SnackbarController.show("No file available")
 
                                     }
                                 }
@@ -1163,7 +1134,7 @@ fun GeneralTradesmanSettings(
 }
 
 @Composable
-fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel,onShowSnackbar: (String) -> Unit) {
+fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel) {
     var isChecked by remember { mutableStateOf(true) }
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
@@ -1172,7 +1143,7 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
             // Clear tokens and navigate regardless of result
             TokenManager.clearToken()
             AccountManager.clearAccountData()
-            onShowSnackbar("Logout successful")
+            SnackbarController.show("Logout successful")
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }

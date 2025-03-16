@@ -13,8 +13,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 
 class PutJobApplicationStatusViewModel(private val apiService: ApiService, private val context: Context): ViewModel() {
-    private val _putJobApplicationStatusState = MutableStateFlow<PutJobApplicationState>(
-        PutJobApplicationState.Idle)
+    private val _putJobApplicationStatusState = MutableStateFlow<PutJobApplicationState>(PutJobApplicationState.Idle)
     val putJobApplicationState: StateFlow<PutJobApplicationState> = _putJobApplicationStatusState
 
     fun updateJobApplicationStatus(id: Int, status: String, reason: String) {

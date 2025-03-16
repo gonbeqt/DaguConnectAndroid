@@ -11,6 +11,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -46,6 +49,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -76,10 +80,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.WebSocketNotificationManager
 import com.example.androidproject.data.preferences.AccountManager
@@ -89,9 +95,17 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient2
+import com.example.androidproject.view.theme.myGradient4
+import com.example.androidproject.view.tradesman.UploadField
+import com.example.androidproject.view.tradesman.openFile
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 import kotlinx.coroutines.delay
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -100,6 +114,32 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
+
+    // ✅ Correctly remember LazyListState for scrolling detection
+    val listState = rememberLazyListState()
+
+    val isScrolled by remember {
+        derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 50 }
+    }
+
+    // ✅ Smoothly animate colors based on scroll position
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isScrolled) Color.White else Color(0xFF42C2AE),
+        animationSpec = tween(durationMillis = 300),
+        label = "backgroundColor"
+    )
+
+    val textColor by animateColorAsState(
+        targetValue = if (isScrolled) Color.Black else Color.White,
+        animationSpec = tween(durationMillis = 300),
+        label = "textColor"
+    )
+
+    val boxColor by animateColorAsState(
+        targetValue = if (isScrolled) Color(0xFFEDEFEF) else Color(0xFF42C2AE),
+        animationSpec = tween(durationMillis = 300),
+        label = "boxColor"
+    )
 
     val userId = AccountManager.getAccount()?.id
     LaunchedEffect(Unit) {
@@ -124,62 +164,96 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFECECEC))
+            .background(Color(0xFFEDEFEF))
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(boxColor, RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp))
+        ){}
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Provide navController to the SearchField
-            HomeTopSection(navController,windowSize )
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())) {
-                Spacer(modifier = Modifier.height(30.dp))
-                ExploreNow(windowSize)
-
-                Spacer(modifier = Modifier.height(20.dp))
-                CategoryRow(categories,navController)
-
-                Spacer(modifier = Modifier.height(5.dp))
-                TradesmanColumn(getResumesViewModel,navController,reportTradesmanViewModel,LoadingUI)
+            HomeTopSection(navController,windowSize, backgroundColor, textColor )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState // ✅ Ensure listState is used properly
+            ) {
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+                item { ExploreNow(windowSize) }
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+                item { CategoryRow(categories, navController) }
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel, LoadingUI) }
             }
         }
+
     }
 }
 @Composable
-fun HomeTopSection(navController: NavController,windowSize: WindowSize) {
+fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor: Color, textColor: Color) {
+    val firstName = AccountManager.getAccount()?.firstName
+    val createdAt = AccountManager.getAccount()?.createdAt
+    val newUser = LocalDate.now()
+    val createdAtDate = createdAt?.let { creationTime ->
+        try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val dateTime = LocalDateTime.parse(creationTime, formatter)
+            dateTime.toLocalDate()
+        } catch (e: Exception) {
+            null
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(1.dp)
-            .background(Color.White)
+            .background(bgColor)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
-                .padding(horizontal = 25.dp), // Added padding inside for spacing
+                .padding(horizontal = 25.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left-aligned text
-            Text(
-                text = "Home",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Medium
-            )
-
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color.Black,
-                    modifier = Modifier
-                        .size(35.dp)
-                        .clickable { navController.navigate("notification") }
+            Column {
+                // Left-aligned text
+                Text(
+                    text = "Hi ${firstName},",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = textColor
                 )
 
 
+                if (createdAtDate == newUser) {
+                    Text(
+                        text = "Let's get started!",
+                        fontSize = 24.sp,
+                        color = textColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                } else {
+                    Text(
+                        text = "Welcome back!",
+                        fontSize = 24.sp,
+                        color = textColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+            }
+            Icon(
+                imageVector = Icons.Outlined.Notifications,
+                contentDescription = "Notifications Icon",
+                tint = textColor,
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable { navController.navigate("notification") }
+            )
         }
     }
 }
@@ -203,13 +277,13 @@ fun CategoryScrollIndicator(scrollState: LazyListState, itemCount: Int, visibleI
         }
     }
 
-    val trackWidth = 100.dp
+    val trackWidth = 50.dp
     val handleWidth = 15.dp
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -250,7 +324,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp, vertical = 15.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             Text(
@@ -269,7 +343,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(cardSize.second)
-                .background(Color(0xFFECECEC)),
+                .background(Color.Transparent),
         ) {
             items(categories) { category ->
                 CategoryItem(category) {
@@ -358,14 +432,14 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, end = 25.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = "Top-Rated",
             fontSize = 18.sp,
             fontWeight = FontWeight(500),
-            modifier = Modifier.padding(top = 15.dp)
+            modifier = Modifier.padding(top = 12.dp)
         )
         TextButton(onClick = { navController.navigate("alltradesman") }) {
             Text(
@@ -417,7 +491,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                                 Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
                             }
                         }
-                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                        .background(Color(0xFFEDEFEF), RoundedCornerShape(8.dp))
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
@@ -436,14 +510,13 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
             Card(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
-                    .background(Color.White),
-                shape = RoundedCornerShape(8.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .background(Color.Transparent)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .background(Color(0xFFECECEC)),
+                        .background(Color(0xFFEDEFEF)),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     displayedResumes.forEach { resume ->
@@ -470,9 +543,9 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
 @Composable
 fun ExploreNow(windowSize: WindowSize) {
     val titleTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
     }
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 16.sp
@@ -503,7 +576,7 @@ fun ExploreNow(windowSize: WindowSize) {
             .height(boxHeight)
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(myGradient2)
+            .background(myGradient4)
     ) {
         // DaguConnect Row positioned at the top-left
         Row(
@@ -528,12 +601,13 @@ fun ExploreNow(windowSize: WindowSize) {
 
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 30.dp, top = 20.dp, end = 16.dp),
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier.weight(1f)
+                    .padding(start = 20.dp, top = 16.dp),
             ) {
                 Text(
                     text = "What service do you need today?",
@@ -564,8 +638,8 @@ fun ExploreNow(windowSize: WindowSize) {
                 contentDescription = "Workers Images",
                 modifier = Modifier
                     .size(imageSize.first, imageSize.second)
-                    .padding(start = 12.dp)
             )
+
         }
     }
 }
@@ -586,7 +660,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFECECEC)),
+                .background(Color(0xFFEDEFEF)),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -598,7 +672,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
                         .size(50.dp)
                         .shadow(3.dp, shape = CircleShape)
                         .background(
-                            color = Color.White,
+                            color = Color(0xFFFFD9C1),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -612,7 +686,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
                 Text(
                     text = category.name,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Normal,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -640,9 +714,9 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
     val windowSize = rememberWindowSizeClass()
 
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 24.dp
+        WindowType.LARGE -> 32.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -688,7 +762,6 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             is ReportTradesmanViewModel.ReportState.Success -> {
                 val responseReport = report.data?.message
                 Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
-                Log.d("ReportState", "Success: $responseReport")
                 showReportDialog = false
                 reportSubmissionKey = null // Reset key after handling
                 delay(1000)
@@ -713,7 +786,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             .height(cardHeight)
             .clickable { navController.navigate("booknow/${resumes.id}") }, //implementation here
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
+        elevation = CardDefaults.cardElevation(1.dp)
 
 
         ) {
@@ -753,9 +826,10 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         // Menu Icon
                         Box {
                             Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Menu Icon",
+                                painter = painterResource(R.drawable.meatball_ic),
+                                contentDescription = "Report Icon",
                                 modifier = Modifier
+                                    .padding(end = 10.dp)
                                     .size(iconSize)
                                     .clickable { showMenu = true }
                             )
@@ -782,45 +856,52 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         color = Color.Black,
                         fontSize = taskTextSize,
                         )
-                    Row(modifier = Modifier.size(185.dp, 110.dp)) {
+                    Row(modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(70.dp, 50.dp)
-                                .padding(top = 15.dp, end = 5.dp)
+                                .size(70.dp, 30.dp)
                                 .background(
                                     color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
-                                )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "P${resumes.workFee}/hr",
-                                fontSize = smallTextSize,
-                                modifier = Modifier.padding(top = 5.dp, start = 8.dp)
+                                fontSize = smallTextSize
                             )
                         }
                         Box(
                             modifier = Modifier
-                                .size(70.dp, 50.dp)
-                                .padding(top = 15.dp, start = 10.dp, end = 10.dp)
+                                .size(50.dp, 30.dp)
                                 .background(
                                     color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
-                                )
+                                ),
+                            contentAlignment = Alignment.Center
+
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Star, contentDescription = "Start Icon",
-                                tint = Color(0xFFFFA500), modifier = Modifier
-                                    .size(25.dp)
-                                    .padding(top = 7.dp, start = 2.dp)
-                            )
-                            Text(
-                                when {
-                                    resumes.ratings == 0f -> "0"
-                                    else -> String.format("%.1f", resumes.ratings)
-                                },
-                                fontSize = smallTextSize,
-                                modifier = Modifier.padding(top = 5.dp, start = 28.dp)
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Start Icon",
+                                    tint = Color(0xFFFFA500),
+                                    modifier = Modifier
+                                        .size(iconSize)
+                                )
+                                Text(
+                                    when {
+                                        resumes.ratings == 0f -> "0"
+                                        else -> String.format("%.1f", resumes.ratings)
+                                    },
+                                    fontSize = smallTextSize,
+                                )
+                            }
                         }
                     }
 

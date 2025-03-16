@@ -198,7 +198,7 @@ fun TradesmanCancellationDetails(jobId:String, modifier: Modifier = Modifier, na
                             if (selectedBooking != null) {
                                 Text(
                                     fontSize = smallTextSize,
-                                    text = selectedBooking.cancelReason
+                                    text = selectedBooking.bookingDateStatus
                                 )
                             }
                         }

@@ -65,6 +65,7 @@ import com.example.androidproject.view.client.MessageScreen
 import com.example.androidproject.view.client.MessagingScreen
 import com.example.androidproject.view.client.NotificationScreen
 import com.example.androidproject.view.client.RateAndReviews
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.tradesman.AvailabilityStatus
 import com.example.androidproject.view.tradesman.BookingsTradesman
 import com.example.androidproject.view.tradesman.CancelTradesmanNow
