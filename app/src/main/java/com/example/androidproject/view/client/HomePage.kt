@@ -683,7 +683,6 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             is ReportTradesmanViewModel.ReportState.Success -> {
                 val responseReport = report.data?.message
                 Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
-                Log.d("ReportState", "Success: $responseReport")
                 showReportDialog = false
                 reportSubmissionKey = null // Reset key after handling
                 delay(1000)

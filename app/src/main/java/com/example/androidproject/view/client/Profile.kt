@@ -480,8 +480,6 @@ fun ProfileScreen(
 fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJobViewModel, putJobs: PutJobViewModel) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     val postJobState by postJobViewModel.postJobState.collectAsState()
-    val putJobState by putJobs.putJobState.collectAsState()
-    val context = LocalContext.current
 
 
 
@@ -560,6 +558,7 @@ fun PostsCard(
     val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
     val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
     var isDialogVisible by remember { mutableStateOf(false) }
+    var updateSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
 
     // Initialize editable states with the current job data
     var editableJobType by remember { mutableStateOf(getJobs.jobType) }
@@ -597,20 +596,21 @@ fun PostsCard(
         "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
         "Urdaneta City", "Villasis"
     )
-    when ( putJobState) {
-        is PutJobViewModel.PutJobState.Success -> {
-            Toast.makeText(context, "Job updated successfully", Toast.LENGTH_SHORT).show()
-            putJobs.resetState()
-            isDialogVisible = false
+    LaunchedEffect(putJobState,updateSubmissionKey) {
+        if (updateSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet
+        when (val state = putJobState) {
+            is PutJobViewModel.PutJobState.Success -> {
+                updateSubmissionKey = null // Reset key after handling
+                Toast.makeText(context, "Job updated successfully", Toast.LENGTH_SHORT).show()
+                putJobs.resetState()
+            }
+            is PutJobViewModel.PutJobState.Error -> {
+                putJobs.resetState()
+                updateSubmissionKey = null // Reset key after handling
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
         }
-        is PutJobViewModel.PutJobState.Error -> {
-            Toast.makeText(context,"No Changes In The Post", Toast.LENGTH_SHORT).show()
-            putJobs.resetState()
-            isDialogVisible = true
-        }
-        is PutJobViewModel.PutJobState.Loading -> {}
-        is PutJobViewModel.PutJobState.Idle -> {}
-        else -> {}
     }
     Card(
         modifier = Modifier
@@ -864,6 +864,7 @@ fun PostsCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = {
+                                updateSubmissionKey = System.currentTimeMillis() // Trigger LaunchedEffect
                                 onEditClick(
                                     editableBudget,
                                     editableDescription,
