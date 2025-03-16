@@ -503,14 +503,35 @@ fun TradesmanApplicationCompleted(jobId: String, jobs :String, modifier: Modifie
                                 ) {
                                     Row(modifier = Modifier
                                         .fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween){
-                                        Text(fontWeight = FontWeight.Normal,
+                                        horizontalArrangement = Arrangement.SpaceBetween) {
+
+                                        Text(
+                                            fontWeight = FontWeight.Normal,
                                             fontSize = smallTextSize,
                                             color = Color.Gray,
-                                            text = "Posted on")
+                                            text = "Posted on"
+                                        )
                                         if (myjobs != null) {
-                                            Text(fontSize = smallTextSize,
-                                                text = myjobs.createdAt)
+                                            Text(
+                                                fontSize = smallTextSize,
+                                                text = myjobs.createdAt
+                                            )
+                                        }
+                                    }
+                                    Row(modifier = Modifier
+                                        .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween) {
+
+                                        Text(
+                                            fontWeight = FontWeight.Normal,
+                                            fontSize = smallTextSize,
+                                            color = Color.Gray,
+                                            text = "Completed on"
+                                        )
+
+                                        if (selectedBooking != null) {
+                                            Text(text = selectedBooking.jobDateStatus,                                        fontSize = smallTextSize,
+                                            )
                                         }
                                     }
 

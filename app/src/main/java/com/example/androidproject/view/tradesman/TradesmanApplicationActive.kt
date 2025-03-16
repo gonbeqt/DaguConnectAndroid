@@ -513,6 +513,18 @@ fun TradesmanApplicationActive(jobId: String, jobs :String, modifier: Modifier =
                                                 text = myjobs.createdAt)
                                         }
                                     }
+                                    Row(modifier = Modifier
+                                        .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(fontWeight = FontWeight.Normal,
+                                            fontSize = smallTextSize,
+                                            color = Color.Gray,
+                                            text = "Confirmed on")
+                                        if (selectedBooking != null) {
+                                            Text(fontSize = smallTextSize,
+                                                text = selectedBooking.jobDateStatus)
+                                        }
+                                    }
 
 
                                 }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -87,11 +88,11 @@ import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
-import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
@@ -109,7 +110,6 @@ fun HomeTradesman(
     LoadingUI: @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
@@ -121,9 +121,7 @@ fun HomeTradesman(
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableIntStateOf(0) }
-
     var isLoading by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val headerTextSize = when (windowSize.width) {
@@ -133,24 +131,15 @@ fun HomeTradesman(
     }
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
 
-    val onShowSnackbar: (String) -> Unit = { message ->
-        snackbarMessage = message
-        showSnackbar = true
-    }
-
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
         if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
+            isLoading = true
+            delay(200.milliseconds)
+            isLoading = false
         }
     }
 
-    // Tab titles
     val tabTitles = listOf("Top Matches", "Recent Posted Jobs")
 
     Box(
@@ -159,131 +148,120 @@ fun HomeTradesman(
             .padding(WindowInsets.systemBars.asPaddingValues())
             .background(Color.White)
     ) {
+        // Main content
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentSize()
                 .background(Color.White)
         ) {
-            // Provide navController to the SearchField
             TopSectionHomeTradesman(navController, windowSize)
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // Tabs (Fixed Choices)
-                        TabRow(
-                            indicator = { tabPositions ->
-                                TabRowDefaults.Indicator(
-                                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                    color = Color(0xFF42C2AE),
-                                    height = 2.dp
-                                )
-                            },
-                            selectedTabIndex = selectedTabIndex,
-                            modifier = Modifier.fillMaxWidth(),
-                            containerColor = Color.White
-                        ) {
-                            tabTitles.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            fontSize = headerTextSize,
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(4.dp),
-                                            color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                        // Content changes based on the selected tab
-                        if (!isConnected.value) {
-                            // No internet connection
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = "No Internet Connection",
-                                        fontSize = 18.sp,
-                                        color = Color.Red,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Text(
-                                        text = "Please check your internet and try again.",
-                                        fontSize = 14.sp,
-                                        color = Color.Gray
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    // Retry button (only fetch data when clicked)
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable {
-                                                // Re-check network connectivity
-                                                isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                                if (isConnected.value) {
-                                                    // Show loading state and trigger data fetch
-                                                    isLoading = true
-                                                    refreshTrigger++
-                                                } else {
-                                                    snackbarMessage = "Still no internet connection"
-                                                    showSnackbar = true
-                                                }
-                                            }
-                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    ) {
-                                        Text(
-                                            text = "Retry",
-                                            color = Color.White,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
-                            if (isLoading) {
-                                LoadingUI()
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color(0xFFD9D9D9))
-                                ) {
-                                    when (selectedTabIndex) {
-                                        0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI, onShowSnackbar)
-                                        1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel, onShowSnackbar)
-                                    }
-
-                                }
-
-                            }
-                        }
-                    }
-
-            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 16.dp),
-                contentAlignment = Alignment.BottomCenter
+                    .background(Color.White)
             ) {
-                CustomDurationSnackbar(
-                    message = snackbarMessage ,
-                    show = showSnackbar,
-                    duration = 3000L,
-                    onDismiss = { showSnackbar = false }
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp) // Consistent padding for content
+                ) {
+                    TabRow(
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                color = Color(0xFF42C2AE),
+                                height = 2.dp
+                            )
+                        },
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier.fillMaxWidth(),
+                        containerColor = Color.White
+                    ) {
+                        tabTitles.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = { selectedTabIndex = index },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        fontSize = headerTextSize,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(4.dp),
+                                        color = if (selectedTabIndex == index) Color(0xFF42C2AE) else Color.Gray
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    if (!isConnected.value) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    fontSize = 18.sp,
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Please check your internet and try again.",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clickable {
+                                            isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                            if (isConnected.value) {
+                                                isLoading = true
+                                                refreshTrigger++
+                                            } else {
+                                                SnackbarController.show("Still no internet connection")
+                                            }
+                                        }
+                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Retry",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        if (isLoading) {
+                            LoadingUI()
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFFD9D9D9))
+                            ) {
+                                when (selectedTabIndex) {
+                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI )
+                                    1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel )
+                                }
+                            }
+                        }
+                    }
+                }
             }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
         }
     }
 }
@@ -335,7 +313,7 @@ fun TopMatches(
     getJobsViewModel: GetJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
     LoadingUI: @Composable () -> Unit,
-    onShowSnackbar: (String) -> Unit
+
 ) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
 
@@ -357,7 +335,7 @@ fun TopMatches(
             items(jobsList.itemCount) { index ->
                 val job = jobsList[index]
                 if (job != null) {
-                    TopMatchesItem(job, navController, reportClientViewModel, onShowSnackbar)
+                    TopMatchesItem(job, navController, reportClientViewModel)
                 }
             }
             item {
@@ -381,7 +359,6 @@ fun TopMatchesItem(
     getJobs: GetJobs,
     navController: NavController,
     reportClientViewModel: ReportClientViewModel,
-    onShowSnackbar: (String) -> Unit
 ) {
     val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
@@ -429,14 +406,14 @@ fun TopMatchesItem(
                 val responseReport = reportClient.data?.message
                 if (responseReport != null) {
                     reportSubmissionKey = null // Reset key after handling
-                    onShowSnackbar(responseReport)
+                    SnackbarController.show(responseReport)
                 }
                 showReportDialog = false
                 reportClientViewModel.resetState()
             }
             is ReportClientViewModel.ReportClientState.Error -> {
                 val error = reportClient.message
-                onShowSnackbar(error)
+                SnackbarController.show(error)
                 reportSubmissionKey = null // Reset key after handling
                 showReportDialog = true
                 reportClientViewModel.resetState()
@@ -456,7 +433,7 @@ fun TopMatchesItem(
         Column(
             modifier = Modifier.padding(16.dp).fillMaxWidth()
         ) {
-            Row {
+            Row() {
                 AsyncImage(
                     model = getJobs.clientProfilePicture,
                     contentDescription = "Profile Image",
@@ -466,16 +443,19 @@ fun TopMatchesItem(
                     contentScale = ContentScale.Crop
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        ,
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+
                 ) {
                     Text(
                         text = getJobs.clientFullname,
-                        fontSize = 16.sp,
-                        color = Color.Black,
+                        fontSize = 18.sp,
+                        color = Color.Black
+                        ,
                         fontWeight = FontWeight(500),
-                        modifier = Modifier.padding(start = 20.dp)
+                        modifier = Modifier.padding(start = 20.dp, top = 20.dp)
                     )
                     Box {
                         Icon(
@@ -525,18 +505,16 @@ fun TopMatchesItem(
                     Text(text = getJobs.jobDescription, fontSize = 14.sp)
                     Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
                     Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "${getJobs.totalApplicants} Applicant",
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium,
+                        style = TextStyle(textDecoration = TextDecoration.Underline),
+                    )
                 }
-                Row(modifier = Modifier.padding(start = 5.dp)) {
-                    TextButton(onClick = {}) {
-                        Text(
-                            text = "${getJobs.totalApplicants} Applicant",
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Medium,
-                            style = TextStyle(textDecoration = TextDecoration.Underline),
-                        )
-                    }
-                }
+
             }
         }
     }
@@ -686,7 +664,7 @@ fun TopMatchesItem(
                             Button(
                                 onClick = {
                                     if (selectedIndex == -1) {
-                                        onShowSnackbar("Please select a reason for reporting")
+                                        SnackbarController.show("Please select a reason for reporting")
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
                                             otherReason
@@ -717,7 +695,6 @@ fun RecentJobs(
     navController: NavController,
     getRecentJobsViewModel: GetRecentJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
-    onShowSnackbar: (String) -> Unit
 ) {
     val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     LazyColumn(
@@ -727,7 +704,7 @@ fun RecentJobs(
         items(jobList.itemCount) { index ->
             val job = jobList[index]
             if (job != null) {
-                RecentJobsItem(job, navController, reportClientViewModel, onShowSnackbar)
+                RecentJobsItem(job, navController, reportClientViewModel)
             }
         }
     }
@@ -738,7 +715,6 @@ fun RecentJobsItem(
     getJobs: GetJobs,
     navController: NavController,
     reportClientViewModel: ReportClientViewModel,
-    onShowSnackbar: (String) -> Unit
 ) {
     val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val getJobsDate = ViewModelSetups.formatDateTime(getJobs.createdAt)
@@ -785,7 +761,7 @@ fun RecentJobsItem(
             is ReportClientViewModel.ReportClientState.Success -> {
                 val responseReport = reportClient.data?.message
                 if (responseReport != null) {
-                    onShowSnackbar(responseReport)
+                    SnackbarController.show(responseReport)
                 }
                 reportSubmissionKey = null // Reset key after handling
                 showReportDialog = false
@@ -794,7 +770,7 @@ fun RecentJobsItem(
             is ReportClientViewModel.ReportClientState.Error -> {
                 reportSubmissionKey = null // Reset key after handling
                 val error = reportClient.message
-                onShowSnackbar(error)
+                SnackbarController.show(error)
             }
             else -> Unit
         }
@@ -1036,7 +1012,7 @@ fun RecentJobsItem(
                             Button(
                                 onClick = {
                                     if (selectedIndex == -1) {
-                                        onShowSnackbar("Please select a reason for reporting")
+                                        SnackbarController.show("Please select a reason for reporting")
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
                                             otherReason

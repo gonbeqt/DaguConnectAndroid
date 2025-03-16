@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 
@@ -65,8 +66,7 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
             when (postJobApplicationState) {
                 is PostJobApplicationViewModel.PostJobApplicationState.Success -> {
                     val message = "Application successful!" // Default message
-                    Log.d("PostJobApplication", "Success: $message")
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                   SnackbarController.show(message)
 
                     postJobApplicationViewModel.resetState()
                     isSubmitClicked = false
@@ -76,13 +76,16 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                 is PostJobApplicationViewModel.PostJobApplicationState.Error -> {
                     val errorState = postJobApplicationState as PostJobApplicationViewModel.PostJobApplicationState.Error
                     Log.d("PostJobApplication", "Error: ${errorState.message}")
-                    Toast.makeText(context, errorState.message, Toast.LENGTH_SHORT).show()
+                    SnackbarController.show(errorState.message)
+
                     isSubmitClicked = false
                 }
                 else -> Unit
             }
         }
     }
+    Box(Modifier.fillMaxSize()){
+
 
     Column(
         modifier = Modifier
@@ -179,7 +182,10 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                         }
                         BasicTextField(
                             value = qualificationSummary,
-                            onValueChange = { qualificationSummary = it },
+                            onValueChange = {newText ->
+                                if (newText.length <= 500) {
+                                    qualificationSummary = newText
+                                }},
                             textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -191,7 +197,7 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                         horizontalArrangement = Arrangement.End,
 
                     ) {
-                        Text("Character: ${characterCount}/150", color = Color.Gray, fontSize = 12.sp)
+                        Text("Character: ${characterCount}/500", color = Color.Gray, fontSize = 12.sp)
                     }
 
                     Spacer(modifier = Modifier.weight(1f)) // pushes the buttons to the bottom
@@ -211,7 +217,8 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                                     color = Color.White,
                                     shape = RoundedCornerShape(12.dp)
                                 )
-                                .clickable { }
+                                .clickable {
+                                }
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -233,7 +240,8 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                                             qualificationSummary = qualificationSummary
                                         )
                                     } else {
-                                        Toast.makeText(context, "Please enter your qualifications", Toast.LENGTH_SHORT).show()
+                                        SnackbarController.show("Please enter your qualifications")
+
                                     }
                                 }
                                 .padding(12.dp),
@@ -244,6 +252,15 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                     }
                 }
             }
+        }
+    }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 26.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
         }
     }
 }

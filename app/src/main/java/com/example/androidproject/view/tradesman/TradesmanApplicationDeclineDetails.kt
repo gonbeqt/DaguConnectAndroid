@@ -153,12 +153,8 @@ fun TradesmanApplicationDeclineDetails(jobId:String,jobs:String, modifier: Modif
                                 text = "Requested by"
                             )
                             if (selectedBooking != null) {
-                                selectedBooking.cancelledBy?.let {
-                                    Text(
-                                        fontSize = smallTextSize,
-                                        text = it
-                                    )
-                                }
+                                Text(text = selectedBooking.jobDateStatus, fontSize = smallTextSize,
+                                )
                             }
                         }
                         Row(
@@ -170,13 +166,15 @@ fun TradesmanApplicationDeclineDetails(jobId:String,jobs:String, modifier: Modif
                                 fontWeight = FontWeight.Normal,
                                 fontSize = smallTextSize,
                                 color = Color.Gray,
-                                text = "Request Date and Time"
+                                text = "Request Date"
                             )
                             if (selectedBooking != null) {
-                                Text(
-                                    fontSize = smallTextSize,
-                                    text = selectedBooking.createdAt
-                                )
+                                selectedBooking.jobDateStatus?.let {
+                                    Text(
+                                        fontSize = smallTextSize,
+                                        text = it
+                                    )
+                                }
                             }
                         }
                         Row(
