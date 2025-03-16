@@ -136,7 +136,7 @@ fun LandingPageScreen(navController: NavController) {
                     modifier = Modifier.size(24.dp)
                 )
             }
-            TextButton(onClick = { navController.navigate("login") }) {
+            TextButton(onClick = { navController.navigate("landingpage2") }) {
                 Text(text = "Skip", color = Color.Gray)
             }
         }

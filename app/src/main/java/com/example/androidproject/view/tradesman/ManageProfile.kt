@@ -59,6 +59,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
@@ -71,63 +72,75 @@ import com.google.accompanist.flowlayout.FlowRow
 
 @Composable
 fun ManageProfile(
-        modifier: Modifier = Modifier,
-        navController: NavController,
-        updateTradesmanDetailViewModel :UpdateTradesmanDetailViewModel,
-        workLocation : String,
-        number : String,
-        rate : String,
-        about : String
-    ){
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    updateTradesmanDetailViewModel: UpdateTradesmanDetailViewModel,
+    workLocation: String,
+    number: String,
+    rate: String,
+    about: String
+) {
     val updateDetailState by updateTradesmanDetailViewModel.updateTradesmanDetailState.collectAsState()
-    var selectedLocation by remember { mutableStateOf("Select location") }
-    var phoneNumber by remember { mutableStateOf("")  }
-    var estimatedRate by remember { mutableStateOf("") } // Changed to String for simplicity
-    var aboutMe by remember { mutableStateOf("")}
+
+    // Initialize state with passed parameters
+    var selectedLocation by remember { mutableStateOf(workLocation ?: "Select location") }
+    var phoneNumber by remember { mutableStateOf(if (number.equals("null", ignoreCase = true)) "" else number ?: "") }
+    var estimatedRate by remember { mutableStateOf(rate ?: "") }
+    var aboutMe by remember { mutableStateOf(about ?: "") }
+
     val context = LocalContext.current
-    var isPhoneValid by remember { mutableStateOf(false) }
+    var isPhoneValid by remember { mutableStateOf(phoneNumber.isEmpty() || "^9[0-9]{9}$".toRegex().matches(phoneNumber)) }
     val phoneRegex = "^9[0-9]{9}$".toRegex()
 
+    // Store initial values for change detection
+    val initialLocation by remember { mutableStateOf(workLocation ?: "Select location") }
+    val initialPhoneNumber by remember { mutableStateOf(if (number.equals("null", ignoreCase = true)) "" else number ?: "") }
+    val initialRate by remember { mutableStateOf(rate ?: "") }
+    val initialAbout by remember { mutableStateOf(about ?: "") }
 
-    // Handle "N/A" and "null" (case-insensitive) by setting phoneNumber to empty string
-    phoneNumber =if (number == "null") "" else number ?: ""
-    estimatedRate = rate ?: ""
-    selectedLocation = workLocation ?: "Select location"
-    aboutMe = about ?: ""
+    // Check if any field has changed
+    val hasChanges by remember {
+        derivedStateOf {
+            selectedLocation != initialLocation ||
+                    phoneNumber != initialPhoneNumber ||
+                    estimatedRate != initialRate ||
+                    aboutMe != initialAbout
+        }
+    }
+
+    // Update isPhoneValid whenever phoneNumber changes
+    LaunchedEffect(phoneNumber) {
+        isPhoneValid = phoneNumber.isEmpty() || phoneRegex.matches(phoneNumber)
+    }
 
     LaunchedEffect(updateDetailState) {
-        when(val updateDetails = updateDetailState){
-            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Loading-> {
-                //loading
+        when (val updateDetails = updateDetailState) {
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Loading -> {
+                // Loading
             }
-            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Success->{
-
+            is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Success -> {
                 SnackbarController.show("Updated Successfully")
                 updateTradesmanDetailViewModel.resetState()
-                // Navigate to the "profile" screen and clear the back stack
                 navController.navigate("main_screen?selectedItem=4&selectedTab=0") {
-                    navController.popBackStack()
+                    popUpTo(navController.graph.startDestinationId)
+                    launchSingleTop = true
                 }
-
             }
             is UpdateTradesmanDetailViewModel.UpdateTradesmanDetailState.Error -> {
-                val error = updateDetails.message
-                SnackbarController.show(error)
-
+                SnackbarController.show(updateDetails.message)
                 updateTradesmanDetailViewModel.resetState()
             }
             else -> Unit
         }
     }
+
     Box(Modifier.fillMaxSize()) {
         Column(
             modifier = modifier
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(WindowInsets.systemBars.asPaddingValues())
-
         ) {
-            // tob bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -166,7 +179,6 @@ fun ManageProfile(
                         )
                     }
                 }
-
                 item {
                     Row(
                         modifier = Modifier
@@ -182,7 +194,6 @@ fun ManageProfile(
                         )
                     }
                 }
-
                 item {
                     Row(
                         modifier = Modifier
@@ -198,9 +209,6 @@ fun ManageProfile(
                         )
                     }
                 }
-
-
-
                 item {
                     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                         Text(
@@ -208,7 +216,6 @@ fun ManageProfile(
                             fontWeight = FontWeight.Normal,
                             fontSize = 16.sp
                         )
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -218,10 +225,8 @@ fun ManageProfile(
                                 selectedOption = selectedLocation,
                                 onOptionSelected = { selectedLocation = it }
                             )
-
                         }
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
                 }
                 item {
@@ -244,41 +249,34 @@ fun ManageProfile(
                                     text = "+63",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Normal,
-                                    style = TextStyle(fontSize = 14.sp),
                                     color = if (phoneNumber.isNotEmpty()) Color.Black else Color.Gray
                                 )
-
                                 BasicTextField(
                                     value = phoneNumber,
                                     onValueChange = { newValue ->
-                                        // Filter to digits only and limit to 10 characters
                                         val filteredValue = newValue.filter { it.isDigit() }.take(10)
-                                        // Enforce "9" prefix
                                         phoneNumber = when {
                                             filteredValue.isEmpty() -> ""
                                             filteredValue.length == 1 && filteredValue != "9" -> "9$filteredValue"
                                             else -> filteredValue
                                         }
-                                        // Validate using regex
-                                        isPhoneValid = phoneNumber.isEmpty() || phoneRegex.matches(phoneNumber)
                                     },
                                     textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
-                                    keyboardOptions = KeyboardOptions(
-                                        keyboardType = KeyboardType.Number
-                                    ),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     modifier = Modifier
                                         .padding(start = 4.dp)
                                         .fillMaxWidth(),
                                     decorationBox = { innerTextField ->
-                                        if (phoneNumber.isEmpty()) {
-                                            Text(
-                                                text = "eg. 9123456789",
-                                                color = Color.Gray,
-                                                style = TextStyle(fontSize = 14.sp),
-                                                fontSize = 14.sp
-                                            )
+                                        Box {
+                                            if (phoneNumber.isEmpty()) {
+                                                Text(
+                                                    text = "eg. 9123456789",
+                                                    color = Color.Gray,
+                                                    style = TextStyle(fontSize = 14.sp)
+                                                )
+                                            }
+                                            innerTextField()
                                         }
-                                        innerTextField()
                                     }
                                 )
                             }
@@ -292,7 +290,6 @@ fun ManageProfile(
                             )
                         }
                     }
-
                     Spacer(modifier = Modifier.height(10.dp))
                 }
                 item {
@@ -308,8 +305,6 @@ fun ManageProfile(
                                 .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
                                 .padding(12.dp)
                         ) {
-                            // Placeholder
-
                             BasicTextField(
                                 value = estimatedRate,
                                 onValueChange = { newText ->
@@ -322,20 +317,21 @@ fun ManageProfile(
                                     estimatedRate = trimmedText
                                 },
                                 textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Number
-                                ),
-                                modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth(),
                                 decorationBox = { innerTextField ->
-                                    if (estimatedRate.isEmpty()) {
-                                        Text("₱ Enter amount", color = Color.Gray, fontSize = 16.sp)
-                                    }
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text("₱ ", fontSize = 16.sp) // Peso sign as static prefix
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text("₱ ", fontSize = 16.sp, color = Color.Black)
+                                        Box {
+                                            if (estimatedRate.isEmpty()) {
+                                                Text(
+                                                    text = "Enter amount",
+                                                    color = Color.Gray,
+                                                    fontSize = 14.sp
+                                                )
+                                            }
                                             innerTextField()
-
+                                        }
                                     }
                                 }
                             )
@@ -351,8 +347,6 @@ fun ManageProfile(
                             fontSize = 16.sp,
                             color = Color.DarkGray
                         )
-
-                        // textfield with placeholder
                         BasicTextField(
                             value = aboutMe,
                             onValueChange = { newText ->
@@ -361,23 +355,24 @@ fun ManageProfile(
                                 } else {
                                     aboutMe = newText.substring(0, 500)
                                     SnackbarController.show("Character count exceeds")
-
                                 }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
                                 .padding(10.dp),
-                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp, color = Color.Black),
                             decorationBox = { innerTextField ->
-                                if (aboutMe.isEmpty()) {
-                                    Text(
-                                        text = "Example: I'm a licensed plumber with over 7 years of experience handling everything from leak repairs to full plumbing system installations.",
-                                        fontSize = 16.sp,
-                                        color = Color.Gray
-                                    )
+                                Box {
+                                    if (aboutMe.isEmpty()) {
+                                        Text(
+                                            text = "Example: I'm a licensed plumber with over 7 years of experience...",
+                                            fontSize = 16.sp,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                    innerTextField()
                                 }
-                                innerTextField()
                             }
                         )
                     }
@@ -389,19 +384,27 @@ fun ManageProfile(
                             updateTradesmanDetailViewModel.updateTradesmanDetails(
                                 aboutMe,
                                 selectedLocation,
-                                estimatedRate.toInt(),
+                                estimatedRate.toIntOrNull() ?: 0,
                                 phoneNumber
                             )
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
-                        modifier = Modifier.padding(16.dp).fillMaxWidth()
-                            .background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))
+                        enabled = hasChanges && isPhoneValid,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (hasChanges && isPhoneValid) Color(0xFF42C2AE) else Color.Gray,
+                            disabledContainerColor = Color.Gray
+                        ),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                            .background(
+                                color = if (hasChanges && isPhoneValid) Color(0xFF42C2AE) else Color.Gray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
                     ) {
                         Text(text = "Save Changes")
                     }
                 }
             }
-
         }
         Box(
             modifier = Modifier
@@ -417,17 +420,18 @@ fun ManageProfile(
 @Composable
 fun CustomDropdown(
     selectedOption: String,
-    onOptionSelected: (String) -> Unit,
-
+    onOptionSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val options = listOf("Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
+    val options = listOf(
+        "Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
         "Bayambang", "Binalonan", "Binmaley", "Bolinao", "Bugallon", "Burgos", "Calasiao",
         "Dagupan City", "Dasol", "Infanta", "Labrador", "Laoac", "Lingayen", "Mabini", "Malasiqui",
         "Manaoag", "Mangaldan", "Mangatarem", "Mapandan", "Natividad", "Pozorrubio", "Rosales",
         "San Fabian", "San Jacinto", "San Manuel", "San Nicolas", "San Quintin", "Santa Barbara",
         "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
-        "Urdaneta City", "Villasis")
+        "Urdaneta City", "Villasis"
+    )
 
     Box(
         modifier = Modifier
@@ -441,18 +445,16 @@ fun CustomDropdown(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = selectedOption,
+            Text(
+                text = selectedOption,
                 fontSize = 16.sp,
                 color = if (selectedOption == "Select location") Color.Gray else Color.Black
             )
-
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
                 contentDescription = "Dropdown",
                 tint = Color.Gray,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable { expanded = true }
+                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -460,7 +462,9 @@ fun CustomDropdown(
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
-        modifier = Modifier.width(330.dp).background(Color.White)
+        modifier = Modifier
+            .width(330.dp)
+            .background(Color.White)
     ) {
         options.forEach { option ->
             DropdownMenuItem(

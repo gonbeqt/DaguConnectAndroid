@@ -433,7 +433,7 @@ fun TopMatchesItem(
         Column(
             modifier = Modifier.padding(16.dp).fillMaxWidth()
         ) {
-            Row {
+            Row() {
                 AsyncImage(
                     model = getJobs.clientProfilePicture,
                     contentDescription = "Profile Image",
@@ -443,16 +443,19 @@ fun TopMatchesItem(
                     contentScale = ContentScale.Crop
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        ,
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+
                 ) {
                     Text(
                         text = getJobs.clientFullname,
-                        fontSize = 16.sp,
-                        color = Color.Black,
+                        fontSize = 18.sp,
+                        color = Color.Black
+                        ,
                         fontWeight = FontWeight(500),
-                        modifier = Modifier.padding(start = 20.dp)
+                        modifier = Modifier.padding(start = 20.dp, top = 20.dp)
                     )
                     Box {
                         Icon(
@@ -502,18 +505,16 @@ fun TopMatchesItem(
                     Text(text = getJobs.jobDescription, fontSize = 14.sp)
                     Text(text = "Est. Budget: ₱ ${getJobs.salary}", fontSize = 14.sp)
                     Text(text = "Location: ${getJobs.address}, Pangasinan", fontSize = 14.sp)
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "${getJobs.totalApplicants} Applicant",
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium,
+                        style = TextStyle(textDecoration = TextDecoration.Underline),
+                    )
                 }
-                Row(modifier = Modifier.padding(start = 5.dp)) {
-                    TextButton(onClick = {}) {
-                        Text(
-                            text = "${getJobs.totalApplicants} Applicant",
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Medium,
-                            style = TextStyle(textDecoration = TextDecoration.Underline),
-                        )
-                    }
-                }
+
             }
         }
     }

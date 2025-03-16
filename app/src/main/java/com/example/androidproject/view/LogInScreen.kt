@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +68,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
@@ -90,6 +96,19 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     val context = LocalContext.current
     var showSuspendedDialog by remember { mutableStateOf(false) }
 
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.lottie_animation)
+    )
+    var isAnimationPlaying by remember { mutableStateOf(true) }
+
+    // Animate the Lottie composition with looping
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = isAnimationPlaying,
+        speed = 0.5f,
+        restartOnPlay = false
+    )
 
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
@@ -126,6 +145,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 SnackbarController.show(loginStatus.message)
 
                 viewModel.resetState()
+                isAnimationPlaying = true
             }
             else -> {}
         }
@@ -137,8 +157,10 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     val cardOffsetY = remember { Animatable(500f) } // Start off-screen to the bottom
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
+
     // Launch animation when composable is composed
     LaunchedEffect(currentBackStackEntry.value) {
+        delay(750)
         cardOffsetY.animateTo(
             targetValue = 0f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
@@ -152,13 +174,13 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
             .padding(WindowInsets.systemBars.asPaddingValues()),
         contentAlignment = Alignment.Center
     ) {
-        // Set an image as the background
-        Image(
-            painter = painterResource(id = R.drawable.authbg),
-            contentDescription = "Background Image",
-            modifier = Modifier.fillMaxSize()
-                .offset(y = (-150).dp)
-        )
+            LottieAnimation(
+                composition = composition,
+                modifier = Modifier
+                    .size(300.dp)
+                    .offset(y = (-80).dp),
+                progress = { progress }
+            )
 
         // Card with adaptive size and padding
         Card(
@@ -261,6 +283,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 SignUpButton(
                     navController = navController,
                     windowSize = windowSize,
+                    onSignUpClick = { isAnimationPlaying = false },
                     modifier = Modifier.constrainAs(signUpText) {
                         top.linkTo(loginButton.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
@@ -477,7 +500,7 @@ fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: 
 }
 
 @Composable
-fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier: Modifier = Modifier) {
+fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier: Modifier = Modifier,onSignUpClick: () -> Unit) {
     Row(modifier = modifier) {
         Text(
             text = "Don't have an account? ",
@@ -495,7 +518,9 @@ fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier:
                 WindowType.SMALL -> 12.sp
                 else -> 14.sp
             },
-            modifier = Modifier.clickable { navController.navigate("signup") }
+            modifier = Modifier.clickable {
+                onSignUpClick()
+                navController.navigate("signup") }
         )
     }
 }
