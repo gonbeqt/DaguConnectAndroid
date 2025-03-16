@@ -231,5 +231,6 @@ interface ApiService {
     @PUT("/user/tradesman/update/activeStatus")
     suspend fun  updateTradesmanActiveStatus(@Body request: UpdateActiveStatusRequest) : Response<UpdateActiveStatusResponse>
 
-
+    @DELETE("/client/jobs/delete/{jobId}")
+    suspend fun deleteJob(@Path("jobId") jobId: Int): Response<Unit>
 }

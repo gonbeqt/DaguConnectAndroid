@@ -3,12 +3,12 @@ package com.example.androidproject.viewmodel.factories.jobs
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.androidproject.api.ApiService
-import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
+import com.example.androidproject.viewmodel.jobs.DeleteJobViewModel
 
-class GetJobsViewModelFactory(private val apiService: ApiService): ViewModelProvider.Factory  {
+class DeleteJobViewModelFactory(private val apiService: ApiService): ViewModelProvider.Factory  {
     override fun <T: ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(GetJobsViewModel::class.java)) {
-            return  GetJobsViewModel(apiService) as T
+        if (modelClass.isAssignableFrom(DeleteJobViewModel::class.java)) {
+            return  DeleteJobViewModel(apiService) as T
         }
         throw IllegalArgumentException("Unknown ViewModel Class")
     }
