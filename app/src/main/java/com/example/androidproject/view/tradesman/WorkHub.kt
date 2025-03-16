@@ -1505,7 +1505,6 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                             .size(100.dp)
                             .padding(start = 10.dp)
                     )
-
                     // Tradesman details
                     Column(
                         modifier = Modifier
@@ -1847,7 +1846,7 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
 //Design For Items
 @Composable
 fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
-    val updatedAt = ViewModelSetups.formatDateTime(myJob.updatedAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.jobDateStatus)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
 
     val windowSize = rememberWindowSizeClass()
@@ -1918,7 +1917,7 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Applied on $createdAt",
+                        text = "Applied on $updatedAt",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
@@ -2631,7 +2630,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
 @Composable
 fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
-
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.jobDateStatus)
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
         WindowType.MEDIUM -> 20.sp
@@ -2712,7 +2711,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Cancelled on: $createdAt",
+                            text = "Cancelled on: $updatedAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
