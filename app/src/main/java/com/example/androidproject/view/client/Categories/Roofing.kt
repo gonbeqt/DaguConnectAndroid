@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -42,11 +45,15 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,7 +65,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -76,15 +85,38 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.view.theme.myGradient5
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel){
     val roofingList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
-
     val dismissedResumes by getResumesViewModel.dismissedResumes
+
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        confirmValueChange = { it != SheetValue.Hidden }
+    )
+    var showFullText by remember { mutableStateOf(false) }
+    val aboutme ="Ensure the safety and durability of your home or business with professional roof installation, repair, and maintenance, designed to withstand the elements for years to come."
+    val maxPreviewLength = 70
+
+    val scaffoldState = remember {
+        BottomSheetScaffoldState(
+            bottomSheetState = bottomSheetState,
+            snackbarHostState = SnackbarHostState()
+        )
+    }
+    val roofingImages = listOf(
+        R.drawable.rooferbg1,
+        R.drawable.rooferbg2,
+        R.drawable.rooferbg3
+    )
     LaunchedEffect(roofingList.itemSnapshotList, dismissedResumes) {
         Log.d("TradesmanColumn", "Updating displayed resumes")
         displayedResumes = roofingList.itemSnapshotList.items
@@ -95,47 +127,138 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
         getResumesViewModel.refreshResumes()
     }
 
-
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(WindowInsets.statusBars.asPaddingValues())
-
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-
-        ) {
-            // First Card (Header)
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        sheetContainerColor = Color.White,
+        sheetPeekHeight = screenHeightDp * 0.82f,
+        sheetContent = {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                shape = RoundedCornerShape(0.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(Color.White)
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    // Background Image
-                    Image(
-                        painter = painterResource(R.drawable.roofingbg),
-                        contentDescription = "Roofing Background",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.matchParentSize()
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                ) {
+                    // "About" Section
+                    Text(
+                        text = "About",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
                     )
 
-                    Box(
+                    if (aboutme.length > maxPreviewLength) {
+                        Column {
+                            Text(
+                                text = if (showFullText) aboutme else "${aboutme.take(maxPreviewLength)}...",
+                                modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp),
+                                fontSize = 14.sp,
+                                color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
+                            )
+                            Text(
+                                modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp).clickable(interactionSource = remember { MutableInteractionSource() }
+                                    ,indication = null){ showFullText = !showFullText},
+                                text = if (showFullText) "See Less" else "See More",
+                                color = Color.Blue,
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.End
+                            )
+
+                        }
+                    } else {
+                        Text(
+                            text = aboutme,
+                            modifier = Modifier.padding(top = 4.dp),
+                            fontSize = 16.sp,
+                            color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Expert",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF214A4C).copy(alpha = 0.6f))
-                    )
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        val filteredList = roofingList.itemSnapshotList.items.filter {
+                            it.specialty.contains("Roofing") && it.id !in dismissedResumes
+                        }
+                        if (filteredList.isEmpty()) {
+                            Box(Modifier.fillMaxWidth().height(400.dp)
+                                ,contentAlignment = Alignment.Center)
+                            {
+                                Text(
+                                    text = "No Roofing workers",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+                            filteredList.forEach { roofing ->
+                                if (roofing.id !in dismissedResumes) {
+                                    RoofingItem(
+                                        roofing,
+                                        navController,
+                                        reportTradesmanViewModel
+                                    ) {
+                                        getResumesViewModel.dismissResume(roofing.id)
+                                    }
+                                }
+                            }
+                        }
+
+                        if (roofingList.loadState.append is LoadState.Loading) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ) {
+        // Header Section (Outside the BottomSheet)
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RectangleShape
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                AutoSlidingImagePager(
+                    imageResIds = roofingImages,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(myGradient5)
+                )
+                Column {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .align(Alignment.TopStart), // Align to the top for the icon
+                            .padding( vertical = 8.dp),
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Icon(
@@ -148,110 +271,17 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                             tint = Color.White
                         )
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Roofing Work",
+                        text = "Roofing Works",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 36.dp, horizontal = 15.dp)
-                            .align(Alignment.BottomStart)
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                }
-            }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .absoluteOffset(y = (-20).dp)
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(Color(0xFFF9F9F9))
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        // "About" Section
-                        Text(
-                            text = "About",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        Text(
-                            text = "Find skilled roofing workers for installations, repairs, and maintenance, ensuring durable and weatherproof protection for your home.",
-                            fontSize = 16.sp,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Start
-                        )
-                        Text(
-                            text = "Expert",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                        LazyColumn(
-
-                            modifier = Modifier
-                                .fillMaxSize() // Ensure LazyColumn takes up the remaining space
-                                .background(Color.White),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            val filteredList = roofingList.itemSnapshotList.items.filter {it.specialty.contains("Roofing") && it.id !in dismissedResumes  }
-
-                            if (filteredList.isEmpty()) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillParentMaxSize()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "No Roofing workers",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Gray,
-                                            textAlign = TextAlign.Center
-                                        )
-                                    }
-                                }
-                            } else {
-                                items(filteredList.size) { index ->
-                                    val roofingList = filteredList[index]
-                                    if (roofingList != null && roofingList.id !in dismissedResumes) {
-                                        RoofingItem(roofingList, navController,reportTradesmanViewModel){
-                                            getResumesViewModel.dismissResume(roofingList.id)
-                                        }
-                                    }
-                                }
-                            }
-                            item {
-                                if (roofingList.loadState.append == LoadState.Loading) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        CircularProgressIndicator()
-                                    }
-                                }
-                            }
-                        }
-
-
-                    }
                 }
             }
         }
@@ -278,9 +308,9 @@ fun RoofingItem(roofing: resumesItem, navController: NavController, reportTrades
     val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 24.dp
+        WindowType.LARGE -> 32.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -337,7 +367,7 @@ fun RoofingItem(roofing: resumesItem, navController: NavController, reportTrades
                     )
                     Box {
                         Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
+                            painter = painterResource(id = R.drawable.meatball_ic),
                             contentDescription = "Menu Icon",
                             modifier = Modifier
                                 .size(iconSize)
