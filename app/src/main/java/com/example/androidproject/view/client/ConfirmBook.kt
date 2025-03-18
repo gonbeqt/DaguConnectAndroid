@@ -463,7 +463,6 @@ fun ConfirmBook(
                                                 "A client has requested for your service!",
                                                 "${AccountManager.getAccount()?.firstName + AccountManager.getAccount()?.lastName} has requested your service. Will you accept the book or decline?"
                                             )
-
                                             navController.navigate("main_screen?selectedItem=1&selectedTab=1") {
                                                 popUpTo(navController.graph.startDestinationId) {
                                                     inclusive = false

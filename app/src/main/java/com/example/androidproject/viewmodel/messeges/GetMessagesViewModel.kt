@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class GetMessagesViewModel(
     private val apiService: ApiService,
-    private val chatId: Int
+    private val chatId: Int,
+    private val receiverId: Int
 ) : ViewModel() {
 
     private val _newMessages = MutableStateFlow<List<Conversation>>(emptyList())
@@ -38,7 +39,7 @@ class GetMessagesViewModel(
                     enablePlaceholders = false
                 ),
                 pagingSourceFactory = {
-                    GetMessagesPagingSource(apiService, chatId).also {
+                    GetMessagesPagingSource(apiService, chatId, receiverId).also {
                         lastPagingSource = it
                     }
                 }

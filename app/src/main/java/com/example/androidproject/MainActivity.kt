@@ -541,7 +541,7 @@ class MainActivity : ComponentActivity() {
                             val receiverId = backStackEntry.arguments?.getString("receiverId")?.toIntOrNull() ?: 0
                             val receipientName = backStackEntry.arguments?.getString("receipientName") ?: ""
                             val receipientProfile = backStackEntry.arguments?.getString("receipientProfile") ?: ""
-                            val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId)
+                            val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId, receiverId)
                             val getMessageViewModel = ViewModelProvider(
                                 LocalViewModelStoreOwner.current!!,
                                 getMessagesViewModelFactory

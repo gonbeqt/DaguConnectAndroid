@@ -1,5 +1,6 @@
 package com.example.androidproject.view.tradesman
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -444,6 +445,12 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
                                                 text = "Contact Client",
                                                 fontSize = nameTextSize,
                                                 modifier = Modifier.padding(start = 10.dp)
+                                                    .clickable{
+                                                        val encodedProfilePicture = Uri.encode(
+                                                            selectedBooking?.clientProfilePicture
+                                                        )
+                                                        navController.navigate("messaging/0/${selectedBooking?.clientId}/${selectedBooking?.clientFullname}/${encodedProfilePicture}")
+                                                    }
                                             )
                                         }
                                         Icon(

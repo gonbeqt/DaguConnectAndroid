@@ -57,7 +57,7 @@ object WebSocketNotificationManager {
     private fun showNotification(title: String?, messageBody: String?) {
         Log.d(TAG, "Showing notification: Title=$title, Body=$messageBody")
 
-        val channelId = "daguc"
+        val channelId = "daguconnect_channel_id"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

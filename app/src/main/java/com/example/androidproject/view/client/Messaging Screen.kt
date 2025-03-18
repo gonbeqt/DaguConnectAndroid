@@ -53,7 +53,10 @@ fun MessagingScreen(
     val webSocketMessages by WebSocketManager.incomingMessages.collectAsState()
     val listState = rememberLazyListState()
     var sentMessage by remember { mutableStateOf(false) }
-
+    var chatIds by remember { mutableStateOf(chatId) }
+    if (chatId.toInt() == 0){
+        chatIds = chatIds
+    }
     // Combine paged messages and real-time messages, ensuring they are sorted properly
     val allMessages by remember(webSocketMessages, pagingMessages, newMessages) {
         derivedStateOf {
@@ -124,11 +127,16 @@ fun MessagingScreen(
         }
     }
 
-    // Ensure scrolling when sending a message
+// Ensure scrolling when sending a message
     LaunchedEffect(sentMessage) {
         if (sentMessage) {
             getMessages.refreshMessages()
-            listState.animateScrollToItem(allMessages.lastIndex)
+
+            // Wait for messages to update
+            if (allMessages.isNotEmpty()) {
+                listState.animateScrollToItem(allMessages.lastIndex)
+            }
+
             sentMessage = false
         }
     }
@@ -198,6 +206,7 @@ fun MessagingScreen(
                 ) {
                     items(allMessages.size) { message ->
                         val message = allMessages[message]
+                        chatIds = message.chatId
                         MessageComposable(
                             message = message.message,
                             isSent = userId?.toInt() == message.userId

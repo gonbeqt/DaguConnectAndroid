@@ -6,7 +6,8 @@ import com.example.androidproject.model.Conversation
 
 class GetMessagesPagingSource(
     private val apiService: ApiService,
-    private val chatId: Int
+    private val chatId: Int,
+    private val receiverId: Int
 ) : PagingSource<Int, Conversation>() {
 
     private var lastPage: Int? = null
@@ -16,7 +17,7 @@ class GetMessagesPagingSource(
         Log.d("API_DEBUG", "Fetching messages for chatId: $chatId, Page: $page, LoadSize: ${params.loadSize}")
 
         return try {
-            val response = apiService.getConversation(chatId, page, params.loadSize)
+            val response = apiService.getConversation(chatId, receiverId, page, params.loadSize)
             if (response.isSuccessful) {
                 val messages = response.body()?.messages ?: emptyList()
 

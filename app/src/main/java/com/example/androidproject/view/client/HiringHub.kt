@@ -548,8 +548,6 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
             }
         }
     }
-
-
 }
 
 @Composable
