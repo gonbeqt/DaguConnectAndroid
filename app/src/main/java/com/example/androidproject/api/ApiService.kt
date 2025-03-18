@@ -233,4 +233,7 @@ interface ApiService {
 
     @DELETE("/client/jobs/delete/{jobId}")
     suspend fun deleteJob(@Path("jobId") jobId: Int): Response<Unit>
+
+    @DELETE("/user/notification/clear")
+    suspend fun clearNotifications(): Response<Unit>
 }
