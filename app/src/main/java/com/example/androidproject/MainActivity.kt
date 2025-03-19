@@ -139,6 +139,7 @@ import com.example.androidproject.viewmodel.factories.job_application.PutJobAppl
 import com.example.androidproject.viewmodel.factories.job_application.ViewJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.client.GetMyJobApplicantsViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.tradesman.GetMyJobApplicationViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.DeleteJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetRecentJobsViewModelFactory
@@ -146,6 +147,7 @@ import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFacto
 import com.example.androidproject.viewmodel.factories.jobs.PutJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.messeges.GetMessageViewModelFactory
+import com.example.androidproject.viewmodel.factories.notification.ClearNotificationViewModelFactory
 import com.example.androidproject.viewmodel.factories.notification.GetNotificationViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
@@ -159,6 +161,7 @@ import com.example.androidproject.viewmodel.job_application.PutJobApplicationSta
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
+import com.example.androidproject.viewmodel.jobs.DeleteJobViewModel
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
@@ -166,6 +169,7 @@ import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
+import com.example.androidproject.viewmodel.notifications.ClearNotificationViewModel
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
@@ -314,16 +318,11 @@ class MainActivity : ComponentActivity() {
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
 
-        val initialMessages = listOf(
-            Message("Hello!", true),              // Sent (right)
-            Message("Hi, how are you?", false),   // Received (left)
-            Message("I'm doing well!", true),     // Sent (right)
-            Message("Great to hear!", false),     // Received (left)
-            Message("I have a lot to say...", false), // Received (left)
-            Message("Like, a lot!", false),       // Received (left)
-            Message("Keep going!", false),        // Received (left)
-            Message("Cool, I'm listening!", true) // Sent (right)
-        )
+        val clearNotificationViewModelFactory = ClearNotificationViewModelFactory(apiService)
+        val clearNotificationViewModel = ViewModelProvider(this, clearNotificationViewModelFactory)[ClearNotificationViewModel::class.java]
+
+        val deleteJobViewModelFactory = DeleteJobViewModelFactory(apiService)
+        val deleteJobViewModel = ViewModelProvider(this, deleteJobViewModelFactory)[DeleteJobViewModel::class.java]
 
         val updateTradesmanDetailVMFactory = UpdateTradesmanDetailViewModelFactory(apiService)
         val updateTradesmanDetailViewModel = ViewModelProvider(this, updateTradesmanDetailVMFactory)[UpdateTradesmanDetailViewModel::class.java]
@@ -525,7 +524,7 @@ class MainActivity : ComponentActivity() {
                             ReportProblem(navController)
                         }
                         composable("notification") {
-                            NotificationScreen(navController, getNotificationViewModel)
+                            NotificationScreen(navController, getNotificationViewModel, clearNotificationViewModel)
                         }
                         composable("accountsettings") {
                             AccountSettings(navController, getClientProfileViewModel,updateClientProfileAddressViewModel)

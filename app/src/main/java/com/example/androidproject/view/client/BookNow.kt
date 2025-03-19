@@ -528,7 +528,12 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                     ) {
                         Box(
                             modifier = Modifier
-                                .clickable { navController.navigate("message_screen") }
+                                .clickable{
+                                    val encodedProfilePicture = Uri.encode(
+                                        resume.profilePic
+                                    )
+                                    navController.navigate("messaging/0/${resumeId}/${resume.tradesmanFullName}/${encodedProfilePicture}")
+                                }
                                 .background(
                                     color = Color(0xFF42C2AE),
                                     shape = RoundedCornerShape(12.dp)
@@ -547,6 +552,7 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     tint = Color.White
                                 )
                                 Text(text = "Chat Me", color = Color.White, fontSize = nameTextSize)
+
                             }
                         }
 

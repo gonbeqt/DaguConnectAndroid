@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,6 +56,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
@@ -74,6 +77,7 @@ fun CancelNow(
     var Cancel by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
+    var cancellationReason by remember { mutableStateOf("") }
     val workStatusstate by updateBookingTradesmanViewModel.workStatusState.collectAsState()
     val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
@@ -114,6 +118,11 @@ fun CancelNow(
                 // Do nothing
             }
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
+                WebSocketManager.sendNotificationBookingToTradesman(
+                    resumeId.toString(),
+                    "A book job has been cancelled!!",
+                    "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the active book due to $cancellationReason."
+                )
                 Toast.makeText(context, "Appointment Cancelled successfully", Toast.LENGTH_SHORT).show()
                 updateBookingTradesmanViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
@@ -399,6 +408,12 @@ fun CancelNow(
                                         Text(
                                             text = "Contact Tradesman",
                                             modifier = Modifier.padding(start = 10.dp)
+                                                .clickable{
+                                                    val encodedProfilePicture = Uri.encode(
+                                                        viewClientBooking.data.tradesmanProfile
+                                                    )
+                                                    navController.navigate("messaging/0/${viewclientbooking.tradesmanId}/${viewclientbooking.tradesmanFullName}/${encodedProfilePicture}")
+                                                }
                                         )
                                     }
                                     Icon(
@@ -571,6 +586,7 @@ fun CancelNow(
                                             reasons[selectedIndex]
                                         }
                                         updateBookingTradesmanViewModel.updateWorkStatus("Cancelled", selectedReason, bookingId)
+                                        cancellationReason = selectedReason
                                         Cancel = false
                                     }
                                 },

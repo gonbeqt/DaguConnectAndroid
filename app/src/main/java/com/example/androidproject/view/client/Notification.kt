@@ -1,6 +1,8 @@
 package com.example.androidproject.view.client
 
+import android.health.connect.datatypes.units.Length
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,10 +26,11 @@ import com.example.androidproject.ViewModelSetups.Companion.getDateOnly
 import com.example.androidproject.ViewModelSetups.Companion.isNotToday
 import com.example.androidproject.ViewModelSetups.Companion.isToday
 import com.example.androidproject.model.Notification
+import com.example.androidproject.viewmodel.notifications.ClearNotificationViewModel
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 
 @Composable
-fun NotificationScreen(navController: NavController, getNotification: GetNotificationViewModel) {
+fun NotificationScreen(navController: NavController, getNotification: GetNotificationViewModel, clearNotification: ClearNotificationViewModel) {
     val notifications = getNotification.getNotificationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(notifications) {
@@ -38,7 +42,7 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
             .fillMaxSize()
             .background(Color(0xFFF2F2F2)) // Light gray background
     ) {
-        NotificationTopSection(navController)
+        NotificationTopSection(navController, clearNotification)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
@@ -71,7 +75,15 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
 }
 
 @Composable
-fun NotificationTopSection(navController: NavController) {
+fun NotificationTopSection(navController: NavController, clearNotification: ClearNotificationViewModel) {
+    val clearNotificationState by clearNotification.clearNotificationResult.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(clearNotificationState) {
+        clearNotificationState?.let {
+            Toast.makeText(context, "Notifications cleared", Toast.LENGTH_SHORT).show()
+        }
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,7 +130,9 @@ fun NotificationTopSection(navController: NavController) {
                         .padding(top = 15.dp)
                         .weight(1f)
                 )
-                TextButton (onClick = {}){
+                TextButton (onClick = {
+
+                }){
                     Text("Clear",
                         color = Color.Gray,
                         textAlign = TextAlign.Center)

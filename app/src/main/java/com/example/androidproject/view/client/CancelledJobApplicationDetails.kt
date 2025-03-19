@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -339,6 +340,12 @@ fun CancelledJobApplicationDetails(navController: NavController, viewJobApplicat
                                     Text(
                                         text = "Contact Tradesman",
                                         modifier = Modifier.padding(start = 10.dp)
+                                            .clickable{
+                                                val encodedProfilePicture = Uri.encode(
+                                                    viewJob?.jobApplication?.clientProfilePicture
+                                                )
+                                                navController.navigate("messaging/0/${viewJob?.jobApplication?.userId}/${viewJob?.jobApplication?.tradesmanFullname}/${encodedProfilePicture}")
+                                            }
                                     )
                                 }
                                 Icon(
