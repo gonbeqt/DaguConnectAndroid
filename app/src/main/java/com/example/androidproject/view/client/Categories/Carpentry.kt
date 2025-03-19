@@ -5,10 +5,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,13 +28,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -42,23 +56,31 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -76,15 +98,43 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.view.theme.myGradient5
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.HorizontalPagerIndicator
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Carpentry(navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel) {
     val carpentryList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
     val dismissedResumes by getResumesViewModel.dismissedResumes
+
+    val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
+
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        confirmValueChange = { it != SheetValue.Hidden }
+    )
+    var showFullText by remember { mutableStateOf(false) }
+    val aboutme ="Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship."
+    val maxPreviewLength = 70
+
+    val scaffoldState = remember {
+        BottomSheetScaffoldState(
+            bottomSheetState = bottomSheetState,
+            snackbarHostState = SnackbarHostState()
+        )
+    }
+    val carpentryImages = listOf(
+        R.drawable.carpentrybg1,
+        R.drawable.carpentrybg2,
+        R.drawable.carpentrybg3
+    )
     LaunchedEffect(carpentryList.itemSnapshotList, dismissedResumes) {
         Log.d("TradesmanColumn", "Updating displayed resumes")
         displayedResumes = carpentryList.itemSnapshotList.items
@@ -93,45 +143,137 @@ fun Carpentry(navController: NavController, getResumesViewModel: GetResumesViewM
     LaunchedEffect(Unit) {
         getResumesViewModel.refreshResumes()
     }
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(WindowInsets.statusBars.asPaddingValues())
-
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-
-        ) {
-            // First Card (Header)
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        sheetContainerColor = Color.White,
+        sheetPeekHeight = screenHeightDp * 0.82f,
+        sheetContent = {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                shape = RoundedCornerShape(0.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(Color.White)
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    // Background Image
-                    Image(
-                        painter = painterResource(R.drawable.carpentrybg),
-                        contentDescription = "Carpentry Background",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.matchParentSize()
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                ) {
+                    // "About" Section
+                    Text(
+                        text = "About",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
                     )
-                    Box(
+
+                    if (aboutme.length > maxPreviewLength) {
+                        Column {
+                            Text(
+                                text = if (showFullText) aboutme else "${aboutme.take(maxPreviewLength)}...",
+                                modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp),
+                                fontSize = 14.sp,
+                                color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
+                            )
+                            Text(
+                                modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp).clickable(interactionSource = remember { MutableInteractionSource() }
+                                    ,indication = null){ showFullText = !showFullText},
+                                text = if (showFullText) "See Less" else "See More",
+                                color = Color.Blue,
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.End
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = aboutme,
+                            modifier = Modifier.padding(top = 4.dp),
+                            fontSize = 16.sp,
+                            color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Expert",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF214A4C).copy(alpha = 0.6f))
-                    )
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        val filteredList = carpentryList.itemSnapshotList.items.filter {
+                            it.specialty.contains("Carpentry") && it.id !in dismissedResumes
+                        }
+                        if (filteredList.isEmpty()) {
+                            Box(Modifier.fillMaxWidth().height(400.dp)
+                                ,contentAlignment = Alignment.Center)
+                            {
+                                Text(
+                                    text = "No Carpentry workers",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+                            filteredList.forEach { carpentry ->
+                                if (carpentry.id !in dismissedResumes) {
+                                    CarpentryItem(
+                                        carpentry,
+                                        navController,
+                                        reportTradesmanViewModel
+                                    ) {
+                                        getResumesViewModel.dismissResume(carpentry.id)
+                                    }
+                                }
+                            }
+                        }
+
+                        if (carpentryList.loadState.append is LoadState.Loading) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ) {
+        // Header Section (Outside the BottomSheet)
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RectangleShape
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                AutoSlidingImagePager(
+                    imageResIds = carpentryImages,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(myGradient5)
+                )
+                Column {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .align(Alignment.TopStart), // Align to the top for the icon
+                            .padding( vertical = 8.dp),
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Icon(
@@ -144,123 +286,34 @@ fun Carpentry(navController: NavController, getResumesViewModel: GetResumesViewM
                             tint = Color.White
                         )
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
                         text = "Carpentry Works",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(vertical = 36.dp, horizontal = 15.dp)
-                            .align(Alignment.BottomStart)
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                }
-            }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .absoluteOffset(y = (-20).dp)
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(Color(0xFFF9F9F9))
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        // "About" Section
-                        Text(
-                            text = "About",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        Text(
-                            text = "Find skilled carpenters for custom woodwork, repairs, and installations, delivering high-quality craftsmanship.",
-                            fontSize = 16.sp,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Start
-                        )
-                        Text(
-                            text = "Expert",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                        LazyColumn(
-
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            val filteredList = carpentryList.itemSnapshotList.items.filter {it.specialty.contains("Carpentry") && it.id !in dismissedResumes  }
-
-                            if (filteredList.isEmpty()) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillParentMaxSize()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "No Carpentry workers",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Gray,
-                                            textAlign = TextAlign.Center
-                                        )
-                                    }
-                                }
-                            }
-                            else {
-                                items(filteredList.size) { index ->
-                                    val Carpentry = filteredList[index]
-                                    if (Carpentry != null && Carpentry.id !in dismissedResumes) {
-                                        CarpentryItem(Carpentry, navController,reportTradesmanViewModel){
-                                            getResumesViewModel.dismissResume(Carpentry.id)
-                                        }
-                                    }
-                                }
-                            }
-                            item {
-                                if (carpentryList.loadState.append == LoadState.Loading) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        CircularProgressIndicator()
-                                    }
-                                }
-                            }
-                        }
-
-                    }
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel, onUninterested:() -> Unit) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
-    var showReportDialog by remember { mutableStateOf(false) }
+    var showReportSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var reportSubmissionKey by remember { mutableStateOf<Long?>(null) }
+
     val reasons = listOf(
         "Abusive or Harassing Behavior",
         "Inappropriate Content or Language",
@@ -274,9 +327,9 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTr
     val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 24.dp
+        WindowType.LARGE -> 32.dp
     }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -332,7 +385,7 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTr
                     )
                     Box {
                         Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
+                            painter = painterResource(id = R.drawable.meatball_ic),
                             contentDescription = "Menu Icon",
                             modifier = Modifier
                                 .size(iconSize)
@@ -349,7 +402,7 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTr
                                 text = { Text("Report") },
                                 onClick = {
                                     showMenu = false
-                                    showReportDialog = true
+                                    showReportSheet = true
                                 }
                             )
                             DropdownMenuItem(
@@ -365,248 +418,309 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTr
 
 
 
-                Row(modifier = Modifier.size(185.dp, 110.dp)) {
+                Row(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     Box(
                         modifier = Modifier
-                            .size(80.dp, 45.dp)
-                            .padding(top = 10.dp)
+                            .size(70.dp, 30.dp)
                             .background(
                                 color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
-                            )
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "P${carpentry.workFee}/hr",
-                            fontSize = smallTextSize,
-                            modifier = Modifier.padding(top = 5.dp, start = 8.dp)
+                            fontSize = smallTextSize
                         )
                     }
                     Box(
                         modifier = Modifier
-                            .size(70.dp, 45.dp)
-                            .padding(top = 10.dp, start = 10.dp)
+                            .size(50.dp, 30.dp)
                             .background(
                                 color = (Color(0xFFF5F5F5)),
                                 shape = RoundedCornerShape(12.dp)
-                            )
+                            ),
+                        contentAlignment = Alignment.Center
+
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Star, contentDescription = "Start Icon",
-                            tint = Color(0xFFFFA500), modifier = Modifier
-                                .size(25.dp)
-                                .padding(top = 7.dp, start = 2.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Start Icon",
+                                tint = Color(0xFFFFA500),
+                                modifier = Modifier
+                                    .size(iconSize)
+                            )
+                            Text(
+                                when {
+                                    carpentry.ratings == 0f -> "0"
+                                    else -> String.format("%.1f", carpentry.ratings)
+                                },
+                                fontSize = smallTextSize,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (showReportSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showReportSheet = false },
+            sheetState = bottomSheetState,
+            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Report", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    IconButton(onClick = { showReportSheet = false }) {
+                        Icon(Icons.Default.Close, contentDescription = "Close")
+                    }
+                }
+
+                Column(modifier = Modifier.padding(top = 16.dp)) {
+
+                    reasons.forEachIndexed { index, reason ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        ) {
+                            Checkbox(
+                                checked = selectedIndex == index,
+                                onCheckedChange = {
+                                    selectedIndex = if (selectedIndex == index) -1 else index
+                                }
+                            )
+                            if (reason == "Others") {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = reason,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.Black
+                                    )
+
+                                    if (selectedIndex == index) {
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        TextField(
+                                            value = otherReason,
+                                            onValueChange = { otherReason = it },
+                                            placeholder = { Text("Enter other reason") },
+                                            singleLine = true,
+                                            modifier = Modifier
+                                                .heightIn(min = 40.dp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = Color.Transparent,
+                                                unfocusedContainerColor = Color.Transparent,
+                                                focusedIndicatorColor = Color.Blue,
+                                                unfocusedIndicatorColor = Color.Gray,
+                                                cursorColor = Color.Black
+                                            )
+                                        )
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = reason,
+                                    fontSize = 16.sp,
+                                    color = Color.Black,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+
+                        }
+                    }
+                }
+                if (selectedIndex != -1) {
+                    Text(
+                        text = "Tell us the Problem",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    UploadFieldScreenShot(
+                        label = "Screenshot",
+                        uri = reportDocument,
+                        fileType = "image",
+                        onUploadClick = {
+                            documentPickerLauncher.launch("image/*")
+                        },
+                        onViewClick = {
+                            reportDocument?.let { uri ->
+                                openScreenShot(context, uri)
+                            }
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = reasonDescription,
+                        onValueChange = { reasonDescription = it },
+                        placeholder = { Text("Enter Your Explanation") },
+                        shape = RoundedCornerShape(16.dp),
+                        maxLines = 3,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Blue,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Blue,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
                         )
-                        Text(
-                            text =  when {
-                                carpentry.ratings == 0f -> "0"
-                                else -> String.format("%.1f", carpentry.ratings)
-                            },
-                            fontSize = smallTextSize,
-                            modifier = Modifier.padding(top = 5.dp, start = 28.dp)
+                    )
+                }
+
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { showReportSheet = false },
+                        modifier = Modifier.size(110.dp, 45.dp)
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+
+                            if (selectedIndex == -1) {
+                                // Show a message to the user indicating that they need to select a reason
+                                Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                            } else {
+                                val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                    // If "Others" is selected, use the value from the otherReason field
+                                    otherReason
+                                } else {
+                                    // Otherwise, use the selected reason from the list
+                                    reasons[selectedIndex]
+                                }
+                                reportSubmissionKey = System.currentTimeMillis() // Set unique key
+                                reportTradesmanViewModel.report(selectedReason, reasonDescription, reportDocument!!,context,carpentry.userid)
+                            }
+                        },
+                        modifier = Modifier.size(110.dp, 45.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(
+                                0xFF42C2AE
+                            )
                         )
+                    ) {
+                        Text("Submit", color = Color.White)
+                    }
+                    LaunchedEffect(reportState) {
+                        when(val report = reportState){
+                            is ReportTradesmanViewModel.ReportState.Loading -> {
+                                //do nothing
+                            }
+                            is ReportTradesmanViewModel.ReportState.Success -> {
+                                val responsereport = report.data?.message
+                                Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
+
+                                reportTradesmanViewModel.resetState()
+                                // Close the dialog
+                                showReportSheet = false
+                            }
+                            is ReportTradesmanViewModel.ReportState.Error -> {
+                                val errorMessage = report.message
+                                Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                                showReportSheet = true
+                                reportTradesmanViewModel.resetState()
+                            }
+                            else -> Unit
+                        }
                     }
 
                 }
             }
         }
     }
-    if (showReportDialog) {
-        Dialog(onDismissRequest = { showReportDialog = false }) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                ,
-                contentAlignment = Alignment.Center
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Reason for Reason",
-                            fontSize = 20.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold
-                        )
+}
 
-                        Column(modifier = Modifier.padding(top = 16.dp)) {
-                            reasons.forEachIndexed { index, reason ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-                                ) {
-                                    Checkbox(
-                                        checked = selectedIndex == index,
-                                        onCheckedChange = {
-                                            selectedIndex =
-                                                if (selectedIndex == index) -1 else index
-                                        },
-                                        colors = CheckboxDefaults.colors(
-                                            uncheckedColor = Color.Black,
-                                            checkedColor = Color(0xFF42C2AE)
-                                        )
-                                    )
+@Composable
+fun AutoSlidingImagePager(
+    imageResIds: List<Int>,
+    modifier: Modifier = Modifier
+) {
+    val pagerState = rememberPagerState(
+        pageCount = { imageResIds.size } // Modern syntax since Compose 1.0.0-alpha13
+    )
+    val coroutineScope = rememberCoroutineScope()
 
-                                    if (reason == "Others") {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = reason,
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = Color.Black
-                                            )
-
-                                            if (selectedIndex == index) {
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                TextField(
-                                                    value = otherReason,
-                                                    onValueChange = { otherReason = it },
-                                                    placeholder = { Text("Enter other reason") },
-                                                    singleLine = true,
-                                                    modifier = Modifier
-                                                        .weight(1f) // Pushes the field to the right
-                                                        .heightIn(min = 40.dp),
-                                                    colors = TextFieldDefaults.colors(
-                                                        focusedContainerColor = Color.Transparent,
-                                                        unfocusedContainerColor = Color.Transparent,
-                                                        focusedIndicatorColor = Color.Blue,
-                                                        unfocusedIndicatorColor = Color.Gray,
-                                                        cursorColor = Color.Black
-                                                    )
-                                                )
-                                            }
-                                        }
-                                    } else {
-                                        Text(
-                                            text = reason,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color.Black,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
-                            UploadFieldScreenShot(
-                                label = "Screenshot",
-                                uri = reportDocument,
-                                fileType = "image",
-                                onUploadClick = {
-                                    documentPickerLauncher.launch("image/*")
-                                },
-                                onViewClick = {
-                                    reportDocument?.let { uri ->
-                                        openScreenShot(context, uri)
-                                    }
-                                }
-                            )
-                            OutlinedTextField(
-                                value = reasonDescription,
-                                onValueChange = { reasonDescription = it },
-                                placeholder = { Text("Enter Your Explanation") },
-                                shape = RoundedCornerShape(16.dp),
-                                maxLines = 3,
-
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 100.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Blue,
-                                    unfocusedIndicatorColor = Color.Gray,
-                                    focusedLabelColor = Color.Blue,
-                                    unfocusedLabelColor = Color.Gray,
-                                    cursorColor = Color.Black
-                                )
-                            )
-
-                        }
-
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Button(
-                                onClick = { showReportDialog = false },
-                                modifier = Modifier.size(110.dp, 45.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
-                                )
-                            ) {
-                                Text("Cancel", color = Color.White)
-                            }
-                            Button(
-                                onClick = {
-                                    if (selectedIndex == -1) {
-                                        // Show a message to the user indicating that they need to select a reason
-                                        Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
-                                            // If "Others" is selected, use the value from the otherReason field
-                                            otherReason
-                                        } else {
-                                            // Otherwise, use the selected reason from the list
-                                            reasons[selectedIndex]
-                                        }
-                                        reportTradesmanViewModel.report(selectedReason, reasonDescription, reportDocument!!,context,carpentry.userid)
-                                    }
-                                          },
-                                modifier = Modifier.size(110.dp, 45.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
-                                )
-                            ) {
-                                Text("Submit", color = Color.White)
-                            }
-                            LaunchedEffect(reportState) {
-                                when(val report = reportState){
-                                    is ReportTradesmanViewModel.ReportState.Loading -> {
-                                        //do nothing
-                                    }
-                                    is ReportTradesmanViewModel.ReportState.Success -> {
-                                        val responsereport = report.data?.message
-                                        Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
-
-                                        reportTradesmanViewModel.resetState()
-                                        // Close the dialog
-                                        showReportDialog = false
-                                    }
-                                    is ReportTradesmanViewModel.ReportState.Error -> {
-                                        val errorMessage = report.message
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                        showReportDialog = true
-                                        reportTradesmanViewModel.resetState()
-                                    }
-                                    else -> Unit
-                                }
-                            }
-                        }
-                    }
-                }
+    LaunchedEffect(key1 = pagerState.currentPage) {
+        while (true) {
+            delay(3000) // Auto-scroll every 3 seconds
+            val nextPage = (pagerState.currentPage + 1) % imageResIds.size
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(nextPage)
             }
+        }
+    }
+
+    Box(modifier = modifier) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            Image(
+                painter = painterResource(id = imageResIds[page]),
+                contentDescription = "Carpentry Image $page",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize().clipToBounds() // Ensure the image itself isn't clipped unnecessarily
+            )
+        }
+
+        // Dark overlay for better text visibility
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(myGradient5)
+        )
+
+        // Page indicator
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 70.dp)
+        ) {
+            HorizontalPagerIndicator(
+                pagerState = pagerState,
+                pageCount = imageResIds.size,
+                activeColor = Color.White,
+                inactiveColor = Color.Gray.copy(alpha = 0.5f),
+                indicatorWidth = 8.dp,
+                indicatorHeight = 8.dp,
+                spacing = 8.dp,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(50)) // Makes dots circular
+            )
         }
     }
 }

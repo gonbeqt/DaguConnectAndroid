@@ -45,6 +45,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
@@ -56,12 +59,16 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -69,8 +76,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -137,6 +146,12 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
         WebSocketManager.connect(userId.toString())
         WebSocketNotificationManager.initialize(context, userId.toString())
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+
 
     val categories = listOf(    
         Categories(R.drawable.carpentry, "Carpentry"),
@@ -166,24 +181,48 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
         Column(modifier = Modifier.fillMaxSize()) {
 
             // Provide navController to the SearchField
-            HomeTopSection(navController,windowSize, backgroundColor, textColor )
+            HomeTopSection(navController,windowSize, backgroundColor, textColor, poppinsFont )
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState // ✅ Ensure listState is used properly
             ) {
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-                item { ExploreNow(windowSize) }
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-                item { CategoryRow(categories, navController) }
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel, LoadingUI) }
+                item { Spacer(modifier = Modifier
+                    .height(20.dp)) }
+                item { ExploreNow(windowSize,
+                    poppinsFont = FontFamily(
+                        Font(R.font.poppins_regular, FontWeight.Normal),
+                        Font(R.font.poppins_medium, FontWeight.Medium),
+                        Font(R.font.poppins_bold, FontWeight.Bold)
+                    )
+                ) }
+                item { Spacer(modifier = Modifier
+                    .height(20.dp)
+                ) }
+                item { CategoryRow(categories, navController,
+                    poppinsFont = FontFamily(
+                    Font(R.font.poppins_regular, FontWeight.Normal),
+                    Font(R.font.poppins_medium, FontWeight.Medium),
+                    Font(R.font.poppins_bold, FontWeight.Bold)
+                ))
+                }
+                item { Spacer(modifier = Modifier
+                    .height(20.dp)
+                ) }
+                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel, LoadingUI,
+                        poppinsFont = FontFamily(
+                        Font(R.font.poppins_regular, FontWeight.Normal),
+                        Font(R.font.poppins_medium, FontWeight.Medium),
+                        Font(R.font.poppins_bold, FontWeight.Bold)
+                )
+                ) }
             }
         }
 
     }
 }
 @Composable
-fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor: Color, textColor: Color) {
+fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor: Color, textColor: Color, poppinsFont: FontFamily) {
+
     val firstName = AccountManager.getAccount()?.firstName
     val createdAt = AccountManager.getAccount()?.createdAt
     val newUser = LocalDate.now()
@@ -213,10 +252,11 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor:
             Column {
                 // Left-aligned text
                 Text(
-                    text = "Hi ${firstName},",
+                    text = "Hello $firstName,",
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = textColor
+                    color = textColor,
+                    fontWeight = FontWeight.Light,
+                    fontFamily = poppinsFont
                 )
 
 
@@ -230,9 +270,10 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor:
                 } else {
                     Text(
                         text = "Welcome back!",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         color = textColor,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = poppinsFont
                     )
                 }
 
@@ -248,6 +289,12 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor:
         }
     }
 }
+
+@Composable
+fun FontFamily(x0: Font, x1: Font, x2: Font) {
+    TODO("Not yet implemented")
+}
+
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun CategoryScrollIndicator(scrollState: LazyListState, itemCount: Int, visibleItems: Int) {
@@ -299,7 +346,7 @@ fun CategoryScrollIndicator(scrollState: LazyListState, itemCount: Int, visibleI
 
 
 @Composable
-fun CategoryRow(categories: List<Categories>, navController: NavController) {
+fun CategoryRow(categories: List<Categories>, navController: NavController, poppinsFont: FontFamily) {
     val windowSize = rememberWindowSizeClass()
     val cardSize = when (windowSize.width) {
         WindowType.SMALL -> 100.dp to 80.dp
@@ -321,11 +368,12 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
             Text(
                 text = "Categories",
                 fontSize = when (windowSize.width) {
-                    WindowType.SMALL -> 18.sp
-                    WindowType.MEDIUM -> 20.sp
-                    WindowType.LARGE -> 22.sp
+                    WindowType.SMALL -> 14.sp
+                    WindowType.MEDIUM -> 16.sp
+                    WindowType.LARGE -> 18.sp
                 },
                 fontWeight = FontWeight(500),
+                fontFamily = poppinsFont
             )
         }
 
@@ -362,7 +410,7 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 
 
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit) {
+fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit, poppinsFont: FontFamily) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
 
@@ -423,22 +471,35 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = "Top-Rated",
-            fontSize = 18.sp,
+            fontSize = when (windowSize.width) {
+                WindowType.SMALL -> 14.sp
+                WindowType.MEDIUM -> 16.sp
+                WindowType.LARGE -> 18.sp
+            },
             fontWeight = FontWeight(500),
-            modifier = Modifier.padding(top = 12.dp)
+            fontFamily = poppinsFont
         )
-        TextButton(onClick = { navController.navigate("alltradesman") }) {
-            Text(
-                text = "See All",
-                color = Color.Gray,
-                fontSize = 16.sp,
-            )
-        }
+
+        Text(
+            modifier = Modifier.clickable {
+                navController.navigate("alltradesmen")
+            },
+            text = "See All",
+            color = Color.Gray,
+            fontSize = when (windowSize.width) {
+                WindowType.SMALL -> 14.sp
+                WindowType.MEDIUM -> 16.sp
+                WindowType.LARGE -> 18.sp
+            },
+            fontWeight = FontWeight.Normal,
+            fontFamily = poppinsFont
+        )
+
     }
 
     if (!isConnected.value) {
@@ -532,7 +593,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
 
 
 @Composable
-fun ExploreNow(windowSize: WindowSize) {
+fun ExploreNow(windowSize: WindowSize, poppinsFont: FontFamily) {
     val titleTextSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
         WindowType.MEDIUM -> 14.sp
@@ -586,7 +647,8 @@ fun ExploreNow(windowSize: WindowSize) {
                 text = "DaguConnect",
                 color = Color.White,
                 fontSize = titleTextSize,
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.Light,
+                fontFamily = poppinsFont
             )
         }
 
@@ -604,7 +666,8 @@ fun ExploreNow(windowSize: WindowSize) {
                     text = "What service do you need today?",
                     color = Color.White,
                     fontSize = textSize,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = poppinsFont
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -620,6 +683,7 @@ fun ExploreNow(windowSize: WindowSize) {
                         color = Color.White,
                         fontSize = buttonTextSize,
                         fontWeight = FontWeight.Light,
+                        fontFamily = poppinsFont
                     )
                 }
             }
@@ -685,6 +749,7 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportTradesmanViewModels: ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableIntStateOf(-1) }
@@ -692,6 +757,9 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
     var reasonDescription by remember { mutableStateOf("") }
     val reportState by reportTradesmanViewModels.reportState.collectAsState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var showReportSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val reasons = listOf(
         "Abusive or Harassing Behavior",
@@ -724,7 +792,6 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    var showReportDialog by remember { mutableStateOf(false) }
     var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var reportSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
@@ -737,8 +804,8 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
     // Permission launcher for storage access
 
 
-    LaunchedEffect(showReportDialog) {
-        if(showReportDialog){
+    LaunchedEffect(showReportSheet) {
+        if (showReportSheet) {
             selectedIndex = -1
             otherReason = ""
             reasonDescription = ""
@@ -753,20 +820,23 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
             is ReportTradesmanViewModel.ReportState.Success -> {
                 val responseReport = report.data?.message
                 Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
-                showReportDialog = false
+                Log.d("ReportState", "Success: $responseReport")
+                showReportSheet = false
                 reportSubmissionKey = null // Reset key after handling
                 delay(1000)
                 reportTradesmanViewModels.resetState()
             }
+
             is ReportTradesmanViewModel.ReportState.Error -> {
                 val errorMessage = report.message
                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                 Log.d("ReportState", "Error: $errorMessage")
-                showReportDialog = true
+                showReportSheet = true
                 reportSubmissionKey = null // Reset key after handling
                 delay(1000)
                 reportTradesmanViewModels.resetState()
             }
+
             else -> Unit
         }
     }
@@ -780,7 +850,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         elevation = CardDefaults.cardElevation(1.dp)
 
 
-        ) {
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -835,7 +905,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                     text = { Text("Report", textAlign = TextAlign.Center) },
                                     onClick = {
                                         showMenu = false
-                                        showReportDialog = true
+                                        showReportSheet = true
                                     }
                                 )
                             }
@@ -846,10 +916,11 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             .replace("_", " "),
                         color = Color.Black,
                         fontSize = taskTextSize,
-                        )
-                    Row(modifier = Modifier
-                        .padding(top = 8.dp)
-                        .fillMaxWidth(),
+                    )
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Box(
@@ -876,8 +947,10 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             contentAlignment = Alignment.Center
 
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = "Start Icon",
@@ -895,196 +968,179 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             }
                         }
                     }
-
-
                 }
 
             }
         }
     }
-    if (showReportDialog) {
-        Dialog(onDismissRequest = { showReportDialog = false }) {
-            Box(
+    if (showReportSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showReportSheet = false },
+            sheetState = bottomSheetState,
+            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                ,
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .border(2.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp)),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)), // Dark background for contrast
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Reason for Report",
-                            fontSize = 20.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Text("Report", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    IconButton(onClick = { showReportSheet = false }) {
+                        Icon(Icons.Default.Close, contentDescription = "Close")
+                    }
+                }
 
-                        Column(modifier = Modifier.padding(top = 16.dp)) {
-                            reasons.forEachIndexed { index, reason ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                ) {
-                                    Checkbox(
-                                        checked = selectedIndex == index,
-                                        onCheckedChange = {
-                                            selectedIndex = if (selectedIndex == index) -1 else index
-                                        },
-                                        colors = CheckboxDefaults.colors(
-                                            uncheckedColor = Color.Black,
-                                            checkedColor = Color(0xFF42C2AE)
-                                        )
-                                    )
+                Column(modifier = Modifier.padding(top = 16.dp)) {
 
-                                    if (reason == "Others") {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = reason,
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = Color.Black
-                                            )
-
-                                            if (selectedIndex == index) {
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                TextField(
-                                                    value = otherReason,
-                                                    onValueChange = { otherReason = it },
-                                                    placeholder = { Text("Enter other reason") },
-                                                    singleLine = true,
-                                                    modifier = Modifier
-                                                        .weight(1f) // Pushes the field to the right
-                                                        .heightIn(min = 40.dp),
-                                                    colors = TextFieldDefaults.colors(
-                                                        focusedContainerColor = Color.Transparent,
-                                                        unfocusedContainerColor = Color.Transparent,
-                                                        focusedIndicatorColor = Color.Blue,
-                                                        unfocusedIndicatorColor = Color.Gray,
-                                                        cursorColor = Color.Black
-                                                    )
-                                                )
-                                            }
-                                        }
-                                    } else {
-                                        Text(
-                                            text = reason,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color.Black,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
-                            UploadFieldScreenShot(
-                                label = "Screenshot",
-                                uri = reportDocument,
-                                fileType = "image",
-                                onUploadClick = {
-                                    documentPickerLauncher.launch("image/*")
-                                },
-                                onViewClick = {
-                                    reportDocument?.let { uri ->
-                                        openScreenShot(context, uri)
-                                    }
-                                }
-                            )
-
-                            OutlinedTextField(
-                                    value = reasonDescription,
-                            onValueChange = { reasonDescription = it },
-                            placeholder = { Text("Enter Your Explanation") },
-                            shape = RoundedCornerShape(16.dp),
-                                maxLines = 3,
-
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 100.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Blue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedLabelColor = Color.Blue,
-                                unfocusedLabelColor = Color.Gray,
-                                cursorColor = Color.Black
-                            )
-                            )
-
-                        }
-
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
+                    reasons.forEachIndexed { index, reason ->
                         Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                         ) {
-                            Button(
-                                onClick = { showReportDialog = false },
-                                modifier = Modifier.size(110.dp, 45.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
+                            Checkbox(
+                                checked = selectedIndex == index,
+                                onCheckedChange = {
+                                    selectedIndex = if (selectedIndex == index) -1 else index
+                                }
+                            )
+                            if (reason == "Others") {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = reason,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.Black
                                     )
-                                )
-                            ) {
-                                Text("Cancel", color = Color.White)
-                            }
-                            Button(
-                                onClick = {
 
-                                    if (selectedIndex == -1) {
-                                        // Show a message to the user indicating that they need to select a reason
-                                        Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        val selectedReason = if (selectedIndex == reasons.size - 1) {
-                                            // If "Others" is selected, use the value from the otherReason field
-                                            otherReason
-                                        } else {
-                                            // Otherwise, use the selected reason from the list
-                                            reasons[selectedIndex]
-                                        }
-                                        reportSubmissionKey = System.currentTimeMillis() // Set unique key
-                                        reportTradesmanViewModels.report(selectedReason, reasonDescription, reportDocument!!,context,resumes.userid)
+                                    if (selectedIndex == index) {
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        TextField(
+                                            value = otherReason,
+                                            onValueChange = { otherReason = it },
+                                            placeholder = { Text("Enter other reason") },
+                                            singleLine = true,
+                                            modifier = Modifier
+                                                .heightIn(min = 40.dp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = Color.Transparent,
+                                                unfocusedContainerColor = Color.Transparent,
+                                                focusedIndicatorColor = Color.Blue,
+                                                unfocusedIndicatorColor = Color.Gray,
+                                                cursorColor = Color.Black
+                                            )
+                                        )
                                     }
-                                          },
-                                modifier = Modifier.size(110.dp, 45.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF42C2AE
-                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = reason,
+                                    fontSize = 16.sp,
+                                    color = Color.Black,
+                                    modifier = Modifier.padding(start = 8.dp)
                                 )
-                            ) {
-                                Text("Submit", color = Color.White)
-                            }
                             }
 
                         }
                     }
                 }
+                if (selectedIndex != -1) {
+                    Text(
+                        text = "Tell us the Problem",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    UploadFieldScreenShot(
+                        label = "Screenshot",
+                        uri = reportDocument,
+                        fileType = "image",
+                        onUploadClick = {
+                            documentPickerLauncher.launch("image/*")
+                        },
+                        onViewClick = {
+                            reportDocument?.let { uri ->
+                                openScreenShot(context, uri)
+                            }
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = reasonDescription,
+                        onValueChange = { reasonDescription = it },
+                        placeholder = { Text("Enter Your Explanation") },
+                        shape = RoundedCornerShape(16.dp),
+                        maxLines = 3,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Blue,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Blue,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
+
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { showReportSheet = false },
+                        modifier = Modifier.size(110.dp, 45.dp)
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+
+                            if (selectedIndex == -1) {
+                                // Show a message to the user indicating that they need to select a reason
+                                Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                            } else {
+                                val selectedReason = if (selectedIndex == reasons.size - 1) {
+                                    // If "Others" is selected, use the value from the otherReason field
+                                    otherReason
+                                } else {
+                                    // Otherwise, use the selected reason from the list
+                                    reasons[selectedIndex]
+                                }
+                                reportSubmissionKey = System.currentTimeMillis() // Set unique key
+                                reportTradesmanViewModels.report(selectedReason, reasonDescription, reportDocument!!,context,resumes.userid)
+                            }
+                        },
+                        modifier = Modifier.size(110.dp, 45.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(
+                                0xFF42C2AE
+                            )
+                        )
+                    ) {
+                        Text("Submit", color = Color.White)
+                    }
+
+                }
             }
         }
     }
+}
 
 @Composable
 fun UploadFieldScreenShot(label: String, uri: Uri?, fileType: String = "image", onUploadClick: () -> Unit, onViewClick: () -> Unit) {
