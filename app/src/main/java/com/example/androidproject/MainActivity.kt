@@ -654,7 +654,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("tradesmancompleteddetails/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            TradesmanCompletedDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel)
+                            TradesmanCompletedDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel,reportClientViewModel)
                         }
                         composable("tradesmancancellationdetails/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -678,7 +678,8 @@ class MainActivity : ComponentActivity() {
                             TradesmanJobCancelled(jobId,
                                 modifier = Modifier,
                                 navController,
-                                getTradesmanBookingViewModel)
+                                getTradesmanBookingViewModel,
+                                reportClientViewModel)
                         }
                         composable("tradesmanjobdecline/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -713,20 +714,18 @@ class MainActivity : ComponentActivity() {
                         composable("tradesmanapplicationcompleted/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationCompleted(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel,viewJobViewModel)
+                            TradesmanApplicationCompleted(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel,viewJobViewModel,reportClientViewModel)
                         }
                         composable("tradesmanapplicationcancelled/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
+                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel,reportClientViewModel)
                         }
                         composable("tradesmanapplicationcanceldetails/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
                             TradesmanApplicationCancelDetails(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel)
                         }
-
-
                     }
                 }
             }
