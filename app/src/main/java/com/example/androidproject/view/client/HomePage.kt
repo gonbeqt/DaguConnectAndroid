@@ -369,7 +369,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        getResumesViewModel.refreshResumes()
+        resumeList.refresh()
     }
 
     LaunchedEffect(resumeList.itemSnapshotList) {
@@ -402,9 +402,10 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
     // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
         if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
+            isLoading = true
+            delay(200.milliseconds) // Keep the delay for UI feedback
+            resumeList.refresh() // Explicitly refresh the LazyPagingItems
+            isLoading = false
         }
     }
 
@@ -482,7 +483,7 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                                 Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
                             }
                         }
-                        .background(Color(0xFFEDEFEF), RoundedCornerShape(8.dp))
+                        .background(Color(0xFF42C2AE), RoundedCornerShape(8.dp)) // Change to green
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
@@ -495,9 +496,6 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
             }
         }
     } else {
-        if (isLoading){
-            LoadingUI()
-        }else{
             Card(
                 modifier = Modifier
                     .fillMaxSize()
@@ -522,7 +520,10 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
                 }
             }
         }
+    if (isLoading){
+        LoadingUI()
     }
+
 
 
 }
