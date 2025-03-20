@@ -1113,7 +1113,7 @@ fun FabPosting(
     var deadline by remember { mutableStateOf("") }
     var jobType by remember { mutableStateOf("") }
 
-    val applicantOptions = (1..10).map { it.toString() }
+    val applicantOptions = (1..5).map { it.toString() }
     val locationOptions = listOf(
         "Agno", "Aguilar", "Alcala", "Anda", "Asingan", "Balungao", "Bani", "Basista", "Bautista",
         "Bayambang", "Binalonan", "Binmaley", "Bolinao", "Bugallon", "Burgos", "Calasiao",
