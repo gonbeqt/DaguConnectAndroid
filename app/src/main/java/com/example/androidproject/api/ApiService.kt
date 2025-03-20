@@ -24,6 +24,8 @@ import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
 import com.example.androidproject.model.PostMessage
 import com.example.androidproject.model.PostMessageResponse
+import com.example.androidproject.model.ReportConcernRequest
+import com.example.androidproject.model.ReportConcernResponse
 import com.example.androidproject.model.UpdateAddress
 import com.example.androidproject.model.UpdateAddressResponse
 import com.example.androidproject.model.UpdateJob
@@ -233,4 +235,7 @@ interface ApiService {
 
     @DELETE("/client/jobs/delete/{jobId}")
     suspend fun deleteJob(@Path("jobId") jobId: Int): Response<Unit>
+
+    @POST("/user/contact")
+    suspend fun  reportConcern(@Body request : ReportConcernRequest): Response<ReportConcernResponse>
 }

@@ -97,6 +97,7 @@ import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
+import com.example.androidproject.viewmodel.ReportConcernViewModel
 import com.example.androidproject.viewmodel.ResetPassViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
@@ -120,6 +121,7 @@ import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
+import com.example.androidproject.viewmodel.factories.ReportConcernViewModelFactory
 import com.example.androidproject.viewmodel.factories.ResetPassViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanActiveStatusViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanDetailViewModelFactory
@@ -313,6 +315,9 @@ class MainActivity : ComponentActivity() {
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
+
+        val reportConcernVMFactory = ReportConcernViewModelFactory(apiService)
+        val reportConcernViewModel = ViewModelProvider(this, reportConcernVMFactory)[ReportConcernViewModel::class.java]
 
         val initialMessages = listOf(
             Message("Hello!", true),              // Sent (right)
@@ -522,7 +527,7 @@ class MainActivity : ComponentActivity() {
                             AboutUs(navController)
                         }
                         composable("reportproblem") {
-                            ReportProblem(navController)
+                            ReportProblem(navController,reportConcernViewModel,{ LoadingUI() })
                         }
                         composable("notification") {
                             NotificationScreen(navController, getNotificationViewModel)
