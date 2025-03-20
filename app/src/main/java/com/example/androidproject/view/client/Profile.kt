@@ -307,9 +307,6 @@ fun ProfileScreen(
                 }
             } else {
                 when (val state = profileState) {
-                    is GetClientProfileViewModel.ClientProfileState.Loading -> {
-                        LoadingUI()
-                    }
                     is GetClientProfileViewModel.ClientProfileState.Success -> {
                         val profile = state.data
                         // Profile Info Section

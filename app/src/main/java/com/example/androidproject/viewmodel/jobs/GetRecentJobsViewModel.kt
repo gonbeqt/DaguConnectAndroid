@@ -20,7 +20,7 @@ class GetRecentJobsViewModel (private val apiService: ApiService, private val co
     private val refreshTrigger = MutableStateFlow(Unit)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val jobsPagingData: Flow<PagingData<GetJobs>> = refreshTrigger.flatMapLatest {
+    val jobsPagingData: Flow<PagingData<GetJobs>> =
         Pager(
             config = PagingConfig(
                 pageSize = 10,
@@ -30,7 +30,7 @@ class GetRecentJobsViewModel (private val apiService: ApiService, private val co
             ),
             pagingSourceFactory = { GetRecentJobsPagingSource(apiService) }
         ).flow.cachedIn(viewModelScope)
-    }
+
 
     fun refreshJobs() {
         refreshTrigger.value = Unit

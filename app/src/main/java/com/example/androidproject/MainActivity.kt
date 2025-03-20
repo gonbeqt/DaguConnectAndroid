@@ -588,8 +588,7 @@ class MainActivity : ComponentActivity() {
                                 getMyJobApplicationViewModel,
                                 getTradesmanBookingViewModel,
                                 putJobApplicationStatusViewModel,
-                                viewJobApplicationViewModel,
-                                {LoadingUI()}
+                                viewJobApplicationViewModel
                             )
                         }
                         composable("profiletradesman") {
@@ -601,7 +600,7 @@ class MainActivity : ComponentActivity() {
                                 updateTradesmanProfileViewModel,
                                 updateTradesmanActiveStatusViewModel,
                                 viewRatingsViewModel,
-                                { LoadingUI() })
+                            )
                         }
                         composable("manageprofile/{workLocation}/{phoneNumber}/{rate}/{aboutMe}") {backStackEntry ->
                             val workLocation = backStackEntry.arguments?.getString("workLocation") ?: ""

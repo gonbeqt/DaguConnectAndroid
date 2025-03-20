@@ -288,11 +288,11 @@ fun ContentScreen(
         }
     } else {
         when (selectedItem) {
-            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel,reportClientViewModel,LoadingUI,selectedTab)
-            1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,LoadingUI,selectedTab,  selectedSection )
+            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel,reportClientViewModel,selectedTab)
+            1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,selectedTab,  selectedSection )
             2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController,getTradesmanBooking,getMyJobApplications)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,updateTradesmanActiveStatusViewModel,viewRatingsViewModel,LoadingUI,selectedTab)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,updateTradesmanActiveStatusViewModel,viewRatingsViewModel,selectedTab)
         }
     }
 }

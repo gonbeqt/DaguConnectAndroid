@@ -108,6 +108,7 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
@@ -126,7 +127,6 @@ fun ProfileTradesman(
     updateTradesmanProfileViewModel: UpdateTradesmanProfileViewModel,
     updateTradesmanActiveStatusViewModel: UpdateTradesmanActiveStatusViewModel,
     viewRatingsViewModel: ViewRatingsViewModel,
-    LoadingUI: @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
     // Function to check network connectivity
