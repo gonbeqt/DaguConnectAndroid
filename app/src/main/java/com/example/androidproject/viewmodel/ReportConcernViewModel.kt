@@ -29,6 +29,9 @@ class ReportConcernViewModel(private val apiService: ApiService) : ViewModel()  
         }
 
     }
+    fun resetState(){
+        _reportConcernState.value = ReportConcernState.Idle
+    }
 
     sealed class ReportConcernState{
         object Idle : ReportConcernState()

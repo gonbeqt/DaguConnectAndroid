@@ -59,11 +59,16 @@ fun ReportProblem(navController: NavController, reportConcernViewModel : ReportC
             is ReportConcernViewModel.ReportConcernState.Success -> {
                 isLoading = false
                 SnackbarController.show("Reported Problem Sent Successfully")
+                navController.navigate("main_screen?selectedItem=4&selectedTab=1"){
+                    navController.popBackStack()
+                    reportConcernViewModel.resetState()
+                }
         }
             is ReportConcernViewModel.ReportConcernState.Error -> {
                 val error = reportConcern.message
                 SnackbarController.show(error)
                 isLoading = false
+                reportConcernViewModel.resetState()
             }
             else -> Unit
         }
@@ -197,7 +202,12 @@ fun ReportProblem(navController: NavController, reportConcernViewModel : ReportC
             SnackbarController.ObserveSnackbar()
         }
     }
-    if(isLoading){
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.4f)) // Semi-transparent dark overlay
+        )
         LoadingUI()
     }
 

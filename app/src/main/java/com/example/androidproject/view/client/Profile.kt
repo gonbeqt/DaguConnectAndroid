@@ -229,7 +229,6 @@ fun ProfileScreen(
     LaunchedEffect(refreshTrigger) {
         isLoading = true // Set loading state before fetching
         getClientProfileViewModel.getClientProfile()
-        delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
         isLoading = false // Set loading state before fetching
     }
 
@@ -315,9 +314,6 @@ fun ProfileScreen(
                 }
             }
         } else {
-            if (isLoading){
-                LoadingUI()
-            } else {
                 when (val state = profileState) {
                     is GetClientProfileViewModel.ClientProfileState.Loading -> {
                         isLoading = true
@@ -469,6 +465,8 @@ fun ProfileScreen(
                     }
                 }
             }
+        if (isLoading){
+            LoadingUI()
         }
     }
 }
