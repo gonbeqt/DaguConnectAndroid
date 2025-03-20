@@ -87,6 +87,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
@@ -98,6 +99,7 @@ import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.UpdateJob
 import com.example.androidproject.view.ServicePosting
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
@@ -122,7 +124,6 @@ fun ProfileScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     putJobs: PutJobViewModel,
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
-    LoadingUI : @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
 
@@ -139,8 +140,18 @@ fun ProfileScreen(
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
+    // State to track loading during retry
+    var showLoading by remember { mutableStateOf(false) }
+
+    val profileState by getClientProfileViewModel.getProfileState.collectAsState()
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
+    val tabNames = listOf("My Posts", "General")
+
     //state of updating the profile picture
     val updateProfilePictureState by updateClientProfilePictureViewModel.updateClientProfileState.collectAsState()
+
+    val getMyJobsViewModelState = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    val loadState = getMyJobsViewModelState.loadState
 
     LaunchedEffect(updateProfilePictureState) {
         when(val updateProf = updateProfilePictureState){
@@ -149,42 +160,20 @@ fun ProfileScreen(
                 updateClientProfilePictureViewModel.resetState()
             }
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Error -> {
-              val error = updateProf.message
+                val error = updateProf.message
                 Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
             }
             else->Unit
 
         }
     }
-
-    // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableStateOf(0) }
-
-
-
-    // State to track loading during retry
-    var isLoading by remember { mutableStateOf(false) }
-
-    val profileState by getClientProfileViewModel.getProfileState.collectAsState()
-    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
-    val tabNames = listOf("My Posts", "General")
-    val windowSize = rememberWindowSizeClass()
-
-    val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+    LaunchedEffect(Unit) {
+        if (isConnected.value) {
+            getClientProfileViewModel.getClientProfile()
+        }
     }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
-    val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
+
+
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     // Define the image launcher
@@ -226,11 +215,7 @@ fun ProfileScreen(
         }
     }
 
-    LaunchedEffect(refreshTrigger) {
-        isLoading = true // Set loading state before fetching
-        getClientProfileViewModel.getClientProfile()
-        isLoading = false // Set loading state before fetching
-    }
+
 
     Column(
         modifier = modifier
@@ -254,69 +239,76 @@ fun ProfileScreen(
                     fontWeight = FontWeight.Medium
                 )
 
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications Icon",
-                        tint = Color.Black,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clickable { navController.navigate("notification") }
-                    )
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color.Black,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clickable { navController.navigate("notification") }
+                )
 
 
 
             }
         }
 
-        // Handle different states based on connectivity and data loading
-        if (!isConnected.value) {
-            // No internet connection
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No Internet Connection",
-                        fontSize = 18.sp,
-                        color = Color.Red,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Please check your internet and try again.",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Retry button (only fetch data when clicked)
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                // Re-check network connectivity
-                                isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                if (isConnected.value) {
-                                    // Show loading state and trigger data fetch
-                                    isLoading = true
-                                    refreshTrigger++
-                                } else {
-                                    // Optionally show a toast if still no internet
-                                    Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "Retry",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+
+        when{
+            loadState.refresh is LoadState.Loading && getMyJobsViewModelState.itemCount == 0 ->{
+                LoadingUI()
+            }else -> {
+            // Handle different states based on connectivity and data loading
+            if (!isConnected.value) {
+                if(showLoading){
+                    LoadingUI()
+                    LaunchedEffect(Unit) {
+                        delay(1500)
+                        isConnected.value = checkNetworkConnectivity(connectivityManager)
+                        showLoading = false // Hide LoadingUI after delay
+                        if (isConnected.value) {
+                            getMyJobsViewModelState.refresh() // Refresh data after reconnecting
+                        }
                     }
                 }
-            }
-        } else {
+                // No internet connection
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "No Internet Connection",
+                            fontSize = 18.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Please check your internet and try again.",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Retry button (only fetch data when clicked)
+                        Box(
+                            modifier = Modifier
+                                .clickable {
+                                    showLoading = true
+                                }
+                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "Retry",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            } else {
                 when (val state = profileState) {
                     is GetClientProfileViewModel.ClientProfileState.Loading -> {
-                        isLoading = true
+                        LoadingUI()
                     }
                     is GetClientProfileViewModel.ClientProfileState.Success -> {
                         val profile = state.data
@@ -460,14 +452,12 @@ fun ProfileScreen(
                     is GetClientProfileViewModel.ClientProfileState.Error -> {
                         Text(text = "Error: ${state.message}", color = Color.Red)
                     }
-                    else -> {
-                        Text(text = "No profile data available")
-                    }
+                    else -> Unit
                 }
             }
-        if (isLoading){
-            LoadingUI()
+            }
         }
+
     }
 }
 
@@ -522,9 +512,9 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJob
             onDeadlineChange = { deadline ->
                 println("Selected Deadline: $deadline")
             },
-             postJobViewModel,
+            postJobViewModel,
 
-        )
+            )
     }
 }
 

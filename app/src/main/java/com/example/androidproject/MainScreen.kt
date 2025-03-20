@@ -280,11 +280,11 @@ fun ContentScreen(
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
-            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportTradesmanViewModel,LoadingUI)
-            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel, LoadingUI,selectedTab,selectedSection)
+            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportTradesmanViewModel)
+            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel,selectedTab,selectedSection)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,getMyJobApplicantsViewModel)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
-            4 -> ProfileScreen(modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel, putJobViewModel, updateClientProfilePictureViewModel, LoadingUI, selectedTab,)
+            4 -> ProfileScreen(modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel, putJobViewModel, updateClientProfilePictureViewModel, selectedTab,)
         }
     } else {
         when (selectedItem) {

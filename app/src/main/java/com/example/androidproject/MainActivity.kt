@@ -471,8 +471,7 @@ class MainActivity : ComponentActivity() {
                                 updateBookingTradesmanViewModel,
                                 getMyJobApplicantsViewModel,
                                 viewJobApplicationViewModel,
-                                putJobApplicationStatusViewModel,
-                                {LoadingUI()}
+                                putJobApplicationStatusViewModel
                             )
                         }
                         composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
@@ -562,8 +561,7 @@ class MainActivity : ComponentActivity() {
                                 navController,
                                 getJobsViewModel,
                                 getRecentJobsViewModel,
-                                reportClientViewModel,
-                                { LoadingUI() }
+                                reportClientViewModel
                             )
                         }
                         composable("tradesmanapply/{jobId}") { backStackEntry ->

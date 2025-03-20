@@ -94,6 +94,7 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
@@ -109,7 +110,6 @@ fun HomeTradesman(
     getJobsViewModel: GetJobsViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
-    LoadingUI: @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
@@ -288,7 +288,7 @@ fun HomeTradesman(
                                     .background(Color(0xFFD9D9D9))
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI )
+                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel )
                                     1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel )
                                 }
                             }
@@ -354,7 +354,6 @@ fun TopMatches(
     navController: NavController,
     getJobsViewModel: GetJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
-    LoadingUI: @Composable () -> Unit,
 
 ) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
