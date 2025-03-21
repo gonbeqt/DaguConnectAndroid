@@ -1,8 +1,5 @@
 package com.example.androidproject.viewmodel.bookings
 
-import android.content.Context
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -11,24 +8,24 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.client.GetTradesmanBooking
-import com.example.androidproject.viewmodel.bookings.paginate.GetClientBookingPagingSource
 import com.example.androidproject.viewmodel.bookings.paginate.GetTradesmanBookingPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class GetTradesmanBookingViewModel(private val apiService: ApiService) : ViewModel() {
 
-    val TradesmanBookingPagingData: Flow<PagingData<GetTradesmanBooking>> = Pager(
+    private val _pagingSource = MutableStateFlow<GetTradesmanBookingPagingSource?>(null)
 
-        config = PagingConfig(
-            pageSize = 10,
-            initialLoadSize = 10,
-            prefetchDistance = 2,
-            enablePlaceholders = false
-        ),
-        pagingSourceFactory = { GetTradesmanBookingPagingSource(apiService)}
-    ).flow.cachedIn(viewModelScope)
-
-
-
+    val TradesmanBookingPagingData: Flow<PagingData<GetTradesmanBooking>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                initialLoadSize = 10,
+                prefetchDistance = 2,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                GetTradesmanBookingPagingSource(apiService).also { _pagingSource.value =it}
+            }
+        ).flow.cachedIn(viewModelScope)
 }

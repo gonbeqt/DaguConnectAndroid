@@ -10,9 +10,10 @@ class GetMyJobApplicationPagingSource(
 ) : PagingSource<Int, JobApplicationData>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, JobApplicationData> {
-        val page = params.key ?: 1
+
 
         return try {
+            val page = params.key ?: 1
             val response = apiService.getMyJobApplications(page = page, limit = params.loadSize)
             if (response.isSuccessful) {
                 val responseBody = response.body()

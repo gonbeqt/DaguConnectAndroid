@@ -80,6 +80,9 @@ import com.example.androidproject.viewmodel.job_application.PutJobApplicationSta
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import kotlinx.coroutines.delay
+import java.sql.Types.NULL
+import kotlin.time.Duration.Companion.milliseconds
+
 
 @Composable
 fun BookingsScreen(
@@ -111,34 +114,24 @@ fun BookingsScreen(
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-                )
+        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
     }
 
-    val context = LocalContext.current
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
-    var showLoading by remember { mutableStateOf(false) } // For retry loading
+
 
     val getClientsBookingState = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
     val getClientsBookingLoadState = getClientsBookingState.loadState
 
-    val getMyJobApplicantsState = getMyJobApplicants.jobApplicantsPagingData.collectAsLazyPagingItems()
-    val getMyJobApplicantsLoadState = getMyJobApplicantsState.loadState
+    val getMyJobsApplicantsState = getMyJobApplicants.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val getMyJobsApplicantsLoadState = getMyJobsApplicantsState.loadState
 
-    // Trigger refresh only on initial load or section/tab change
-    LaunchedEffect(selectedSection, selectedTabIndex) {
-        if (isConnected.value) {
-            if (selectedSection == 0) {
-                getClientsBookingState.refresh()
-            } else {
-                getMyJobApplicantsState.refresh()
-            }
-        }
-    }
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+    var showLoading by remember { mutableStateOf(false) } // State to control LoadingUI visibility
+
 
     Box(
         modifier = modifier
@@ -147,10 +140,7 @@ fun BookingsScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
-                Modifier
-                    .fillMaxWidth()
-                    .height(70.dp)
-                    .shadow(0.2.dp),
+                Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -209,60 +199,57 @@ fun BookingsScreen(
                         )
                     }
                 }
-
-                // Main content logic
-                if (!isConnected.value) {
-                    if (showLoading) {
+                when {
+                    getClientsBookingLoadState.refresh is LoadState.Loading && getClientsBookingState.itemCount == 0 -> {
                         LoadingUI()
-                        LaunchedEffect(Unit) {
-                            delay(1500)
-                            isConnected.value = checkNetworkConnectivity(connectivityManager)
-                            showLoading = false
-                            if (isConnected.value) {
-                                getClientsBookingState.refresh()
-                                getMyJobApplicantsState.refresh()
-                            }
-                        }
-                    } else {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "No Internet Connection",
-                                    fontSize = 18.sp,
-                                    color = Color.Red,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "Please check your internet and try again.",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .clickable { showLoading = true }
-                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = "Retry",
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                    }
+                    else -> {
+                        if (!isConnected.value) {
+                            if (showLoading) {
+                                LoadingUI()
+                                LaunchedEffect(Unit) {
+                                    delay(1500) // Show LoadingUI for 1.5 seconds
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    showLoading = false // Hide LoadingUI after delay
+                                    if (isConnected.value) {
+                                        getClientsBookingState.refresh()
+                                    }
+                                }
+                            } else {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "No Internet Connection",
+                                            fontSize = 18.sp,
+                                            color = Color.Red,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "Please check your internet and try again.",
+                                            fontSize = 14.sp,
+                                            color = Color.Gray
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clickable {
+                                                    showLoading = true // Show LoadingUI on retry
+                                                }
+                                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                        ) {
+                                            Text(
+                                                text = "Retry",
+                                                color = Color.White,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
-                } else {
-                    when {
-                        // Show LoadingUI only during initial load
-                        (selectedSection == 0 && getClientsBookingLoadState.refresh is LoadState.Loading && getClientsBookingState.itemCount == 0) ||
-                                (selectedSection == 1 && getMyJobApplicantsLoadState.refresh is LoadState.Loading && getMyJobApplicantsState.itemCount == 0) -> {
-                            LoadingUI()
-                        }
-                        else -> {
+                        } else {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -318,7 +305,7 @@ fun BookingsTopSection(navController: NavController, selectedSection: Int, onSec
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .background(if (selectedSection == 0) Color(0xFF3CC0B0) else (Color.Transparent))
+                .background(if (selectedSection == 0) Color(0xFF3CC0B0  ) else (Color.Transparent))
                 .weight(1f)
                 .clickable {
                     onSectionSelected(0)
@@ -340,7 +327,7 @@ fun BookingsTopSection(navController: NavController, selectedSection: Int, onSec
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .background(if (selectedSection == 1) Color(0xFF3CC0B0) else (Color.Transparent))
+                .background(if (selectedSection == 1) Color(0xFF3CC0B0  ) else (Color.Transparent))
                 .weight(1f)
                 .clickable {
                     onSectionSelected(1)
@@ -405,19 +392,8 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
                         Log.d("ALLBOOKINGS", "AllBookingsContent: $clientbooking")
                     }
                 }
+            }
         }
-    }
-
-
-        /* items(booking.size) { index ->
-             val bookings = booking[index]
-             AllItem(bookings,navController)
-         }*/
-
-
-
-
-
     }
 
 }
@@ -426,8 +402,6 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 @Composable
 fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navController:NavController,updateBookingTradesmanViewModel: UpdateBookingTradesmanViewModel) {
     val pending = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
-
-
 
     LaunchedEffect(Unit) {
         pending.refresh()
@@ -1011,7 +985,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = {
-                            showCompletedDialog = true
+                        showCompletedDialog = true
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -2173,28 +2147,28 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
             .background(Color(0xFFD9D9D9)),
         contentAlignment = Alignment.Center // Center the content
     ) {
-    if (completedApplication.isEmpty()) {
+        if (completedApplication.isEmpty()) {
 
-        // Display "No Pending Booking" when the list is empty
-        Text(
-            text = "No Completed Applicants",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.Black,
-            textAlign = TextAlign.Center
-        )
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxHeight()
-                .size(420.dp)
-                .background(Color(0xFFD9D9D9)),
-            contentPadding = PaddingValues(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(completedApplication.size) { index ->
-                val completedJobs = completedApplication[index]
-                CompletedApplicantsItem(completedJobs, navController)
+            // Display "No Pending Booking" when the list is empty
+            Text(
+                text = "No Completed Applicants",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .size(420.dp)
+                    .background(Color(0xFFD9D9D9)),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(completedApplication.size) { index ->
+                    val completedJobs = completedApplication[index]
+                    CompletedApplicantsItem(completedJobs, navController)
                 }
             }
         }
@@ -2820,9 +2794,9 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                     AsyncImage(
                         model = myJob.clientProfilePicture, // Use URL here
                         contentDescription = "Profile Image",
-                         modifier = Modifier
-                             .size(62.dp)
-                             .clip(CircleShape),
+                        modifier = Modifier
+                            .size(62.dp)
+                            .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
                     // Tradesman details
@@ -2872,8 +2846,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                     ) {
                         Box(
                             modifier = Modifier
-                                .clickable(
-                                    indication = null,
+                                .clickable(indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) { showCancelledDialog = true }
                                 .background(
@@ -2889,8 +2862,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                         }
                         Box(
                             modifier = Modifier
-                                .clickable(
-                                    indication = null,
+                                .clickable(indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) {
                                     showCompletedDialog = true
@@ -3117,7 +3089,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
             )
         }
     }
-    }
+}
 
 @Composable
 fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {

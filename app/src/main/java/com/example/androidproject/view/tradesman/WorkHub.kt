@@ -435,8 +435,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
 }
 @Composable
 fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel, updateBookingClientViewModel: UpdateBookingClientViewModel ) {
-    val bookingPendingstate =
-        getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val bookingPendingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         bookingPendingstate.refresh()
