@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
@@ -89,6 +90,7 @@ import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.Categories
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
@@ -101,7 +103,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit) {
+fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getResumesViewModel: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel) {
     Log.i("Screen" , "HomeScreen")
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
@@ -176,7 +178,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
                 item { Spacer(modifier = Modifier.height(20.dp)) }
                 item { CategoryRow(categories, navController) }
                 item { Spacer(modifier = Modifier.height(20.dp)) }
-                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel, LoadingUI) }
+                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel) }
             }
         }
 
@@ -362,51 +364,31 @@ fun CategoryRow(categories: List<Categories>, navController: NavController) {
 
 
 @Composable
-fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel,LoadingUI:@Composable ()-> Unit) {
+fun TradesmanColumn(
+    getResumesViewModel: GetResumesViewModel,
+    navController: NavController,
+    reportTradesmanViewModel: ReportTradesmanViewModel
+) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
-
+    val loadState = resumeList.loadState
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
+    var showLoading by remember { mutableStateOf(false) } // State to control LoadingUI visibility
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    LaunchedEffect(Unit) {
-        getResumesViewModel.refreshResumes()
-    }
-
-    LaunchedEffect(resumeList.itemSnapshotList) {
-        displayedResumes = resumeList.itemSnapshotList.items
-            .filter { it.ratings != null && it.id != null } // Add more validation
-            .sortedByDescending { it.ratings }
-            .take(5)
-    }
-
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
+    // Function to check network connectivity
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+        return capabilities != null && (
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                )
     }
-
-
-    val context = LocalContext.current
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-
-    // State to track loading during retry
-    var isLoading by remember { mutableStateOf(false) }
-
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
-        }
-    }
 
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 120.dp
@@ -441,92 +423,102 @@ fun TradesmanColumn(getResumesViewModel: GetResumesViewModel, navController: Nav
         }
     }
 
-    if (!isConnected.value) {
-        // No internet connection
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp), // Optional padding to avoid edge clipping
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center // Ensures vertical centering within the Column
-            ) {
-                Text(
-                    text = "No Internet Connection",
-                    fontSize = 18.sp,
-                    color = Color.Red,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Please check your internet and try again.",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center // Ensures the text is centered if it wraps
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                // Retry button (only fetch data when clicked)
-                Box(
-                    modifier = Modifier
-                        .clickable {
-                            // Re-check network connectivity
+    when {
+        // Initial loading state
+        loadState.refresh is LoadState.Loading && resumeList.itemCount == 0 -> {
+            LoadingUI()
+        }
+        else -> {
+            if (!isConnected.value) {
+                if (showLoading) {
+                        LoadingUI()
+                        LaunchedEffect(Unit) {
+                            delay(1500) // Show LoadingUI for 1.5 seconds
                             isConnected.value = checkNetworkConnectivity(connectivityManager)
+                            showLoading = false // Hide LoadingUI after delay
                             if (isConnected.value) {
-                                // Show loading state and trigger data fetch
-                                isLoading = true
-                                refreshTrigger++
-                            } else {
-                                // Optionally show a toast if still no internet
-                                Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                resumeList.refresh() // Refresh data after reconnecting
                             }
                         }
-                        .background(Color(0xFFEDEFEF), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "Retry",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "No Internet Connection",
+                                fontSize = 18.sp,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Please check your internet and try again.",
+                                fontSize = 14.sp,
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        showLoading = true // Show LoadingUI on retry
+                                    }
+                                    .background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Retry",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    } else {
-        if (isLoading){
-            LoadingUI()
-        }else{
-            Card(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-                    .background(Color.Transparent)
-            ) {
-                Column(
+            } else {
+                Card(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .background(Color(0xFFEDEFEF)),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                        .background(Color.Transparent)
                 ) {
-                    displayedResumes.forEach { resume ->
-                        TradesmanItem(
-                            resumes = resume,
-                            navController = navController,
-                            cardHeight = cardHeight,
-                            textSize = textSize,
-                            reportTradesmanViewModels = reportTradesmanViewModel
-                        )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .background(Color(0xFFEDEFEF)),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (displayedResumes.isEmpty() && resumeList.itemCount > 0) {
+                            // Fallback to ensure data is displayed
+                            displayedResumes = resumeList.itemSnapshotList.items
+                                .filter { it.ratings != null && it.id != null }
+                                .sortedByDescending { it.ratings }
+                                .take(5)
+                        }
+                        displayedResumes.forEach { resume ->
+                            TradesmanItem(
+                                resumes = resume,
+                                navController = navController,
+                                cardHeight = cardHeight,
+                                textSize = textSize,
+                                reportTradesmanViewModels = reportTradesmanViewModel
+                            )
+                        }
                     }
                 }
             }
         }
     }
-
-
 }
-
 
 
 

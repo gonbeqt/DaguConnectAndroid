@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class GetChatViewModel(private val apiService: ApiService) : ViewModel() {
-    private val refreshTrigger = MutableStateFlow(Unit)
     private val _pagingSource = MutableStateFlow<GetChatPagingSource?>(null)
 
     val getChatsPagingData: Flow<PagingData<Chats>> =

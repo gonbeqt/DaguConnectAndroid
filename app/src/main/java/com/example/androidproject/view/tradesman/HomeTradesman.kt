@@ -94,6 +94,7 @@ import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
 import com.example.androidproject.view.client.openScreenShot
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
@@ -109,7 +110,6 @@ fun HomeTradesman(
     getJobsViewModel: GetJobsViewModel,
     getRecentJobsViewModel: GetRecentJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
-    LoadingUI: @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
@@ -122,18 +122,13 @@ fun HomeTradesman(
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+    val getJobsViewModelState = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    val loadState = getJobsViewModelState.loadState
 
-    var refreshTrigger by remember { mutableIntStateOf(0) }
+
     val userId = AccountManager.getAccount()?.id
 
-    // Permission launcher for POST_NOTIFICATIONS
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
+
 
     // Monitor network state dynamically
     LaunchedEffect(Unit) {
@@ -146,14 +141,6 @@ fun HomeTradesman(
     // Initialize WebSocket and notifications
     LaunchedEffect(isConnected.value) {
         if (isConnected.value) {
-            // Request notification permission for Android 13+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val permission = Manifest.permission.POST_NOTIFICATIONS
-                if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    permissionLauncher.launch(permission)
-                }
-            }
-
             // Connect WebSocket and initialize notifications
             WebSocketManager.connect(userId.toString())
             WebSocketNotificationManager.initialize(context, userId.toString())
@@ -164,7 +151,7 @@ fun HomeTradesman(
 
 
 
-    var isLoading by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val headerTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
@@ -173,14 +160,6 @@ fun HomeTradesman(
     }
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
 
-
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true
-            delay(200.milliseconds)
-            isLoading = false
-        }
-    }
 
     val tabTitles = listOf("Top Matches", "Recent Posted Jobs")
 
@@ -239,48 +218,54 @@ fun HomeTradesman(
                             )
                         }
                     }
-                    if (!isConnected.value) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "No Internet Connection",
-                                    fontSize = 18.sp,
-                                    color = Color.Red,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "Please check your internet and try again.",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .clickable {
-                                            isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                            if (isConnected.value) {
-                                                isLoading = true
-                                                refreshTrigger++
-                                            } else {
-                                                SnackbarController.show("Still no internet connection")
-                                            }
-                                        }
-                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = "Retry",
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                    when{
+                        loadState.refresh is LoadState.Loading && getJobsViewModelState.itemCount == 0 -> {
+                            LoadingUI()
+                        }else -> {
+                        if (!isConnected.value) {
+                            if(showLoading){
+                                LoadingUI()
+                                LaunchedEffect(Unit) {
+                                    delay(2000)
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    showLoading = false
+                                    if (isConnected.value) {
+                                        getJobsViewModelState.refresh()
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        if (isLoading) {
-                            LoadingUI()
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "No Internet Connection",
+                                        fontSize = 18.sp,
+                                        color = Color.Red,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Please check your internet and try again.",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .clickable {
+                                                showLoading = true
+                                            }
+                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Retry",
+                                            color = Color.White,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
                         } else {
                             Box(
                                 modifier = Modifier
@@ -288,12 +273,14 @@ fun HomeTradesman(
                                     .background(Color(0xFFD9D9D9))
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel, LoadingUI )
+                                    0 -> TopMatches(navController, getJobsViewModel, reportClientViewModel )
                                     1 -> RecentJobs(navController, getRecentJobsViewModel, reportClientViewModel )
                                 }
                             }
                         }
+                        }
                     }
+
                 }
             }
         }
@@ -354,13 +341,12 @@ fun TopMatches(
     navController: NavController,
     getJobsViewModel: GetJobsViewModel,
     reportClientViewModel: ReportClientViewModel,
-    LoadingUI: @Composable () -> Unit,
 
 ) {
     val jobsList = getJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getJobsViewModel.refreshJobs()
+        jobsList.refresh()
     }
     val windowSize = rememberWindowSizeClass()
 
@@ -380,18 +366,7 @@ fun TopMatches(
                     TopMatchesItem(job, navController, reportClientViewModel)
                 }
             }
-            item {
-                if (jobsList.loadState.append == LoadState.Loading) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        LoadingUI()
-                    }
-                }
-            }
+
         }
     }
 }

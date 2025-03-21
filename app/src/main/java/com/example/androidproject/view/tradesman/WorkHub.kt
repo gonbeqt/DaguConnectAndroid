@@ -63,6 +63,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
@@ -71,6 +72,7 @@ import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
@@ -83,7 +85,7 @@ import java.sql.Types.NULL
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, LoadingUI: @Composable () -> Unit, initialTabIndex: Int = 0, initialSection: Int = 0) {// Default to 0 if not provided
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel,  initialTabIndex: Int = 0, initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
 
     val iconSize = when (windowSize.width) {
@@ -116,20 +118,11 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-
+    val getMyJobApplicationsState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val loadState = getMyJobApplicationsState.loadState
     // State to track loading during retry
-    var isLoading by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
 
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
-        }
-    }
 
     // Define tab titles based on selected section
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
@@ -211,57 +204,58 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             )
                         }
                     }
-                    // Handle different states based on connectivity and data loading
-                    if (!isConnected.value) {
-                        // No internet connection
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "No Internet Connection",
-                                    fontSize = 18.sp,
-                                    color = Color.Red,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "Please check your internet and try again.",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                // Retry button (only fetch data when clicked)
-                                Box(
-                                    modifier = Modifier
-                                        .clickable {
-                                            // Re-check network connectivity
-                                            isConnected.value =
-                                                checkNetworkConnectivity(connectivityManager)
-                                            if (isConnected.value) {
-                                                // Show loading state and trigger data fetch
-                                                isLoading = true
-                                                refreshTrigger++
-                                            } else {
-                                                // Optionally show a toast if still no internet
-                                                SnackbarController.show("Still no internet connection")
-
-                                            }
-                                        }
-                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = "Retry",
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                    when {
+                        loadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0-> {
+                            LoadingUI()
+                        }else ->{
+                        // Handle different states based on connectivity and data loading
+                        if (!isConnected.value) {
+                            if(showLoading){
+                                LoadingUI()
+                                LaunchedEffect(Unit) {
+                                    delay(1500) // Show LoadingUI for 1.5 seconds
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    showLoading = false // Hide LoadingUI after delay
+                                    if (isConnected.value) {
+                                        getMyJobApplicationsState.refresh()
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        if (isLoading){
-                            LoadingUI()
-                        }else{
+                            // No internet connection
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "No Internet Connection",
+                                        fontSize = 18.sp,
+                                        color = Color.Red,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Please check your internet and try again.",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    // Retry button (only fetch data when clicked)
+                                    Box(
+                                        modifier = Modifier
+                                            .clickable {
+                                                showLoading = true
+                                            }
+                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Retry",
+                                            color = Color.White,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
                             // Content changes based on the selected tab and section
                             Box(
                                 modifier = Modifier
@@ -289,8 +283,11 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                     }
                                 }
                             }
+
+                        }
                         }
                     }
+
 
                 }
 

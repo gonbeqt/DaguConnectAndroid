@@ -62,6 +62,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
@@ -71,6 +72,7 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
@@ -91,8 +93,7 @@ fun BookingsScreen(
     getMyJobApplicants: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     putJobApplicationStatus: PutJobApplicationStatusViewModel,
-    LoadingUI:@Composable () -> Unit,
-    initialTabIndex: Int = 0, // Default to 0 if not provided
+    initialTabIndex: Int = 0,
     initialSection: Int = 0
 ) {
     Log.i("Screen", "BookingsScreen")
@@ -103,14 +104,13 @@ fun BookingsScreen(
         WindowType.LARGE -> 16.sp
     }
 
-    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
     var selectedSection by remember { mutableIntStateOf(initialSection) }
 
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
 
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
@@ -119,25 +119,14 @@ fun BookingsScreen(
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
     }
 
+    val getClientsBookingState = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    val loadState = getClientsBookingState.loadState
 
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+    var showLoading by remember { mutableStateOf(false) } // State to control LoadingUI visibility
 
-    // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-
-    // State to track loading during retry
-    var isLoading by remember { mutableStateOf(false) }
-
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
-        }
-    }
 
     Box(
         modifier = modifier
@@ -145,18 +134,17 @@ fun BookingsScreen(
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
+            Row(
+                Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-
-            ){
+            ) {
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 25.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-
                 ) {
                     Text(
                         text = "Bookings",
@@ -206,77 +194,77 @@ fun BookingsScreen(
                         )
                     }
                 }
-                // Handle different states based on connectivity and data loading
-                if (!isConnected.value) {
-                    // No internet connection
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "No Internet Connection",
-                                fontSize = 18.sp,
-                                color = Color.Red,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Please check your internet and try again.",
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            // Retry button (only fetch data when clicked)
-                            Box(
-                                modifier = Modifier
-                                    .clickable {
-                                        // Re-check network connectivity
-                                        isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                        if (isConnected.value) {
-                                            // Show loading state and trigger data fetch
-                                            isLoading = true
-                                            refreshTrigger++
-                                        } else {
-                                            // Optionally show a toast if still no internet
-                                            Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                when {
+                    loadState.refresh is LoadState.Loading && getClientsBookingState.itemCount == 0 -> {
+                        LoadingUI()
+                    }
+                    else -> {
+                        if (!isConnected.value) {
+                            if (showLoading) {
+                                LoadingUI()
+                                LaunchedEffect(Unit) {
+                                    delay(1500) // Show LoadingUI for 1.5 seconds
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    showLoading = false // Hide LoadingUI after delay
+                                }
+                            } else {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "No Internet Connection",
+                                            fontSize = 18.sp,
+                                            color = Color.Red,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "Please check your internet and try again.",
+                                            fontSize = 14.sp,
+                                            color = Color.Gray
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clickable {
+                                                    showLoading = true // Show LoadingUI on retry
+                                                }
+                                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                        ) {
+                                            Text(
+                                                text = "Retry",
+                                                color = Color.White,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
                                         }
                                     }
-                                    .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = "Retry",
-                                    color = Color.White,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    if (isLoading){
-                        LoadingUI()
-                    }else{
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFFD9D9D9))
-                                .padding(16.dp)
-                        ) {
-                            when (selectedSection) {
-                                0 -> when (selectedTabIndex) {
-                                    0 -> AllBookingsContent(getClientsBooking, navController)
-                                    1 -> PendingBookingsContent(getClientsBooking, navController,updateBookingTradesmanViewModel)
-                                    2 -> DeclinedBookingsContent(getClientsBooking, navController)
-                                    3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
-                                    4 -> CompletedBookingsContent(getClientsBooking, navController)
-                                    5 -> CancelledBookingsContent(getClientsBooking, navController)
                                 }
-                                1 -> when (selectedTabIndex) {
-                                    0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
-                                    1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
-                                    2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
-                                    3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
-                                    4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
-                                    5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFFD9D9D9))
+                                    .padding(16.dp)
+                            ) {
+                                when (selectedSection) {
+                                    0 -> when (selectedTabIndex) {
+                                        0 -> AllBookingsContent(getClientsBooking, navController)
+                                        1 -> PendingBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
+                                        2 -> DeclinedBookingsContent(getClientsBooking, navController)
+                                        3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
+                                        4 -> CompletedBookingsContent(getClientsBooking, navController)
+                                        5 -> CancelledBookingsContent(getClientsBooking, navController)
+                                    }
+                                    1 -> when (selectedTabIndex) {
+                                        0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
+                                        1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
+                                        2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                        3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
+                                        4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                        5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                    }
                                 }
                             }
                         }

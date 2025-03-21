@@ -3,7 +3,6 @@ package com.example.androidproject.data.preferences
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import com.example.androidproject.model.LoginResponse
 import com.example.androidproject.model.User
 import com.google.gson.Gson
 

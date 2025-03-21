@@ -14,23 +14,27 @@ import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.viewmodel.bookings.paginate.GetClientBookingPagingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 
 class GetClientBookingViewModel(private val apiService: ApiService) : ViewModel() {
 
     private val _pagingSource = MutableStateFlow<GetClientBookingPagingSource?>(null)
 
-    val ClientBookingPagingData: Flow<PagingData<GetClientsBooking>> = Pager(
 
-        config = PagingConfig(
-            pageSize = 10,
-            initialLoadSize = 10,
-            prefetchDistance = 2,
-            enablePlaceholders = false
-        ),
-        pagingSourceFactory = {
-            GetClientBookingPagingSource(apiService).also { _pagingSource.value = it }
-        }
-    ).flow.cachedIn(viewModelScope)
+    val ClientBookingPagingData: Flow<PagingData<GetClientsBooking>> =
+        Pager(
+
+            config = PagingConfig(
+                pageSize = 10,
+                initialLoadSize = 10,
+                prefetchDistance = 2,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                GetClientBookingPagingSource(apiService).also { _pagingSource.value = it }
+            }
+        ).flow.cachedIn(viewModelScope)
+
 
 
 }
