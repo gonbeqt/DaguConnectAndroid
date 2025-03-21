@@ -119,7 +119,11 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
     val getMyJobApplicationsState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
-    val loadState = getMyJobApplicationsState.loadState
+    val getMyJobApplicationsLoadState = getMyJobApplicationsState.loadState
+
+    val getTradesmanBookingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val getTradesmanBookingLoadState = getTradesmanBookingState.loadState
+
     // State to track loading during retry
     var showLoading by remember { mutableStateOf(false) }
 
@@ -205,8 +209,11 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                         }
                     }
                     when {
-                        loadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0-> {
-                            LoadingUI()
+                        (selectedSection == 0 && getMyJobApplicationsLoadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0) -> {
+                            LoadingUI() // For "My Jobs" - this is correct as is
+                        }
+                        (selectedSection == 1 && getTradesmanBookingLoadState.refresh is LoadState.Loading && getTradesmanBookingState.itemCount == 0) -> {
+                            LoadingUI() // For "My Applications" - use getMyJobApplications instead of getTradesmanBooking
                         }else ->{
                         // Handle different states based on connectivity and data loading
                         if (!isConnected.value) {
@@ -218,6 +225,8 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                     showLoading = false // Hide LoadingUI after delay
                                     if (isConnected.value) {
                                         getMyJobApplicationsState.refresh()
+                                        getTradesmanBookingState.refresh()
+
                                     }
                                 }
                             }
