@@ -273,36 +273,35 @@ fun ProfileTradesman(
                     if(showRetryLoading){
                         LoadingUI()
                     }else{
-
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "No Internet Connection",
-                            fontSize = 18.sp,
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Please check your internet and try again.",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Box(
-                            modifier = Modifier
-                                .clickable {
-                                    showRetryLoading = true // Start retry loading animation
-                                }
-                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Retry",
-                                color = Color.White,
-                                fontSize = 16.sp,
+                                text = "No Internet Connection",
+                                fontSize = 18.sp,
+                                color = Color.Red,
                                 fontWeight = FontWeight.Bold
                             )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Please check your internet and try again.",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        showRetryLoading = true // Start retry loading animation
+                                    }
+                                    .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Retry",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
