@@ -752,10 +752,11 @@ fun CategoryItem(category: Categories, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, textSize: TextUnit, reportTradesmanViewModels: ReportTradesmanViewModel) {
+
+    val reportState by reportTradesmanViewModels.reportState.collectAsState()
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
-    val reportState by reportTradesmanViewModels.reportState.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showReportSheet by remember { mutableStateOf(false) }
