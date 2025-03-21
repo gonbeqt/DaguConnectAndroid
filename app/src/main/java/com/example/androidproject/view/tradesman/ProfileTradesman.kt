@@ -163,8 +163,8 @@ fun ProfileTradesman(
 
     val updateTradesmanActiveStatusState by updateTradesmanActiveStatusViewModel.updateStatusState.collectAsState()
 
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-    var isLoading by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(true) }
+    var showRetryLoading  by remember { mutableStateOf(false) }
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
     val tabNames = listOf("Job Profile", "General")
@@ -204,15 +204,25 @@ fun ProfileTradesman(
         }
     }
 
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true
-            delay(200.milliseconds)
+
+    // Fetch profile data when the composable is first launched or when retrying
+    LaunchedEffect(showLoading) {
+        if (showLoading && isConnected.value) {
             viewTradesmanProfileViewModel.viewTradesmanProfile()
-            isLoading = false
         }
     }
 
+// Handle retry loading animation
+    LaunchedEffect(showRetryLoading) {
+        if (showRetryLoading) {
+            delay(1500) // Show LoadingUI for 1.5 seconds
+            isConnected.value = checkNetworkConnectivity(connectivityManager)
+            if (isConnected.value) {
+                showLoading = true // Trigger data fetch if internet is back
+            }
+            showRetryLoading = false // Hide loading animation
+        }
+    }
     LaunchedEffect(updateTradesmanActiveStatusState) {
         when (val updatingStatus = updateTradesmanActiveStatusState) {
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
@@ -260,6 +270,11 @@ fun ProfileTradesman(
 
             if (!isConnected.value) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if(showRetryLoading){
+                        LoadingUI()
+                    }else{
+
+                    }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "No Internet Connection",
@@ -277,14 +292,7 @@ fun ProfileTradesman(
                         Box(
                             modifier = Modifier
                                 .clickable {
-                                    isConnected.value =
-                                        checkNetworkConnectivity(connectivityManager)
-                                    if (isConnected.value) {
-                                        isLoading = true
-                                        refreshTrigger++
-                                    } else {
-                                        SnackbarController.show("Still no internet connection")
-                                    }
+                                    showRetryLoading = true // Start retry loading animation
                                 }
                                 .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -299,9 +307,6 @@ fun ProfileTradesman(
                     }
                 }
             } else {
-                if (isLoading) {
-                    LoadingUI()
-                } else {
                     when (val profileState = viewTradesmanProfilestate) {
                         is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
                             Box(
@@ -523,55 +528,12 @@ fun ProfileTradesman(
                         }
 
                         is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Error -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = "Error: ${profileState.message}",
-                                        color = Color.Red,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable {
-                                                isConnected.value =
-                                                    checkNetworkConnectivity(connectivityManager)
-                                                if (isConnected.value) {
-                                                    isLoading = true
-                                                    refreshTrigger++
-                                                } else {
-                                                    SnackbarController.show("Still no internet connection")
-                                                }
-                                            }
-                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    ) {
-                                        Text(
-                                            text = "Retry",
-                                            color = Color.White,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
+
                         }
 
-                        else -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                LoadingUI()
-                            }
-                        }
+                        else -> Unit
                     }
 
-                }
 
             }
 
