@@ -118,15 +118,6 @@ fun BookingsScreen(
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
     }
-
-
-
-    val getClientsBookingState = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
-    val getClientsBookingLoadState = getClientsBookingState.loadState
-
-    val getMyJobsApplicantsState = getMyJobApplicants.jobApplicantsPagingData.collectAsLazyPagingItems()
-    val getMyJobsApplicantsLoadState = getMyJobsApplicantsState.loadState
-
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
@@ -199,11 +190,6 @@ fun BookingsScreen(
                         )
                     }
                 }
-                when {
-                    getClientsBookingLoadState.refresh is LoadState.Loading && getClientsBookingState.itemCount == 0 -> {
-                        LoadingUI()
-                    }
-                    else -> {
                         if (!isConnected.value) {
                             if (showLoading) {
                                 LoadingUI()
@@ -211,9 +197,6 @@ fun BookingsScreen(
                                     delay(1500) // Show LoadingUI for 1.5 seconds
                                     isConnected.value = checkNetworkConnectivity(connectivityManager)
                                     showLoading = false // Hide LoadingUI after delay
-                                    if (isConnected.value) {
-                                        getClientsBookingState.refresh()
-                                    }
                                 }
                             } else {
                                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -276,8 +259,6 @@ fun BookingsScreen(
                                 }
                             }
                         }
-                    }
-                }
             }
         }
     }
