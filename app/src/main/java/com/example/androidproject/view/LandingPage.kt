@@ -59,6 +59,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.androidproject.R
+import com.example.androidproject.data.preferences.NotificationSettingManager
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -73,6 +74,7 @@ fun LandingPageScreen(navController: NavController) {
         if (!isGranted) {
             Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
         }
+        NotificationSettingManager.saveNotification(true)
     }
 
     LaunchedEffect(Unit) {

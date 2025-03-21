@@ -1952,7 +1952,7 @@ fun PendingMySubmissionsTradesmanItem(
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
 ) {
     val windowSize = rememberWindowSizeClass()
-
+    var ifCancelledClicked by remember { mutableStateOf(false) }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
         WindowType.MEDIUM -> 20.sp
@@ -1974,6 +1974,7 @@ fun PendingMySubmissionsTradesmanItem(
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val putState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
+    var cancelReason by remember { mutableStateOf("") }
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
@@ -1987,6 +1988,11 @@ fun PendingMySubmissionsTradesmanItem(
     LaunchedEffect(putState) {
         when (putState) {
             is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
+                WebSocketManager.sendNotificationJobToClient(
+                    myJob.clientId.toString(),
+                    "A job application was cancelled",
+                    "${myJob.tradesmanFullname} has cancelled the job application due to ${cancelReason}"
+                )
                 SnackbarController.show("Application cancelled")
                 putJobApplicationStatusViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
@@ -2207,7 +2213,7 @@ fun PendingMySubmissionsTradesmanItem(
                         showCancelReasons = false
                         selectedReason?.let {
                             putJobApplicationStatusViewModel.updateJobApplicationStatus(myJob.id,"Cancelled",it)
-
+                            cancelReason = it
                         }
                     },
                     enabled = selectedReason != null,

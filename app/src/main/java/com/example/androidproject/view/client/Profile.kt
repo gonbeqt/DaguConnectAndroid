@@ -1012,6 +1012,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                     checked = isChecked,
                     onCheckedChange = { isChecked = it
                         NotificationSettingManager.saveNotification(it)
+                        Toast.makeText(context, "$isChecked", Toast.LENGTH_SHORT).show()
                                       },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,

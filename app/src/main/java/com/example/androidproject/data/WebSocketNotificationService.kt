@@ -37,11 +37,11 @@ object WebSocketNotificationManager {
             Log.d(TAG, "Starting to collect WebSocket notifications")
             WebSocketManager.notifications.collect { notification ->
                 notification?.let {
-                    if(NotificationSettingManager.getNotification() == true){
+                    if(NotificationSettingManager.getNotification() == true || NotificationSettingManager.getNotification() == null){
                         Log.d(TAG, "Collected notification: Title=${it.title}, Message=${it.message}")
                         showNotification(it.title, it.message)
                     } else {
-                        Log.d(TAG, "Notification is turned off.")
+                        Log.d(TAG, "Notification is turned off: ${NotificationSettingManager.getNotification()}.")
                     }
                 } ?: Log.d(TAG, "Notification was null")
             }
@@ -80,7 +80,7 @@ object WebSocketNotificationManager {
             .setStyle(NotificationCompat.BigTextStyle()
                 .bigText(messageBody ?: "New message received"))
             .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
