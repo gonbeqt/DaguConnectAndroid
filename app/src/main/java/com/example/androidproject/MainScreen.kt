@@ -97,8 +97,7 @@ fun MainScreen(
     viewRatingsViewModel: ViewRatingsViewModel,
     initialSelectedItem: Int = 0,
     initialSelectedTab: Int = 0,
-    initialSelectedSection: Int = 0,
-    LoadingUI: @Composable () -> Unit
+    initialSelectedSection: Int = 0
 ) {
     val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
@@ -239,8 +238,7 @@ fun MainScreen(
             updateClientProfilePictureViewModel,
             updateTradesmanActiveStatusViewModel,
             reportClientViewModel,
-            viewRatingsViewModel,
-            LoadingUI
+            viewRatingsViewModel
         )
     }
 }
@@ -275,7 +273,6 @@ fun ContentScreen(
     updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
     reportClientViewModel:ReportClientViewModel,
     viewRatingsViewModel: ViewRatingsViewModel,
-    LoadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {

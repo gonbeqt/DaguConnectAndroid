@@ -128,14 +128,7 @@ fun HomeTradesman(
 
     val userId = AccountManager.getAccount()?.id
 
-    // Permission launcher for POST_NOTIFICATIONS
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
+
 
     // Monitor network state dynamically
     LaunchedEffect(Unit) {
@@ -148,14 +141,6 @@ fun HomeTradesman(
     // Initialize WebSocket and notifications
     LaunchedEffect(isConnected.value) {
         if (isConnected.value) {
-            // Request notification permission for Android 13+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val permission = Manifest.permission.POST_NOTIFICATIONS
-                if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    permissionLauncher.launch(permission)
-                }
-            }
-
             // Connect WebSocket and initialize notifications
             WebSocketManager.connect(userId.toString())
             WebSocketNotificationManager.initialize(context, userId.toString())

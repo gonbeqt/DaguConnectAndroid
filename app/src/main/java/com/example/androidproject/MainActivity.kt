@@ -2,7 +2,6 @@ package com.example.androidproject
 
 import LogoutViewModel
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -31,6 +30,7 @@ import androidx.navigation.navArgument
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.NotificationSettingManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
 import com.example.androidproject.view.client.AllTradesman
@@ -65,7 +65,6 @@ import com.example.androidproject.view.client.MessageScreen
 import com.example.androidproject.view.client.MessagingScreen
 import com.example.androidproject.view.client.NotificationScreen
 import com.example.androidproject.view.client.RateAndReviews
-import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.tradesman.AvailabilityStatus
 import com.example.androidproject.view.tradesman.BookingsTradesman
 import com.example.androidproject.view.tradesman.CancelTradesmanNow
@@ -180,10 +179,10 @@ class MainActivity : ComponentActivity() {
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val isShown = sharedPreferences.getBoolean("isShown", false)
 
-        // Initialize TokenManager
+        // Initialize managers
         TokenManager.init(this)
         AccountManager.init(this)
-
+        NotificationSettingManager.init(this)
 
         // Determine the start destination based on token and user role
         val startDestination = when {
@@ -412,8 +411,7 @@ class MainActivity : ComponentActivity() {
                                 viewRatingsViewModel,
                                 initialSelectedItem = selectedItem,
                                 initialSelectedTab = selectedTab,
-                                initialSelectedSection = selectedSection,
-                                { LoadingUI() } // Pass LoadingUI here
+                                initialSelectedSection = selectedSection
                             )
                         }
                         composable("message_screen") {
