@@ -1764,7 +1764,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                 }
                 Spacer(Modifier.width(16.dp))
                 OutlinedButton(
-                    onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}") },
+                    onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}/${completedBooking.id}") },
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, Color(0xFFECAB1E)),
                     modifier = Modifier.weight(1f),

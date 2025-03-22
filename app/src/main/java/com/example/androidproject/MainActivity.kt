@@ -472,14 +472,16 @@ class MainActivity : ComponentActivity() {
                                 putJobApplicationStatusViewModel
                             )
                         }
-                        composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
+                        composable("rateandreviews/{resumeId}/{tradesmanId}/{bookingId}") { backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            val bookingId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+                            val tradesmanId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+                            val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
                             RateAndReviews(
                                 rateTradesmanViewModel,
                                 viewClientBookingViewModel,
                                 navController,
                                 resumeId,
+                                tradesmanId,
                                 bookingId
                             )
                         }

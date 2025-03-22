@@ -54,11 +54,12 @@ import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 
 @Composable
-fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBookingViewModel: ViewClientBookingViewModel, navController: NavController, resumeId: String,tradesmanId :String) {
+fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBookingViewModel: ViewClientBookingViewModel, navController: NavController, resumeId: String,tradesmanId :String,bookingId :String) {
     val reviewText = remember { mutableStateOf("") }
     val rating = remember { mutableStateOf(0) }
     val ResumeId = resumeId.toIntOrNull() ?: return
     val tradesman_Id = tradesmanId.toIntOrNull()?: return
+    val booking_Id = bookingId.toIntOrNull()?: return
     val ratetradesmanState by rateTradesmanViewModel.rateTradesmanState.collectAsState()
     val context = LocalContext.current
     var rateStar by remember { mutableStateOf("") }
@@ -81,14 +82,15 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                 )
                 val successMessage = ratetradesman.data?.message
                 Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
-                // Pass result to MainScreen to switch to Bookings tab with Cancelled selected
-                navController.previousBackStackEntry?.savedStateHandle?.set("selectedTab", 4)
-                navController.popBackStack("main_screen", inclusive = false)
+                navController.navigate("main_screen?selectedItem=1&selectedTab=4"){
+                    navController.popBackStack()
+                }
                 rateTradesmanViewModel.resetState()
             }
             is RateTradesmanViewModel.RateTradesman.Error -> {
                val errormessage = ratetradesman.message
                 Toast.makeText(context, errormessage, Toast.LENGTH_SHORT).show()
+                rateTradesmanViewModel.resetState()
             }
             else -> Unit
         }
@@ -130,7 +132,10 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Arrow Back",
                                 Modifier
-                                    .clickable { navController.popBackStack() }
+                                    .clickable {
+                                        navController.navigate("main_screen?selectedItem=1&selectedTab=4"){
+                                        navController.popBackStack() }
+                                    }
                                     .padding(16.dp),
                                 tint = Color(0xFF81D796)
                             )
@@ -230,7 +235,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                         // Submit Button
                         Button(
                             onClick = {
-                                rateTradesmanViewModel.rateTradesman(reviewText.value, rating.value, tradesman_Id)
+                                rateTradesmanViewModel.rateTradesman(reviewText.value, rating.value, tradesman_Id,booking_Id)
                                 rateStar = rating.value.toString()
                             },
                             modifier = Modifier
