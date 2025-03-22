@@ -3,6 +3,7 @@ package com.example.androidproject.view.theme
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.google.gson.internal.bind.TypeAdapters.FLOAT
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
@@ -56,5 +57,14 @@ val myGradient4 = Brush.linearGradient(
     ),
     start = Offset(0f, 0f),
     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+)
+
+val myGradient5 = Brush.verticalGradient(
+    colors = listOf(
+        Color.Transparent,
+        Color.Black.copy(alpha = 0.6f)
+    ),
+    startY = 0f,
+    endY = Float.POSITIVE_INFINITY
 )
 

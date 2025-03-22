@@ -1331,7 +1331,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("tradesmanactivedetails/${active.id}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1344,7 +1344,6 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
             }
         }
     }
-
 }
 @Composable
 fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) {

@@ -1,22 +1,31 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.androidproject.R
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.Conversation
@@ -119,7 +129,28 @@ fun MessagingScreen(
                 }
         }
     }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
+    var otherReason by remember { mutableStateOf("") }
+    var reasonDescription by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var showReportSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val reasons = listOf(
+        "Abusive or Harassing Behavior",
+        "Inappropriate Content or Language",
+        "Fraudulent Activity or Scam",
+        "Poor Quality of Service",
+        "Unprofessional Conduct",
+        "Safety Concerns",
+        "Others"
+    )
+    var reportDocument by remember { mutableStateOf<Uri?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { reportDocument = it } }
 // Scroll to the bottom when a new message arrives
     LaunchedEffect(allMessages) {
         if (allMessages.isNotEmpty()) {
@@ -167,10 +198,40 @@ fun MessagingScreen(
                                 .size(32.dp)
                                 .padding(end = 8.dp)
                         )
-                        Text(
-                            text = receipientName,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween){
+                            Text(
+                                text = receipientName,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Box {
+                                Icon(
+                                    painter = painterResource(R.drawable.meatball_ic),
+                                    contentDescription = "Report Icon",
+                                    modifier = Modifier
+                                        .padding(end = 10.dp)
+                                        .size(16.dp)
+                                        .clickable { showMenu = true }
+                                )
+
+                                // Popup Menu
+                                DropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = { showMenu = false },
+                                    modifier = Modifier.background(Color.White)
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Report", textAlign = TextAlign.Center) },
+                                        onClick = {
+                                            showMenu = false
+                                            showReportSheet = true
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -212,6 +273,159 @@ fun MessagingScreen(
                             isSent = userId?.toInt() == message.userId
                         )
                     }
+                }
+            }
+        }
+    }
+    if (showReportSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showReportSheet = false },
+            sheetState = bottomSheetState,
+            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Report", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    IconButton(onClick = { showReportSheet = false }) {
+                        Icon(Icons.Default.Close, contentDescription = "Close")
+                    }
+                }
+
+                Column(modifier = Modifier.padding(top = 16.dp)) {
+
+                    reasons.forEachIndexed { index, reason ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        ) {
+                            Checkbox(
+                                checked = selectedIndex == index,
+                                onCheckedChange = {
+                                    selectedIndex = if (selectedIndex == index) -1 else index
+                                }
+                            )
+                            if (reason == "Others") {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = reason,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.Black
+                                    )
+
+                                    if (selectedIndex == index) {
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        TextField(
+                                            value = otherReason,
+                                            onValueChange = { otherReason = it },
+                                            placeholder = { Text("Enter other reason") },
+                                            singleLine = true,
+                                            modifier = Modifier
+                                                .heightIn(min = 40.dp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = Color.Transparent,
+                                                unfocusedContainerColor = Color.Transparent,
+                                                focusedIndicatorColor = Color.Blue,
+                                                unfocusedIndicatorColor = Color.Gray,
+                                                cursorColor = Color.Black
+                                            )
+                                        )
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = reason,
+                                    fontSize = 16.sp,
+                                    color = Color.Black,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+
+                        }
+                    }
+                }
+                if (selectedIndex != -1) {
+                    Text(
+                        text = "Tell us the Problem",
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    UploadFieldScreenShot(
+                        label = "Screenshot",
+                        uri = reportDocument,
+                        fileType = "image",
+                        onUploadClick = {
+                            documentPickerLauncher.launch("image/*")
+                        },
+                        onViewClick = {
+                            reportDocument?.let { uri ->
+                                openScreenShot(context, uri)
+                            }
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = reasonDescription,
+                        onValueChange = { reasonDescription = it },
+                        placeholder = { Text("Enter Your Explanation") },
+                        shape = RoundedCornerShape(16.dp),
+                        maxLines = 3,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Blue,
+                            unfocusedIndicatorColor = Color.Gray,
+                            focusedLabelColor = Color.Blue,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
+
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { showReportSheet = false },
+                        modifier = Modifier.size(110.dp, 45.dp)
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+
+                        },
+                        modifier = Modifier.size(110.dp, 45.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(
+                                0xFF42C2AE
+                            )
+                        )
+                    ) {
+                        Text("Submit", color = Color.White)
+                    }
+
                 }
             }
         }

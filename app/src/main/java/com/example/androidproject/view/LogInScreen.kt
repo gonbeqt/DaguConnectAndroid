@@ -95,7 +95,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
     var showSuspendedDialog by remember { mutableStateOf(false) }
-
+    var isPasswordIncorrect by remember { mutableStateOf(false) }
     val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.lottie_animation)
     )
@@ -138,11 +138,19 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     navController.navigate("main_screen") {
                         popUpTo("login") { inclusive = true }
                     }
+                    isPasswordIncorrect = false
                 }
                 viewModel.resetState()
             }
             is LoginViewModel.LoginState.Error -> {
-                SnackbarController.show(loginStatus.message)
+                val errorMessage = loginStatus.message
+                if (errorMessage.contains("password") || errorMessage.contains("credentials")) {
+                    isPasswordIncorrect = true
+                }
+                else {
+                    isPasswordIncorrect = false
+                }
+                SnackbarController.show(errorMessage)
 
                 viewModel.resetState()
                 isAnimationPlaying = true
@@ -244,8 +252,15 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 // Password Field
                 PasswordField(
                     password = password,
-                    onPasswordChange = { password = it },
+                    onPasswordChange = { newPassword ->
+                        password = newPassword
+                        isPasswordIncorrect = false
+                        if (newPassword.isEmpty()) {
+                            isPasswordIncorrect = false
+                        }
+                    },
                     windowSize = windowSize,
+                    isPasswordIncorrect = isPasswordIncorrect,
                     modifier = Modifier.constrainAs(passwordField) {
                         top.linkTo(emailField.bottom, margin = 16.dp)
                         start.linkTo(verticalGuideline1)
@@ -398,6 +413,7 @@ fun EmailField(
                 unfocusedIndicatorColor = Color.Gray,
                 focusedLabelColor = Color.Blue,
                 unfocusedLabelColor = Color.Gray,
+                errorContainerColor =  Color.Transparent,
                 cursorColor = Color.Black
             ),
             textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
@@ -418,10 +434,12 @@ fun EmailField(
 @Composable
 fun PasswordField(password: String,
                   onPasswordChange: (String) -> Unit,
-
-                  windowSize: WindowSize, modifier: Modifier = Modifier) {
+                  windowSize: WindowSize,
+                  modifier: Modifier = Modifier,
+                  isPasswordIncorrect: Boolean,
+                  )
+{
     var passwordVisible by remember { mutableStateOf(false) }
-
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
     else
@@ -441,6 +459,7 @@ fun PasswordField(password: String,
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         singleLine = true,
+        isError = isPasswordIncorrect,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
@@ -453,10 +472,25 @@ fun PasswordField(password: String,
             unfocusedIndicatorColor = Color.Gray,
             focusedLabelColor = Color.Blue,
             unfocusedLabelColor = Color.Gray,
-            cursorColor = Color.Black
+            cursorColor = Color.Black,
+
+            errorContainerColor = Color.Transparent,
+            errorIndicatorColor = Color.Red,
+
         ),
         textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
+        if (isPasswordIncorrect) {
+            Text(
+                text = "● Incorrect password.",
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth()
+            )
+        }
+
 
     }
 }
@@ -481,7 +515,8 @@ fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: 
             } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 SnackbarController.show("Invalid email format")
 
-            } else if (password.length < 8) {
+            }
+            else if (password.length < 8) {
                 SnackbarController.show("Password must be at least 8 characters")
 
             }

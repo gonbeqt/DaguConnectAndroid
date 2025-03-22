@@ -2,6 +2,8 @@ package com.example.androidproject
 
 import LogoutViewModel
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -180,6 +182,8 @@ import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val isShown = sharedPreferences.getBoolean("isShown", false)
 
@@ -652,7 +656,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("tradesmancompleteddetails/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            TradesmanCompletedDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel)
+                            TradesmanCompletedDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel,reportClientViewModel)
                         }
                         composable("tradesmancancellationdetails/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -676,7 +680,8 @@ class MainActivity : ComponentActivity() {
                             TradesmanJobCancelled(jobId,
                                 modifier = Modifier,
                                 navController,
-                                getTradesmanBookingViewModel)
+                                getTradesmanBookingViewModel,
+                                reportClientViewModel)
                         }
                         composable("tradesmanjobdecline/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -711,20 +716,18 @@ class MainActivity : ComponentActivity() {
                         composable("tradesmanapplicationcompleted/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationCompleted(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel,viewJobViewModel)
+                            TradesmanApplicationCompleted(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel,viewJobViewModel,reportClientViewModel)
                         }
                         composable("tradesmanapplicationcancelled/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
+                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel,reportClientViewModel)
                         }
                         composable("tradesmanapplicationcanceldetails/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
                             TradesmanApplicationCancelDetails(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel)
                         }
-
-
                     }
                 }
             }
