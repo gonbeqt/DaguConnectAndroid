@@ -384,7 +384,6 @@ fun CategoryRow(categories: List<Categories>, navController: NavController, popp
                 fontFamily = poppinsFont
             )
         }
-
         LazyRow(
             state = scrollState,
             modifier = Modifier
@@ -802,9 +801,9 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         WindowType.LARGE -> 32.dp
     }
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val taskTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
@@ -905,7 +904,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             text = resumes.tradesmanFullName,
                             color = Color.Black,
                             fontWeight = FontWeight(500),
-                            fontSize = taskTextSize,
+                            fontSize = nameTextSize,
                         )
 
                         // Menu Icon

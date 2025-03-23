@@ -419,9 +419,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
-
-                ,
+                    .background(Color(0xFFD9D9D9)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(allBooking.itemCount) { index ->
@@ -553,7 +551,6 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
                     .fillMaxHeight()
                     .size(420.dp)
                     .padding(bottom = 70.dp)
-
                     .background(Color(0xFFD9D9D9))
                 ,
                 verticalArrangement = Arrangement.spacedBy(8.dp),

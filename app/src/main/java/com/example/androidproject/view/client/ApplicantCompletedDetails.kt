@@ -1,6 +1,5 @@
-package com.example.androidproject.view.tradesman
+package com.example.androidproject.view.client
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,33 +12,27 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
-import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
-import java.sql.Types.NULL
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 
+@Preview
 @Composable
-fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel,) {
+fun ApplicantCompletedDetails(modifier: Modifier = Modifier) {
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 16.sp
@@ -57,15 +50,6 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
         WindowType.LARGE -> 16.sp
     }
 
-    val jobID = jobId.toIntOrNull() ?: return
-    val bookingPendingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
-    LaunchedEffect(Unit) {
-        bookingPendingState.refresh()
-    }
-
-    // Find the booking with the matching jobId and "Pending" status
-    val selectedBooking = bookingPendingState.itemSnapshotList.items
-        .firstOrNull { it.id == jobID && it.bookingStatus == "Pending" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -128,94 +112,13 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Your approval is pending: Approve or Decline",
+                            text = "The applicant has successfully completed the job.",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(200.dp),
-                    colors = CardDefaults.cardColors(Color.White),
-                    shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp) // Keep card shape
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(vertical = 18.dp, horizontal = 16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Client’s Information",
-                            fontSize = nameTextSize,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Black,
-                        )
-                        Divider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 10.dp),
-                            thickness = 0.5.dp,
-                            color = Color.Gray
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Client image
-                            if (selectedBooking != null) {
-                                AsyncImage(
-                                    model =selectedBooking.clientProfile ,
-                                    contentDescription = "Client Image",
-                                    modifier = Modifier
-                                        .size(100.dp)
-                                )
-                            }
-
-                            // Tradesman details
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 10.dp)
-                            ) {
-                                if (selectedBooking != null) {
-                                    Text(
-                                        text = selectedBooking.clientFullName,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = nameTextSize,
-                                    )
-                                }
-                                if (selectedBooking != null) {
-                                    Text(
-                                        text = selectedBooking.phoneNumber,
-                                        color = Color.Gray,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = smallTextSize,
-                                    )
-                                }
-
-
-                                if (selectedBooking != null) {
-                                    Text(
-                                        text = selectedBooking.address,
-                                        color = Color.Gray,
-                                        fontSize = smallTextSize,
-                                    )
-                                }
-                            }
-                        }
-
-                    }
-
-                }
-                Spacer(Modifier.height(10.dp))
 
                 Column(
                     modifier = Modifier
@@ -225,20 +128,31 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                         modifier = Modifier
                             .fillMaxWidth(),
                         colors = CardDefaults.cardColors(Color.White),
-                        shape = RoundedCornerShape(15.dp) // Keep card shape
+                        shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp) // Keep card shape
                     ) {
                         Column(
                             modifier = Modifier
                                 .padding(16.dp)
                                 .fillMaxWidth()
                         ) {
-                            Text(
+                            Row(modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Task Information",
+                                    fontSize = nameTextSize,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black,
+                                )
+                                Text(
+                                    text = "View Post",
+                                    textDecoration = TextDecoration.Underline,
+                                    fontSize = nameTextSize,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Blue,
+                                )
 
-                                text = "Task Information",
-                                fontSize = nameTextSize,
-                                color = Color.Black,
-                                fontWeight = FontWeight.Medium
-                            )
+                            }
                             Divider(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -246,6 +160,77 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                                 thickness = 0.5.dp,
                                 color = Color.Gray
                             )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Work,
+                                            contentDescription = "Help Icon",
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                        )
+                                        Text(
+                                            text = "Job Details:",
+                                            fontSize = nameTextSize,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(start = 10.dp)
+                                        )
+
+                                    }
+                                    Spacer(Modifier.height(10.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color(0xFFF5F5F5))
+                                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                    ) {
+                                        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+                                            Text(text = "Hiring: Electrician", fontSize = nameTextSize, color = Color.Black, fontWeight = FontWeight.Medium)
+
+                                            Spacer(Modifier.height(10.dp))
+
+                                            Text(text = "i am l8ikong foe electrivcina chubachuhcu", fontSize = nameTextSize, color = Color.Black)
+                                        }
+                                    }
+                                }
+
+                            }
+                            Spacer(Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Money,
+                                        contentDescription = "Estimated Budget",
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                    )
+                                    Text(
+                                        text = "Estimated Budget:",
+                                        fontSize = nameTextSize,
+                                        color = Color.Black,
+                                        modifier = Modifier.padding(start = 10.dp)
+                                    )
+                                    Text(
+                                        text = "P100",
+                                        fontSize = nameTextSize,
+                                        color = Color.Black,
+                                        modifier = Modifier.padding(start = 10.dp)
+                                    )
+                                }
+                            }
 
                             Row(
                                 modifier = Modifier
@@ -266,57 +251,100 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                                         color = Color.Black,
                                         modifier = Modifier.padding(start = 10.dp)
                                     )
-                                    if (selectedBooking != null) {
-                                        Text(
-                                            text = selectedBooking.bookingDate,
-                                            fontSize = nameTextSize,
-                                            color = Color.Black,
-                                            modifier = Modifier.padding(start = 10.dp)
-                                        )
-                                    }
+                                    Text(
+                                        text = "March 1, 2025",
+                                        fontSize = nameTextSize,
+                                        color = Color.Black,
+                                        modifier = Modifier.padding(start = 10.dp)
+                                    )
                                 }
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Work,
-                                            contentDescription = "Help Icon",
-                                            modifier = Modifier
-                                                .size(32.dp)
-                                        )
-                                        Text(
-                                            text = "Optional Details:",
-                                            fontSize = nameTextSize,
-                                            color = Color.Black,
-                                            modifier = Modifier.padding(start = 10.dp)
-                                        )
-
-                                    }
-                                    Spacer(Modifier.height(10.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFF5F5F5))
-                                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                                    ) {
-                                        if (selectedBooking != null) {
-                                            Text(modifier = Modifier.padding(16.dp),text = selectedBooking.taskDescription, fontSize = nameTextSize, color = Color.Black)
-                                        }
-                                    }
-                                }
-
                             }
 
                         }
 
                     }
+                }
+                Spacer(Modifier.height(10.dp))
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(200.dp),
+                    colors = CardDefaults.cardColors(Color.White),
+                    shape = RoundedCornerShape(15.dp) // Keep card shape
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 18.dp, horizontal = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Tradesman’s Information",
+                                fontSize = nameTextSize,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Black,
+                            )
+                            Text(
+                                text = "See full resume",
+                                textDecoration = TextDecoration.Underline,
+                                fontSize = nameTextSize,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Blue,
+                            )
+
+                        }
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp),
+                            thickness = 0.5.dp,
+                            color = Color.Gray
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            AsyncImage(
+                                model = "selectedBooking.tradesmanFullName ",
+                                contentDescription = "Client Image",
+                                modifier = Modifier
+                                    .size(100.dp)
+                            )
+                            // Tradesman details
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp)
+                            ) {
+                                Text(
+                                    text = "selectedBooking.tradesmanFullName",
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = nameTextSize,
+                                )
+                                Text(
+                                    text = "selectedBooking.phoneNumber",
+                                    color = Color.Gray,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = smallTextSize,
+                                )
+
+
+                                Text(
+                                    text = "selectedBooking.address",
+                                    color = Color.Gray,
+                                    fontSize = smallTextSize,
+                                )
+                            }
+                        }
+
+                    }
+
                 }
                 Spacer(Modifier.height(10.dp))
 
@@ -365,7 +393,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                                             .size(32.dp)
                                     )
                                     Text(
-                                        text = "Contact Client",
+                                        text = "Contact Tradesman",
                                         fontSize = nameTextSize,
                                         modifier = Modifier.padding(start = 10.dp)
                                     )
@@ -403,12 +431,11 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                                         .size(32.dp)
                                 )
                             }
-
-
                         }
 
                     }
                 }
+
                 Spacer(Modifier.height(10.dp))
                 Box(
                     modifier = Modifier
@@ -426,6 +453,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                     Text(text = "OK", fontSize = nameTextSize)
                 }
             }
+
         }
     }
 
