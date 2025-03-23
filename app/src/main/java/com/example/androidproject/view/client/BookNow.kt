@@ -85,7 +85,6 @@ fun BookNow(
     }
 
     var downloadId by remember { mutableStateOf<Long?>(null) }
-
     val bottomSheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.PartiallyExpanded,
         confirmValueChange = { it != SheetValue.Hidden }
@@ -94,7 +93,6 @@ fun BookNow(
         bottomSheetState = bottomSheetState,
         snackbarHostState = remember { SnackbarHostState() }
     )
-
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (scaffoldRef, buttonsRef) = createRefs()
 
@@ -115,7 +113,7 @@ fun BookNow(
                 when (val state = viewResumeState) {
                     is ViewResumeViewModel.ViewResumeState.Loading -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Loading...")
+                            CircularProgressIndicator()
                         }
                     }
                     is ViewResumeViewModel.ViewResumeState.Success -> {
@@ -141,6 +139,7 @@ fun BookNow(
                                     modifier = Modifier
                                         .size(100.dp)
                                         .padding(start = 10.dp)
+                                        .clip(CircleShape)
                                 )
                                 Column(
                                     modifier = Modifier
@@ -176,13 +175,13 @@ fun BookNow(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
                                             imageVector = Icons.Default.Star,
-                                            contentDescription = "Star Icon",
+                                            contentDescription = "Rating",
                                             tint = Color(0xFFFFA500),
                                             modifier = Modifier.size(16.dp)
                                         )
-                                        Spacer(modifier = Modifier.size(4.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            when {
+                                            text = when {
                                                 resume.ratings == 0f -> "0"
                                                 else -> String.format("%.1f", resume.ratings)
                                             },
@@ -210,7 +209,7 @@ fun BookNow(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 var showFullText by remember { mutableStateOf(false) }
-                                val aboutMe = resume.aboutMe ?: "No comments available"
+                                val aboutMe = resume.aboutMe ?: "No description available"
                                 val maxPreviewLength = 100
                                 if (aboutMe.length > maxPreviewLength) {
                                     Column {
@@ -302,61 +301,47 @@ fun BookNow(
                                     Text(
                                         text = "View File",
                                         color = Color.Blue,
-                                        fontSize = 16.sp,
+                                        fontSize = taskTextSize,
                                         textDecoration = TextDecoration.Underline,
                                         fontWeight = FontWeight(500),
-                                        modifier = Modifier
-                                            .clickable {
-                                                val fileUrl = resume.documents // Assuming this is the URL to the file
-
-                                                if (fileUrl != null) {
-                                                    showConfirmDialog = true // Only show dialog if there's a file
-                                                } else {
-                                                    Toast.makeText(
-                                                        context,
-                                                        "No file available",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                }
-                                            }
+                                        modifier = Modifier.clickable {
+                                            resume.documents?.let {
+                                                showConfirmDialog = true
+                                            } ?: Toast.makeText(
+                                                context,
+                                                "No file available",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     )
-                                    if (showConfirmDialog) {
-                                        AlertDialog(
-                                            onDismissRequest = { showConfirmDialog = false },
-                                            title = { Text("Download File") },
-                                            text = { Text("Download credential file?") },
-                                            confirmButton = {
-                                                TextButton(onClick = {
-                                                    val fileUrl = resume.documents
-                                                    val fileName = "trade_credential_${resume.tradesmanFullName}.pdf"
+                                }
 
+                                if (showConfirmDialog) {
+                                    AlertDialog(
+                                        onDismissRequest = { showConfirmDialog = false },
+                                        title = { Text("Download File") },
+                                        text = { Text("Would you like to download the credential file?") },
+                                        confirmButton = {
+                                            TextButton(onClick = {
+                                                resume.documents?.let { fileUrl ->
+                                                    val fileName = "trade_credential_${resume.tradesmanFullName}.pdf"
                                                     try {
-                                                        downloadId = downloadFileTradesman(context, fileUrl!!, fileName)
+                                                        downloadId = downloadFileTradesman(context, fileUrl, fileName)
                                                         Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
 
-                                                        // Register a broadcast receiver to listen for download completion
                                                         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                                                         val onComplete = object : BroadcastReceiver() {
                                                             override fun onReceive(context: Context, intent: Intent) {
                                                                 val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                                                                 if (id == downloadId) {
-                                                                    val query = DownloadManager.Query().setFilterById(
-                                                                        downloadId!!
-                                                                    )
+                                                                    val query = DownloadManager.Query().setFilterById(id)
                                                                     val cursor = downloadManager.query(query)
                                                                     if (cursor.moveToFirst()) {
-                                                                        val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                                                                        if (columnIndex != -1) {
-                                                                            val status = cursor.getInt(columnIndex)
-                                                                            if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                                                                                Toast.makeText(context, "Download success", Toast.LENGTH_SHORT).show()
-                                                                            }
-                                                                        } else {
-                                                                            // Handle the case where the column isn't found
-                                                                            Toast.makeText(context, "Error: Status column not found", Toast.LENGTH_LONG).show()
+                                                                        val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                                                                        if (statusIndex != -1 && cursor.getInt(statusIndex) == DownloadManager.STATUS_SUCCESSFUL) {
+                                                                            Toast.makeText(context, "Download completed successfully", Toast.LENGTH_SHORT).show()
                                                                         }
                                                                     }
-                                                                    cursor.close()
                                                                     cursor.close()
                                                                     context.unregisterReceiver(this)
                                                                 }
@@ -369,22 +354,21 @@ fun BookNow(
                                                             IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
                                                             ContextCompat.RECEIVER_NOT_EXPORTED
                                                         )
-
                                                     } catch (e: Exception) {
                                                         Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
                                                     }
-                                                    showConfirmDialog = false
-                                                }) {
-                                                    Text("Yes")
                                                 }
-                                            },
-                                            dismissButton = {
-                                                TextButton(onClick = { showConfirmDialog = false }) {
-                                                    Text("No")
-                                                }
+                                                showConfirmDialog = false
+                                            }) {
+                                                Text("Yes")
                                             }
-                                        )
-                                    }
+                                        },
+                                        dismissButton = {
+                                            TextButton(onClick = { showConfirmDialog = false }) {
+                                                Text("No")
+                                            }
+                                        }
+                                    )
                                 }
 
                                 Divider(color = Color.Gray, thickness = 0.3.dp)
@@ -416,8 +400,7 @@ fun BookNow(
                         ) {
                             Text("Error: ${state.message}", color = Color.Red)
                             Spacer(modifier = Modifier.height(16.dp))
-                            TextButton(onClick = { viewResumeViewModel.viewResume(resumeIdInt) }
-                            ) {
+                            Button(onClick = { viewResumeViewModel.viewResume(resumeIdInt) }) {
                                 Text("Retry")
                             }
                         }
@@ -430,18 +413,22 @@ fun BookNow(
                     modifier = Modifier
                         .background(myGradient3)
                         .fillMaxWidth()
-                        .size(100.dp)
+                        .height(100.dp)
                         .padding(top = 20.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Arrow Back",
+                            contentDescription = "Back",
                             modifier = Modifier
-                                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
                                     navController.navigate("main_screen")
                                 }
                                 .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
@@ -459,80 +446,69 @@ fun BookNow(
                     }
                 }
             }
-        ) {
+        ) { innerPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(innerPadding)
                     .background(Color.Transparent)
             )
         }
 
+        // Fixed Buttons at the Bottom
+        if (viewResumeState is ViewResumeViewModel.ViewResumeState.Success) {
+            val resume = (viewResumeState as ViewResumeViewModel.ViewResumeState.Success).data
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .constrainAs(buttonsRef) {
+                        bottom.linkTo(parent.bottom, margin = 44.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Button(
+                    onClick = {
+                        val encodedProfilePicture = Uri.encode(resume.profilePic)
+                        navController.navigate("messaging/0/$resumeId/${resume.tradesmanFullName}/$encodedProfilePicture")
+                    },
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Message,
+                            contentDescription = "Message",
+                            tint = Color.White
+                        )
+                        Text(text = "Chat Me", color = Color.White, fontSize = nameTextSize)
+                    }
                 }
 
-                    // Fixed Buttons at the Bottom
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .constrainAs(buttonsRef) {
-                                bottom.linkTo(parent.bottom, margin = 44.dp)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            },
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                            Button(
-                                onClick = {
-                                    val encodedProfilePicture = Uri.encode(
-                                        resume.profilePic
-                                    )
-                                    navController.navigate("messaging/0/${resumeId}/${resume.tradesmanFullName}/${encodedProfilePicture}")                                          },
-                                modifier = Modifier
-                                    .width(150.dp)
-                                    .height(50.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
-                            ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Message,
-                                    contentDescription = "Message Icon",
-                                    tint = Color.White
-                                )
-                                Text(text = "Chat Me", color = Color.White, fontSize = nameTextSize)
-
-                            }
-                        }
-
-                        Button(
-                            onClick = { navController.navigate("confirmbook/${resume.id}/${resume.userid}") },
-                            modifier = Modifier
-                                .width(150.dp)
-                                .height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
-                        ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(
-                                imageVector = Icons.Default.AddShoppingCart,
-                                contentDescription = "Add to Cart Icon",
-                                tint = Color.White
-                            )
-                            Text(text = "Book Now", color = Color.White, fontSize = nameTextSize)
-                        }
+                Button(
+                    onClick = { navController.navigate("confirmbook/${resume.id}/${resume.userid}") },
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.AddShoppingCart,
+                            contentDescription = "Book",
+                            tint = Color.White
+                        )
+                        Text(text = "Book Now", color = Color.White, fontSize = nameTextSize)
                     }
                 }
             }
-
-
         }
-        is ViewResumeViewModel.ViewResumeState.Error -> {
-            Text("Error: ${state.message}")
-            Log.e("Error",state.message)
-        }
-        else -> Unit
     }
 }
 
@@ -743,6 +719,3 @@ fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
         else -> Unit
     }
 }
-
-
-
