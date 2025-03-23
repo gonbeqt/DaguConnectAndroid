@@ -82,11 +82,7 @@ import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.LoginViewModel
 import kotlinx.coroutines.delay
 
-@Preview(showBackground = true)
-@Composable
-fun LogInScreenPreview() {
-    //LogInScreen(navController = rememberNavController())
-}
+
 @Composable
 fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutViewModel:LogoutViewModel) {
 

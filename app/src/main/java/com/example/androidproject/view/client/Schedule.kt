@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -512,7 +513,7 @@ fun ScheduleTopSection(navController: NavController){
                 fontWeight = FontWeight.Medium
             )
             Icon(
-                imageVector = Icons.Default.Notifications,
+                imageVector = Icons.Outlined.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
                 modifier = Modifier

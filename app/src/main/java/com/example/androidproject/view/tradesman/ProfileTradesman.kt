@@ -264,7 +264,7 @@ fun ProfileTradesman(
                     imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp).clickable { navController.navigate("notification") }
                 )
             }
 

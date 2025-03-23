@@ -52,14 +52,12 @@ import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.ResetPassword
 import com.example.androidproject.view.SignUpScreen
-import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.client.AccountSettings
 import com.example.androidproject.view.client.BookNow
 import com.example.androidproject.view.client.BookingDetails
 import com.example.androidproject.view.client.BookingsScreen
 import com.example.androidproject.view.client.CancelNow
-import com.example.androidproject.view.client.CancelledDetails
-import com.example.androidproject.view.client.CancelledJobApplicationDetails
+
 import com.example.androidproject.view.client.Categories.Carpentry
 import com.example.androidproject.view.client.ConfirmBook
 import com.example.androidproject.view.client.Message
@@ -201,7 +199,6 @@ class MainActivity : ComponentActivity() {
             }
             else -> "login"
         }
-        val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
         TokenManager.init(this)
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
@@ -447,9 +444,7 @@ class MainActivity : ComponentActivity() {
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             BookingDetails(viewClientBookingViewModel, navController, resumeId)
                         }
-                        composable("cancelleddetails") {
-                            CancelledDetails(trade, navController)
-                        }
+
                         composable("cancelnow/{resumeId}/{bookingstatus}/{bookingId}") { backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             val bookingStatus =
@@ -537,11 +532,6 @@ class MainActivity : ComponentActivity() {
                             AccountSettings(navController, getClientProfileViewModel,updateClientProfileAddressViewModel)
                         }
 
-
-                    //CANCELLED DETAILS
-                        composable("canceljobapplicationsdetails") {
-                            CancelledJobApplicationDetails(navController, viewJobApplicationViewModel, putJobApplicationStatusViewModel)
-                        }
                         composable("messaging/{chatId}/{receiverId}/{receipientName}/{receipientProfile}") { backStackEntry ->
                             val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
                             val receiverId = backStackEntry.arguments?.getString("receiverId")?.toIntOrNull() ?: 0

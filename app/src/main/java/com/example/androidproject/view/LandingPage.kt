@@ -11,7 +11,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -119,7 +121,25 @@ fun LandingPageScreen(navController: NavController) {
         val sharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         sharedPreferences.edit().putBoolean("isShown", true).apply()
     }
+    val random = remember { java.util.Random() }
+    var box1TargetY by remember { mutableStateOf(100f) }
+    var box2TargetY by remember { mutableStateOf(350f) }
 
+    // Update target positions when clickCount changes
+    LaunchedEffect(clickCount) {
+        box1TargetY = random.nextFloat() * 400f
+        box2TargetY = random.nextFloat() * 400f
+    }
+
+    val box1Y by animateFloatAsState(
+        targetValue = box1TargetY,
+        animationSpec = tween(durationMillis = 600, easing = androidx.compose.animation.core.EaseInOut)
+    )
+
+    val box2Y by animateFloatAsState(
+        targetValue = box2TargetY,
+        animationSpec = tween(durationMillis = 600, easing = androidx.compose.animation.core.EaseInOut)
+    )
 
 
     Box(
@@ -130,17 +150,16 @@ fun LandingPageScreen(navController: NavController) {
         Box(
             modifier = Modifier
                 .size(80.dp)
-                .offset(x = (-40).dp, y = if (isTop) 100.dp else 350.dp)
+                .offset(x = (-40).dp, y = box1Y.dp)
                 .background(Color(0xFF66FFB2), shape = CircleShape)
                 .zIndex(1f)
-
         )
 
-        // Circle 2 (Right Corner)
+        // Animated Circle 2 (Right Corner)
         Box(
             modifier = Modifier
                 .size(100.dp)
-                .offset(x = 370.dp, y = if (isTop) 350.dp else 100.dp) // Switches between top & bottom
+                .offset(x = 370.dp, y = box2Y.dp)
                 .background(Color(0xFF122826), shape = CircleShape)
                 .zIndex(1f)
         )

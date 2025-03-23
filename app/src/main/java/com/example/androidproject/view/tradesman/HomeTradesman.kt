@@ -334,6 +334,7 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
                     modifier = Modifier.size(32.dp)
+                        .clickable { navController.navigate("notification") }
                 )
             }
         }

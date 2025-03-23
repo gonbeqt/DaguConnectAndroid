@@ -56,9 +56,8 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
 
         LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .size(420.dp)
-                .background(Color(0xFFD9D9D9))
+                .fillMaxSize()
+                .background(Color.Transparent)
             ,
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

@@ -79,7 +79,6 @@ fun ConfirmBook(
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("Select A Date") }
-    var selectedTaskType by remember { mutableStateOf<String?>(null) }
     val ResumeId = resumeId.toIntOrNull() ?: return
     val TradesmanId = tradesmanId.toIntOrNull() ?: return
     val context = LocalContext.current

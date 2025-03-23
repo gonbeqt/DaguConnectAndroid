@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -289,7 +290,7 @@ fun MessageTopSection(navController: NavController) {
                 fontWeight = FontWeight.Medium
             )
             Icon(
-                imageVector = Icons.Default.Notifications,
+                imageVector = Icons.Outlined.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
                 modifier = Modifier

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -241,7 +242,7 @@ fun ProfileScreen(
                 )
 
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
                     modifier = Modifier
@@ -991,7 +992,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector =Icons.Default.NotificationsNone,
+                        imageVector =Icons.Outlined.Notifications,
                         contentDescription = "Notification Icon",
                         modifier = Modifier.size(24.dp),
                         tint = Color.Black

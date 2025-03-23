@@ -164,6 +164,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
                     modifier = Modifier.size(32.dp)
+                        .clickable { navController.navigate("notification") }
                 )
             }
         }

@@ -12,6 +12,9 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -105,6 +109,7 @@ import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -195,7 +200,8 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
                         Font(R.font.poppins_regular, FontWeight.Normal),
                         Font(R.font.poppins_medium, FontWeight.Medium),
                         Font(R.font.poppins_bold, FontWeight.Bold)
-                    )
+                    ),
+                    listState = listState
                 ) }
                 item { Spacer(modifier = Modifier
                     .height(20.dp)
@@ -589,7 +595,7 @@ fun TradesmanColumn(
 
 
 @Composable
-fun ExploreNow(windowSize: WindowSize, poppinsFont: FontFamily) {
+fun ExploreNow(windowSize: WindowSize, poppinsFont: FontFamily,listState: LazyListState) {
     val titleTextSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
         WindowType.MEDIUM -> 14.sp
@@ -617,6 +623,7 @@ fun ExploreNow(windowSize: WindowSize, poppinsFont: FontFamily) {
         WindowType.MEDIUM -> 180.dp
         WindowType.LARGE -> 200.dp
     }
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -670,7 +677,27 @@ fun ExploreNow(windowSize: WindowSize, poppinsFont: FontFamily) {
 
                 Box(
                     modifier = Modifier
-                        .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
+                        .clickable {
+                        coroutineScope.launch {
+                            // Smoothly scroll to TradesmanColumn (index 4)
+                            val steps = 8
+                            val durationPerStep = 55L
+                            val targetIndex = 4
+                            val currentOffset = listState.firstVisibleItemScrollOffset.toFloat()
+                            val targetOffset = 1000f
+
+                            val stepSize = (targetOffset - currentOffset) / steps
+
+                            repeat(steps) {
+                                listState.scrollBy(stepSize)
+                                delay(durationPerStep)
+                            }
+                            // Ensure final position
+                            listState.scrollToItem(index = targetIndex)
+
+                        }
+                    }
+                                .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
                         .background(Color.Transparent)
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                 ) {

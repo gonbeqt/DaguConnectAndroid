@@ -81,12 +81,6 @@ import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@Preview(showBackground = true)
-@Composable
-fun SignUpScreenPreview() {
-    // Use a mock or placeholder NavController for preview purposes
-    //SignUpScreen(navController = rememberNavController())
-}
 
 @Composable
 fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,LoadingUI : @Composable () -> Unit) {
