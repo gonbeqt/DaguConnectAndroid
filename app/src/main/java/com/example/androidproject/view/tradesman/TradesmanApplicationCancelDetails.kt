@@ -27,7 +27,7 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 
 @Composable
-fun TradesmanApplicationCancelDetails(jobId:String,jobs:String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
+fun TradesmanApplicationCancelDetails(jobId:String,jobs:String,status:String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -35,11 +35,7 @@ fun TradesmanApplicationCancelDetails(jobId:String,jobs:String, modifier: Modifi
         WindowType.MEDIUM -> 18.sp
         WindowType.LARGE -> 20.sp
     }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
+
     val smallTextSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
         WindowType.MEDIUM -> 14.sp
@@ -47,13 +43,14 @@ fun TradesmanApplicationCancelDetails(jobId:String,jobs:String, modifier: Modifi
     }
     val jobID = jobId.toIntOrNull() ?: return
     val jobS = jobs.toIntOrNull() ?: return
+    val bookingStatus = status.ifEmpty { return }
 
     val bookingPendingState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
         bookingPendingState.refresh()
     }
     val selectedBooking = bookingPendingState.itemSnapshotList.items
-        .firstOrNull { it.id == jobID && it.status == "Cancelled" }
+        .firstOrNull { it.id == jobID  }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,11 +77,11 @@ fun TradesmanApplicationCancelDetails(jobId:String,jobs:String, modifier: Modifi
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        modifier = Modifier.clickable {},
+                        modifier = Modifier.clickable {navController.popBackStack()},
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Cancelled Details",
+                        text = "${bookingStatus} Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
@@ -123,7 +120,7 @@ fun TradesmanApplicationCancelDetails(jobId:String,jobs:String, modifier: Modifi
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF42C2AE),
                         fontSize = 20.sp,
-                        text = " Job offer cancelled"
+                        text = " Job offer ${bookingStatus.lowercase()}"
                     )
                     Divider(
                         modifier = Modifier
@@ -204,7 +201,7 @@ fun TradesmanApplicationCancelDetails(jobId:String,jobs:String, modifier: Modifi
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { navController.navigate("tradesmanapplicationcancelled/${selectedBooking?.id}/${jobS}") }
+                    .clickable { navController.navigate("tradesmanapplication/${jobID}/${jobS}/${bookingStatus}") }
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)

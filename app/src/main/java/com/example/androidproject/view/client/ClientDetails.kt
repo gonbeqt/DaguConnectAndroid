@@ -94,7 +94,7 @@ fun ClientDetails(modifier: Modifier = Modifier, resumeId: String,status:String,
                                 "Completed" -> navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=0") {
                                     navController.popBackStack()
                                 }
-                                "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=0") {
+                                "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=0") {
                                     navController.popBackStack()
                                 }
                                 "Cancelled" -> navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=0") {
