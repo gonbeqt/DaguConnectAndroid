@@ -82,18 +82,10 @@ import com.example.androidproject.view.tradesman.ProfileVerification
 import com.example.androidproject.view.tradesman.TradesmanApply
 import com.example.androidproject.view.theme.AndroidProjectTheme
 import com.example.androidproject.view.tradesman.AccountSettingsTradesman
-import com.example.androidproject.view.tradesman.TradesmanCompletedDetails
-import com.example.androidproject.view.tradesman.TradesmanJobDecline
-import com.example.androidproject.view.tradesman.TradesmanJobCancelled
-import com.example.androidproject.view.tradesman.TradesmanActiveDetails
+
 import com.example.androidproject.view.tradesman.TradesmanApplication
-import com.example.androidproject.view.tradesman.TradesmanApplicationActive
 import com.example.androidproject.view.tradesman.TradesmanApplicationCancelDetails
-import com.example.androidproject.view.tradesman.TradesmanApplicationCancelled
-import com.example.androidproject.view.tradesman.TradesmanApplicationDecline
-import com.example.androidproject.view.tradesman.TradesmanApplicationDeclineDetails
-import com.example.androidproject.view.tradesman.TradesmanApplicationPending
-import com.example.androidproject.view.tradesman.TradesmanCancellationDetails
+
 import com.example.androidproject.view.tradesman.TradesmanDeclinationDetails
 import com.example.androidproject.view.tradesman.TradesmanDetails
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
@@ -740,33 +732,6 @@ class MainActivity : ComponentActivity() {
                             TradesmanApplicationCancelDetails(jobId,jobs,status,modifier = Modifier, navController,getMyJobApplicationViewModel)
                         }
 
-
-                        composable("tradesmanapplicationpending/{jobId}/{jobs}") {backStackEntry ->
-                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationPending(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
-                        }
-                        composable("tradesmanapplicationdecline/{jobId}/{jobs}") {backStackEntry ->
-                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationDecline(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
-                        }
-                        composable("tradesmanapplicationactive/{jobId}/{jobs}") {backStackEntry ->
-                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationActive(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
-                        }
-                        composable("tradesmanapplicationdeclinedetails/{jobId}/{jobs}") {backStackEntry ->
-                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationDeclineDetails(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel)
-                        }
-
-                        composable("tradesmanapplicationcancelled/{jobId}/{jobs}") {backStackEntry ->
-                            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel,reportClientViewModel)
-                        }
 
                     }
                 }
