@@ -210,8 +210,8 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
                 item { Spacer(modifier = Modifier
                     .height(20.dp)
                 ) }
-                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel, LoadingUI,
-                        poppinsFont = FontFamily(
+                item { TradesmanColumn(getResumesViewModel, navController, reportTradesmanViewModel,
+                         poppinsFont = FontFamily(
                         Font(R.font.poppins_regular, FontWeight.Normal),
                         Font(R.font.poppins_medium, FontWeight.Medium),
                         Font(R.font.poppins_bold, FontWeight.Bold)
@@ -415,7 +415,8 @@ fun CategoryRow(categories: List<Categories>, navController: NavController, popp
 fun TradesmanColumn(
     getResumesViewModel: GetResumesViewModel,
     navController: NavController,
-    reportTradesmanViewModel: ReportTradesmanViewModel
+    reportTradesmanViewModel: ReportTradesmanViewModel,
+    poppinsFont: FontFamily
 ) {
     val windowSize = rememberWindowSizeClass()
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
