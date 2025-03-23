@@ -210,10 +210,10 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     }
                     when {
                         (selectedSection == 0 && getMyJobApplicationsLoadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0) -> {
-                            LoadingUI() // For "My Jobs" - this is correct as is
+                            LoadingUI()
                         }
                         (selectedSection == 1 && getTradesmanBookingLoadState.refresh is LoadState.Loading && getTradesmanBookingState.itemCount == 0) -> {
-                            LoadingUI() // For "My Applications" - use getMyJobApplications instead of getTradesmanBooking
+                            LoadingUI()
                         }else ->{
                         // Handle different states based on connectivity and data loading
                         if (!isConnected.value) {
