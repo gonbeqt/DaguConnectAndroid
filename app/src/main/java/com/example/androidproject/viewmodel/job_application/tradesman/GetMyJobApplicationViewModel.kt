@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 
 class GetMyJobApplicationViewModel(private val apiService: ApiService, private val context: Context) : ViewModel() {
+
     private val _pagingSource = MutableStateFlow<GetMyJobApplicationPagingSource?>(null)
 
     val jobApplicationPagingData: Flow<PagingData<JobApplicationData>> =

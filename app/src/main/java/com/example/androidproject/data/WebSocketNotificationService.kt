@@ -7,12 +7,12 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.androidproject.data.preferences.NotificationSettingManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-
 @SuppressLint("StaticFieldLeak")
 object WebSocketNotificationManager {
     private val TAG = "WebSocketNotifManager"
@@ -37,8 +37,12 @@ object WebSocketNotificationManager {
             Log.d(TAG, "Starting to collect WebSocket notifications")
             WebSocketManager.notifications.collect { notification ->
                 notification?.let {
-                    Log.d(TAG, "Collected notification: Title=${it.title}, Message=${it.message}")
-                    showNotification(it.title, it.message)
+                    if(NotificationSettingManager.getNotification() == true || NotificationSettingManager.getNotification() == null){
+                        Log.d(TAG, "Collected notification: Title=${it.title}, Message=${it.message}")
+                        showNotification(it.title, it.message)
+                    } else {
+                        Log.d(TAG, "Notification is turned off: ${NotificationSettingManager.getNotification()}.")
+                    }
                 } ?: Log.d(TAG, "Notification was null")
             }
         }
@@ -76,7 +80,7 @@ object WebSocketNotificationManager {
             .setStyle(NotificationCompat.BigTextStyle()
                 .bigText(messageBody ?: "New message received"))
             .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)

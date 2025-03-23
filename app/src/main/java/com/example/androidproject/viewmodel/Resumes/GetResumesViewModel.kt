@@ -25,21 +25,9 @@ class GetResumesViewModel(private val apiService: ApiService) : ViewModel() {
     private val _dismissedResumes = mutableStateOf(setOf<Int>())
     val dismissedResumes: State<Set<Int>> = _dismissedResumes
     private val refreshTrigger = MutableStateFlow(Unit)
-/*
-    val resumePagingData: Flow<PagingData<resumesItem>> = Pager(
 
-        config = PagingConfig(
-            pageSize = 10,
-            initialLoadSize = 10,
-            prefetchDistance = 2,
-            enablePlaceholders = false
-        ),
-        pagingSourceFactory = {
-            GetResumePagingSource(apiService).also { _pagingSource.value = it }
-        }
-    ).flow.cachedIn(viewModelScope)*/
 
-    val resumePagingData:Flow<PagingData<resumesItem>> = refreshTrigger.flatMapLatest {
+    val resumePagingData:Flow<PagingData<resumesItem>> =
         Pager(
 
             config = PagingConfig(
@@ -50,7 +38,7 @@ class GetResumesViewModel(private val apiService: ApiService) : ViewModel() {
             ),
             pagingSourceFactory = { GetResumePagingSource(apiService)}
         ).flow.cachedIn(viewModelScope)
-    }
+
 
     // Call this to force a refresh
     fun refreshResumes() {

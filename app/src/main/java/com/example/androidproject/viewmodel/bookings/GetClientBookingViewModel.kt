@@ -1,8 +1,5 @@
 package com.example.androidproject.viewmodel.bookings
 
-import android.content.Context
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -15,22 +12,26 @@ import com.example.androidproject.viewmodel.bookings.paginate.GetClientBookingPa
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
+
 class GetClientBookingViewModel(private val apiService: ApiService) : ViewModel() {
 
     private val _pagingSource = MutableStateFlow<GetClientBookingPagingSource?>(null)
 
-    val ClientBookingPagingData: Flow<PagingData<GetClientsBooking>> = Pager(
 
-        config = PagingConfig(
-            pageSize = 10,
-            initialLoadSize = 10,
-            prefetchDistance = 2,
-            enablePlaceholders = false
-        ),
-        pagingSourceFactory = {
-            GetClientBookingPagingSource(apiService).also { _pagingSource.value = it }
-        }
-    ).flow.cachedIn(viewModelScope)
+    val ClientBookingPagingData: Flow<PagingData<GetClientsBooking>> =
+        Pager(
+
+            config = PagingConfig(
+                pageSize = 10,
+                initialLoadSize = 10,
+                prefetchDistance = 2,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                GetClientBookingPagingSource(apiService).also { _pagingSource.value = it }
+            }
+        ).flow.cachedIn(viewModelScope)
+
 
 
 }

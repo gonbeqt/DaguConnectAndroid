@@ -87,17 +87,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.NotificationSettingManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.UpdateJob
 import com.example.androidproject.view.ServicePosting
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
@@ -122,7 +125,6 @@ fun ProfileScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     putJobs: PutJobViewModel,
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
-    LoadingUI : @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
 
@@ -139,8 +141,18 @@ fun ProfileScreen(
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
+    // State to track loading during retry
+    var showLoading by remember { mutableStateOf(false) }
+
+    val profileState by getClientProfileViewModel.getProfileState.collectAsState()
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
+    val tabNames = listOf("My Posts", "General")
+
     //state of updating the profile picture
     val updateProfilePictureState by updateClientProfilePictureViewModel.updateClientProfileState.collectAsState()
+
+    val getMyJobsViewModelState = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
+    val loadState = getMyJobsViewModelState.loadState
 
     LaunchedEffect(updateProfilePictureState) {
         when(val updateProf = updateProfilePictureState){
@@ -149,42 +161,20 @@ fun ProfileScreen(
                 updateClientProfilePictureViewModel.resetState()
             }
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Error -> {
-              val error = updateProf.message
+                val error = updateProf.message
                 Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
             }
             else->Unit
 
         }
     }
-
-    // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableStateOf(0) }
-
-
-
-    // State to track loading during retry
-    var isLoading by remember { mutableStateOf(false) }
-
-    val profileState by getClientProfileViewModel.getProfileState.collectAsState()
-    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
-    val tabNames = listOf("My Posts", "General")
-    val windowSize = rememberWindowSizeClass()
-
-    val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+    LaunchedEffect(Unit) {
+        if (isConnected.value && profileState !is GetClientProfileViewModel.ClientProfileState.Success) {
+            getClientProfileViewModel.getClientProfile()
+        }
     }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
-    val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 12.sp
-        WindowType.MEDIUM -> 14.sp
-        WindowType.LARGE -> 16.sp
-    }
+
+
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     // Define the image launcher
@@ -226,12 +216,7 @@ fun ProfileScreen(
         }
     }
 
-    LaunchedEffect(refreshTrigger) {
-        isLoading = true // Set loading state before fetching
-        getClientProfileViewModel.getClientProfile()
-        delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-        isLoading = false // Set loading state before fetching
-    }
+
 
     Column(
         modifier = modifier
@@ -255,73 +240,74 @@ fun ProfileScreen(
                     fontWeight = FontWeight.Medium
                 )
 
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications Icon",
-                        tint = Color.Black,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clickable { navController.navigate("notification") }
-                    )
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications Icon",
+                    tint = Color.Black,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clickable { navController.navigate("notification") }
+                )
 
 
 
             }
         }
 
-        // Handle different states based on connectivity and data loading
-        if (!isConnected.value) {
-            // No internet connection
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No Internet Connection",
-                        fontSize = 18.sp,
-                        color = Color.Red,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Please check your internet and try again.",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Retry button (only fetch data when clicked)
-                    Box(
-                        modifier = Modifier
-                            .clickable {
-                                // Re-check network connectivity
-                                isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                if (isConnected.value) {
-                                    // Show loading state and trigger data fetch
-                                    isLoading = true
-                                    refreshTrigger++
-                                } else {
-                                    // Optionally show a toast if still no internet
-                                    Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = "Retry",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+
+        when{
+            loadState.refresh is LoadState.Loading && getMyJobsViewModelState.itemCount == 0 ->{
+                LoadingUI()
+            }else -> {
+            // Handle different states based on connectivity and data loading
+            if (!isConnected.value) {
+                if(showLoading){
+                    LoadingUI()
+                    LaunchedEffect(Unit) {
+                        delay(1500)
+                        isConnected.value = checkNetworkConnectivity(connectivityManager)
+                        showLoading = false // Hide LoadingUI after delay
+                        if (isConnected.value) {
+                            getMyJobsViewModelState.refresh() // Refresh data after reconnecting
+                        }
                     }
                 }
-            }
-        } else {
-            if (isLoading){
-                LoadingUI()
+                // No internet connection
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "No Internet Connection",
+                            fontSize = 18.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Please check your internet and try again.",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Retry button (only fetch data when clicked)
+                        Box(
+                            modifier = Modifier
+                                .clickable {
+                                    showLoading = true
+                                }
+                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "Retry",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             } else {
                 when (val state = profileState) {
-                    is GetClientProfileViewModel.ClientProfileState.Loading -> {
-                        isLoading = true
-                    }
                     is GetClientProfileViewModel.ClientProfileState.Success -> {
                         val profile = state.data
                         // Profile Info Section
@@ -464,12 +450,12 @@ fun ProfileScreen(
                     is GetClientProfileViewModel.ClientProfileState.Error -> {
                         Text(text = "Error: ${state.message}", color = Color.Red)
                     }
-                    else -> {
-                        Text(text = "No profile data available")
-                    }
+                    else -> Unit
                 }
             }
+            }
         }
+
     }
 }
 
@@ -478,20 +464,30 @@ fun ProfileScreen(
 
 
 @Composable
-fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJobViewModel, putJobs: PutJobViewModel) {
+fun MyPostsTab(
+    getMyJobsViewModel: GetMyJobsViewModel,
+    postJobViewModel: PostJobViewModel,
+    putJobs: PutJobViewModel
+) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     val postJobState by postJobViewModel.postJobState.collectAsState()
+    val putJobState by putJobs.putJobState.collectAsState()
 
-
-
-    // Force recomposition and refresh when a new post is successful
+    // Refresh jobs list when a new post or edit is successful
     LaunchedEffect(postJobState) {
         if (postJobState is PostJobViewModel.PostJobState.Success) {
             jobsList.refresh()
+            postJobViewModel.resetState() // Reset to avoid repeated triggers
+        }
+    }
+    LaunchedEffect(putJobState) {
+        if (putJobState is PutJobViewModel.PutJobState.Success) {
+            jobsList.refresh()
+            putJobs.resetState() // Reset to avoid repeated triggers
         }
     }
 
-    LazyColumn( // Make it scrollable
+    LazyColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxSize()
     ) {
@@ -501,14 +497,11 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJob
                 PostsCard(
                     onEditClick = { rate, description, location, deadline ->
                         val update = UpdateJob(rate, description, location, deadline)
-                        putJobs.updateJobApplicationStatus(
-                            job.id,
-                            update
-                        )
+                        putJobs.updateJobApplicationStatus(job.id, update)
                     },
                     onApplicantsClick = { /* Handle applicants click */ },
-                    job,
-                    putJobs
+                    job = job,
+                    putJobs = putJobs
                 )
             }
         }
@@ -519,13 +512,9 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJob
             .padding(16.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
-        Log.d("fab", "fab")
         FabPosting(
-            onDeadlineChange = { deadline ->
-                println("Selected Deadline: $deadline")
-            },
-             postJobViewModel,
-
+            onDeadlineChange = { deadline -> println("Selected Deadline: $deadline") },
+            postJobViewModel = postJobViewModel
         )
     }
 }
@@ -535,7 +524,7 @@ fun MyPostsTab(getMyJobsViewModel: GetMyJobsViewModel, postJobViewModel: PostJob
 fun PostsCard(
     onEditClick: (Int, String, String, String) -> Unit,
     onApplicantsClick: () -> Unit,
-    getJobs: GetJobs,
+    job: GetJobs, // Renamed to `job` for clarity
     putJobs: PutJobViewModel
 ) {
     val windowSize = rememberWindowSizeClass()
@@ -556,17 +545,24 @@ fun PostsCard(
         WindowType.LARGE -> 16.sp
     }
     val putJobState by putJobs.putJobState.collectAsState()
-    val date = ViewModelSetups.formatDateTime(getJobs.createdAt)
-    val deadline = ViewModelSetups.formatDateTime(getJobs.deadline)
+    val date = ViewModelSetups.formatDateTime(job.createdAt)
+    val deadline = ViewModelSetups.formatDateTime(job.deadline)
     var isDialogVisible by remember { mutableStateOf(false) }
-    var updateSubmissionKey by remember { mutableStateOf<Long?>(null) } // Unique key for each submission
+    var updateSubmissionKey by remember { mutableStateOf<Long?>(null) }
 
-    // Initialize editable states with the current job data
-    var editableJobType by remember { mutableStateOf(getJobs.jobType) }
-    var editableDescription by remember { mutableStateOf(getJobs.jobDescription) }
-    var editableLocation by remember { mutableStateOf(getJobs.address) }
-    var editableDeadline by remember { mutableStateOf(getJobs.deadline) }
-    var editableBudget by remember { mutableIntStateOf(getJobs.salary) }
+    // Local editable states
+    var editableJobType by remember { mutableStateOf(job.jobType) }
+    var editableDescription by remember { mutableStateOf(job.jobDescription) }
+    var editableLocation by remember { mutableStateOf(job.address) }
+    var editableDeadline by remember { mutableStateOf(job.deadline) }
+    var editableBudget by remember { mutableIntStateOf(job.salary) }
+
+    // Store initial values for reset on cancel
+    val initialDescription = remember { job.jobDescription }
+    val initialLocation = remember { job.address }
+    val initialDeadline = remember { job.deadline }
+    val initialBudget = remember { job.salary }
+
     val context = LocalContext.current
     val today = LocalDate.now()
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
@@ -597,22 +593,26 @@ fun PostsCard(
         "Santa Maria", "Santo Tomas", "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo",
         "Urdaneta City", "Villasis"
     )
-    LaunchedEffect(putJobState,updateSubmissionKey) {
-        if (updateSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet
+
+    // Update local state only on successful edit
+    LaunchedEffect(putJobState, updateSubmissionKey) {
+        if (updateSubmissionKey == null) return@LaunchedEffect
         when (val state = putJobState) {
             is PutJobViewModel.PutJobState.Success -> {
-                updateSubmissionKey = null // Reset key after handling
+                updateSubmissionKey = null
                 Toast.makeText(context, "Job updated successfully", Toast.LENGTH_SHORT).show()
                 putJobs.resetState()
+                isDialogVisible = false
             }
             is PutJobViewModel.PutJobState.Error -> {
-                putJobs.resetState()
-                updateSubmissionKey = null // Reset key after handling
+                updateSubmissionKey = null
                 Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                putJobs.resetState()
             }
             else -> {}
         }
     }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -630,7 +630,7 @@ fun PostsCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Looking for ${getJobs.jobType}",
+                        text = "Looking for ${job.jobType}",
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -694,7 +694,7 @@ fun PostsCard(
                         color = Color.Gray
                     )
                     Text(
-                        text = "${getJobs.jobType}",
+                        text = "${job.jobType}",
                         fontSize = taskTextSize,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
@@ -702,7 +702,7 @@ fun PostsCard(
                 }
 
                 Text(
-                    text = "Applicants: ${getJobs.totalApplicants}",
+                    text = "Applicants: ${job.totalApplicants}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary,
@@ -711,7 +711,7 @@ fun PostsCard(
                 Text(text = "Job Deadline: $deadline", fontSize = 16.sp, color = Color.Red)
 
                 Text(
-                    text = "Posted on $date - ${getJobs.status}",
+                    text = "Posted on $date - ${job.status}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
@@ -721,7 +721,13 @@ fun PostsCard(
 
     // Pop-up dialog for editing posting
     if (isDialogVisible) {
-        Dialog(onDismissRequest = { isDialogVisible = false }) {
+        Dialog(onDismissRequest = {
+            editableDescription = initialDescription
+            editableLocation = initialLocation
+            editableDeadline = initialDeadline
+            editableBudget = initialBudget
+            isDialogVisible = false
+        }) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -748,9 +754,8 @@ fun PostsCard(
                         color = Color.Gray
                     )
 
-                    // Job Type (Read-only)
                     OutlinedTextField(
-                        value = getJobs.jobType,
+                        value = job.jobType,
                         onValueChange = { /* No action, read-only */ },
                         label = { Text("Job Type") },
                         enabled = false,
@@ -772,7 +777,6 @@ fun PostsCard(
                         )
                     )
 
-                    // Location
                     DropDown(
                         label = "Location",
                         options = locationOptions,
@@ -781,8 +785,6 @@ fun PostsCard(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-
-                    // Estimated Budget
                     OutlinedTextField(
                         value = editableBudget.toString(),
                         onValueChange = { newValue ->
@@ -828,11 +830,11 @@ fun PostsCard(
                             Text(
                                 text = if (editableDeadline.isNotEmpty()) editableDeadline else "Select Deadline",
                                 fontSize = 16.sp,
-                                color = if (editableDeadline.isNotEmpty()) Color.Black else Color.Gray                            )
+                                color = if (editableDeadline.isNotEmpty()) Color.Black else Color.Gray
+                            )
                         }
                     }
 
-                    // Description
                     OutlinedTextField(
                         value = editableDescription,
                         onValueChange = { editableDescription = it },
@@ -858,6 +860,10 @@ fun PostsCard(
                     ) {
                         Button(
                             onClick = {
+                                editableDescription = initialDescription
+                                editableLocation = initialLocation
+                                editableDeadline = initialDeadline
+                                editableBudget = initialBudget
                                 isDialogVisible = false
                             },
                             colors = ButtonDefaults.buttonColors(Color(0xFF3CC0B0))
@@ -867,7 +873,7 @@ fun PostsCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = {
-                                updateSubmissionKey = System.currentTimeMillis() // Trigger LaunchedEffect
+                                updateSubmissionKey = System.currentTimeMillis()
                                 onEditClick(
                                     editableBudget,
                                     editableDescription,
@@ -885,7 +891,6 @@ fun PostsCard(
         }
     }
 }
-
 
 @Composable
 fun GeneralSettings(
@@ -957,6 +962,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             // Clear tokens and navigate regardless of result
             TokenManager.clearToken()
             AccountManager.clearAccountData()
+            NotificationSettingManager.clearNotificationData()
             Toast.makeText(context, "logout successful", Toast.LENGTH_SHORT).show()
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -1006,7 +1012,10 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                 }
                 Switch(
                     checked = isChecked,
-                    onCheckedChange = { isChecked = it },
+                    onCheckedChange = { isChecked = it
+                        NotificationSettingManager.saveNotification(it)
+                        Toast.makeText(context, "$isChecked", Toast.LENGTH_SHORT).show()
+                                      },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = Color(0xFF3CC0B0),

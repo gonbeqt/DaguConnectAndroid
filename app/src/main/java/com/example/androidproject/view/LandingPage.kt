@@ -1,7 +1,13 @@
 package com.example.androidproject.view
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
@@ -50,16 +56,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.androidproject.R
-
-
+import com.example.androidproject.data.preferences.NotificationSettingManager
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LandingPageScreen(navController: NavController) {
     val windowSize = rememberWindowSizeClass()
+    val context = LocalContext.current
+
+    // Permission launcher for POST_NOTIFICATIONS
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
+        }
+        NotificationSettingManager.saveNotification(true)
+    }
+
+    LaunchedEffect(Unit) {
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permission = Manifest.permission.POST_NOTIFICATIONS
+            if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionLauncher.launch(permission)
+            }
+        }
+    }
 
     var mainText by remember { mutableStateOf("Find & Offer Local Services with Ease") }
     var messageText by remember { mutableStateOf("Connect with local residents in Dagupan City, to find or offer services, showcase your skills transact easily,and enjoy a secure platform") }
@@ -87,7 +113,6 @@ fun LandingPageScreen(navController: NavController) {
         R.drawable.landing3
     )
 
-    val context = LocalContext.current
     val activity = (context as? Activity)
 
     LaunchedEffect(Unit) {
