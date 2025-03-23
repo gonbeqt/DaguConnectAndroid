@@ -69,7 +69,8 @@ data class SubmitResumeResponse(
         @SerializedName("is_approve")
         val isApprove: Int,
         @SerializedName("status_of_approval")
-        val statusOfApproval: String?
+        val statusOfApproval: String?,
+        val birthdate: String
     ){
         // Helper property to convert Int to Boolean
         val isActiveBoolean: Boolean

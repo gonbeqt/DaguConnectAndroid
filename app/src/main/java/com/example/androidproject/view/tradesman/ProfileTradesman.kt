@@ -1247,18 +1247,16 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
 }
 
 fun downloadFileTradesman(context: Context, fileUrl: String, fileName: String): Long {
+    
+    val request = DownloadManager.Request(Uri.parse(fileUrl))
+        .setTitle(fileName)
+        .setDescription("Downloading tradesman credential")
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+        .setAllowedOverMetered(true)
+        .setAllowedOverRoaming(true)
+
     val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val uri = Uri.parse(fileUrl)
-
-    val request = DownloadManager.Request(uri).apply {
-        setTitle(fileName)
-        setDescription("Downloading tradesman credential")
-        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-        setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-        setMimeType("application/pdf")
-    }
-
     return downloadManager.enqueue(request)
 }
 

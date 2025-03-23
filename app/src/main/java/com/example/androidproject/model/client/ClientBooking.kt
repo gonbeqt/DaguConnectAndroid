@@ -42,7 +42,9 @@ data class GetClientsBooking(
     @SerializedName("user_id")
     val userid: Int,
     @SerializedName("cancel_reason")
-    val cancelReason: String
+    val cancelReason: String,
+    @SerializedName("booking_date_status")
+    val bookingDateStatus: String,
 
 )
 

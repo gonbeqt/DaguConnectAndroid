@@ -15,6 +15,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,11 +33,21 @@ import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
+import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
+import java.util.Locale
 
-@Preview
+
 @Composable
-fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
-) {
+fun ApplicantDeclinationDetails(resumeId: String,
+                                status: String,
+                                tradesmanId: String,
+                                modifier: Modifier = Modifier,
+                                navController: NavController,
+                                getMyJobApplicant: GetMyJobApplicantsViewModel,
+                                ) {
+    val resumeID = resumeId.toIntOrNull() ?: return
+    val bookingStatus = status.ifEmpty { return }
+    val tradesmanID = tradesmanId.toIntOrNull() ?: return
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -43,15 +55,16 @@ fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
         WindowType.MEDIUM -> 18.sp
         WindowType.LARGE -> 20.sp
     }
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
     val smallTextSize = when (windowSize.width) {
         WindowType.SMALL -> 12.sp
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
+    }
+    val bookingPendingState = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
+    val selectedBooking = bookingPendingState.itemSnapshotList.items
+        .firstOrNull { it.id == resumeID }
+    LaunchedEffect(Unit) {
+        bookingPendingState.refresh()
     }
 
     Column(
@@ -80,11 +93,11 @@ fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        modifier = Modifier.clickable {},
+                        modifier = Modifier.clickable {navController.popBackStack()},
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Declination Details",
+                        text = "${bookingStatus} Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
@@ -123,7 +136,7 @@ fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF42C2AE),
                         fontSize = 20.sp,
-                        text = "Applicant declined successfully"
+                        text = "Applicant ${bookingStatus.lowercase()} successfully"
                     )
                     Divider(
                         modifier = Modifier
@@ -148,10 +161,12 @@ fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
                                 color = Color.Gray,
                                 text = "Requested by"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "selectedBooking.clientFullName"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.jobDateStatus
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -164,10 +179,12 @@ fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
                                 color = Color.Gray,
                                 text = "Request Date and Time"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "selectedBooking.createdAt"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.updatedAt
+                                )
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -180,10 +197,12 @@ fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
                                 color = Color.Gray,
                                 text = "Reason"
                             )
-                            Text(
-                                fontSize = smallTextSize,
-                                text = "selectedBooking.cancelReason"
-                            )
+                            if (selectedBooking != null) {
+                                Text(
+                                    fontSize = smallTextSize,
+                                    text = selectedBooking.cancelledReason ?: ""
+                                )
+                            }
                         }
                     }
 
@@ -195,7 +214,7 @@ fun ApplicantDeclinationDetails( modifier: Modifier = Modifier
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-
+                        navController.navigate("applicantsdetails/${resumeID}/${bookingStatus}/${tradesmanID}")
                     }
                     .background(
                         color = Color.Transparent,

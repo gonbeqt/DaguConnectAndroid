@@ -53,18 +53,20 @@ import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.ResetPassword
 import com.example.androidproject.view.SignUpScreen
 import com.example.androidproject.view.client.AccountSettings
+import com.example.androidproject.view.client.ApplicantDeclinationDetails
+import com.example.androidproject.view.client.ApplicantDetails
 import com.example.androidproject.view.client.BookNow
 import com.example.androidproject.view.client.BookingDetails
 import com.example.androidproject.view.client.BookingsScreen
 import com.example.androidproject.view.client.CancelNow
 
 import com.example.androidproject.view.client.Categories.Carpentry
-import com.example.androidproject.view.client.ClientActiveDetails
 import com.example.androidproject.view.client.ClientCancellationDetails
 import com.example.androidproject.view.client.ClientCancelledDetails
 import com.example.androidproject.view.client.ClientCompletedDetails
 import com.example.androidproject.view.client.ClientDeclinationDetails
 import com.example.androidproject.view.client.ClientDeclineDetails
+import com.example.androidproject.view.client.ClientDetails
 import com.example.androidproject.view.client.ClientPendingDetails
 import com.example.androidproject.view.client.ConfirmBook
 import com.example.androidproject.view.client.Message
@@ -466,32 +468,15 @@ class MainActivity : ComponentActivity() {
                                 bookingId
                             )
                         }
-                        //HIRING HUB
-                        composable("clientpendingdetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientPendingDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
+                        //My Tradesman
 
-                            )
-                        }
-                        composable("clientactivedetails/{resumeId}") {backStackEntry ->
+                        composable("clientdeclinationdetails/{resumeId}/{status}") {backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientActiveDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            )
-                        }
-
-                        composable("clientdeclinationdetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             ClientDeclinationDetails(
                                 resumeId,
+                                status,
                                 modifier = Modifier,
                                 navController,
                                 getClientBookingViewModel,
@@ -499,49 +484,50 @@ class MainActivity : ComponentActivity() {
 
                                 )
                         }
-                        composable("clientcompleteddetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientCompletedDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
 
-                            )
-                        }
-                        composable("clientdeclineddetails/{resumeId}") {backStackEntry ->
+                        composable("clientdetails/{resumeId}/{status}") {backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientDeclineDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            )
-                        }
-                        composable("clientcancelleddetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientCancelledDetails(
+                            ClientDetails(
                                 modifier = Modifier,
                                 resumeId,
+                                status,
                                 getClientBookingViewModel,
                                 navController
 
                             )
                         }
 
-                        composable("clientcancellactiondetails/{resumeId}") {backStackEntry ->
+                        //My Applicants
+                        composable("applicantsdetails/{resumeId}/{status}/{tradesmanId}") { backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientCancellationDetails(
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
+                            val tradesmanId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+
+                            ApplicantDetails(
                                 resumeId,
+                                status,
+                                tradesmanId,
                                 modifier = Modifier,
                                 navController,
-                                getClientBookingViewModel,
-
+                                getMyJobApplicantsViewModel,
+                                viewResumeViewModel
                             )
                         }
-
-
+                        composable("applicantsdeclinedetails/{resumeId}/{status}/{tradesmanId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
+                            val tradesmanId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+                            ApplicantDeclinationDetails(
+                                resumeId,
+                                status,
+                                tradesmanId,
+                                modifier = Modifier,
+                                navController,
+                                getMyJobApplicantsViewModel,
+                            )
+                        }
                         composable("booking") {
                             BookingsScreen(
                                 modifier = Modifier,

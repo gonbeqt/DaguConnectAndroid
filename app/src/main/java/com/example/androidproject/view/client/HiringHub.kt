@@ -938,7 +938,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
 
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientactivedetails/${activeBooking.id}")}
+            .clickable{navController.navigate("clientdetails/${activeBooking.id}/${activeBooking.bookingStatus}")}
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1327,7 +1327,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
     Card(
         modifier = Modifier
             .clickable{
-                navController.navigate("clientpendingdetails/${pendingBooking.id}")
+                navController.navigate("clientdetails/${pendingBooking.id}/${pendingBooking.bookingStatus}")
             }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -1448,7 +1448,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
                     Spacer(Modifier.width(16.dp))
                     OutlinedButton(
                         onClick = {
-                            navController.navigate("clientpendingdetails/${pendingBooking.id}")
+                            navController.navigate("clientdetails/${pendingBooking.id}/${pendingBooking.bookingStatus}")
                         },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color(0xFFECAB1E)),
@@ -1598,7 +1598,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
     }
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientdeclineddetails/${declineBooking.id}") }
+            .clickable{navController.navigate("clientdetails/${declineBooking.id}/${declineBooking.bookingStatus}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1712,7 +1712,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                     horizontalArrangement = Arrangement.End
                 ) {
                     OutlinedButton(
-                        onClick = { navController.navigate("clientdeclineddetails/${declineBooking.id}") },
+                        onClick = { navController.navigate("clientdetails/${declineBooking.id}/${declineBooking.bookingStatus}") },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color.Gray),
                         modifier = Modifier.weight(1f),
@@ -1762,7 +1762,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
     }
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientcompleteddetails/${completedBooking.tradesmanId}") }
+            .clickable{navController.navigate("clientdetails/${completedBooking.id}/${completedBooking.bookingStatus}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1922,7 +1922,7 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
     }
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientcancelleddetails/${cancelledBooking.id}") }
+            .clickable{navController.navigate("clientdetails/${cancelledBooking.id}/${cancelledBooking.bookingStatus}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -2033,7 +2033,7 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                     horizontalArrangement = Arrangement.End
                 ) {
                     OutlinedButton(
-                        onClick = { navController.navigate("clientcancelleddetails/${cancelledBooking.id}") },
+                        onClick = { navController.navigate("clientdetails/${cancelledBooking.id}/${cancelledBooking.bookingStatus}") },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color.Gray),
                         modifier = Modifier.weight(1f),
@@ -2563,7 +2563,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2984,7 +2985,8 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -3352,13 +3354,18 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+        ,
+        shape = RoundedCornerShape(8.dp)
+
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White),
+
         ) {
             Column( // Using Column to stack elements vertically inside the Card
                 modifier = Modifier
@@ -3451,8 +3458,9 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
-                        .background(
+                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+
+                    .background(
                             color = Color.Transparent,
                         )
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
@@ -3491,7 +3499,9 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+        ,
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -3590,7 +3600,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -3609,11 +3619,6 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
 
 @Composable
 fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavController) {
-    var jobType = myJob.jobType
-
-    if (jobType == "Electrical_work") {
-        jobType = "Electrical Work"
-    }
     var jobType = myJob.jobType
     if (jobType == "Electrical_work") {
         jobType = "Electrical Work"
@@ -3636,7 +3641,8 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+        ,
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -3735,7 +3741,7 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
                         .background(
                             color = Color.Transparent,
                         )
