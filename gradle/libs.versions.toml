@@ -15,8 +15,10 @@ constraintlayout = "2.1.4"
 foundationAndroid = "1.7.6"
 storage = "1.5.0"
 pagingComposeAndroid = "3.3.6"
+lottie-compose = "6.4.0"
 
 [libraries]
+com-airbnb-lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie-compose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

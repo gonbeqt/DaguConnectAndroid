@@ -1,6 +1,8 @@
 package com.example.androidproject.view.client
 
+import android.health.connect.datatypes.units.Length
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,37 +26,14 @@ import com.example.androidproject.ViewModelSetups.Companion.getDateOnly
 import com.example.androidproject.ViewModelSetups.Companion.isNotToday
 import com.example.androidproject.ViewModelSetups.Companion.isToday
 import com.example.androidproject.model.Notification
-import com.example.androidproject.view.NotificationItem
+import com.example.androidproject.viewmodel.notifications.ClearNotificationViewModel
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 
 @Composable
-fun NotificationScreen(navController: NavController, getNotification: GetNotificationViewModel) {
+fun NotificationScreen(navController: NavController, getNotification: GetNotificationViewModel, clearNotification: ClearNotificationViewModel) {
     val notifications = getNotification.getNotificationPagingData.collectAsLazyPagingItems()
 
-    // Filter with additional logging
-    val todayNotifications = notifications.itemSnapshotList?.filter { item ->
-        Log.d("NotificationScreen", "Processing item: $item")
-        item?.createdAt?.let { createdAt ->
-            val result = isToday(createdAt)
-            Log.d("NotificationScreen", "isToday result for $createdAt: $result")
-            result
-        } == true
-    } ?: emptyList()
-
-    val previousNotifications = notifications.itemSnapshotList?.filter { item ->
-        Log.d("NotificationScreen", "Processing item: $item")
-        item?.createdAt?.let { createdAt ->
-            val result = isNotToday(createdAt)
-            Log.d("NotificationScreen", "isNotToday result for $createdAt: $result")
-            result
-        } == true
-    } ?: emptyList()
-
-    Log.d("NotificationScreen", "Today Notifications: $todayNotifications")
-
-    Log.d("NotificationScreen", "Previous Notifications: $previousNotifications")
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(notifications) {
         getNotification.refreshNotification()
     }
 
@@ -62,7 +42,7 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
             .fillMaxSize()
             .background(Color(0xFFF2F2F2)) // Light gray background
     ) {
-        NotificationTopSection(navController)
+        NotificationTopSection(navController, clearNotification)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
@@ -74,25 +54,19 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
 
         Spacer(modifier = Modifier.height(8.dp))
 
-
-
         LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .size(420.dp)
-                .background(Color(0xFFD9D9D9))
+                .fillMaxSize()
+                .background(Color.Transparent)
             ,
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
-            if (todayNotifications != null) {
-                items(todayNotifications.size) { index ->
-                    val today = todayNotifications[index]
-                    if (today != null) {
-                        Log.d("NotificationScreen", "Today Notification: ${todayNotifications}")
-                        NotificationCardToday(today)
-                    }
+            items(notifications.itemCount) { index ->
+                val notification = notifications[index]
+                if (notification != null) {
+                    NotificationCardToday(notification)
+                    Log.d("NotificationScreen", "Notification Title: ${notification.notificationTitle}")
                 }
             }
         }
@@ -100,7 +74,15 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
 }
 
 @Composable
-fun NotificationTopSection(navController: NavController) {
+fun NotificationTopSection(navController: NavController, clearNotification: ClearNotificationViewModel) {
+    val clearNotificationState by clearNotification.clearNotificationResult.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(clearNotificationState) {
+        clearNotificationState?.let {
+            Toast.makeText(context, "Notifications cleared", Toast.LENGTH_SHORT).show()
+        }
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -147,7 +129,9 @@ fun NotificationTopSection(navController: NavController) {
                         .padding(top = 15.dp)
                         .weight(1f)
                 )
-                TextButton (onClick = {}){
+                TextButton (onClick = {
+
+                }){
                     Text("Clear",
                         color = Color.Gray,
                         textAlign = TextAlign.Center)

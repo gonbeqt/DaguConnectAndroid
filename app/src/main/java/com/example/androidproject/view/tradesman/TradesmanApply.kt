@@ -419,7 +419,7 @@ fun TradesmanApply(
                 val job = (viewJobState as ViewJobViewModel.JobState.Success).data
                 Button(
                     onClick = {
-                        navController.navigate("hiringdetails/${job.job.id}")
+                        navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}")
                     },
                     modifier = Modifier
                         .fillMaxWidth()

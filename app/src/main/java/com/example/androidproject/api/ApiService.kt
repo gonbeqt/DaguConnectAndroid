@@ -22,6 +22,10 @@ import com.example.androidproject.model.PostJobResponse
 import com.example.androidproject.model.RegisterRequest
 import com.example.androidproject.model.RegisterResponse
 import com.example.androidproject.model.PostJobs
+import com.example.androidproject.model.PostMessage
+import com.example.androidproject.model.PostMessageResponse
+import com.example.androidproject.model.ReportConcernRequest
+import com.example.androidproject.model.ReportConcernResponse
 import com.example.androidproject.model.UpdateAddress
 import com.example.androidproject.model.UpdateAddressResponse
 import com.example.androidproject.model.UpdateJob
@@ -171,8 +175,8 @@ interface ApiService {
     @GET("/user/client/job-applications")
     suspend fun getMyJobApplicants(@Query("page") page: Int = 1, @Query("limit") limit: Int = 10 ): Response<GetJobApplicantsData>
 
-    @GET("/user/message/{chatId}")
-    suspend fun getConversation(@Path("chatId") chatId: Int, @Query("page") page: Int = 1, @Query("limit") limit: Int = 10): Response<List<GetMessages>>
+    @GET("/user/message/{chatId}/{receiverId}")
+    suspend fun getConversation(@Path("chatId") chatId: Int, @Path("receiverId")receiverId: Int, @Query("page") page: Int = 1, @Query("limit") limit: Int = 20): Response<GetMessages>
 
     @GET("/user/tradesman/getResume/Details")
     suspend fun getTradesmanResume(): Response<viewResume>
@@ -229,5 +233,12 @@ interface ApiService {
     @PUT("/user/tradesman/update/activeStatus")
     suspend fun  updateTradesmanActiveStatus(@Body request: UpdateActiveStatusRequest) : Response<UpdateActiveStatusResponse>
 
+    @DELETE("/client/jobs/delete/{jobId}")
+    suspend fun deleteJob(@Path("jobId") jobId: Int): Response<Unit>
 
+    @POST("/user/contact")
+    suspend fun  reportConcern(@Body request : ReportConcernRequest): Response<ReportConcernResponse>
+
+    @DELETE("/user/notification/clear")
+    suspend fun clearNotifications(): Response<Unit>
 }

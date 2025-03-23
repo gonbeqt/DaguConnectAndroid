@@ -46,16 +46,16 @@ data class JobApplicationData(
     @SerializedName("qualification_summary")
     val qualificationSummary: String,
     val status: String,
-    @SerializedName("created_at")
-    val createdAt: String,
-    @SerializedName("updated_at")
-    val updatedAt: String,
     @SerializedName("cancelled_reason")
     val cancelledReason: String?,
     @SerializedName("cancelled_by")
-    val cancelledBy: String?
-
-
+    val cancelledBy: String?,
+    @SerializedName("job_date_status")
+    val jobDateStatus: String,
+    @SerializedName("created_at")
+    val createdAt: String,
+    @SerializedName("updated_at")
+    val updatedAt: String
 )
 
 data class UpdateStatus(
@@ -103,8 +103,16 @@ data class JobApplicantData(
     @SerializedName("qualification_summary")
     val qualificationSummary: String,
     val status: String,
+    @SerializedName("updated_at")
+    val updatedAt: String,
     @SerializedName("created_at")
-    val createdAt: String
+    val createdAt: String,
+    @SerializedName("cancelled_by")
+    val cancelledBy: String,
+    @SerializedName("cancelled_reason")
+    val cancelledReason: String,
+    @SerializedName("job_date_status")
+    val jobDateStatus: String
 )
 
 data class ViewJobApplicationData(
@@ -140,6 +148,8 @@ data class ViewJobApplicationData(
     val cancelledReason: String?,
     @SerializedName("cancelled_by")
     val cancelledBy: String?,
+    @SerializedName("updated_at")
+    val updatedAt: String,
     @SerializedName("created_at")
     val createdAt: String
 )

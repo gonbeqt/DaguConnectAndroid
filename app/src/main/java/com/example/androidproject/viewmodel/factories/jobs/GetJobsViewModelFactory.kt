@@ -1,6 +1,5 @@
 package com.example.androidproject.viewmodel.factories.jobs
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.androidproject.api.ApiService

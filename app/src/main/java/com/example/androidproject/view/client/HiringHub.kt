@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,16 +43,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -66,15 +62,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
@@ -95,8 +94,7 @@ fun BookingsScreen(
     getMyJobApplicants: GetMyJobApplicantsViewModel,
     viewJobsApplication: ViewJobApplicationViewModel,
     putJobApplicationStatus: PutJobApplicationStatusViewModel,
-    LoadingUI:@Composable () -> Unit,
-    initialTabIndex: Int = 0, // Default to 0 if not provided
+    initialTabIndex: Int = 0,
     initialSection: Int = 0
 ) {
     Log.i("Screen", "BookingsScreen")
@@ -107,14 +105,13 @@ fun BookingsScreen(
         WindowType.LARGE -> 16.sp
     }
 
-    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) } // Use initialTabIndex
+    var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
     var selectedSection by remember { mutableIntStateOf(initialSection) }
 
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
 
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
@@ -122,26 +119,11 @@ fun BookingsScreen(
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
     }
-
-
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+    var showLoading by remember { mutableStateOf(false) } // State to control LoadingUI visibility
 
-    // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-
-    // State to track loading during retry
-    var isLoading by remember { mutableStateOf(false) }
-
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
-        }
-    }
 
     Box(
         modifier = modifier
@@ -149,18 +131,17 @@ fun BookingsScreen(
             .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
+            Row(
+                Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-
-            ){
+            ) {
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 22.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-
                 ) {
                     Text(
                         text = "Hiring Hub",
@@ -210,82 +191,75 @@ fun BookingsScreen(
                         )
                     }
                 }
-                // Handle different states based on connectivity and data loading
-                if (!isConnected.value) {
-                    // No internet connection
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "No Internet Connection",
-                                fontSize = 18.sp,
-                                color = Color.Red,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Please check your internet and try again.",
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            // Retry button (only fetch data when clicked)
-                            Box(
-                                modifier = Modifier
-                                    .clickable {
-                                        // Re-check network connectivity
-                                        isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                        if (isConnected.value) {
-                                            // Show loading state and trigger data fetch
-                                            isLoading = true
-                                            refreshTrigger++
-                                        } else {
-                                            // Optionally show a toast if still no internet
-                                            Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                        if (!isConnected.value) {
+                            if (showLoading) {
+                                LoadingUI()
+                                LaunchedEffect(Unit) {
+                                    delay(1500) // Show LoadingUI for 1.5 seconds
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    showLoading = false // Hide LoadingUI after delay
+                                }
+                            } else {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = "No Internet Connection",
+                                            fontSize = 18.sp,
+                                            color = Color.Red,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "Please check your internet and try again.",
+                                            fontSize = 14.sp,
+                                            color = Color.Gray
+                                        )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clickable {
+                                                    showLoading = true // Show LoadingUI on retry
+                                                }
+                                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                        ) {
+                                            Text(
+                                                text = "Retry",
+                                                color = Color.White,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
                                         }
                                     }
-                                    .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                }
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFFD9D9D9))
+                                    .padding(16.dp)
                             ) {
-                                Text(
-                                    text = "Retry",
-                                    color = Color.White,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    if (isLoading){
-                        LoadingUI()
-                    }else{
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFFD9D9D9))
-                                .padding(8.dp)
-                        ) {
-                            when (selectedSection) {
-                                0 -> when (selectedTabIndex) {
-                                    0 -> AllBookingsContent(getClientsBooking, navController)
-                                    1 -> PendingBookingsContent(getClientsBooking, navController,updateBookingTradesmanViewModel)
-                                    2 -> DeclinedBookingsContent(getClientsBooking, navController)
-                                    3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
-                                    4 -> CompletedBookingsContent(getClientsBooking, navController)
-                                    5 -> CancelledBookingsContent(getClientsBooking, navController)
-                                }
-                                1 -> when (selectedTabIndex) {
-                                    0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
-                                    1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
-                                    2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
-                                    3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
-                                    4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
-                                    5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                when (selectedSection) {
+                                    0 -> when (selectedTabIndex) {
+                                        0 -> AllBookingsContent(getClientsBooking, navController)
+                                        1 -> PendingBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
+                                        2 -> DeclinedBookingsContent(getClientsBooking, navController)
+                                        3 -> ActiveBookingsContent(getClientsBooking, navController, updateBookingTradesmanViewModel)
+                                        4 -> CompletedBookingsContent(getClientsBooking, navController)
+                                        5 -> CancelledBookingsContent(getClientsBooking, navController)
+                                    }
+                                    1 -> when (selectedTabIndex) {
+                                        0 -> AllApplicantsContent(getMyJobApplicants, viewJobsApplication)
+                                        1 -> PendingApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
+                                        2 -> DeclinedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                        3 -> ActiveApplicantsContent(navController, getMyJobApplicants, viewJobsApplication, putJobApplicationStatus)
+                                        4 -> CompletedApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                        5 -> CancelledApplicantsContent(navController, getMyJobApplicants, viewJobsApplication)
+                                    }
                                 }
                             }
                         }
-                    }
-                }
             }
         }
     }
@@ -428,14 +402,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
         }
     }
 
-
-        /* items(booking.size) { index ->
-             val bookings = booking[index]
-             AllItem(bookings,navController)
-         }*/
 }
-
-
 
 
 @Composable
@@ -614,8 +581,6 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
             }
         }
     }
-
-
 }
 
 @Composable
@@ -908,7 +873,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
     var showJobCompletedDialog by remember { mutableStateOf(false) }
     var showCancelledReason by remember { mutableStateOf(false) }
     var buttonSubmit by remember { mutableStateOf(false) }
-
+    var cancelReason by remember { mutableStateOf("") }
     val  context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
     val cardWidth = when (windowSize.width) {
@@ -939,11 +904,21 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                 updateWorkStatusViewModel.resetState()
                 if(updateWorkStatusState.status == "Completed"){
                     // Navigate to the "profile" screen and clear the back stack
+                    WebSocketManager.sendNotificationBookingToTradesman(
+                        activeBooking.resumeId.toString(),
+                        "A book job has been marked as completed!!",
+                        "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has marked the active book into completed."
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
                         navController.popBackStack()
                     }
                 }else if(updateWorkStatusState.status == "Cancelled"){
                     // Navigate to the "profile" screen and clear the back stack
+                    WebSocketManager.sendNotificationBookingToTradesman(
+                        activeBooking.resumeId.toString(),
+                        "An active booked job has been cancelled!",
+                        "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the active service. due to $cancelReason"
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
                         navController.popBackStack()
                     }
@@ -963,7 +938,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
 
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientactivedetails/${activeBooking.id}")}
+            .clickable{navController.navigate("clientdetails/${activeBooking.id}/${activeBooking.bookingStatus}")}
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1286,6 +1261,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
                                 it,
                                 activeBooking.id
                             )
+                            cancelReason = it
                         }
 
                     },
@@ -1307,10 +1283,15 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
     val updateBookingState by updateBookingTradesmanViewModel.workStatusState.collectAsState()
     var showCancelDialog by remember { mutableStateOf(false) }
     var showCancelReasons by remember { mutableStateOf(false) }
-
+    var cancelReason by remember { mutableStateOf("") }
     LaunchedEffect(updateBookingState) {
         when (updateBookingState) {
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
+                WebSocketManager.sendNotificationBookingToTradesman(
+                    pendingBooking.resumeId.toString(),
+                    "A client has cancelled a booking!",
+                    "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the booking request, due to $cancelReason."
+                )
                 Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
                 updateBookingTradesmanViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
@@ -1346,7 +1327,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
     Card(
         modifier = Modifier
             .clickable{
-                navController.navigate("clientpendingdetails/${pendingBooking.id}")
+                navController.navigate("clientdetails/${pendingBooking.id}/${pendingBooking.bookingStatus}")
             }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -1467,7 +1448,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
                     Spacer(Modifier.width(16.dp))
                     OutlinedButton(
                         onClick = {
-                            navController.navigate("clientpendingdetails/${pendingBooking.id}")
+                            navController.navigate("clientdetails/${pendingBooking.id}/${pendingBooking.bookingStatus}")
                         },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color(0xFFECAB1E)),
@@ -1576,7 +1557,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
                             showCancelReasons = false
                             selectedReason?.let {
                                 updateBookingTradesmanViewModel.updateWorkStatus("Cancelled", it, pendingBooking.id)
-
+                                cancelReason = it
                             }
                         },
                         enabled = selectedReason != null,
@@ -1617,7 +1598,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
     }
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientdeclineddetails/${declineBooking.id}") }
+            .clickable{navController.navigate("clientdetails/${declineBooking.id}/${declineBooking.bookingStatus}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1731,7 +1712,7 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                     horizontalArrangement = Arrangement.End
                 ) {
                     OutlinedButton(
-                        onClick = { navController.navigate("clientdeclineddetails/${declineBooking.id}") },
+                        onClick = { navController.navigate("clientdetails/${declineBooking.id}/${declineBooking.bookingStatus}") },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color.Gray),
                         modifier = Modifier.weight(1f),
@@ -1781,7 +1762,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
     }
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientcompleteddetails/${completedBooking.tradesmanId}") }
+            .clickable{navController.navigate("clientdetails/${completedBooking.id}/${completedBooking.bookingStatus}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1941,7 +1922,7 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
     }
     Card(
         modifier = Modifier
-            .clickable{navController.navigate("clientcancelleddetails/${cancelledBooking.id}") }
+            .clickable{navController.navigate("clientdetails/${cancelledBooking.id}/${cancelledBooking.bookingStatus}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -2052,7 +2033,7 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                     horizontalArrangement = Arrangement.End
                 ) {
                     OutlinedButton(
-                        onClick = { navController.navigate("clientcancelleddetails/${cancelledBooking.id}") },
+                        onClick = { navController.navigate("clientdetails/${cancelledBooking.id}/${cancelledBooking.bookingStatus}") },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color.Gray),
                         modifier = Modifier.weight(1f),
@@ -2523,6 +2504,9 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
     var buttonSubmit by remember { mutableStateOf(false) }
+    var reason by remember { mutableStateOf("") }
+    var declined by remember { mutableStateOf(false) }
+
     when(val jobput =putJob) {
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Loading -> {
@@ -2538,10 +2522,21 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
                 putJobApplicationStatus.resetState()
                 if(jobput.status == "Active"){
+                    WebSocketManager.sendNotificationJobToTradesman(
+                        myJob.resumeId.toString(),
+                        "Job Application accepted!",
+                        "Your job application from ${myJob.clientFullname} has been accepted!"
+                    )
+
                     navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
-                       navController.popBackStack()
+                        navController.popBackStack()
                     }
                 }else if(jobput.status == "Declined"){
+                    WebSocketManager.sendNotificationJobToTradesman(
+                        myJob.resumeId.toString(),
+                        "${myJob.clientFullname} Declined Your Job Application.",
+                        "Your application was declined by ${myJob.clientFullname} due to $reason."
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
                         navController.popBackStack()
                     }
@@ -2568,7 +2563,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2881,6 +2877,8 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 confirmButton = {
                     Button(
                         onClick = {
+                            reason = selectedReason ?: ""
+                            declined = true
                             buttonSubmit = true
                             showDeclineReasons = false
                             selectedReason?.let {
@@ -2919,7 +2917,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
     val context = LocalContext.current
     var cancelledClicked by remember { mutableStateOf(false) }
     var completedClicked by remember { mutableStateOf(false) }
-
+    var cancelReason by remember { mutableStateOf("") }
 
     LaunchedEffect(putJobState) {
         if (cancelledClicked || completedClicked) {
@@ -2938,11 +2936,21 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                     if (putJob.status =="Completed"){
+                        WebSocketManager.sendNotificationJobToTradesman(
+                            myJob.resumeId.toString(),
+                            "Job was marked as completed!",
+                            "${myJob.clientFullname} has marked your ${myJob.jobType} service as completed!"
+                        )
                         Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
                         navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
                             navController.popBackStack()
                         }
                     }else if(putJob.status == "Cancelled"){
+                        WebSocketManager.sendNotificationJobToTradesman(
+                            myJob.resumeId.toString(),
+                            "An active job was cancelled!",
+                            "${myJob.clientFullname} has cancelled ${myJob.jobType} service due to $cancelReason!"
+                        )
                         Toast.makeText(context, "Job Cancelled", Toast.LENGTH_SHORT).show()
                         navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                             navController.popBackStack()
@@ -2977,7 +2985,8 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -3234,6 +3243,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                                 "Completed",
                                 "",
                             )
+
                             completedClicked = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
@@ -3302,6 +3312,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                                     "Cancelled",
                                     it
                                 )
+                                cancelReason = it
                             }
                             completedClicked = true
 
@@ -3317,7 +3328,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
             )
         }
     }
-    }
+}
 
 @Composable
 fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController) {
@@ -3343,13 +3354,18 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+        ,
+        shape = RoundedCornerShape(8.dp)
+
+
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White),
+
         ) {
             Column( // Using Column to stack elements vertically inside the Card
                 modifier = Modifier
@@ -3442,8 +3458,9 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
-                        .background(
+                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+
+                    .background(
                             color = Color.Transparent,
                         )
                         .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
@@ -3482,7 +3499,9 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+        ,
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -3581,7 +3600,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -3622,7 +3641,8 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+        ,
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -3721,7 +3741,7 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
                         .background(
                             color = Color.Transparent,
                         )

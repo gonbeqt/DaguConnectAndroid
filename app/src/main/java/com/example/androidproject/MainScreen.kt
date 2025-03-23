@@ -97,8 +97,7 @@ fun MainScreen(
     viewRatingsViewModel: ViewRatingsViewModel,
     initialSelectedItem: Int = 0,
     initialSelectedTab: Int = 0,
-    initialSelectedSection: Int = 0,
-    LoadingUI: @Composable () -> Unit
+    initialSelectedSection: Int = 0
 ) {
     val role = AccountManager.getAccount()?.isClient
     val context = LocalContext.current
@@ -239,8 +238,7 @@ fun MainScreen(
             updateClientProfilePictureViewModel,
             updateTradesmanActiveStatusViewModel,
             reportClientViewModel,
-            viewRatingsViewModel,
-            LoadingUI
+            viewRatingsViewModel
         )
     }
 }
@@ -275,24 +273,23 @@ fun ContentScreen(
     updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
     reportClientViewModel:ReportClientViewModel,
     viewRatingsViewModel: ViewRatingsViewModel,
-    LoadingUI : @Composable () -> Unit // Add this parameter
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
         when (selectedItem) {
-            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportTradesmanViewModel,LoadingUI)
-            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel, LoadingUI,selectedTab,selectedSection)
-            2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking)
+            0 -> HomeScreen(modifier = modifier.padding(bottom = 0.1.dp),navController,getResumesViewModel,reportTradesmanViewModel)
+            1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel,selectedTab,selectedSection)
+            2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,getMyJobApplicantsViewModel)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
-            4 -> ProfileScreen(modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel, putJobViewModel, updateClientProfilePictureViewModel, LoadingUI, selectedTab,)
+            4 -> ProfileScreen(modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel, putJobViewModel, updateClientProfilePictureViewModel, selectedTab,)
         }
     } else {
         when (selectedItem) {
-            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel,reportClientViewModel,LoadingUI,selectedTab)
-            1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,LoadingUI,selectedTab,  selectedSection )
-            2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController,getClientsBooking)
+            0 -> HomeTradesman(modifier = Modifier, navController, getJobsViewModel, getRecentJobsViewModel,reportClientViewModel,selectedTab)
+            1 -> BookingsTradesman(modifier = Modifier, navController,updateBookingClientViewModel, getMyJobApplications,getTradesmanBooking, putJobApplicationStatusViewModel, viewJobsApplication,selectedTab,  selectedSection )
+            2 -> ScheduleTradesman(modifier.padding(bottom = 0.1.dp), navController,getTradesmanBooking,getMyJobApplications)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp), navController, viewModel)
-            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,updateTradesmanActiveStatusViewModel,viewRatingsViewModel,LoadingUI,selectedTab)
+            4 -> ProfileTradesman(modifier = Modifier, navController, logoutViewModel,viewTradesmanProfileViewModel,updateTradesmanProfileViewModel,updateTradesmanActiveStatusViewModel,viewRatingsViewModel,selectedTab)
         }
     }
 }

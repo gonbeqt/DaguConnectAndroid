@@ -1,5 +1,6 @@
 package com.example.androidproject.viewmodel.notifications.paginate
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.androidproject.api.ApiService
@@ -18,6 +19,7 @@ class GetNotificationPagingSource (
             if (response.isSuccessful) {
                 val responseBody = response.body()
                 val notification = responseBody?.notifications?: emptyList()
+                Log.d("Get Notification Paging Source", "load: $notification")
                 LoadResult.Page(
                     data = notification,
                     prevKey = if (page == 1) null else page - 1,

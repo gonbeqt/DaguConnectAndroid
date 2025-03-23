@@ -27,8 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -64,32 +62,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.MotionScene
 import androidx.navigation.NavController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
-import com.example.androidproject.view.CustomDurationSnackbar
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
-import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PutJobApplicationStatusViewModel
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateBookingClientViewModel
-import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
-import com.example.androidproject.viewmodel.factories.bookings.UpdateBookingClientViewModelFactory
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import kotlinx.coroutines.delay
-import org.jetbrains.annotations.Async
 import java.sql.Types.NULL
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel, LoadingUI: @Composable () -> Unit, initialTabIndex: Int = 0, initialSection: Int = 0) {// Default to 0 if not provided
+fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel,  initialTabIndex: Int = 0, initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
 
     val iconSize = when (windowSize.width) {
@@ -122,33 +118,21 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    // State to trigger refresh/recomposition
-    var refreshTrigger by remember { mutableIntStateOf(0) }
+    val getMyJobApplicationsState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val getMyJobApplicationsLoadState = getMyJobApplicationsState.loadState
+
+    val getTradesmanBookingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val getTradesmanBookingLoadState = getTradesmanBookingState.loadState
 
     // State to track loading during retry
-    var isLoading by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
 
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
-        }
-    }
 
     // Define tab titles based on selected section
     val myJobsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
-
-    val onShowSnackbar: (String) -> Unit = { message ->
-        snackbarMessage = message
-        showSnackbar = true
-    }
 
     Column(
         modifier = modifier
@@ -180,6 +164,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
                     modifier = Modifier.size(32.dp)
+                        .clickable { navController.navigate("notification") }
                 )
             }
         }
@@ -224,57 +209,63 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             )
                         }
                     }
-                    // Handle different states based on connectivity and data loading
-                    if (!isConnected.value) {
-                        // No internet connection
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = "No Internet Connection",
-                                    fontSize = 18.sp,
-                                    color = Color.Red,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "Please check your internet and try again.",
-                                    fontSize = 14.sp,
-                                    color = Color.Gray
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                // Retry button (only fetch data when clicked)
-                                Box(
-                                    modifier = Modifier
-                                        .clickable {
-                                            // Re-check network connectivity
-                                            isConnected.value = checkNetworkConnectivity(connectivityManager)
-                                            if (isConnected.value) {
-                                                // Show loading state and trigger data fetch
-                                                isLoading = true
-                                                refreshTrigger++
-                                            } else {
-                                                // Optionally show a toast if still no internet
-                                                snackbarMessage = "Still no internet connection"
+                    when {
+                        (selectedSection == 0 && getMyJobApplicationsLoadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0) -> {
+                            LoadingUI() // For "My Jobs" - this is correct as is
+                        }
+                        (selectedSection == 1 && getTradesmanBookingLoadState.refresh is LoadState.Loading && getTradesmanBookingState.itemCount == 0) -> {
+                            LoadingUI() // For "My Applications" - use getMyJobApplications instead of getTradesmanBooking
+                        }else ->{
+                        // Handle different states based on connectivity and data loading
+                        if (!isConnected.value) {
+                            if(showLoading){
+                                LoadingUI()
+                                LaunchedEffect(Unit) {
+                                    delay(1500) // Show LoadingUI for 1.5 seconds
+                                    isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                    showLoading = false // Hide LoadingUI after delay
+                                    if (isConnected.value) {
+                                        getMyJobApplicationsState.refresh()
+                                        getTradesmanBookingState.refresh()
 
-                                                showSnackbar = true
-                                            }
-                                        }
-                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = "Retry",
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        if (isLoading){
-                            LoadingUI()
-                        }else{
+                            // No internet connection
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = "No Internet Connection",
+                                        fontSize = 18.sp,
+                                        color = Color.Red,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Please check your internet and try again.",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    // Retry button (only fetch data when clicked)
+                                    Box(
+                                        modifier = Modifier
+                                            .clickable {
+                                                showLoading = true
+                                            }
+                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Retry",
+                                            color = Color.White,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
                             // Content changes based on the selected tab and section
                             Box(
                                 modifier = Modifier
@@ -285,7 +276,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                 when (selectedSection) {
                                     0 -> when (selectedTabIndex) {
                                         0 -> AllBookingsTradesmanContent(getTradesmanBooking)
-                                        1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel,onShowSnackbar)
+                                        1 -> PendingBookingsTradesmanContent(navController,getTradesmanBooking,updateBookingClientViewModel)
                                         2 -> DeclinedBookingsTradesmanContent(navController,getTradesmanBooking)
                                         3 -> ActiveBookingsTradesmanContent(navController,getTradesmanBooking)
                                         4 -> CompletedBookingsTradesmanContent(navController,getTradesmanBooking)
@@ -294,16 +285,19 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
                                     1 -> when (selectedTabIndex) {
                                         0 -> AllMySubmissionsTradesmanContent(getMyJobApplications)
-                                        1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel,onShowSnackbar)
+                                        1 -> PendingMySubmissionsTradesmanContent(navController, getMyJobApplications, putJobApplicationStatusViewModel)
                                         2 -> DeclinedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
-                                        3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel,onShowSnackbar)
+                                        3 -> ActiveMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication, putJobApplicationStatusViewModel)
                                         4 -> CompletedMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication)
                                         5 -> CancelledMySubmissionsTradesmanContent(navController, getMyJobApplications, viewJobsApplication )
                                     }
                                 }
                             }
+
+                        }
                         }
                     }
+
 
                 }
 
@@ -312,15 +306,10 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 80.dp),
+                    .padding(bottom = 76.dp),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                CustomDurationSnackbar(
-                    message = snackbarMessage ,
-                    show = showSnackbar,
-                    duration = 5000L,
-                    onDismiss = { showSnackbar = false }
-                )
+                SnackbarController.ObserveSnackbar()
             }
         }
     }
@@ -344,7 +333,11 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
         // Left-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(if (selectedSection == 0) SolidColor(Color(0xFF122826)) else SolidColor(Color.Transparent))
+                .background(
+                    if (selectedSection == 0) SolidColor(Color(0xFF122826)) else SolidColor(
+                        Color.Transparent
+                    )
+                )
                 .weight(1f)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
@@ -417,7 +410,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
             Text(
                 text = "No Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -438,16 +431,16 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
             }
         }
     }
-
 }
 @Composable
-fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel, updateBookingClientViewModel: UpdateBookingClientViewModel,onShowSnackbar:(String) -> Unit) {
+fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel, updateBookingClientViewModel: UpdateBookingClientViewModel ) {
     val bookingPendingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         bookingPendingstate.refresh()
     }
-    val bookingPending = bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
+    val bookingPending =
+        bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -460,24 +453,22 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             Text(
                 text = "No Pending Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
-        } else{
+        } else {
             LazyColumn(
                 modifier = Modifier
                     .padding(bottom = 80.dp)
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
-
-                ,
+                    .background(Color(0xFFD9D9D9)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(bookingPending.size) { index ->
                     val Pending = bookingPending[index]
-                    PendingTradesmanItem(Pending,navController,updateBookingClientViewModel,onShowSnackbar)
+                    PendingTradesmanItem(Pending, navController, updateBookingClientViewModel)
                 }
             }
         }
@@ -505,7 +496,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
             Text(
                 text = "No Declined Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -549,7 +540,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
             Text(
                 text = "No Active Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -594,7 +585,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
             Text(
                 text = "No Completed Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -639,7 +630,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
             Text(
                 text = "No Cancelled Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -661,7 +652,6 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
             }
         }
     }
-
 }
 
 
@@ -770,7 +760,7 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
 
 
 @Composable
-fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavController, updateBookingClientViewModel :  UpdateBookingClientViewModel,onShowSnackbar:(String) ->Unit) {
+fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavController, updateBookingClientViewModel :  UpdateBookingClientViewModel) {
     val updateWorkStatus by updateBookingClientViewModel.clientWorkStatusState.collectAsState()
     val  context = LocalContext.current
     var showApproveDialog by remember { mutableStateOf(false) }
@@ -778,7 +768,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     var showJobApproveDialog by remember { mutableStateOf(false) }
     var showDeclineReasons by remember { mutableStateOf(false) }
     val date = ViewModelSetups.formatDateTime(pending.bookingDate)
-
+    var cancelReason by remember { mutableStateOf("") }
     LaunchedEffect(updateWorkStatus) {
         when (val updateStatus = updateWorkStatus) {
             is UpdateBookingClientViewModel.UpdateClientWorkStatus.Loading -> {
@@ -788,12 +778,22 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                 updateBookingClientViewModel.resetState()
                 // Set the selectedTab based on the work status
                 if (updateStatus.status == "Accepted") {
-                    onShowSnackbar("Jobs has been Accepted")
+                    SnackbarController.show("Jobs has been Accepted")
+                    WebSocketManager.sendNotificationBookingToClient(
+                        pending.id.toString(),
+                        "Tradesman has accepted your booking request!",
+                        "${pending.tradesmanFullName} has accepted your booked service request. Start a conversation to futhermore give details.",
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=3"){
                         navController.popBackStack()
                     }
                 } else if (updateStatus.status == "Declined") {
-                    onShowSnackbar("Jobs has been Declined")
+                    SnackbarController.show("Jobs has been Declined")
+                    WebSocketManager.sendNotificationBookingToClient(
+                        pending.userId.toString(),
+                        "Tradesman has declined your booking request!",
+                        "${pending.tradesmanFullName} has declined your booked service request due to $cancelReason.",
+                    )
                     navController.navigate("main_screen?selectedItem=1&selectedTab=2") {
                         navController.popBackStack()
                     }
@@ -804,7 +804,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
 
             is UpdateBookingClientViewModel.UpdateClientWorkStatus.Error -> {
                 val errorMessage = updateStatus.message
-                onShowSnackbar(errorMessage)
+                    SnackbarController.show(errorMessage)
                 updateBookingClientViewModel.resetState()
             }
 
@@ -835,7 +835,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     }
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmanpendingdetails/${pending.id}") }
+            .clickable { navController.navigate("tradesmanpendingdetails/${pending.id}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1114,6 +1114,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                                 it,
                                 pending.id
                             )
+                            cancelReason = it
                         }
                     },
                     enabled = selectedReason != null,
@@ -1159,7 +1160,7 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
 
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmanjobdecline/${declined.id}") }
+            .clickable { navController.navigate("tradesmanjobdecline/${declined.id}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1222,7 +1223,7 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmanjobdecline/${declined.id}")}
+                        .clickable { navController.navigate("tradesmanjobdecline/${declined.id}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1264,7 +1265,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {navController.navigate("tradesmanactivedetails/${active.id}") }
+            .clickable { navController.navigate("tradesmanactivedetails/${active.id}") }
         ,
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1328,7 +1329,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
+                        .clickable { navController.navigate("tradesmanactivedetails/${active.id}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1341,7 +1342,6 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
             }
         }
     }
-
 }
 @Composable
 fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) {
@@ -1369,7 +1369,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
     }
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmancompleteddetails/${completed.id}") }
+            .clickable { navController.navigate("tradesmancompleteddetails/${completed.id}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1433,7 +1433,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmancompleteddetails/${completed.id}")}
+                        .clickable { navController.navigate("tradesmancompleteddetails/${completed.id}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1476,7 +1476,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
     }
     Card(
         modifier = Modifier
-            .clickable {navController.navigate("tradesmanjobcancelled/${cancel.id}") }
+            .clickable { navController.navigate("tradesmanjobcancelled/${cancel.id}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1540,7 +1540,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {navController.navigate("tradesmanjobcancelled/${cancel.id}")  }
+                        .clickable { navController.navigate("tradesmanjobcancelled/${cancel.id}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1562,7 +1562,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
     val myJobs = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
-        getMyJobApplications.refreshJobApplicants()
+        myJobs.refresh()
     }
 
     Box(
@@ -1576,9 +1576,9 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
             // Display "No Submissions" when the list is empty
             Text(
                 text = "No Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1612,7 +1612,6 @@ fun PendingMySubmissionsTradesmanContent(
     navController: NavController,
     getMyJobApplications: GetMyJobApplicationViewModel,
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
-    ,onShowSnackbar:(String) -> Unit
 ) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
@@ -1631,9 +1630,9 @@ fun PendingMySubmissionsTradesmanContent(
             // Display "No Pending Submissions" when the list is empty
             Text(
                 text = "No Pending Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1651,7 +1650,7 @@ fun PendingMySubmissionsTradesmanContent(
                         pendingJobs,
                         navController,
                         putJobApplicationStatusViewModel,
-                        onShowSnackbar
+
                     )
                 }
             }
@@ -1679,9 +1678,9 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
             // Display "No Active Submissions" when the list is empty
             Text(
                 text = "No Decline Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1706,7 +1705,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
 }
 
 @Composable
-fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,onShowSnackbar:(String) -> Unit) {
+fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
 
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
@@ -1726,9 +1725,9 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
             // Display "No Active Submissions" when the list is empty
             Text(
                 text = "No Active Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1745,7 +1744,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
             ) {
                 items(activeApplication.size) { index ->
                     val activeJobs = activeApplication[index]
-                    ActiveMySubmissionsTradesmanItem(activeJobs,navController, putJobApplicationStatusViewModel,onShowSnackbar)
+                    ActiveMySubmissionsTradesmanItem(activeJobs,navController, putJobApplicationStatusViewModel)
                 }
             }
         }
@@ -1773,9 +1772,9 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
             // Display "No Completed Submissions" when the list is empty
             Text(
                 text = "No Completed Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1797,7 +1796,6 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
             }
         }
     }
-
 }
 @Composable
 fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
@@ -1819,9 +1817,9 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
             // Display "No Declined Submissions" when the list is empty
             Text(
                 text = "No Cancelled Applications",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
@@ -1850,7 +1848,7 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
 //Design For Items
 @Composable
 fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.jobDateStatus)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
 
     val windowSize = rememberWindowSizeClass()
@@ -1921,7 +1919,7 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Applied on $createdAt",
+                        text = "Applied on $updatedAt",
                         color = Color.Black,
                         fontSize = 14.sp
                     )
@@ -1947,11 +1945,10 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
 fun PendingMySubmissionsTradesmanItem(
     myJob: JobApplicationData,
     navController: NavController,
-    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,
-    onShowSnackbar:(String)-> Unit
+    putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
 ) {
     val windowSize = rememberWindowSizeClass()
-
+    var ifCancelledClicked by remember { mutableStateOf(false) }
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
         WindowType.MEDIUM -> 20.sp
@@ -1973,6 +1970,7 @@ fun PendingMySubmissionsTradesmanItem(
     val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
     val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val putState by putJobApplicationStatusViewModel.putJobApplicationState.collectAsState()
+    var cancelReason by remember { mutableStateOf("") }
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
@@ -1986,7 +1984,12 @@ fun PendingMySubmissionsTradesmanItem(
     LaunchedEffect(putState) {
         when (putState) {
             is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
-                onShowSnackbar("Application cancelled")
+                WebSocketManager.sendNotificationJobToClient(
+                    myJob.clientId.toString(),
+                    "A job application was cancelled",
+                    "${myJob.tradesmanFullname} has cancelled the job application due to ${cancelReason}"
+                )
+                SnackbarController.show("Application cancelled")
                 putJobApplicationStatusViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                     navController.popBackStack()
@@ -2074,7 +2077,7 @@ fun PendingMySubmissionsTradesmanItem(
                     Box(
                         modifier = Modifier
                             .clickable {
-                                showCancelDialog= true
+                                showCancelDialog = true
                             }
                             .background(
                                 color = Color.Transparent,
@@ -2206,7 +2209,7 @@ fun PendingMySubmissionsTradesmanItem(
                         showCancelReasons = false
                         selectedReason?.let {
                             putJobApplicationStatusViewModel.updateJobApplicationStatus(myJob.id,"Cancelled",it)
-
+                            cancelReason = it
                         }
                     },
                     enabled = selectedReason != null,
@@ -2221,9 +2224,8 @@ fun PendingMySubmissionsTradesmanItem(
     }
 }
 @Composable
-fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel,onShowSnackbar:(String)->Unit) {
+fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
     val windowSize = rememberWindowSizeClass()
-
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
         WindowType.MEDIUM -> 20.sp
@@ -2255,11 +2257,11 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
-                    onShowSnackbar(putJob.message)
+                    SnackbarController.show(putJob.message)
                 }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
-                    onShowSnackbar( putJob.data.message())
+                    SnackbarController.show( putJob.data.message())
 
                     putJobApplicationStatusViewModel.resetState()
                     navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
@@ -2283,7 +2285,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
+            .clickable { navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2355,7 +2357,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}")}
+                        .clickable { navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -2403,7 +2405,7 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {navController.navigate("tradesmanapplicationdecline/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
+            .clickable { navController.navigate("tradesmanapplicationdecline/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2616,7 +2618,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {navController.navigate("tradesmanapplicationcompleted/${myJob.id}/${myJob.jobId}") }
+                        .clickable { navController.navigate("tradesmanapplicationcompleted/${myJob.id}/${myJob.jobId}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -2636,7 +2638,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
 @Composable
 fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: NavController) {
     val windowSize = rememberWindowSizeClass()
-
+    val updatedAt = ViewModelSetups.formatDateTime(myJob.jobDateStatus)
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
         WindowType.MEDIUM -> 20.sp
@@ -2652,8 +2654,6 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    val createdAt = ViewModelSetups.formatDateTime(myJob.createdAt)
-    val deadline = ViewModelSetups.formatDateTime(myJob.jobDeadline)
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 400.dp to 270.dp
         WindowType.MEDIUM -> 410.dp to 280.dp
@@ -2668,7 +2668,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {navController.navigate( "tradesmanapplicationcancelled/${myJob.id}/${myJob.jobId}")}, // Add implementation for click if needed
+            .clickable { navController.navigate("tradesmanapplicationcancelled/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2719,18 +2719,18 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Applied on: $createdAt",
+                            text = "Cancelled on: $updatedAt",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
                         Text(
-                            text = "Due-Date: $deadline",
+                            text = "Cancelled reason: ${myJob.cancelledReason}",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Address: ${myJob.jobAddress}",
+                            text = "Cancelled by: ${myJob.cancelledBy}",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -2747,7 +2747,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}")}
+                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)

@@ -1,10 +1,8 @@
 package com.example.androidproject.viewmodel.factories.notification
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.androidproject.api.ApiService
-import com.example.androidproject.viewmodel.factories.messeges.GetMessageViewModelFactory
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 
 class GetNotificationViewModelFactory(private val apiService: ApiService): ViewModelProvider.Factory  {

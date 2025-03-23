@@ -17,11 +17,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 
 class GetMyJobsViewModel(private val apiService: ApiService, private val context: Context) : ViewModel() {
 
-    // This will trigger a refresh when updated
-    private val refreshTrigger = MutableStateFlow(Unit)
+
     private var currentPagingSource: GetMyJobsPagingSource? = null
 
-    val jobsPagingData: Flow<PagingData<GetJobs>> = refreshTrigger.flatMapLatest {
+    val jobsPagingData: Flow<PagingData<GetJobs>> =
         Pager(
             config = PagingConfig(
                 pageSize = 10,
@@ -31,13 +30,6 @@ class GetMyJobsViewModel(private val apiService: ApiService, private val context
             ),
             pagingSourceFactory = { GetMyJobsPagingSource(apiService) }
         ).flow.cachedIn(viewModelScope)
-    }
 
-    fun refreshJobs() {
-        // Invalidate the current paging source to force a reload
-        currentPagingSource?.invalidate()
-        // Trigger a new data load
-        refreshTrigger.value = Unit
 
-    }
 }

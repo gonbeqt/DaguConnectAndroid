@@ -1,56 +1,39 @@
 package com.example.androidproject.view.client
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.layout.fillMaxSize
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.Chats
-import com.example.androidproject.viewmodel.chats.GetChatViewModel
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.viewmodel.chats.GetChatViewModel
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageScreen(
     modifier: Modifier = Modifier,
@@ -59,13 +42,26 @@ fun MessageScreen(
 ) {
     val chatState = getChatViewModel.getChatsPagingData.collectAsLazyPagingItems()
     val loadState = chatState.loadState
+
+    // State for search input and dropdown visibility
+    var searchQuery by remember { mutableStateOf("") }
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+
+    // Filtered list of chats based on search query
+    val filteredChats = remember(searchQuery, chatState.itemCount) {
+        (0 until chatState.itemCount)
+            .mapNotNull { chatState[it] }
+            .filter { it.fullName.startsWith(searchQuery, ignoreCase = true) }
+    }
+
+    LaunchedEffect(Unit) {
+        getChatViewModel.refreshChats()
+    }
+
     when {
-        // Initial loading state
         loadState.refresh is LoadState.Loading && chatState.itemCount == 0 -> {
             LoadingUI()
         }
-
-        // Loading more items (append) or error states can be handled too if needed
         else -> {
             Column(
                 modifier = Modifier
@@ -75,35 +71,70 @@ fun MessageScreen(
             ) {
                 MessageTopSection(navController)
 
-                Row(
+                // Search Bar with ExposedDropdownMenuBox
+                ExposedDropdownMenuBox(
+                    expanded = isDropdownExpanded && filteredChats.isNotEmpty(),
+                    onExpandedChange = { isDropdownExpanded = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 25.dp)
-                        .background(Color(0xFFFFFFFF), shape = RoundedCornerShape(8.dp))
-                        .border(1.dp, Color(0xFFBEBEBE), shape = RoundedCornerShape(8.dp)),
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search Icon",
-                        tint = Color.Gray,
+                    Row(
                         modifier = Modifier
-                            .size(42.dp)
-                            .padding(start = 16.dp)
-                    )
-                    TextField(
-                        value = "",
-                        onValueChange = { /* Handle input */ },
-                        placeholder = { Text(text = "Search...") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White,
-                            disabledContainerColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
+                            .fillMaxWidth()
+                            .background(Color(0xFFFFFFFF), shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFFBEBEBE), shape = RoundedCornerShape(8.dp))
+                            .menuAnchor(), // Anchor the dropdown to this Row
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Icon",
+                            tint = Color.Gray,
+                            modifier = Modifier
+                                .size(42.dp)
+                                .padding(start = 16.dp)
                         )
-                    )
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = { query ->
+                                searchQuery = query
+                                isDropdownExpanded = query.isNotEmpty() // Show dropdown when typing
+                            },
+                            placeholder = { Text(text = "Search...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                disabledContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            singleLine = true
+                        )
+                    }
+
+                    // Dropdown Menu
+                    ExposedDropdownMenu(
+                        expanded = isDropdownExpanded && filteredChats.isNotEmpty(),
+                        onDismissRequest = { isDropdownExpanded = false },
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .background(Color.White)
+                    ) {
+                        filteredChats.forEach { chat ->
+                            DropdownChatItem(
+                                chats = chat,
+                                navController = navController,
+                                onClick = {
+                                    val encodedProfilePicture = Uri.encode(chat.profilePicture)
+                                    navController.navigate("messaging/${chat.id}/${chat.userId1}/${chat.fullName}/$encodedProfilePicture")
+                                    isDropdownExpanded = false // Close dropdown after selection
+                                    searchQuery = "" // Clear search after selection
+                                }
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -115,11 +146,9 @@ fun MessageScreen(
                     items(chatState.itemCount) { index ->
                         val chats = chatState[index]
                         if (chats != null) {
-                            ChatListItem(chats = chats, navController)
+                            ChatListItem(chats = chats, navController = navController)
                         }
                     }
-
-                    // Optional: Add loading indicator at bottom when appending more items
                     if (loadState.append is LoadState.Loading) {
                         item {
                             Box(
@@ -138,15 +167,65 @@ fun MessageScreen(
     }
 }
 
+// Smaller version of ChatListItem for dropdown
 @Composable
-fun ChatListItem(chats: Chats,navController: NavController) {
+fun DropdownChatItem(
+    chats: Chats,
+    navController: NavController,
+    onClick: () -> Unit
+) {
     val date = ViewModelSetups.formatDateTime(chats.createdAt)
+    val receiverId = if (AccountManager.getAccount()?.id != chats.userId1) chats.userId1 else chats.userId2
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp) // Smaller padding
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp), // Reduced padding
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = chats.profilePicture,
+                contentDescription = "Profile Image",
+                modifier = Modifier
+                    .size(40.dp) // Smaller profile image
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = chats.fullName,
+                    style = MaterialTheme.typography.bodyMedium, // Smaller text
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatListItem(chats: Chats, navController: NavController) {
+    val date = ViewModelSetups.formatDateTime(chats.createdAt)
+    val receiverId = if (AccountManager.getAccount()?.id != chats.userId1) chats.userId1 else chats.userId2
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .clickable { navController.navigate("messaging") },
+            .clickable {
+                val encodedProfilePicture = Uri.encode(chats.profilePicture)
+                navController.navigate("messaging/${chats.id}/$receiverId/${chats.fullName}/$encodedProfilePicture")
+            },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -157,19 +236,15 @@ fun ChatListItem(chats: Chats,navController: NavController) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Profile Icon
             AsyncImage(
-                model = chats.profilePicture, // Use URL here
+                model = chats.profilePicture,
                 contentDescription = "Profile Image",
                 modifier = Modifier
                     .size(62.dp)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
-            // Text Section
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = chats.fullName,
@@ -183,8 +258,6 @@ fun ChatListItem(chats: Chats,navController: NavController) {
                     color = Color.Gray
                 )
             }
-
-            // Timestamp
             Text(
                 text = date,
                 style = MaterialTheme.typography.bodySmall,
@@ -194,6 +267,7 @@ fun ChatListItem(chats: Chats,navController: NavController) {
         }
     }
 }
+
 @Composable
 fun MessageTopSection(navController: NavController) {
     Box(
@@ -206,26 +280,23 @@ fun MessageTopSection(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
-                .padding(horizontal = 25.dp), // Added padding inside for spacing
+                .padding(horizontal = 25.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left-aligned text
             Text(
                 text = "Message",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Medium
             )
-
             Icon(
-                imageVector = Icons.Default.Notifications,
+                imageVector = Icons.Outlined.Notifications,
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
-                modifier = Modifier.size(35.dp)
+                modifier = Modifier
+                    .size(35.dp)
                     .clickable { navController.navigate("notification") }
             )
         }
     }
 }
-
-

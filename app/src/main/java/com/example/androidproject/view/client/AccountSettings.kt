@@ -1,14 +1,7 @@
 package com.example.androidproject.view.client
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.compose.foundation.background
@@ -21,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfileAddressViewModel
 
@@ -168,11 +159,12 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                             .padding(horizontal = 16.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        listOf(
-                            "First Name: ${profile.fullname.split(" ").first()}",
-                            "Last Name: ${profile.fullname.split(" ").last()}",
-                            "Email: ${profile.email}"
-                        ).forEach { text ->
+                      Text(
+                          text = "First Name",
+                          fontSize = 16.sp,
+                          color = Color.Black,
+                          modifier = Modifier.padding(horizontal = 4.dp)
+                      )
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -182,7 +174,31 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                                     .padding(16.dp)
                             ) {
                                 Text(
-                                    text = text,
+                                    text = "${profile.fullname.split(" ").first()}",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        Text(
+                            text = "Last Name",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+
+                        )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                                    .background(Color.White)
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "${profile.fullname.split(" ").last()}",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = Color.Black,
@@ -191,7 +207,32 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                        }
+                        Text(
+                            text = "Email",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                                    .background(Color.White)
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "${profile.email}",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+
 
                         // Editable Contact Number Field
                         OutlinedTextField(

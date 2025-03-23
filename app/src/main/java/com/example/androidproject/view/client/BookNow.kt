@@ -467,45 +467,53 @@ fun BookNow(
             )
         }
 
-        when (val state = viewResumeState) {
-            is ViewResumeViewModel.ViewResumeState.Success -> {
-                val resume = state.data
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .constrainAs(buttonsRef) {
-                            bottom.linkTo(parent.bottom, margin = 44.dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Button(
-                        onClick = { navController.navigate("message_screen") },
+                }
+
+                    // Fixed Buttons at the Bottom
+                    Row(
                         modifier = Modifier
-                            .width(150.dp)
-                            .height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .constrainAs(buttonsRef) {
+                                bottom.linkTo(parent.bottom, margin = 44.dp)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            },
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(
-                                imageVector = Icons.Default.Message,
-                                contentDescription = "Message Icon",
-                                tint = Color.White
-                            )
-                            Text(text = "Chat Me", color = Color.White, fontSize = nameTextSize)
+                            Button(
+                                onClick = {
+                                    val encodedProfilePicture = Uri.encode(
+                                        resume.profilePic
+                                    )
+                                    navController.navigate("messaging/0/${resumeId}/${resume.tradesmanFullName}/${encodedProfilePicture}")                                          },
+                                modifier = Modifier
+                                    .width(150.dp)
+                                    .height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                            ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Message,
+                                    contentDescription = "Message Icon",
+                                    tint = Color.White
+                                )
+                                Text(text = "Chat Me", color = Color.White, fontSize = nameTextSize)
+
+                            }
                         }
-                    }
-                    Button(
-                        onClick = { navController.navigate("confirmbook/${resume.id}/${resume.userid}") },
-                        modifier = Modifier
-                            .width(150.dp)
-                            .height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
-                    ) {
+
+                        Button(
+                            onClick = { navController.navigate("confirmbook/${resume.id}/${resume.userid}") },
+                            modifier = Modifier
+                                .width(150.dp)
+                                .height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                        ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Icon(
                                 imageVector = Icons.Default.AddShoppingCart,
@@ -517,8 +525,14 @@ fun BookNow(
                     }
                 }
             }
-            else -> Unit
+
+
         }
+        is ViewResumeViewModel.ViewResumeState.Error -> {
+            Text("Error: ${state.message}")
+            Log.e("Error",state.message)
+        }
+        else -> Unit
     }
 }
 
@@ -729,4 +743,6 @@ fun FeedbackItem(viewRatingsViewModel: ViewRatingsViewModel, tradesmanId: Int) {
         else -> Unit
     }
 }
+
+
 

@@ -101,13 +101,15 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.example.androidproject.R
+import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
-import com.example.androidproject.view.CustomDurationSnackbar
+import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanActiveStatusViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
@@ -125,7 +127,6 @@ fun ProfileTradesman(
     updateTradesmanProfileViewModel: UpdateTradesmanProfileViewModel,
     updateTradesmanActiveStatusViewModel: UpdateTradesmanActiveStatusViewModel,
     viewRatingsViewModel: ViewRatingsViewModel,
-    LoadingUI: @Composable () -> Unit,
     initialTabIndex: Int = 0
 ) {
     // Function to check network connectivity
@@ -141,13 +142,7 @@ fun ProfileTradesman(
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
 
-    val onShowSnackbar: (String) -> Unit = { message ->
-        snackbarMessage = message
-        showSnackbar = true
-    }
 
     // State for profile update
     val updateProfileState by updateTradesmanProfileViewModel.updateTradesmanProfileState.collectAsState()
@@ -156,11 +151,11 @@ fun ProfileTradesman(
         when (val updatingProfile = updateProfileState) {
             is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Success -> {
                 updateTradesmanProfileViewModel.resetState()
-                onShowSnackbar("Profile updated successfully")
+                SnackbarController.show("Profile updated successfully")
             }
             is UpdateTradesmanProfileViewModel.UpdateTradesmanProfileState.Error -> {
                 val errorMessage = updatingProfile.message
-                onShowSnackbar(errorMessage)
+                SnackbarController.show(errorMessage)
             }
             else -> Unit
         }
@@ -168,8 +163,8 @@ fun ProfileTradesman(
 
     val updateTradesmanActiveStatusState by updateTradesmanActiveStatusViewModel.updateStatusState.collectAsState()
 
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-    var isLoading by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(true) }
+    var showRetryLoading  by remember { mutableStateOf(false) }
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
     val tabNames = listOf("Job Profile", "General")
@@ -198,9 +193,9 @@ fun ProfileTradesman(
                     Manifest.permission.READ_MEDIA_IMAGES
                 )
                 if (shouldShowRationale) {
-                    onShowSnackbar("Permission is required to select a profile picture")
+                    SnackbarController.show("Permission is required to select a profile picture")
                 } else {
-                    onShowSnackbar("Permission denied. Enable it in Settings.")
+                    SnackbarController.show("Permission denied. Enable it in Settings.")
                     val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.parse("package:${context.packageName}")
                     context.startActivity(intent)
@@ -209,27 +204,36 @@ fun ProfileTradesman(
         }
     }
 
-    LaunchedEffect(refreshTrigger) {
-        if (isConnected.value) {
-            isLoading = true
-            delay(200.milliseconds)
+
+    // Fetch profile data when the composable is first launched or when retrying
+    LaunchedEffect(showLoading) {
+        if (showLoading && isConnected.value) {
             viewTradesmanProfileViewModel.viewTradesmanProfile()
-            isLoading = false
         }
     }
 
+// Handle retry loading animation
+    LaunchedEffect(showRetryLoading) {
+        if (showRetryLoading) {
+            delay(1500) // Show LoadingUI for 1.5 seconds
+            isConnected.value = checkNetworkConnectivity(connectivityManager)
+            if (isConnected.value) {
+                showLoading = true // Trigger data fetch if internet is back
+            }
+            showRetryLoading = false // Hide loading animation
+        }
+    }
     LaunchedEffect(updateTradesmanActiveStatusState) {
         when (val updatingStatus = updateTradesmanActiveStatusState) {
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Success -> {
                 updateTradesmanActiveStatusViewModel.resetState()
                 viewTradesmanProfileViewModel.viewTradesmanProfile()
-                snackbarMessage = "Status updated successfully"
-                showSnackbar = true
+                SnackbarController.show ("Status updated successfully")
+
             }
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
                 val errorMessage = updatingStatus.message
-                snackbarMessage = errorMessage
-                showSnackbar = true
+                SnackbarController.show(errorMessage)
             }
             else -> Unit
         }
@@ -260,54 +264,48 @@ fun ProfileTradesman(
                     imageVector = Icons.Outlined.Notifications,
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp).clickable { navController.navigate("notification") }
                 )
             }
 
             if (!isConnected.value) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "No Internet Connection",
-                            fontSize = 18.sp,
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Please check your internet and try again.",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Box(
-                            modifier = Modifier
-                                .clickable {
-                                    isConnected.value =
-                                        checkNetworkConnectivity(connectivityManager)
-                                    if (isConnected.value) {
-                                        isLoading = true
-                                        refreshTrigger++
-                                    } else {
-                                        onShowSnackbar("Still no internet connection")
-                                    }
-                                }
-                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
+                    if(showRetryLoading){
+                        LoadingUI()
+                    }else{
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Retry",
-                                color = Color.White,
-                                fontSize = 16.sp,
+                                text = "No Internet Connection",
+                                fontSize = 18.sp,
+                                color = Color.Red,
                                 fontWeight = FontWeight.Bold
                             )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Please check your internet and try again.",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        showRetryLoading = true // Start retry loading animation
+                                    }
+                                    .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Retry",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
             } else {
-                if (isLoading) {
-                    LoadingUI()
-                } else {
                     when (val profileState = viewTradesmanProfilestate) {
                         is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
                             Box(
@@ -509,81 +507,32 @@ fun ProfileTradesman(
                                             navController,
                                             tradesmanDetails,
                                             viewRatingsViewModel,
-                                            onShowSnackbar
                                         )
 
-                                        1 -> SettingsTradesmanScreen(navController, logoutViewModel,onShowSnackbar)
+                                        1 -> SettingsTradesmanScreen(navController, logoutViewModel)
                                     }
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .padding(bottom = 80.dp),
+                                            .padding(bottom = 76.dp),
                                         contentAlignment = Alignment.BottomCenter
                                     ) {
-                                        CustomDurationSnackbar(
-                                            message = snackbarMessage,
-                                            show = showSnackbar,
-                                            duration = 5000L,
-                                            onDismiss = { showSnackbar = false }
-                                        )
-                                        Log.d("Snackbar", snackbarMessage)
+                                        SnackbarController.ObserveSnackbar()
                                     }
                                 }
+
 
                             }
 
                         }
 
                         is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Error -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = "Error: ${profileState.message}",
-                                        color = Color.Red,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .clickable {
-                                                isConnected.value =
-                                                    checkNetworkConnectivity(connectivityManager)
-                                                if (isConnected.value) {
-                                                    isLoading = true
-                                                    refreshTrigger++
-                                                } else {
-                                                    onShowSnackbar("Still no internet connection")
-                                                }
-                                            }
-                                            .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    ) {
-                                        Text(
-                                            text = "Retry",
-                                            color = Color.White,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
+
                         }
 
-                        else -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                LoadingUI()
-                            }
-                        }
+                        else -> Unit
                     }
 
-                }
 
             }
 
@@ -595,7 +544,7 @@ fun ProfileTradesman(
 
 
 @Composable
-fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel,onShowSnackbar: (String) -> Unit) {
+fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRatingsViewModel : ViewRatingsViewModel) {
     var scale by remember { mutableStateOf(1f) }
     val windowSize = rememberWindowSizeClass()
     val context = LocalContext.current
@@ -839,13 +788,13 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                                     if (fileUrl != null) {
                                         try {
                                             downloadId = downloadFileTradesman(context, fileUrl, fileName)
-                                            onShowSnackbar("Download success")
+                                            SnackbarController.show("Download success")
                                         } catch (e: Exception) {
-                                            onShowSnackbar("Download failed")
+                                            SnackbarController.show("Download failed")
 
                                         }
                                     } else {
-                                        onShowSnackbar("No file available")
+                                        SnackbarController.show("No file available")
 
                                     }
                                 }
@@ -1146,7 +1095,7 @@ fun GeneralTradesmanSettings(
 }
 
 @Composable
-fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel,onShowSnackbar: (String) -> Unit) {
+fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: LogoutViewModel) {
     var isChecked by remember { mutableStateOf(true) }
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
@@ -1155,11 +1104,12 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
             // Clear tokens and navigate regardless of result
             TokenManager.clearToken()
             AccountManager.clearAccountData()
-            onShowSnackbar("Logout successful")
+            SnackbarController.show("Logout successful")
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }
             logoutViewModel.resetLogoutResult()
+            WebSocketManager.disconnect()
         }
     }
     Column(modifier = Modifier
@@ -1297,18 +1247,16 @@ fun SettingsTradesmanScreen(navController: NavController,logoutViewModel: Logout
 }
 
 fun downloadFileTradesman(context: Context, fileUrl: String, fileName: String): Long {
+    
+    val request = DownloadManager.Request(Uri.parse(fileUrl))
+        .setTitle(fileName)
+        .setDescription("Downloading tradesman credential")
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+        .setAllowedOverMetered(true)
+        .setAllowedOverRoaming(true)
+
     val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val uri = Uri.parse(fileUrl)
-
-    val request = DownloadManager.Request(uri).apply {
-        setTitle(fileName)
-        setDescription("Downloading tradesman credential")
-        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-        setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-        setMimeType("application/pdf")
-    }
-
     return downloadManager.enqueue(request)
 }
 

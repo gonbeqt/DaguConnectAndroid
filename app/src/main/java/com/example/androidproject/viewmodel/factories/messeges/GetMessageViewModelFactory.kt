@@ -7,11 +7,12 @@ import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
 
 class GetMessageViewModelFactory(
     private val apiService: ApiService,
-    private val chatId: Int
+    private val chatId: Int,
+    private val receiverId: Int
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GetMessagesViewModel::class.java)) {
-            return GetMessagesViewModel(apiService, chatId) as T
+            return GetMessagesViewModel(apiService, chatId, receiverId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel Class")
     }

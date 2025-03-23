@@ -4,16 +4,16 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.model.JobApplicantData
-import com.example.androidproject.model.JobApplicationData
 
 class GetMyJobApplicantsPagingSource(
     private val apiService: ApiService
 ) : PagingSource<Int, JobApplicantData>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, JobApplicantData> {
-        val page = params.key ?: 1
+
 
         return try {
+            val page = params.key ?: 1
             val response = apiService.getMyJobApplicants(page = page, limit = params.loadSize)
             if (response.isSuccessful) {
                 val responseBody = response.body()
@@ -22,7 +22,7 @@ class GetMyJobApplicantsPagingSource(
                 LoadResult.Page(
                     data = applicants,
                     prevKey = if (page == 1) null else page - 1, // No previous key if first page
-                    nextKey = if (responseBody?.currentPage == responseBody?.totalPage) null else page + 1 // Stop if last page
+                    nextKey = if (applicants.isEmpty()) null else page + 1
                 )
             } else {
                 LoadResult.Error(Exception("Error: ${response.code()} ${response.message()}"))

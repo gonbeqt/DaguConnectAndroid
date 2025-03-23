@@ -40,7 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.example.androidproject.R
-import com.example.androidproject.view.CustomDurationSnackbar
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
 
 
@@ -72,14 +72,9 @@ fun ProfileVerification(
     var backIdUri by remember { mutableStateOf<Uri?>(null) }
     var tradeCredentialUri by remember { mutableStateOf<Uri?>(null) }
      var isPhoneValid by remember { mutableStateOf(false) }
-    val isTyping = estimatedRate.isNotEmpty()
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
     val phoneRegex = "^9[0-9]{9}$".toRegex()
-    val onShowSnackbar: (String) -> Unit = { message ->
-        snackbarMessage = message
-        showSnackbar = true
-    }
+
+    val isTyping = estimatedRate.isNotEmpty()
     var isValid by remember { mutableStateOf(false) }
 
     // Validation function
@@ -106,8 +101,7 @@ fun ProfileVerification(
             3 -> "Please upload Front ID, Back ID, and Trade Credential."
             else -> "Please complete all required fields."
         }
-        snackbarMessage = message
-        showSnackbar = true
+        SnackbarController.show(message)
     }
         Box(
             modifier = modifier
@@ -415,7 +409,7 @@ fun ProfileVerification(
                                                 aboutMe = newText
                                             } else {
                                                 aboutMe = newText.substring(0, 500)
-                                                onShowSnackbar("Character count exceeds")
+                                                SnackbarController.show("Character count exceeds")
                                             }
                                         },
                                         textStyle = TextStyle(fontSize = 14.sp),
@@ -594,12 +588,12 @@ fun ProfileVerification(
                                             // nothing
                                         }
                                         is SubmitResumeViewModel.SubmitResumeState.Success -> {
-                                            onShowSnackbar("Resume submitted successfully")
+                                            SnackbarController.show("Resume submitted successfully")
                                             submitResumeViewModel.resetState()
                                         }
                                         is SubmitResumeViewModel.SubmitResumeState.Error -> {
                                             val error = submitresume.message
-                                            onShowSnackbar(error)
+                                            SnackbarController.show(error)
                                             Log.d("testerrerro", error)
                                             submitResumeViewModel.resetState()
                                         }
@@ -611,21 +605,13 @@ fun ProfileVerification(
                     }
                 }
             }
-
-            // Snackbar overlay
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 80.dp), // Increased padding for visibility
+                    .padding(bottom = 26.dp),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                CustomDurationSnackbar(
-                    message = snackbarMessage,
-                    show = showSnackbar,
-                    duration = 5000L,
-                    onDismiss = { showSnackbar = false }
-                )
-                Log.d("SnackbarDebug", "Rendering: $snackbarMessage, show = $showSnackbar")
+                SnackbarController.ObserveSnackbar()
             }
         }
     }

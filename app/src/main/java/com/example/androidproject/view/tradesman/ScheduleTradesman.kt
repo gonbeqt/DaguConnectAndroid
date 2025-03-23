@@ -2,14 +2,12 @@ package com.example.androidproject.view.tradesman
 
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,15 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Message
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,13 +28,15 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.R
-import com.example.androidproject.model.client.GetClientsBooking
-import com.example.androidproject.view.Tradesman
+import com.example.androidproject.ViewModelSetups
+import com.example.androidproject.model.JobApplicationData
+import com.example.androidproject.model.client.GetTradesmanBooking
 import com.example.androidproject.view.Tradesmandate
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
-import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
+import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
+import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -50,12 +45,15 @@ import java.util.Locale
 
 
 @Composable
-fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavController, getClientsBooking: GetClientBookingViewModel) {
-    val clientBooking = getClientsBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavController, getTradesmanBooking: GetTradesmanBookingViewModel,getMyJobApplications: GetMyJobApplicationViewModel) {
+    val clientBooking = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val applicantBooking = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         clientBooking.refresh()
+        applicantBooking.refresh()
     }
+
     Log.i("Screen", "ScheduleScreen")
 
     var selectedClientDate by remember { mutableStateOf(LocalDate.now()) }
@@ -63,12 +61,9 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var selectedFilter by remember { mutableStateOf("My Jobs") }
 
-    val applicants = listOf(
-        Tradesmandate("${R.drawable.pfp}", "Sarah", "Carpenter", "P550/hr", 4.3f, R.drawable.bookmark, "2025-02-19"),
-        Tradesmandate("${R.drawable.pfp}", "Mike", "Painter", "P480/hr", 4.0f, R.drawable.bookmark, "2025-02-20")
-    )
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     val allBookingDates = remember(clientBooking) {
         clientBooking.itemSnapshotList.filterNotNull()
             .filter { it.bookingStatus == "Active" } // Filter for Active bookings
@@ -90,8 +85,56 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
                 false
             }
         }
+    val allApplicantDates = remember(applicantBooking) {
+        applicantBooking.itemSnapshotList.filterNotNull()
+            .filter { it.status == "Active"}
+            .mapNotNull { applicants ->
+                try {
+                    LocalDate.parse(applicants.createdAt, dateFormatter)
+                }catch (e: Exception){
+                    null
+                }
+            }.toSet()
+    }
 
-    val selectedDate = if (selectedFilter == "My Clients") selectedClientDate else selectedApplicantDate
+    val filteredApplicants = applicantBooking.itemSnapshotList.filterNotNull()
+        .filter {
+            try {
+                val dateApplicants = LocalDate.parse(it.createdAt, dateFormatter)
+                dateApplicants.isEqual(selectedApplicantDate) && it.status == "Active"
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+    val selectedDate = if (selectedFilter == "My Jobs") selectedClientDate else selectedApplicantDate
+    // Convert both types to Tradesmandate
+
+    val tradesmenList = if (selectedFilter == "My Jobs") {
+        filteredClients.map {
+            Tradesmandate(
+                it.tradesmanProfile ?: "",
+                it.tradesmanFullName,
+                it.taskType,
+                "P${it.workFee}",
+                it.ratings,
+                R.drawable.bookmark,
+                it.bookingDate
+            )
+        }
+    } else {
+        filteredApplicants.map {
+            Tradesmandate(
+                it.tradesmanProfilePicture ?: "",
+                it.tradesmanFullname,
+                it.jobType,
+                "", // No rate available
+                0f, // No rating available
+                R.drawable.bookmark,
+                it.createdAt
+            )
+        }
+    }
 
     Box(
         Modifier
@@ -118,18 +161,8 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     }
                 },
                 onMonthChange = { month -> currentMonth = month },
-                allBookingDates = allBookingDates,
-                tradesmen = if (selectedFilter == "My Jobs") filteredClients.map {
-                    Tradesmandate(
-                        it.tradesmanProfile,
-                        it.tradesmanFullName,
-                        it.taskType,
-                        "P${it.workFee}",
-                        it.ratings,
-                        R.drawable.bookmark,
-                        it.bookingDate
-                    )
-                } else applicants
+                allBookingDates =  if (selectedFilter == "My Jobs") allBookingDates else allApplicantDates,
+                tradesmen = tradesmenList
             )
 
             FilterSectionTradesman(selectedDate, selectedFilter) { selectedFilter = it }
@@ -137,7 +170,7 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
             if (selectedFilter == "My Jobs") {
                 MyJobsList(clientBooking, selectedClientDate)
             } else {
-                MySubmissionList(applicants, selectedApplicantDate)
+                MySubmissionList(applicantBooking, selectedApplicantDate)
             }
         }
     }
@@ -195,9 +228,9 @@ fun FilterSectionTradesman(
                     )
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                        text = { Text("My Submission" , fontSize = taskTextSize) },
+                        text = { Text("My Applicants" , fontSize = taskTextSize) },
                         onClick = {
-                            onFilterChange("My Submission")
+                            onFilterChange("My Applicants")
                             expanded = false
                         }
                     )
@@ -215,19 +248,8 @@ fun FilterSectionTradesman(
 }
 
 @Composable
-fun MyJobsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: LocalDate) {
+fun MyJobsList(clientBooking: LazyPagingItems<GetTradesmanBooking>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val allBookingDates = remember(clientBooking) {
-        clientBooking.itemSnapshotList.filterNotNull()
-            .filter { it.bookingStatus == "Active" } // Filter for Active bookingStatus
-            .mapNotNull { booking ->
-                try {
-                    LocalDate.parse(booking.bookingDate, dateFormatter)
-                } catch (e: Exception) {
-                    null
-                }
-            }.toSet()
-    }
 
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
@@ -239,7 +261,7 @@ fun MyJobsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: 
             }
         }
 
-    Log.d("MyClientsList", "Selected Date: $selectedDate, Filtered Clients: $filteredClients, All Booking Dates: $allBookingDates")
+
 
     if (filteredClients.isEmpty()) {
         Box(
@@ -270,11 +292,18 @@ fun MyJobsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: 
     }
 }
 @Composable
-fun MySubmissionList(applicants: List<Tradesmandate>, selectedDate: LocalDate) {
+fun MySubmissionList(applicants: LazyPagingItems<JobApplicationData>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val filteredApplicants = applicants.filter {
-        LocalDate.parse(it.date, dateFormatter).isEqual(selectedDate)
-    }
+
+    val filteredApplicants = applicants.itemSnapshotList.filterNotNull()
+        .filter {
+            try {
+                val applicantDate = LocalDate.parse(it.createdAt, dateFormatter)
+                applicantDate.isEqual(selectedDate) && it.status == "Active" // Filter for Active bookingStatus
+            } catch (e: Exception) {
+                false // Skip invalid dates
+            }
+        }
     if (filteredApplicants.isEmpty()) {
         Box(
             modifier = Modifier
@@ -338,7 +367,7 @@ fun CalendarSectionTradesman(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(230.dp)
+                .height(210.dp)
                 .background(brush = myGradient4) // Apply gradient
         ) {
             Column(
@@ -410,10 +439,14 @@ fun CalendarSectionTradesman(
 
                                     Box(
                                         modifier = Modifier
-                                            .size(24.dp)
+                                            .size(22.dp)
                                             .background(
-                                                if (date == selectedDate) Color.Black else Color.Transparent,
-                                                shape = MaterialTheme.shapes.small
+                                                color = when {
+                                                    date == selectedDate -> Color.Black
+                                                    hasData -> Color.Yellow // Background for dates with data
+                                                    else -> Color.Transparent
+                                                },
+                                                shape = RoundedCornerShape(10.dp)
                                             )
                                             .clickable( indication = null,
                                                 interactionSource = remember { MutableInteractionSource() }
@@ -424,7 +457,7 @@ fun CalendarSectionTradesman(
                                             text = day.toString(),
                                             color = when {
                                                 date == selectedDate -> Color.White
-                                                hasData -> Color.Yellow // Highlight days with data
+                                                hasData -> Color.Black
                                                 else -> Color.White
                                             },
                                             fontSize = 12.sp,
@@ -443,6 +476,7 @@ fun CalendarSectionTradesman(
         }
     }
 }
+
 
 
 
@@ -482,7 +516,8 @@ fun ScheduleTradesmanTopSection(navController: NavController){
 
 
 @Composable
-fun MyJobItem(Clients: GetClientsBooking) {
+fun MyJobItem(clients: GetTradesmanBooking) {
+    val date = ViewModelSetups.formatDateTime(clients.bookingDate)
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp
@@ -516,7 +551,7 @@ fun MyJobItem(Clients: GetClientsBooking) {
         ) {
 
             AsyncImage(
-                model = Clients.tradesmanProfile,
+                model = clients.clientProfile,
                 contentDescription = "Tradesman Image",
                 modifier = Modifier
                     .size(120.dp, 120.dp)
@@ -530,69 +565,48 @@ fun MyJobItem(Clients: GetClientsBooking) {
                 Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
                     Text(
                         modifier = Modifier.padding( top = 5.dp),
-                        text = Clients.tradesmanFullName,
+                        text = clients.clientFullName,
                         color = Color.Black,
                         fontSize = nameTextSize
                     )
                     Text(
                         modifier = Modifier.padding( top = 5.dp, end = 15.dp),
-                        text = Clients.bookingStatus,
+                        text = clients.bookingStatus,
                         color = Color.Black,
                         fontSize = smallTextSize
                     )
                 }
 
-                Text(
-                    text = Clients.taskType,
-                    color = Color.Gray,
-                    fontSize = taskTextSize
-                )
+
                 Row(
-                    modifier = Modifier.padding(top = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .padding(top = 5.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+
                 ) {
-                    Box(modifier = Modifier
-                        .padding(end = 5.dp)
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp)
+                    Column {
+                        Text(
+                            text = "Job Type:",
+                            fontSize = taskTextSize
+
                         )
-                    ) {
-                        Row()
-                        {
-                            Text(
-                                modifier = Modifier.padding(5.dp),
-                                text = "P${Clients.workFee}",
-                                fontSize = smallTextSize
-                            )
-                        }
-                    }
+                        Text(
+                            text = clients.address,
+                            color = Color.Gray,
+                            fontSize = taskTextSize
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Job Type:",
+                            fontSize = taskTextSize
 
-                    Box(modifier = Modifier
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp),
-                        ),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(5.dp)
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .padding(top = 5.dp),
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Rating",
-
-                                tint = Color.Yellow,
-
-                                )
-                            Text(
-                                text = "${Clients.ratings}",
-                                fontSize = smallTextSize
-
-                            )
-                        }
+                        )
+                        Text(
+                            text = clients.taskType,
+                            color = Color.Gray,
+                            fontSize = taskTextSize
+                        )
                     }
                 }
 
@@ -610,20 +624,8 @@ fun MyJobItem(Clients: GetClientsBooking) {
 
                         )
                         Text(
-                            text = Clients.bookingDate,
+                            text = date,
                             fontSize = smallTextSize
-                        )
-                    }
-                    Column {
-                        Text(
-                            text = "Time",
-                            fontSize = taskTextSize
-
-                        )
-                        Text(
-                            text = "8:00 AM",
-                            fontSize = smallTextSize
-
                         )
                     }
                 }
@@ -636,7 +638,7 @@ fun MyJobItem(Clients: GetClientsBooking) {
 
 
 @Composable
-fun MySubmissionItem(trade: Tradesmandate) {
+fun MySubmissionItem(trade: JobApplicationData) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -670,84 +672,33 @@ fun MySubmissionItem(trade: Tradesmandate) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Image( painterResource(trade.imageResId.toInt()),
+            AsyncImage(
+                model = trade.clientProfilePicture,
                 contentDescription = "Tradesman Image",
                 modifier = Modifier
                     .size(120.dp, 120.dp)
-                    .padding(end = 10.dp))
+                    .padding(end = 10.dp)
+            )
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 7.dp, start = 8.dp)
 
             ) {
-                Row (Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
-                        modifier = Modifier.padding( top = 5.dp),
-                        text = trade.username,
+                        modifier = Modifier.padding(top = 5.dp),
+                        text = trade.clientFullname,
                         color = Color.Black,
                         fontSize = nameTextSize
                     )
                     Text(
-                        modifier = Modifier.padding( top = 5.dp, end = 15.dp),
-                        text = "Pending",
+                        modifier = Modifier.padding(top = 5.dp, end = 15.dp),
+                        text = trade.status,
                         color = Color.Black,
                         fontSize = smallTextSize
                     )
-                }
 
-                Text(
-                    text = trade.category,
-                    color = Color.Gray,
-                    fontSize = taskTextSize
-                )
-                Row(
-                    modifier = Modifier.padding(top = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier
-                        .padding(end = 5.dp)
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                    ) {
-                        Row()
-                        {
-                            Text(
-                                modifier = Modifier.padding(5.dp),
-                                text = trade.rate,
-                                fontSize = smallTextSize
-                            )
-                        }
-                    }
-
-                    Box(modifier = Modifier
-                        .background(
-                            color = Color(0xFFFFF2DD),
-                            shape = RoundedCornerShape(5.dp),
-                        ),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(5.dp)
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .padding(top = 5.dp),
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Rating",
-
-                                tint = Color.Yellow,
-
-                                )
-                            Text(
-                                text = trade.reviews.toString(),
-                                fontSize = smallTextSize
-
-                            )
-                        }
-                    }
                 }
 
                 Row(
@@ -759,30 +710,53 @@ fun MySubmissionItem(trade: Tradesmandate) {
                 ) {
                     Column {
                         Text(
-                            text = "Date",
+                            text = "Address:",
                             fontSize = taskTextSize
 
                         )
                         Text(
-                            text = trade.date,
-                            fontSize = smallTextSize
+                            text = trade.jobAddress,
+                            color = Color.Gray,
+                            fontSize = taskTextSize
+                        )
+                        Spacer(modifier = Modifier.height(4.dp)) // Add some space between Address and Job Type
+
+                        Text(
+                            text = "Job Type:",
+                            fontSize = taskTextSize
+
+                        )
+                        Text(
+                            text = trade.jobType,
+                            color = Color.Gray,
+                            fontSize = taskTextSize
                         )
                     }
-                    Column {
-                        Text(
-                            text = "Time",
-                            fontSize = taskTextSize
 
-                        )
-                        Text(
-                            text = "8:00 AM",
-                            fontSize = smallTextSize
 
-                        )
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+
+                    ) {
+
+                        Column {
+                            Text(
+                                text = "Date",
+                                fontSize = taskTextSize
+
+                            )
+                            Text(
+                                text = trade.createdAt,
+                                fontSize = smallTextSize
+                            )
+                        }
                     }
                 }
-            }
 
+            }
         }
     }
 }

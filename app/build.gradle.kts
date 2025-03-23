@@ -75,8 +75,12 @@ dependencies {
     //Firebase Cloud Messaging
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
 
+    implementation ("com.airbnb.android:lottie-compose:6.4.0")
+
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
+    implementation("com.google.firebase:firebase-messaging-ktx")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
-    implementation ("androidx.compose.foundation:foundation:your-version")
+    implementation ("androidx.compose.foundation:foundation:1.6.0")
 
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0") // Check for the latest version

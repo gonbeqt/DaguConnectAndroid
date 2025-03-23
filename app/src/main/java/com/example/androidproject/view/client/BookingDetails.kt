@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -388,6 +389,12 @@ fun BookingDetails(viewClientBookingViewModel: ViewClientBookingViewModel, navCo
                                         Text(
                                             text = "Contact Tradesman",
                                             modifier = Modifier.padding(start = 10.dp)
+                                                .clickable{
+                                                    val encodedProfilePicture = Uri.encode(
+                                                        viewClientBooking.data.tradesmanProfile
+                                                    )
+                                                    navController.navigate("messaging/0/${viewClientBooking.data.tradesmanId}/${viewClientBooking.data.tradesmanFullName}/${encodedProfilePicture}")
+                                                }
                                         )
                                     }
                                     Icon(

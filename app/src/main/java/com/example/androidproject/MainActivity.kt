@@ -2,6 +2,8 @@ package com.example.androidproject
 
 import LogoutViewModel
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -21,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,6 +32,7 @@ import androidx.navigation.navArgument
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
 import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.data.preferences.NotificationSettingManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
 import com.example.androidproject.view.client.AllTradesman
@@ -48,21 +52,21 @@ import com.example.androidproject.view.LandingPageScreen
 import com.example.androidproject.view.LogInScreen
 import com.example.androidproject.view.ResetPassword
 import com.example.androidproject.view.SignUpScreen
-import com.example.androidproject.view.Tradesman
 import com.example.androidproject.view.client.AccountSettings
+import com.example.androidproject.view.client.ApplicantDeclinationDetails
+import com.example.androidproject.view.client.ApplicantDetails
 import com.example.androidproject.view.client.BookNow
 import com.example.androidproject.view.client.BookingDetails
 import com.example.androidproject.view.client.BookingsScreen
 import com.example.androidproject.view.client.CancelNow
-import com.example.androidproject.view.client.CancelledDetails
-import com.example.androidproject.view.client.CancelledJobApplicationDetails
+
 import com.example.androidproject.view.client.Categories.Carpentry
-import com.example.androidproject.view.client.ClientActiveDetails
 import com.example.androidproject.view.client.ClientCancellationDetails
 import com.example.androidproject.view.client.ClientCancelledDetails
 import com.example.androidproject.view.client.ClientCompletedDetails
 import com.example.androidproject.view.client.ClientDeclinationDetails
 import com.example.androidproject.view.client.ClientDeclineDetails
+import com.example.androidproject.view.client.ClientDetails
 import com.example.androidproject.view.client.ClientPendingDetails
 import com.example.androidproject.view.client.ConfirmBook
 import com.example.androidproject.view.client.Message
@@ -101,6 +105,7 @@ import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.LoginViewModel
 import com.example.androidproject.viewmodel.Tradesman_Profile.UpdateTradesmanProfileViewModel
 import com.example.androidproject.viewmodel.RegisterViewModel
+import com.example.androidproject.viewmodel.ReportConcernViewModel
 import com.example.androidproject.viewmodel.ResetPassViewModel
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.Resumes.SubmitResumeViewModel
@@ -124,6 +129,7 @@ import com.example.androidproject.viewmodel.factories.LoginViewModelFactory
 import com.example.androidproject.viewmodel.factories.LogoutViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanProfileViewModelFactory
 import com.example.androidproject.viewmodel.factories.RegisterViewModelFactory
+import com.example.androidproject.viewmodel.factories.ReportConcernViewModelFactory
 import com.example.androidproject.viewmodel.factories.ResetPassViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanActiveStatusViewModelFactory
 import com.example.androidproject.viewmodel.factories.Tradesman_Profile.UpdateTradesmanDetailViewModelFactory
@@ -143,6 +149,7 @@ import com.example.androidproject.viewmodel.factories.job_application.PutJobAppl
 import com.example.androidproject.viewmodel.factories.job_application.ViewJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.client.GetMyJobApplicantsViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.tradesman.GetMyJobApplicationViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.DeleteJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetRecentJobsViewModelFactory
@@ -150,6 +157,7 @@ import com.example.androidproject.viewmodel.factories.jobs.PostJobViewModelFacto
 import com.example.androidproject.viewmodel.factories.jobs.PutJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.ViewJobViewModelFactory
 import com.example.androidproject.viewmodel.factories.messeges.GetMessageViewModelFactory
+import com.example.androidproject.viewmodel.factories.notification.ClearNotificationViewModelFactory
 import com.example.androidproject.viewmodel.factories.notification.GetNotificationViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.RateTradesmanViewModelFactory
 import com.example.androidproject.viewmodel.factories.ratings.ViewRatingsViewModelFactory
@@ -163,6 +171,7 @@ import com.example.androidproject.viewmodel.job_application.PutJobApplicationSta
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
+import com.example.androidproject.viewmodel.jobs.DeleteJobViewModel
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
@@ -170,6 +179,7 @@ import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
+import com.example.androidproject.viewmodel.notifications.ClearNotificationViewModel
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
@@ -179,13 +189,15 @@ import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val isShown = sharedPreferences.getBoolean("isShown", false)
 
-        // Initialize TokenManager
+        // Initialize managers
         TokenManager.init(this)
         AccountManager.init(this)
-
+        NotificationSettingManager.init(this)
 
         // Determine the start destination based on token and user role
         val startDestination = when {
@@ -196,7 +208,6 @@ class MainActivity : ComponentActivity() {
             }
             else -> "login"
         }
-        val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
         TokenManager.init(this)
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
@@ -303,10 +314,6 @@ class MainActivity : ComponentActivity() {
         val putJobViewModelFactory = PutJobViewModelFactory(apiService)
         val putJobViewModel = ViewModelProvider(this, putJobViewModelFactory)[PutJobViewModel::class.java]
 
-        val chatId = intent.extras?.getInt("chatId") ?: 0
-        val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId)
-        val getMessageViewModel = ViewModelProvider(this, getMessagesViewModelFactory)[GetMessagesViewModel::class.java]
-
         val updateClientProfilePictureViewModelFactory = UpdateClientProfilePictureViewModelFactory(apiService)
         val updateClientProfilePictureViewModel = ViewModelProvider(this, updateClientProfilePictureViewModelFactory)[UpdateClientProfilePictureViewModel::class.java]
 
@@ -321,16 +328,16 @@ class MainActivity : ComponentActivity() {
 
         val getNotificationViewModelFactory = GetNotificationViewModelFactory(apiService)
         val getNotificationViewModel = ViewModelProvider(this, getNotificationViewModelFactory)[GetNotificationViewModel::class.java]
-        val initialMessages = listOf(
-            Message("Hello!", true),              // Sent (right)
-            Message("Hi, how are you?", false),   // Received (left)
-            Message("I'm doing well!", true),     // Sent (right)
-            Message("Great to hear!", false),     // Received (left)
-            Message("I have a lot to say...", false), // Received (left)
-            Message("Like, a lot!", false),       // Received (left)
-            Message("Keep going!", false),        // Received (left)
-            Message("Cool, I'm listening!", true) // Sent (right)
-        )
+
+        val clearNotificationViewModelFactory = ClearNotificationViewModelFactory(apiService)
+        val clearNotificationViewModel = ViewModelProvider(this, clearNotificationViewModelFactory)[ClearNotificationViewModel::class.java]
+
+        val deleteJobViewModelFactory = DeleteJobViewModelFactory(apiService)
+        val deleteJobViewModel = ViewModelProvider(this, deleteJobViewModelFactory)[DeleteJobViewModel::class.java]
+
+        val reportConcernVMFactory = ReportConcernViewModelFactory(apiService)
+        val reportConcernViewModel = ViewModelProvider(this, reportConcernVMFactory)[ReportConcernViewModel::class.java]
+
 
         val updateTradesmanDetailVMFactory = UpdateTradesmanDetailViewModelFactory(apiService)
         val updateTradesmanDetailViewModel = ViewModelProvider(this, updateTradesmanDetailVMFactory)[UpdateTradesmanDetailViewModel::class.java]
@@ -414,8 +421,7 @@ class MainActivity : ComponentActivity() {
                                 viewRatingsViewModel,
                                 initialSelectedItem = selectedItem,
                                 initialSelectedTab = selectedTab,
-                                initialSelectedSection = selectedSection,
-                                { LoadingUI() } // Pass LoadingUI here
+                                initialSelectedSection = selectedSection
                             )
                         }
                         composable("message_screen") {
@@ -447,9 +453,7 @@ class MainActivity : ComponentActivity() {
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             BookingDetails(viewClientBookingViewModel, navController, resumeId)
                         }
-                        composable("cancelleddetails") {
-                            CancelledDetails(trade, navController)
-                        }
+
                         composable("cancelnow/{resumeId}/{bookingstatus}/{bookingId}") { backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             val bookingStatus =
@@ -464,32 +468,15 @@ class MainActivity : ComponentActivity() {
                                 bookingId
                             )
                         }
-                        //HIRING HUB
-                        composable("clientpendingdetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientPendingDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
+                        //My Tradesman
 
-                            )
-                        }
-                        composable("clientactivedetails/{resumeId}") {backStackEntry ->
+                        composable("clientdeclinationdetails/{resumeId}/{status}") {backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientActiveDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            )
-                        }
-
-                        composable("clientdeclinationdetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             ClientDeclinationDetails(
                                 resumeId,
+                                status,
                                 modifier = Modifier,
                                 navController,
                                 getClientBookingViewModel,
@@ -497,49 +484,50 @@ class MainActivity : ComponentActivity() {
 
                                 )
                         }
-                        composable("clientcompleteddetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientCompletedDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
 
-                            )
-                        }
-                        composable("clientdeclineddetails/{resumeId}") {backStackEntry ->
+                        composable("clientdetails/{resumeId}/{status}") {backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientDeclineDetails(
-                                modifier = Modifier,
-                                resumeId,
-                                getClientBookingViewModel,
-                                navController
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            )
-                        }
-                        composable("clientcancelleddetails/{resumeId}") {backStackEntry ->
-                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientCancelledDetails(
+                            ClientDetails(
                                 modifier = Modifier,
                                 resumeId,
+                                status,
                                 getClientBookingViewModel,
                                 navController
 
                             )
                         }
 
-                        composable("clientcancellactiondetails/{resumeId}") {backStackEntry ->
+                        //My Applicants
+                        composable("applicantsdetails/{resumeId}/{status}/{tradesmanId}") { backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-                            ClientCancellationDetails(
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
+                            val tradesmanId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+
+                            ApplicantDetails(
                                 resumeId,
+                                status,
+                                tradesmanId,
                                 modifier = Modifier,
                                 navController,
-                                getClientBookingViewModel,
-
+                                getMyJobApplicantsViewModel,
+                                viewResumeViewModel
                             )
                         }
-
-
+                        composable("applicantsdeclinedetails/{resumeId}/{status}/{tradesmanId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
+                            val tradesmanId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+                            ApplicantDeclinationDetails(
+                                resumeId,
+                                status,
+                                tradesmanId,
+                                modifier = Modifier,
+                                navController,
+                                getMyJobApplicantsViewModel,
+                            )
+                        }
                         composable("booking") {
                             BookingsScreen(
                                 modifier = Modifier,
@@ -548,8 +536,7 @@ class MainActivity : ComponentActivity() {
                                 updateBookingTradesmanViewModel,
                                 getMyJobApplicantsViewModel,
                                 viewJobApplicationViewModel,
-                                putJobApplicationStatusViewModel,
-                                {LoadingUI()}
+                                putJobApplicationStatusViewModel
                             )
                         }
                         composable("rateandreviews/{resumeId}/{tradesmanId}") { backStackEntry ->
@@ -604,26 +591,27 @@ class MainActivity : ComponentActivity() {
                             AboutUs(navController)
                         }
                         composable("reportproblem") {
-                            ReportProblem(navController)
+                            ReportProblem(navController,reportConcernViewModel,{ LoadingUI() })
                         }
                         composable("notification") {
-                            NotificationScreen(navController, getNotificationViewModel)
+                            NotificationScreen(navController, getNotificationViewModel, clearNotificationViewModel)
                         }
                         composable("accountsettings") {
                             AccountSettings(navController, getClientProfileViewModel,updateClientProfileAddressViewModel)
                         }
 
+                        composable("messaging/{chatId}/{receiverId}/{receipientName}/{receipientProfile}") { backStackEntry ->
+                            val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
+                            val receiverId = backStackEntry.arguments?.getString("receiverId")?.toIntOrNull() ?: 0
+                            val receipientName = backStackEntry.arguments?.getString("receipientName") ?: ""
+                            val receipientProfile = backStackEntry.arguments?.getString("receipientProfile") ?: ""
+                            val getMessagesViewModelFactory = GetMessageViewModelFactory(apiService, chatId, receiverId)
+                            val getMessageViewModel = ViewModelProvider(
+                                LocalViewModelStoreOwner.current!!,
+                                getMessagesViewModelFactory
+                            )[GetMessagesViewModel::class.java]
 
-                        //CANCELLED DETAILS
-                        composable("canceljobapplicationsdetails") {
-                            CancelledJobApplicationDetails(
-                                navController,
-                                viewJobApplicationViewModel,
-                                putJobApplicationStatusViewModel
-                            )
-                        }
-                        composable("messaging") {
-                            MessagingScreen(initialMessages, navController)
+                            MessagingScreen(getMessageViewModel, receiverId, chatId, receipientName, receipientProfile, navController)
                         }
 
                         //Tradesman Routes
@@ -633,8 +621,7 @@ class MainActivity : ComponentActivity() {
                                 navController,
                                 getJobsViewModel,
                                 getRecentJobsViewModel,
-                                reportClientViewModel,
-                                { LoadingUI() }
+                                reportClientViewModel
                             )
                         }
                         composable("tradesmanapply/{jobId}") { backStackEntry ->
@@ -642,10 +629,12 @@ class MainActivity : ComponentActivity() {
                             Log.e("Job ID", jobId)
                             TradesmanApply(jobId, navController, viewJobViewModel)
                         }
-                        composable("hiringdetails/{jobId}") { backStackEntry ->
+                        composable("hiringdetails/{jobId}/{clientId}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val clientId = backStackEntry.arguments?.getString("clientId") ?: ""
                             HiringDetails(
                                 jobId,
+                                clientId,
                                 modifier = Modifier,
                                 navController,
                                 postJobApplicationViewModel
@@ -659,8 +648,7 @@ class MainActivity : ComponentActivity() {
                                 getMyJobApplicationViewModel,
                                 getTradesmanBookingViewModel,
                                 putJobApplicationStatusViewModel,
-                                viewJobApplicationViewModel,
-                                {LoadingUI()}
+                                viewJobApplicationViewModel
                             )
                         }
                         composable("profiletradesman") {
@@ -672,7 +660,7 @@ class MainActivity : ComponentActivity() {
                                 updateTradesmanProfileViewModel,
                                 updateTradesmanActiveStatusViewModel,
                                 viewRatingsViewModel,
-                                { LoadingUI() })
+                            )
                         }
                         composable("manageprofile/{workLocation}/{phoneNumber}/{rate}/{aboutMe}") {backStackEntry ->
                             val workLocation = backStackEntry.arguments?.getString("workLocation") ?: ""
@@ -726,7 +714,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("tradesmancompleteddetails/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-                            TradesmanCompletedDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel)
+                            TradesmanCompletedDetails(jobId, modifier = Modifier, navController,getTradesmanBookingViewModel,reportClientViewModel)
                         }
                         composable("tradesmancancellationdetails/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -750,7 +738,8 @@ class MainActivity : ComponentActivity() {
                             TradesmanJobCancelled(jobId,
                                 modifier = Modifier,
                                 navController,
-                                getTradesmanBookingViewModel)
+                                getTradesmanBookingViewModel,
+                                reportClientViewModel)
                         }
                         composable("tradesmanjobdecline/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -785,20 +774,18 @@ class MainActivity : ComponentActivity() {
                         composable("tradesmanapplicationcompleted/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationCompleted(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel,viewJobViewModel)
+                            TradesmanApplicationCompleted(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel,viewJobViewModel,reportClientViewModel)
                         }
                         composable("tradesmanapplicationcancelled/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
-                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel)
+                            TradesmanApplicationCancelled(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel, viewJobViewModel,reportClientViewModel)
                         }
                         composable("tradesmanapplicationcanceldetails/{jobId}/{jobs}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
                             TradesmanApplicationCancelDetails(jobId,jobs,modifier = Modifier, navController,getMyJobApplicationViewModel)
                         }
-
-
                     }
                 }
             }

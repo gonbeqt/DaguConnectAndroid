@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,18 +68,21 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.androidproject.R
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.TokenManager
+import com.example.androidproject.view.extras.CustomDurationSnackbar
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.LoginViewModel
 import kotlinx.coroutines.delay
 
-@Preview(showBackground = true)
-@Composable
-fun LogInScreenPreview() {
-    //LogInScreen(navController = rememberNavController())
-}
+
 @Composable
 fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutViewModel:LogoutViewModel) {
 
@@ -87,9 +91,21 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
     var showSuspendedDialog by remember { mutableStateOf(false) }
+    var isPasswordIncorrect by remember { mutableStateOf(false) }
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.lottie_animation)
+    )
+    var isAnimationPlaying by remember { mutableStateOf(true) }
 
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+    // Animate the Lottie composition with looping
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = isAnimationPlaying,
+        speed = 0.5f,
+        restartOnPlay = false
+    )
+
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
             // Clear tokens and navigate regardless of result
@@ -114,18 +130,26 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     showSuspendedDialog = true
                     return@LaunchedEffect
                 }else{
-                    snackbarMessage = "Login successful"
-                    showSnackbar = true
+                    SnackbarController.show("Login successful")
                     navController.navigate("main_screen") {
                         popUpTo("login") { inclusive = true }
                     }
+                    isPasswordIncorrect = false
                 }
                 viewModel.resetState()
             }
             is LoginViewModel.LoginState.Error -> {
-                snackbarMessage = loginStatus.message
-                showSnackbar = true
+                val errorMessage = loginStatus.message
+                if (errorMessage.contains("password") || errorMessage.contains("credentials")) {
+                    isPasswordIncorrect = true
+                }
+                else {
+                    isPasswordIncorrect = false
+                }
+                SnackbarController.show(errorMessage)
+
                 viewModel.resetState()
+                isAnimationPlaying = true
             }
             else -> {}
         }
@@ -137,8 +161,10 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
     val cardOffsetY = remember { Animatable(500f) } // Start off-screen to the bottom
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
+
     // Launch animation when composable is composed
     LaunchedEffect(currentBackStackEntry.value) {
+        delay(750)
         cardOffsetY.animateTo(
             targetValue = 0f,
             animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
@@ -152,13 +178,13 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
             .padding(WindowInsets.systemBars.asPaddingValues()),
         contentAlignment = Alignment.Center
     ) {
-        // Set an image as the background
-        Image(
-            painter = painterResource(id = R.drawable.authbg),
-            contentDescription = "Background Image",
-            modifier = Modifier.fillMaxSize()
-                .offset(y = (-150).dp)
-        )
+            LottieAnimation(
+                composition = composition,
+                modifier = Modifier
+                    .size(300.dp)
+                    .offset(y = (-80).dp),
+                progress = { progress }
+            )
 
         // Card with adaptive size and padding
         Card(
@@ -222,8 +248,15 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 // Password Field
                 PasswordField(
                     password = password,
-                    onPasswordChange = { password = it },
+                    onPasswordChange = { newPassword ->
+                        password = newPassword
+                        isPasswordIncorrect = false
+                        if (newPassword.isEmpty()) {
+                            isPasswordIncorrect = false
+                        }
+                    },
                     windowSize = windowSize,
+                    isPasswordIncorrect = isPasswordIncorrect,
                     modifier = Modifier.constrainAs(passwordField) {
                         top.linkTo(emailField.bottom, margin = 16.dp)
                         start.linkTo(verticalGuideline1)
@@ -249,10 +282,6 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                     email = email,
                     password = password,
                     windowSize = windowSize,
-                    onShowSnackbar = { message ->
-                        snackbarMessage = message
-                        showSnackbar = true
-                    },
                     modifier = Modifier.constrainAs(loginButton) {
                         top.linkTo(forgotPassword.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
@@ -265,6 +294,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 SignUpButton(
                     navController = navController,
                     windowSize = windowSize,
+                    onSignUpClick = { isAnimationPlaying = false },
                     modifier = Modifier.constrainAs(signUpText) {
                         top.linkTo(loginButton.bottom, margin = 24.dp)
                         start.linkTo(verticalGuideline1)
@@ -279,12 +309,7 @@ fun LogInScreen(navController: NavController, viewModel: LoginViewModel,logoutVi
                 .padding(bottom = 16.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            CustomDurationSnackbar(
-                message = snackbarMessage,
-                show = showSnackbar,
-                duration = 5000L,
-                onDismiss = { showSnackbar = false }
-            )
+            SnackbarController.ObserveSnackbar()
         }
     }
     // Suspension Dialog
@@ -384,6 +409,7 @@ fun EmailField(
                 unfocusedIndicatorColor = Color.Gray,
                 focusedLabelColor = Color.Blue,
                 unfocusedLabelColor = Color.Gray,
+                errorContainerColor =  Color.Transparent,
                 cursorColor = Color.Black
             ),
             textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
@@ -404,10 +430,12 @@ fun EmailField(
 @Composable
 fun PasswordField(password: String,
                   onPasswordChange: (String) -> Unit,
-
-                  windowSize: WindowSize, modifier: Modifier = Modifier) {
+                  windowSize: WindowSize,
+                  modifier: Modifier = Modifier,
+                  isPasswordIncorrect: Boolean,
+                  )
+{
     var passwordVisible by remember { mutableStateOf(false) }
-
     val icon = if (passwordVisible)
         painterResource(id = R.drawable.visibility_on)
     else
@@ -427,6 +455,7 @@ fun PasswordField(password: String,
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         singleLine = true,
+        isError = isPasswordIncorrect,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
@@ -439,10 +468,25 @@ fun PasswordField(password: String,
             unfocusedIndicatorColor = Color.Gray,
             focusedLabelColor = Color.Blue,
             unfocusedLabelColor = Color.Gray,
-            cursorColor = Color.Black
+            cursorColor = Color.Black,
+
+            errorContainerColor = Color.Transparent,
+            errorIndicatorColor = Color.Red,
+
         ),
         textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
     )
+        if (isPasswordIncorrect) {
+            Text(
+                text = "● Incorrect password.",
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth()
+            )
+        }
+
 
     }
 }
@@ -459,15 +503,17 @@ fun ForgotPassword(windowSize: WindowSize, modifier: Modifier = Modifier,navCont
     )
 }
 @Composable
-fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize,onShowSnackbar: (String) -> Unit, modifier: Modifier = Modifier) {
+fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: String, password: String, windowSize: WindowSize, modifier: Modifier = Modifier) {
     Button(
         onClick = {
             if (email.isEmpty() || password.isEmpty()) {
-                onShowSnackbar("Fields cannot be empty")
+                SnackbarController.show("Fields cannot be empty")
             } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                onShowSnackbar("Invalid email format")
-            } else if (password.length < 8) {
-                onShowSnackbar("Password must be at least 8 characters")
+                SnackbarController.show("Invalid email format")
+
+            }
+            else if (password.length < 8) {
+                SnackbarController.show("Password must be at least 8 characters")
 
             }
             else {
@@ -485,7 +531,7 @@ fun LoginButton(navController: NavController, viewModel: LoginViewModel, email: 
 }
 
 @Composable
-fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier: Modifier = Modifier) {
+fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier: Modifier = Modifier,onSignUpClick: () -> Unit) {
     Row(modifier = modifier) {
         Text(
             text = "Don't have an account? ",
@@ -503,49 +549,9 @@ fun SignUpButton(navController: NavController, windowSize: WindowSize, modifier:
                 WindowType.SMALL -> 12.sp
                 else -> 14.sp
             },
-            modifier = Modifier.clickable { navController.navigate("signup") }
+            modifier = Modifier.clickable {
+                onSignUpClick()
+                navController.navigate("signup") }
         )
-    }
-}
-
-@Composable
-fun CustomDurationSnackbar(
-    message: String,
-    show: Boolean,
-    duration: Long = 5000L,
-    onDismiss: () -> Unit
-) {
-    AnimatedVisibility(
-        visible = show,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Snackbar(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(bottom = 8.dp)
-                .padding(horizontal = 16.dp)
-                .shadow(5.dp)
-                ,
-            containerColor = Color.Gray,
-            contentColor = Color.White,
-
-            content = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(text = message, fontSize = 16.sp, color = Color.White)
-                }
-            }
-        )
-    }
-
-    // Handle duration
-    LaunchedEffect(show) {
-        if (show) {
-            delay(duration)
-            onDismiss()
-        }
     }
 }

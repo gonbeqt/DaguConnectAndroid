@@ -1,5 +1,7 @@
 package com.example.androidproject.view.tradesman
 
+import android.R.attr.onClick
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -444,6 +446,12 @@ fun TradesmanApplicationActive(jobId: String, jobs :String, modifier: Modifier =
                                                 text = "Contact Client",
                                                 fontSize = nameTextSize,
                                                 modifier = Modifier.padding(start = 10.dp)
+                                                    .clickable{
+                                                        val encodedProfilePicture = Uri.encode(
+                                                            selectedBooking?.clientProfilePicture
+                                                        )
+                                                        navController.navigate("messaging/0/${selectedBooking?.clientId}/${selectedBooking?.clientFullname}/${encodedProfilePicture}")
+                                                    }
                                             )
                                         }
                                         Icon(
@@ -511,6 +519,18 @@ fun TradesmanApplicationActive(jobId: String, jobs :String, modifier: Modifier =
                                         if (myjobs != null) {
                                             Text(fontSize = smallTextSize,
                                                 text = myjobs.createdAt)
+                                        }
+                                    }
+                                    Row(modifier = Modifier
+                                        .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween){
+                                        Text(fontWeight = FontWeight.Normal,
+                                            fontSize = smallTextSize,
+                                            color = Color.Gray,
+                                            text = "Confirmed on")
+                                        if (selectedBooking != null) {
+                                            Text(fontSize = smallTextSize,
+                                                text = selectedBooking.jobDateStatus)
                                         }
                                     }
 

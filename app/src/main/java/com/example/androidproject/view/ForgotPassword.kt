@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.ResetPassViewModel
 import kotlinx.coroutines.delay
@@ -55,8 +56,7 @@ fun ResetPassword(
     var isLoading by remember { mutableStateOf(false) } // Added loading state
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+
     // Countdown logic
     LaunchedEffect(showOtpDialog) {
         if (showOtpDialog) {
@@ -103,8 +103,7 @@ fun ResetPassword(
             is ResetPassViewModel.ResetPassState.Success -> {
                 resetPass.resetState()
                 // Navigate to the "login" screen and clear the back stack
-                snackbarMessage = "Password Reset Successfully"
-                showSnackbar = true
+                SnackbarController.show("Password Reset Successfully")
                 navController.navigate("login") {
                     navController.popBackStack()
                     isLoading = false // Hide loading UI
@@ -113,8 +112,7 @@ fun ResetPassword(
             is ResetPassViewModel.ResetPassState.Error -> {
                 isLoading = false // Hide loading UI
                 val error = resetPassword.message
-                snackbarMessage = error
-                showSnackbar = true
+                SnackbarController.show(error)
             }
             else -> Unit
         }
@@ -128,15 +126,13 @@ fun ResetPassword(
             }
             is ForgotPassViewModel.ForgotPasswordState.Success -> {
                 isLoading = false // Hide loading UI
-                snackbarMessage = "OTP Sent"
-                showSnackbar = true
+                SnackbarController.show("OTP Sent")
                 showOtpDialog = true // Show OTP dialog
             }
             is ForgotPassViewModel.ForgotPasswordState.Error -> {
                 isLoading = false // Hide loading UI
                 val error = state.message
-                snackbarMessage = error
-                showSnackbar = true
+                SnackbarController.show(error)
             }
             else -> Unit
         }
@@ -351,19 +347,17 @@ fun ResetPassword(
                                         onClick = {
                                             //IF OTP IS CORRECT
                                             if(otp.isEmpty()){
-                                                snackbarMessage = "Please enter OTP"
-                                                showSnackbar = true
+                                                SnackbarController.show("Please enter OTP")
                                                 return@Button
                                             }
                                             if (verification != null) {
                                                 if (otp.toInt() == verification.token) {
                                                     isOtpVerified = true
                                                     showOtpDialog = false
-                                                    snackbarMessage = "OTP Verified"
-                                                    showSnackbar = true
+                                                    SnackbarController.show( "OTP Verified")
+
                                                 } else {
-                                                    snackbarMessage = "Invalid OTP"
-                                                    showSnackbar = true
+                                                    SnackbarController.show("Invalid OTP")
                                                 }
                                             }
                                         },
@@ -391,12 +385,7 @@ fun ResetPassword(
                 .padding(bottom = 16.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            CustomDurationSnackbar(
-                message = snackbarMessage,
-                show = showSnackbar,
-                duration = 5000L,
-                onDismiss = { showSnackbar = false }
-            )
+            SnackbarController.ObserveSnackbar()
         }
     }
 }

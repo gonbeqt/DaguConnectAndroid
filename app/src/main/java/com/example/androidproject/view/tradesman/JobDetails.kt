@@ -48,39 +48,43 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.R
-import com.example.androidproject.view.CustomDurationSnackbar
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.PostJobApplicationViewModel
 
 @Composable
-fun HiringDetails(jobId: String, modifier: Modifier, navController: NavController, postJobApplicationViewModel: PostJobApplicationViewModel) {
+
+fun HiringDetails(jobId: String, clientId: String, modifier: Modifier, navController: NavController, postJobApplicationViewModel: PostJobApplicationViewModel) {
     val postJobApplicationState by postJobApplicationViewModel.postJobApplicationState.collectAsState()
     var qualificationSummary by remember { mutableStateOf("") }
     val currentJobId = jobId.toIntOrNull()
     val context = LocalContext.current
     var isSubmitClicked by remember { mutableStateOf(false) }
     val characterCount by remember(qualificationSummary) { mutableStateOf(qualificationSummary.length) }
-    var showSnackbar by remember { mutableStateOf(false) }
-    var snackbarMessage by remember { mutableStateOf("") }
+    val tradesmanFullname = AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName
     LaunchedEffect(postJobApplicationState) {
         if (isSubmitClicked) { // Show messages only after submit is clicked
             when (postJobApplicationState) {
                 is PostJobApplicationViewModel.PostJobApplicationState.Success -> {
                     val message = "Application successful!" // Default message
-                    Log.d("PostJobApplication", "Success: $message")
-                    snackbarMessage = message
-                    showSnackbar = true
+                   SnackbarController.show(message)
 
                     postJobApplicationViewModel.resetState()
                     isSubmitClicked = false
-
+                    WebSocketManager.sendNotificationJobToClient(
+                        clientId,
+                        "New Tradesman Applicant!",
+                        "$tradesmanFullname has applied to your job post."
+                    )
                     navController.navigate("main_screen")
                 }
                 is PostJobApplicationViewModel.PostJobApplicationState.Error -> {
                     val errorState = postJobApplicationState as PostJobApplicationViewModel.PostJobApplicationState.Error
                     Log.d("PostJobApplication", "Error: ${errorState.message}")
-                    snackbarMessage = errorState.message
-                    showSnackbar = true
+                    SnackbarController.show(errorState.message)
+
                     isSubmitClicked = false
                 }
                 else -> Unit
@@ -118,7 +122,7 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Arrow Back",
                         modifier = Modifier
-                            .clickable {  }
+                            .clickable { }
                             .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
                         tint = Color(0xFF81D796)
                     )
@@ -220,7 +224,8 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                                     color = Color.White,
                                     shape = RoundedCornerShape(12.dp)
                                 )
-                                .clickable { }
+                                .clickable {
+                                }
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -242,8 +247,8 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
                                             qualificationSummary = qualificationSummary
                                         )
                                     } else {
-                                        snackbarMessage ="Please enter your qualifications"
-                                        showSnackbar = true
+                                        SnackbarController.show("Please enter your qualifications")
+
                                     }
                                 }
                                 .padding(12.dp),
@@ -259,16 +264,10 @@ fun HiringDetails(jobId: String, modifier: Modifier, navController: NavControlle
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 26.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            CustomDurationSnackbar(
-                message = snackbarMessage,
-                show = showSnackbar,
-                duration = 5000L,
-                onDismiss = { showSnackbar = false }
-            )
-            Log.d("SnackbarDebug", "Rendering: Show=$showSnackbar, Message=$snackbarMessage")
+            SnackbarController.ObserveSnackbar()
         }
     }
 }

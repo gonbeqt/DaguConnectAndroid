@@ -55,12 +55,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.androidproject.data.WebSocketManager
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import org.json.JSONArray
+import java.time.LocalDate
 import java.util.Calendar
 
 
@@ -76,7 +79,6 @@ fun ConfirmBook(
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("Select A Date") }
-    var selectedTaskType by remember { mutableStateOf<String?>(null) }
     val ResumeId = resumeId.toIntOrNull() ?: return
     val TradesmanId = tradesmanId.toIntOrNull() ?: return
     val context = LocalContext.current
@@ -345,7 +347,8 @@ fun ConfirmBook(
                                         focusedTextColor = Color.Black,
                                         unfocusedTextColor = Color.Black,
                                         cursorColor = Color.Black,
-                                        errorIndicatorColor = Color.Red // Error indicator color when invalid
+                                        errorContainerColor = Color.Transparent,
+                                        errorIndicatorColor = Color.Red
                                     ),
 
                                     )
@@ -456,6 +459,11 @@ fun ConfirmBook(
                                         is BooktradesmanViewModel.BookTradesmanState.Success -> {
                                             Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
                                             bookingTradesmanViewModel.resetState()
+                                            WebSocketManager.sendNotificationBookingToTradesman(
+                                                resume.id.toString(),
+                                                "A client has requested for your service!",
+                                                "${AccountManager.getAccount()?.firstName + AccountManager.getAccount()?.lastName} has requested your service. Will you accept the book or decline?"
+                                            )
                                             navController.navigate("main_screen?selectedItem=1&selectedTab=1") {
                                                 popUpTo(navController.graph.startDestinationId) {
                                                     inclusive = false
@@ -498,18 +506,22 @@ fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) ->
     // Set minimum date (tomorrow)
     calendar.add(Calendar.DAY_OF_YEAR, 1)
     val minDate = calendar.timeInMillis
-
+    calendar.time = Calendar.getInstance().time // Reset to today
+    calendar.add(Calendar.MONTH, 1) // Add 1 month
+    val maxDate = calendar.timeInMillis
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
             val formattedDate = "$year-${month + 1}-$dayOfMonth"
-            onDateSelected(formattedDate) // ✅ Send selected date to ConfirmBook
+            onDateSelected(formattedDate) 
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     ).apply {
         datePicker.minDate = minDate // Restrict past dates
+        datePicker.maxDate = maxDate // Restrict past dates
+
     }
 
     Column(
