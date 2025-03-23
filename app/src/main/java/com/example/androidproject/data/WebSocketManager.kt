@@ -17,7 +17,7 @@ data class NotificationData(
 )
 
 object WebSocketManager {
-    private const val URL = "ws://192.168.1.103:8080" // Replace with your server IP
+    private const val URL = "ws://192.168.100.167:8080" // Replace with your server IP
     private const val TAG = "WebSocketManager"
 
     private val client = OkHttpClient.Builder()

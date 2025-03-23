@@ -348,7 +348,8 @@ fun ConfirmBook(
                                         focusedTextColor = Color.Black,
                                         unfocusedTextColor = Color.Black,
                                         cursorColor = Color.Black,
-                                        errorIndicatorColor = Color.Red // Error indicator color when invalid
+                                        errorContainerColor = Color.Transparent,
+                                        errorIndicatorColor = Color.Red
                                     ),
 
                                     )

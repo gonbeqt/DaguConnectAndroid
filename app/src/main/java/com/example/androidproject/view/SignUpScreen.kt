@@ -524,7 +524,9 @@ fun EmailField(
                 unfocusedIndicatorColor = Color.Gray,
                 focusedLabelColor = Color.Blue,
                 unfocusedLabelColor = Color.Gray,
-                cursorColor = Color.Black
+                cursorColor = Color.Black,
+                errorContainerColor = Color.Transparent,
+                errorIndicatorColor = Color.Red
             ),
             textStyle = TextStyle(fontSize = 16.sp, color = Color.Black)
         )
@@ -661,7 +663,9 @@ fun PasswordField(
                 unfocusedIndicatorColor = Color.Gray,
                 focusedLabelColor = Color.Blue,
                 unfocusedLabelColor = Color.Gray,
-                cursorColor = Color.Black
+                cursorColor = Color.Black,
+                errorContainerColor = Color.Transparent,
+                errorIndicatorColor = Color.Red
             ),
             textStyle = TextStyle(
                 fontSize = 16.sp, // Adjust text size for visibility

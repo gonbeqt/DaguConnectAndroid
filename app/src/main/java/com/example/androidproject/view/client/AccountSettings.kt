@@ -168,11 +168,12 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                             .padding(horizontal = 16.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        listOf(
-                            "First Name: ${profile.fullname.split(" ").first()}",
-                            "Last Name: ${profile.fullname.split(" ").last()}",
-                            "Email: ${profile.email}"
-                        ).forEach { text ->
+                      Text(
+                          text = "First Name",
+                          fontSize = 16.sp,
+                          color = Color.Black,
+                          modifier = Modifier.padding(horizontal = 4.dp)
+                      )
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -182,7 +183,31 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                                     .padding(16.dp)
                             ) {
                                 Text(
-                                    text = text,
+                                    text = "${profile.fullname.split(" ").first()}",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        Text(
+                            text = "Last Name",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+
+                        )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                                    .background(Color.White)
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "${profile.fullname.split(" ").last()}",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = Color.Black,
@@ -191,7 +216,32 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                        }
+                        Text(
+                            text = "Email",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                                    .background(Color.White)
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "${profile.email}",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+
 
                         // Editable Contact Number Field
                         OutlinedTextField(

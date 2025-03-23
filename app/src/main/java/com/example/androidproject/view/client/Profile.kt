@@ -759,14 +759,16 @@ fun PostsCard(
                             .fillMaxWidth()
                             .heightIn(min = 56.dp),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
                             focusedIndicatorColor = Color.Gray,
                             unfocusedIndicatorColor = Color.Gray,
                             focusedLabelColor = Color.Gray,
                             unfocusedLabelColor = Color.Gray,
                             cursorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Gray
+                            disabledIndicatorColor = Color.Gray,
+                            disabledContainerColor = Color.Transparent,
+                            disabledTextColor = Color.Black
                         )
                     )
 
