@@ -1,6 +1,5 @@
-package com.example.androidproject.view.tradesman
+package com.example.androidproject.view.client
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,33 +12,33 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
-import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
-import java.sql.Types.NULL
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 
 @Composable
-fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel,) {
+fun ClientActiveDetails(modifier: Modifier = Modifier, resumeId: String, getClientBooking: GetClientBookingViewModel, navController: NavController) {
+    val resumeID = resumeId.toIntOrNull() ?: return
+    val bookingPendingState = getClientBooking.ClientBookingPagingData.collectAsLazyPagingItems()
+    LaunchedEffect(Unit) {
+        bookingPendingState.refresh()
+    }
+
+    // Find the booking with the matching jobId and "Pending" status
+    val selectedBooking = bookingPendingState.itemSnapshotList.items
+        .firstOrNull { it.id == resumeID && it.bookingStatus == "Active" }
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 16.sp
@@ -57,15 +56,6 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
         WindowType.LARGE -> 16.sp
     }
 
-    val jobID = jobId.toIntOrNull() ?: return
-    val bookingPendingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
-    LaunchedEffect(Unit) {
-        bookingPendingState.refresh()
-    }
-
-    // Find the booking with the matching jobId and "Pending" status
-    val selectedBooking = bookingPendingState.itemSnapshotList.items
-        .firstOrNull { it.id == jobID && it.bookingStatus == "Pending" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,7 +85,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Job Details",
+                        text = "Booking Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
@@ -128,7 +118,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Your approval is pending: Approve or Decline",
+                            text = "Your booking is Active",
                             fontSize = nameTextSize,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
@@ -149,7 +139,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                     ) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = "Client’s Information",
+                            text = "Tradesman’s Information",
                             fontSize = nameTextSize,
                             fontWeight = FontWeight.Medium,
                             color = Color.Black,
@@ -168,16 +158,14 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Client image
                             if (selectedBooking != null) {
                                 AsyncImage(
-                                    model =selectedBooking.clientProfile ,
+                                    model =selectedBooking.tradesmanFullName ,
                                     contentDescription = "Client Image",
                                     modifier = Modifier
                                         .size(100.dp)
                                 )
                             }
-
                             // Tradesman details
                             Column(
                                 modifier = Modifier
@@ -186,7 +174,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                             ) {
                                 if (selectedBooking != null) {
                                     Text(
-                                        text = selectedBooking.clientFullName,
+                                        text = selectedBooking.tradesmanFullName,
                                         color = Color.Black,
                                         fontWeight = FontWeight.Medium,
                                         fontSize = nameTextSize,
@@ -365,7 +353,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                                             .size(32.dp)
                                     )
                                     Text(
-                                        text = "Contact Client",
+                                        text = "Contact Tradesman",
                                         fontSize = nameTextSize,
                                         modifier = Modifier.padding(start = 10.dp)
                                     )
@@ -403,12 +391,11 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                                         .size(32.dp)
                                 )
                             }
-
-
                         }
 
                     }
                 }
+
                 Spacer(Modifier.height(10.dp))
                 Box(
                     modifier = Modifier
@@ -426,6 +413,7 @@ fun TradesmanPendingDetails(jobId:String , modifier: Modifier = Modifier, navCon
                     Text(text = "OK", fontSize = nameTextSize)
                 }
             }
+
         }
     }
 

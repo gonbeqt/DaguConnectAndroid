@@ -57,6 +57,13 @@ import com.example.androidproject.view.client.CancelNow
 import com.example.androidproject.view.client.CancelledDetails
 import com.example.androidproject.view.client.CancelledJobApplicationDetails
 import com.example.androidproject.view.client.Categories.Carpentry
+import com.example.androidproject.view.client.ClientActiveDetails
+import com.example.androidproject.view.client.ClientCancellationDetails
+import com.example.androidproject.view.client.ClientCancelledDetails
+import com.example.androidproject.view.client.ClientCompletedDetails
+import com.example.androidproject.view.client.ClientDeclinationDetails
+import com.example.androidproject.view.client.ClientDeclineDetails
+import com.example.androidproject.view.client.ClientPendingDetails
 import com.example.androidproject.view.client.ConfirmBook
 import com.example.androidproject.view.client.Message
 import com.example.androidproject.view.client.MessageScreen
@@ -457,6 +464,81 @@ class MainActivity : ComponentActivity() {
                                 bookingId
                             )
                         }
+                        //HIRING HUB
+                        composable("clientpendingdetails/{resumeId}") {backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            ClientPendingDetails(
+                                modifier = Modifier,
+                                resumeId,
+                                getClientBookingViewModel,
+                                navController
+
+                            )
+                        }
+                        composable("clientactivedetails/{resumeId}") {backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            ClientActiveDetails(
+                                modifier = Modifier,
+                                resumeId,
+                                getClientBookingViewModel,
+                                navController
+
+                            )
+                        }
+
+                        composable("clientdeclinationdetails/{resumeId}") {backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            ClientDeclinationDetails(
+                                resumeId,
+                                modifier = Modifier,
+                                navController,
+                                getClientBookingViewModel,
+
+
+                                )
+                        }
+                        composable("clientcompleteddetails/{resumeId}") {backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            ClientCompletedDetails(
+                                modifier = Modifier,
+                                resumeId,
+                                getClientBookingViewModel,
+                                navController
+
+                            )
+                        }
+                        composable("clientdeclineddetails/{resumeId}") {backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            ClientDeclineDetails(
+                                modifier = Modifier,
+                                resumeId,
+                                getClientBookingViewModel,
+                                navController
+
+                            )
+                        }
+                        composable("clientcancelleddetails/{resumeId}") {backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            ClientCancelledDetails(
+                                modifier = Modifier,
+                                resumeId,
+                                getClientBookingViewModel,
+                                navController
+
+                            )
+                        }
+
+                        composable("clientcancellactiondetails/{resumeId}") {backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            ClientCancellationDetails(
+                                resumeId,
+                                modifier = Modifier,
+                                navController,
+                                getClientBookingViewModel,
+
+                            )
+                        }
+
 
                         composable("booking") {
                             BookingsScreen(

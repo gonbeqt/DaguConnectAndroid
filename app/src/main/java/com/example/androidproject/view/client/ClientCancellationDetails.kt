@@ -1,5 +1,4 @@
-package com.example.androidproject.view.tradesman
-
+package com.example.androidproject.view.client
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,11 +33,12 @@ import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
+import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import java.sql.Types.NULL
 
 @Composable
-fun TradesmanCancellationDetails(jobId:String, modifier: Modifier = Modifier, navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
+fun ClientCancellationDetails(resumeId:String, modifier: Modifier = Modifier, navController: NavController,getClientBookingViewModel: GetClientBookingViewModel) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -56,15 +56,15 @@ fun TradesmanCancellationDetails(jobId:String, modifier: Modifier = Modifier, na
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    val jobID = jobId.toIntOrNull() ?: return
-    val bookingPendingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val resumeID = resumeId.toIntOrNull() ?: return
+    val bookingCancelledState = getClientBookingViewModel.ClientBookingPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
-        bookingPendingState.refresh()
+        bookingCancelledState.refresh()
     }
 
     // Find the booking with the matching jobId and "Pending" status
-    val selectedBooking = bookingPendingState.itemSnapshotList.items
-        .firstOrNull { it.id == jobID && it.bookingStatus == "Cancelled" }
+    val selectedBooking = bookingCancelledState.itemSnapshotList.items
+        .firstOrNull { it.id == resumeID && it.bookingStatus == "Cancelled" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -213,7 +213,7 @@ fun TradesmanCancellationDetails(jobId:String, modifier: Modifier = Modifier, na
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {navController.navigate("tradesmanjobcancelled/${selectedBooking?.id}")}
+                    .clickable {navController.navigate("clientcancelleddetails/${selectedBooking?.id}")}
                     .background(
                         color = Color.Transparent,
                         shape = RoundedCornerShape(12.dp)
