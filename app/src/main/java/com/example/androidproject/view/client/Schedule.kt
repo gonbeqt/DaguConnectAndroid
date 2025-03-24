@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,7 +67,7 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     var selectedClientDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedApplicantDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
-    var selectedFilter by remember { mutableStateOf("My Clients") }
+    var selectedFilter by remember { mutableStateOf("My Tradesman") }
 
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -113,10 +115,10 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
             }
         }
 
-    val selectedDate = if (selectedFilter == "My Clients") selectedClientDate else selectedApplicantDate
+    val selectedDate = if (selectedFilter == "My Tradesman") selectedClientDate else selectedApplicantDate
 
     // Convert both types to Tradesmandate
-    val tradesmenList = if (selectedFilter == "My Clients") {
+    val tradesmenList = if (selectedFilter == "My Tradesman") {
         filteredClients.map {
             Tradesmandate(
                 it.tradesmanProfile ?: "",
@@ -160,21 +162,21 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
                 currentMonth = currentMonth,
                 selectedDate = selectedDate,
                 onDateSelected = { date ->
-                    if (selectedFilter == "My Clients") {
+                    if (selectedFilter == "My Tradesman") {
                         selectedClientDate = date
                     } else {
                         selectedApplicantDate = date
                     }
                 },
                 onMonthChange = { month -> currentMonth = month },
-                allBookingDates = if (selectedFilter == "My Clients") allBookingDates else allApplicantDates,
+                allBookingDates = if (selectedFilter == "My Tradesman") allBookingDates else allApplicantDates,
                 tradesmen = tradesmenList
             )
 
 
             FilterSection(selectedDate, selectedFilter) { selectedFilter = it }
 
-            if (selectedFilter == "My Clients") {
+            if (selectedFilter == "My Tradesman") {
                 MyClientsList(clientBooking, selectedClientDate)
             } else {
                 MyApplicantsList(clientApplicants, selectedApplicantDate)
@@ -189,12 +191,17 @@ fun FilterSection(
     selectedFilter: String,
     onFilterChange: (String) -> Unit
 ) {
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
     var expanded by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val taskTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
@@ -205,7 +212,6 @@ fun FilterSection(
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
     ) {
         Row(
             Modifier.fillMaxWidth(),
@@ -213,6 +219,7 @@ fun FilterSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier.padding(start = 16.dp),
                 text = selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy")),
                 fontWeight = FontWeight.Bold,
                 fontSize = nameTextSize,
@@ -221,21 +228,21 @@ fun FilterSection(
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.wrapContentSize(Alignment.Center)) {
                 TextButton(onClick = { expanded = true }) {
-                    Text(text = selectedFilter, color = Color.Black, fontSize = taskTextSize)
+                    Text(text = selectedFilter, color = Color.Black, fontSize = taskTextSize, fontWeight = FontWeight.Normal, fontFamily = poppinsFont)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Black)
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor =  Color.Black),
-                        text = { Text("My Clients", fontSize = taskTextSize) },
+                        text = { Text("My Tradesman", fontSize = taskTextSize, fontWeight = FontWeight.Normal, fontFamily = poppinsFont) },
                         onClick = {
-                            onFilterChange("My Clients")
+                            onFilterChange("My Tradesman")
                             expanded = false
                         }
                     )
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color.Black),
-                        text = { Text("My Applicants" , fontSize = taskTextSize) },
+                        text = { Text("My Applicants" , fontSize = taskTextSize, fontWeight = FontWeight.Normal, fontFamily = poppinsFont) },
                         onClick = {
                             onFilterChange("My Applicants")
                             expanded = false
@@ -246,8 +253,10 @@ fun FilterSection(
         }
 
         Text(
+            modifier = Modifier.padding(start = 16.dp),
             text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-            fontSize = taskTextSize,
+            fontSize = 18.sp,
+            fontFamily = poppinsFont,
             fontWeight = FontWeight.Normal,
             color = Color.Gray
         )
@@ -257,6 +266,17 @@ fun FilterSection(
 @Composable
 fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
         .filter {
@@ -279,8 +299,9 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
         ) {
             Text(
                 text = "No Bookings Available",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
+                fontFamily = poppinsFont,
                 color = Color.Gray
             )
         }
@@ -301,6 +322,18 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
 @Composable
 fun MyApplicantsList(allApplicants: LazyPagingItems<JobApplicantData>, selectedDate: LocalDate) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     val filteredApplicants = allApplicants.itemSnapshotList.filterNotNull()
         .filter {
@@ -324,8 +357,9 @@ fun MyApplicantsList(allApplicants: LazyPagingItems<JobApplicantData>, selectedD
         ) {
             Text(
                 text = "No Job Applicant Available",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = nameTextSize,
+                fontFamily = poppinsFont,
+                fontWeight = FontWeight.Normal,
                 color = Color.Gray
             )
         }
@@ -355,7 +389,7 @@ fun CalendarSection(
     allBookingDates: Set<LocalDate>, // New parameter for all booking dates
     tradesmen: List<Tradesmandate> // Pass the list of tradesmen
 ) {
-    // Extract dates with data from allBookingDates (for My Clients) or tradesmen (for My Applicants)
+    // Extract dates with data from allBookingDates (for My Tradesman) or tradesmen (for My Applicants)
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val datesWithData = if (tradesmen.isNotEmpty()) {
         tradesmen.mapNotNull { trade ->
@@ -366,7 +400,7 @@ fun CalendarSection(
             }
         }.toSet()
     } else {
-        allBookingDates // Use all booking dates for My Clients
+        allBookingDates // Use all booking dates for Tradesman
     }
     Spacer(Modifier.height(6.dp))
     Card(
@@ -378,7 +412,7 @@ fun CalendarSection(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
+                .height(240.dp)
                 .background(brush = myGradient4) // Apply gradient
         ) {
             Column(
@@ -450,7 +484,7 @@ fun CalendarSection(
 
                                     Box(
                                         modifier = Modifier
-                                            .size(22.dp)
+                                            .size(24.dp)
                                             .background(
                                                 color = when {
                                                     date == selectedDate -> Color.Black
@@ -493,6 +527,11 @@ fun CalendarSection(
 
 @Composable
 fun ScheduleTopSection(navController: NavController){
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -501,7 +540,7 @@ fun ScheduleTopSection(navController: NavController){
     )  {
         Row(
             modifier = Modifier
-                .padding(horizontal = 25.dp)
+                .padding(horizontal = 22.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -509,7 +548,9 @@ fun ScheduleTopSection(navController: NavController){
         ) {
             Text(
                 text = "Schedule",
-                fontSize = 28.sp,
+                fontFamily = poppinsFont,
+                color = Color.Black,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Medium
             )
             Icon(
@@ -517,7 +558,7 @@ fun ScheduleTopSection(navController: NavController){
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
                 modifier = Modifier
-                    .size(35.dp)
+                    .size(32.dp)
                     .clickable { navController.navigate("notification") }
             )
         }
@@ -529,9 +570,9 @@ fun ScheduleTopSection(navController: NavController){
 fun MyClientsItem(Clients: GetClientsBooking) {
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val taskTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
@@ -684,9 +725,9 @@ fun MyApplicantItem(trade: JobApplicantData) {
 
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val taskTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp

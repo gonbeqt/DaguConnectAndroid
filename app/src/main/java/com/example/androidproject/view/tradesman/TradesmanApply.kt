@@ -436,7 +436,7 @@ fun TradesmanApply(
                     )
                 ) {
                     Text(
-                        text = "Apply for Job",
+                        text = "Apply Now",
                         fontSize = nameTextSize,
                         color = Color.White
                     )

@@ -74,6 +74,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -126,6 +128,22 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
         displayedResumes = paintingList.itemSnapshotList.items
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     LaunchedEffect(Unit) {
         getResumesViewModel.refreshResumes()
     }
@@ -152,9 +170,10 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                     // "About" Section
                     Text(
                         text = "About",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        color = Color.Black
                     )
 
                     if (aboutme.length > maxPreviewLength) {
@@ -162,7 +181,9 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                             Text(
                                 text = if (showFullText) aboutme else "${aboutme.take(maxPreviewLength)}...",
                                 modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp),
-                                fontSize = 14.sp,
+                                fontSize = taskTextSize,
+                                fontFamily = poppinsFont,
+                                fontWeight = FontWeight.Normal,
                                 color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
                             )
                             Text(
@@ -170,7 +191,9 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                                     ,indication = null){ showFullText = !showFullText},
                                 text = if (showFullText) "See Less" else "See More",
                                 color = Color.Blue,
-                                fontSize = 14.sp,
+                                fontSize = taskTextSize,
+                                fontFamily = poppinsFont,
+                                fontWeight = FontWeight.Normal,
                                 textAlign = TextAlign.End
                             )
 
@@ -186,7 +209,8 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Expert",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -207,7 +231,8 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                             {
                                 Text(
                                     text = "No Painter workers",
-                                    fontSize = 18.sp,
+                                    fontSize = nameTextSize,
+                                    fontFamily = poppinsFont,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
@@ -284,6 +309,7 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                         text = "Painting Works",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
+                        fontFamily = poppinsFont,
                         color = Color.White,
                         textAlign = TextAlign.Start,
                         modifier = Modifier.padding(horizontal = 16.dp)

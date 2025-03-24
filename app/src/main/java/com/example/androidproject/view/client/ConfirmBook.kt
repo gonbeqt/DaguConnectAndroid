@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Star
@@ -48,6 +49,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -55,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.androidproject.R
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.WindowType
@@ -106,6 +110,11 @@ fun ConfirmBook(
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(ResumeId)
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     when (val resumestate = resumeState) {
         is ViewResumeViewModel.ViewResumeState.Loading -> {
@@ -130,41 +139,44 @@ fun ConfirmBook(
                         .verticalScroll(rememberScrollState()),
                     shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
                 ) {
-
                     Column(
                         modifier = Modifier
                             .background(myGradient3)
                             .fillMaxWidth()
-                            .size(70.dp)
-                            .padding(top = 5.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
+                            .height(80.dp)
+                            .padding(top = 20.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBackIosNew,
-                                contentDescription = "Arrow Back",
-                                modifier = Modifier
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) { navController.popBackStack() }
-                                    .padding(16.dp),
-                                tint = Color.White
-                            )
-                            Text(
-                                text = "Bookings",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .padding(top = 15.dp, end = 50.dp)
-                                    .weight(1f)
-                            )
-                        }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            modifier = Modifier
+                                .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
+                                    navController.popBackStack()
+                                  },
+                            tint = Color.White
+                        )
+                        Text(
+                            text = "Bookings",
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = poppinsFont,
+                            fontSize = 20.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Left,
+                            modifier = Modifier
+                                .weight(1f)
+
+                        )
                     }
+                }
 
                 Card(
                     modifier = Modifier

@@ -409,7 +409,7 @@ fun ClientDetails(modifier: Modifier = Modifier, resumeId: String,status:String,
                                     imageVector = Icons.Default.KeyboardArrowRight,
                                     contentDescription = "Arrow Right Icon",
                                     modifier = Modifier
-                                        .size(32.dp)
+                                        .size(32.dp).clickable{navController.navigate("clienthelp")}
                                 )
                             }
                         }
@@ -462,7 +462,12 @@ fun ClientDetails(modifier: Modifier = Modifier, resumeId: String,status:String,
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "${bookingStatus} Details", fontSize = nameTextSize)
+                            if (bookingStatus == "Cancelled"){
+                                Text(text = "Cancellation Details", fontSize = nameTextSize)
+                            } else{
+                                Text(text = "Declination Details", fontSize = nameTextSize)
+                            }
+
                         }
 
                 }

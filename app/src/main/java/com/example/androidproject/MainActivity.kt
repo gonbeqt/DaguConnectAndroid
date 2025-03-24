@@ -35,6 +35,7 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.NotificationSettingManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.view.ClientPov.AboutUs
+import com.example.androidproject.view.ClientPov.ClientHelp
 import com.example.androidproject.view.client.AllTradesman
 import com.example.androidproject.view.client.Categories.ACRepair
 import com.example.androidproject.view.client.Categories.Cleaning
@@ -54,6 +55,7 @@ import com.example.androidproject.view.ResetPassword
 import com.example.androidproject.view.SignUpScreen
 import com.example.androidproject.view.client.AccountSettings
 import com.example.androidproject.view.client.ApplicantDeclinationDetails
+import com.example.androidproject.view.client.ApplicantDetailJobSummary
 import com.example.androidproject.view.client.ApplicantDetails
 import com.example.androidproject.view.client.BookNow
 import com.example.androidproject.view.client.BookingDetails
@@ -484,6 +486,9 @@ class MainActivity : ComponentActivity() {
 
                                 )
                         }
+                        composable("clienthelp") {
+                            ClientHelp(navController)
+                        }
 
                         composable("clientdetails/{resumeId}/{status}") {backStackEntry ->
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
@@ -506,6 +511,21 @@ class MainActivity : ComponentActivity() {
                             val tradesmanId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
 
                             ApplicantDetails(
+                                resumeId,
+                                status,
+                                tradesmanId,
+                                modifier = Modifier,
+                                navController,
+                                getMyJobApplicantsViewModel,
+                                viewResumeViewModel
+                            )
+                        }
+                        composable("applicantdetailjobsummary/{resumeId}/{status}/{tradesmanId}") { backStackEntry ->
+                            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
+                            val status = backStackEntry.arguments?.getString("status") ?: ""
+                            val tradesmanId = backStackEntry.arguments?.getString("tradesmanId") ?: ""
+
+                            ApplicantDetailJobSummary(
                                 resumeId,
                                 status,
                                 tradesmanId,

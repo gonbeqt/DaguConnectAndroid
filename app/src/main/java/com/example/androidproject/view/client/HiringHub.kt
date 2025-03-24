@@ -57,6 +57,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -124,6 +126,11 @@ fun BookingsScreen(
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
     var showLoading by remember { mutableStateOf(false) } // State to control LoadingUI visibility
 
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     Box(
         modifier = modifier
@@ -145,7 +152,8 @@ fun BookingsScreen(
                 ) {
                     Text(
                         text = "Hiring Hub",
-                        fontSize = 24.sp,
+                        fontFamily = poppinsFont,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Medium
                     )
                     Icon(
@@ -237,8 +245,8 @@ fun BookingsScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color(0xFFD9D9D9))
-                                    .padding(16.dp)
+                                    .background(Color(0xFFEDEFEF))
+                                    .padding(8.dp)
                             ) {
                                 when (selectedSection) {
                                     0 -> when (selectedTabIndex) {
@@ -368,7 +376,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (allBooking.itemCount == 0) {
@@ -385,7 +393,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
+                    .background(Color(0xFFEDEFEF))
 
                 ,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -436,7 +444,7 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (pendingBookings.isEmpty()) {
@@ -493,7 +501,7 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (declinedBookings.isEmpty()) {
@@ -510,7 +518,7 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
+                    .background(Color(0xFFEDEFEF9))
                 ,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -553,7 +561,7 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (activeBooking.isEmpty()) {
@@ -570,7 +578,7 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
+                    .background(Color(0xFFEDEFEF))
                 ,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -612,7 +620,7 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (completedBookings.isEmpty()) {
@@ -629,7 +637,7 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
+                    .background(Color(0xFFEDEFEF))
 
                 ,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -675,7 +683,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (completedBookings.isEmpty()) {
@@ -692,7 +700,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
+                    .background(Color(0xFFEDEFEF))
                 ,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -2077,7 +2085,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
         modifier = Modifier
             .fillMaxHeight()
             .fillMaxSize()
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (myJobs.itemCount == 0) {
@@ -2094,7 +2102,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9)),
+                    .background(Color(0xFFEDEFEF)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(myJobs.itemCount) { index ->
@@ -2130,7 +2138,7 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (pendingApplication.isEmpty()) {
@@ -2147,7 +2155,7 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9)),
+                    .background(Color(0xFFEDEFEF)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
 
                 ) {
@@ -2178,7 +2186,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (declinedApplication.isEmpty()) {
@@ -2195,7 +2203,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9)),
+                    .background(Color(0xFFEDEFEF)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
 
                 ) {
@@ -2226,7 +2234,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (activeApplication.isEmpty()) {
@@ -2243,7 +2251,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9)),
+                    .background(Color(0xFFEDEFEF)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
 
                 ) {
@@ -2274,7 +2282,7 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
     if (completedApplication.isEmpty()) {
@@ -2292,7 +2300,7 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
             modifier = Modifier
                 .fillMaxHeight()
                 .size(420.dp)
-                .background(Color(0xFFD9D9D9)),
+                .background(Color(0xFFEDEFEF)),
             verticalArrangement = Arrangement.spacedBy(8.dp),
 
             ) {
@@ -2327,7 +2335,7 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
         modifier = Modifier
             .fillMaxHeight()
             .size(420.dp)
-            .background(Color(0xFFD9D9D9)),
+            .background(Color(0xFFEDEFEF)),
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (cancelledApplication.isEmpty()) {
@@ -2345,7 +2353,7 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9)),
+                    .background(Color(0xFFEDEFEF)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
 
                 ) {
@@ -2986,7 +2994,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") },
+            .clickable { navController.navigate("applicantdetailjobsummary/${myJob.id}/${myJob.status}/${myJob.resumeId}") },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -3458,7 +3466,7 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+                        .clickable { navController.navigate("applicantdetailjobsummary/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
 
                     .background(
                             color = Color.Transparent,
@@ -3500,7 +3508,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+            .clickable { navController.navigate("applicantdetailjobsummary/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
         ,
         shape = RoundedCornerShape(8.dp),
     ) {
@@ -3600,7 +3608,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+                        .clickable { navController.navigate("applicantdetailjobsummary/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -3641,7 +3649,8 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
     }
     Card(
         modifier = Modifier
-            .fillMaxWidth()                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+            .fillMaxWidth()
+            .clickable { navController.navigate("applicantdetailjobsummary/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
         ,
         shape = RoundedCornerShape(8.dp),
     ) {
@@ -3741,7 +3750,7 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("applicantsdetails/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
+                        .clickable { navController.navigate("applicantdetailjobsummary/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -3749,7 +3758,7 @@ fun CancelledApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                         .padding(vertical = 8.dp),  // Adjust padding as needed
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Applicant Details", fontSize = smallTextSize)
+                    Text(text = "Job Details", fontSize = smallTextSize)
                 }
 
             }

@@ -388,7 +388,7 @@ fun ClientDeclineDetails(modifier: Modifier = Modifier, resumeId: String, getCli
                                     imageVector = Icons.Default.KeyboardArrowRight,
                                     contentDescription = "Arrow Right Icon",
                                     modifier = Modifier
-                                        .size(32.dp)
+                                        .size(32.dp).clickable{navController.navigate("clienthelp")}
                                 )
                             }
                         }

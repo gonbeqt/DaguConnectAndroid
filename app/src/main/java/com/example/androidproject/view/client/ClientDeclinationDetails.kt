@@ -159,7 +159,7 @@ fun ClientDeclinationDetails(resumeId: String,status:String, modifier: Modifier 
                             if (selectedBooking != null) {
                                 Text(
                                     fontSize = smallTextSize,
-                                    text = selectedBooking.clientFullName
+                                    text = if (bookingStatus == "Cancelled") selectedBooking.tradesmanFullName else selectedBooking.clientFullName
                                 )
                             }
                         }

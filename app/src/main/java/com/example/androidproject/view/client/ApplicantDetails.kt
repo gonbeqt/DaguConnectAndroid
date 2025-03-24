@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,9 +50,45 @@ fun ApplicantDetails(
     getMyJobApplicant: GetMyJobApplicantsViewModel,
     viewResumeViewModel: ViewResumeViewModel
 ) {
-    val resumeID = resumeId.toIntOrNull() ?: return
-    val bookingStatus = status.ifEmpty { return }
-    val tradesmanID = tradesmanId.toIntOrNull() ?: return
+    // Log the input parameters
+    Log.d("ApplicantDetails", "Input - resumeId: '$resumeId', status: '$status', tradesmanId: '$tradesmanId'")
+
+    // Parse parameters with fallback values
+    val resumeID = resumeId.toIntOrNull() ?: -1 // Fallback to -1 if invalid
+    val bookingStatus = if (status.isEmpty()) "Unknown" else status // Fallback to "Unknown" if empty
+    val tradesmanID = tradesmanId.toIntOrNull() ?: -1 // Fallback to -1 if invalid
+
+    // Log the parsed values
+    Log.d("ApplicantDetails", "Parsed - resumeID: $resumeID, bookingStatus: $bookingStatus, tradesmanID: $tradesmanID")
+
+    // Check if parameters are invalid but allow the composable to proceed
+    val hasInvalidParams = resumeID == -1 || bookingStatus == "Unknown" || tradesmanID == -1
+    if (hasInvalidParams) {
+        Log.w("ApplicantDetails", "Invalid parameters detected: resumeID=$resumeID, bookingStatus=$bookingStatus, tradesmanID=$tradesmanID")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "Warning: Some parameters are invalid",
+                    fontSize = 20.sp,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Proceeding with limited functionality. Some data may not display correctly.",
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
 
     val context = LocalContext.current
     var downloadId by remember { mutableStateOf<Long?>(null) }
@@ -76,13 +113,36 @@ fun ApplicantDetails(
     val tradesmanState by viewResumeViewModel.viewResumeState.collectAsState()
     val bookingPendingState = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
 
+    // Log the state
+    Log.d("ApplicantDetails", "tradesmanState: $tradesmanState")
+
     LaunchedEffect(Unit) {
+        Log.d("ApplicantDetails", "LaunchedEffect triggered: Refreshing bookingPendingState and fetching resume")
         bookingPendingState.refresh()
-        viewResumeViewModel.viewResume(tradesmanID)
+        if (tradesmanID != -1) { // Only fetch if tradesmanID is valid
+            viewResumeViewModel.viewResume(tradesmanID)
+        } else {
+            Log.w("ApplicantDetails", "Skipping viewResume call due to invalid tradesmanID")
+        }
     }
 
     val selectedBooking = bookingPendingState.itemSnapshotList.items
         .firstOrNull { it.id == resumeID }
+
+    // Log the selected booking
+    Log.d("ApplicantDetails", "selectedBooking: $selectedBooking")
+
+    // Check if selectedBooking is null
+    if (selectedBooking == null && resumeID != -1) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                text = "No booking found for resume ID: $resumeID",
+                fontSize = 20.sp,
+                color = Color.Red
+            )
+        }
+        return
+    }
 
     when (val state = tradesmanState) {
         is ViewResumeViewModel.ViewResumeState.Loading -> {
@@ -91,10 +151,17 @@ fun ApplicantDetails(
             }
         }
         is ViewResumeViewModel.ViewResumeState.Idle -> {
-
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Idle state: Waiting for data...",
+                    fontSize = nameTextSize,
+                    color = Color.Black
+                )
+            }
         }
         is ViewResumeViewModel.ViewResumeState.Success -> {
             val resume = state.data
+            Log.d("ApplicantDetails", "Resume data: $resume")
             Box(Modifier.fillMaxSize()) {
                 Column(
                     modifier = modifier
@@ -119,23 +186,17 @@ fun ApplicantDetails(
                                 contentDescription = "Back",
                                 modifier = Modifier.clickable {
                                     when(bookingStatus){
-                                        "Pending" -> navController.navigate("main_screen?selectedItem=1&selectedTab=1&selectedSection=1") {
-                                            navController.popBackStack()
-                                        }
-                                        "Active" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
-                                            navController.popBackStack()
-                                        }
-                                        "Completed" -> navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
+                                        "Pending" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
                                             navController.popBackStack()
                                         }
                                         "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
                                             navController.popBackStack()
+                                        }else -> {
+                                           navController.popBackStack()
                                         }
-                                        "Cancelled" -> navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
-                                            navController.popBackStack()
-                                        }
+
                                     }
-                                                              },
+                                },
                                 tint = Color(0xFF81D796)
                             )
                             Text(
@@ -176,36 +237,22 @@ fun ApplicantDetails(
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold
                                     )
-
-                                    "Active", -> Text( // Combined identical cases
-                                        text = "The applicant is active.",
-                                        fontSize = nameTextSize,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
-                                    )
-
-                                    "Completed", -> Text( // Combined identical cases
-                                        text = "The applicant has successfully completed the job.",
-                                        fontSize = nameTextSize,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
-                                    )
-
-                                    "Cancelled" -> Text(
-                                        text = "The applicant has cancelled.",
-                                        fontSize = nameTextSize,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
-                                    )
-
                                     "Declined" -> Text(
-                                        text = "The applicant has declined.",
+                                        text = "Your applicant has been declined",
                                         fontSize = nameTextSize,
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold
                                     )
-
+                                    else -> {
+                                        Text(
+                                            text = "Resume",
+                                            fontSize = nameTextSize,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
+
                             }
                         }
 
@@ -335,7 +382,7 @@ fun ApplicantDetails(
                                                 fontSize = taskTextSize
                                             )
                                             Text(
-                                                text = resume?.preferredWorkLocation ?: "N/A",
+                                                text = resume.preferredWorkLocation ?: "N/A",
                                                 color = Color.Black,
                                                 fontWeight = FontWeight.Medium,
                                                 fontSize = taskTextSize,
@@ -373,7 +420,6 @@ fun ApplicantDetails(
                                                             }
                                                         } else {
                                                             SnackbarController.show("No file available")
-
                                                         }
                                                     }
                                             )
@@ -460,7 +506,7 @@ fun ApplicantDetails(
                                         modifier = Modifier.size(24.dp)
                                     )
                                     Text(
-                                        text = "Phone: ${resume?.phoneNumber ?: "N/A"}",
+                                        text = "Phone: ${resume.phoneNumber ?: "N/A"}",
                                         fontSize = taskTextSize,
                                         color = Color.Black,
                                         modifier = Modifier.padding(start = 10.dp)
@@ -477,7 +523,7 @@ fun ApplicantDetails(
                                         modifier = Modifier.size(24.dp)
                                     )
                                     Text(
-                                        text = "Email: ${resume?.email ?: "N/A"}",
+                                        text = "Email: ${resume.email ?: "N/A"}",
                                         fontSize = taskTextSize,
                                         color = Color.Black,
                                         modifier = Modifier.padding(start = 10.dp)
@@ -576,7 +622,7 @@ fun ApplicantDetails(
                                                         modifier = Modifier.size(16.dp)
                                                     )
                                                     Text(
-                                                        text = resume?.ratings?.toDouble()
+                                                        text = resume.ratings?.toDouble()
                                                             .toString() ?: "0",
                                                         fontSize = smallTextSize,
                                                         modifier = Modifier.padding(start = 4.dp)
@@ -662,7 +708,7 @@ fun ApplicantDetails(
                                     Icon(
                                         imageVector = Icons.Default.KeyboardArrowRight,
                                         contentDescription = "Arrow Right",
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier.size(32.dp).clickable { navController.navigate("clienthelp") }
                                     )
                                 }
                             }
@@ -671,12 +717,13 @@ fun ApplicantDetails(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         // View Job Post Button
-                        when (bookingStatus) {
-                            "Pending" ->
+                        when (bookingStatus){
+                            "Pending" , "Declined" -> {
+
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable { navController.navigate("booknow/${tradesmanId}") }
+                                        .clickable { navController.navigate("booknow/$tradesmanId") }
                                         .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                                         .padding(12.dp),
                                     contentAlignment = Alignment.Center
@@ -687,61 +734,18 @@ fun ApplicantDetails(
                                         color = Color.Black
                                     )
                                 }
-
-                            "Active", "Completed" ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            when(bookingStatus){
-
-                                                "Active" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
-                                                    navController.popBackStack()
-                                                }
-                                                "Completed" -> navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
-                                                    navController.popBackStack()
-                                                }
-                                            }
-                                        }
-                                        .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                                        .padding(12.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Ok",
-                                        fontSize = nameTextSize,
-                                        color = Color.Black
-                                    )
-                                }
-
-                            "Declined", "Cancelled" ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {  navController.navigate("applicantsdeclinedetails/${resumeID}/${bookingStatus}/${tradesmanID}") }
-                                        .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                                        .padding(12.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "${bookingStatus} Details",
-                                        fontSize = nameTextSize,
-                                        color = Color.Black
-                                    )
-                                }
-
+                            }
                         }
-
                     }
                 }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 16.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                SnackbarController.ObserveSnackbar()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    SnackbarController.ObserveSnackbar()
+                }
             }
         }
 
@@ -755,7 +759,5 @@ fun ApplicantDetails(
             }
             Log.e("ApplicantDetails", state.message)
         }
-
-
     }
 }
