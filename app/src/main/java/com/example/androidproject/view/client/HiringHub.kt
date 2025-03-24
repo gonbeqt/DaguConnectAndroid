@@ -2723,7 +2723,6 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             navController.popBackStack()
                         }
                     }
-
                     putJobApplicationStatus.resetState()
                 }
             }
@@ -3090,6 +3089,10 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
     }
+    var jobType = myJob.jobType
+    if (jobType == "Electrical_work"){
+        jobType = "Electrical Work"
+    }
     Card(
         modifier = Modifier
             .size(cardHeight.first, cardHeight.second)
@@ -3137,7 +3140,7 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Service: ${myJob.jobType}",
+                            text = "Service: $jobType",
                             color = Color.Black,
                             fontSize = taskTextSize
                         )

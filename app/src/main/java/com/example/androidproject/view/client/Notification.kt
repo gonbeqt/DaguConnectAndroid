@@ -42,11 +42,11 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
             .fillMaxSize()
             .background(Color(0xFFF2F2F2)) // Light gray background
     ) {
-        NotificationTopSection(navController, clearNotification)
+        NotificationTopSection(navController, clearNotification, getNotification)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "You have ${notifications.itemCount} notifications today",
+            text = "You have a total of ${notifications.itemCount} notifications",
             fontSize = 14.sp,
             color = Color.Gray,
             modifier = Modifier.padding(start = 16.dp)
@@ -75,15 +75,19 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
 }
 
 @Composable
-fun NotificationTopSection(navController: NavController, clearNotification: ClearNotificationViewModel) {
+fun NotificationTopSection(navController: NavController, clearNotification: ClearNotificationViewModel, getNotification: GetNotificationViewModel) {
+    val notifications = getNotification.getNotificationPagingData.collectAsLazyPagingItems()
     val clearNotificationState by clearNotification.clearNotificationResult.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(clearNotificationState) {
         clearNotificationState?.let {
+            notifications.refresh()
             Toast.makeText(context, "Notifications cleared", Toast.LENGTH_SHORT).show()
+            clearNotification.resetClearNotificationState()
         }
     }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,7 +135,7 @@ fun NotificationTopSection(navController: NavController, clearNotification: Clea
                         .weight(1f)
                 )
                 TextButton (onClick = {
-
+                    clearNotification.clearNotification()
                 }){
                     Text("Clear",
                         color = Color.Gray,

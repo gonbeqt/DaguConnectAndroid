@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.androidproject.api.ApiService
 import com.example.androidproject.api.RetrofitInstance
+import com.example.androidproject.data.WebSocketService
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.NotificationSettingManager
 import com.example.androidproject.data.preferences.TokenManager
@@ -143,6 +144,7 @@ import com.example.androidproject.viewmodel.factories.job_application.ViewJobApp
 import com.example.androidproject.viewmodel.factories.job_application.client.GetMyJobApplicantsViewModelFactory
 import com.example.androidproject.viewmodel.factories.job_application.tradesman.GetMyJobApplicationViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.DeleteJobViewModelFactory
+import com.example.androidproject.viewmodel.factories.jobs.GetClientPostedJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetMyJobsViewModelFactory
 import com.example.androidproject.viewmodel.factories.jobs.GetRecentJobsViewModelFactory
@@ -165,6 +167,7 @@ import com.example.androidproject.viewmodel.job_application.ViewJobApplicationVi
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.DeleteJobViewModel
+import com.example.androidproject.viewmodel.jobs.GetClientPostedJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
@@ -192,17 +195,32 @@ class MainActivity : ComponentActivity() {
         AccountManager.init(this)
         NotificationSettingManager.init(this)
 
-        // Determine the start destination based on token and user role
-        val startDestination = when {
-            !isShown -> "landing_page"
-            TokenManager.isLoggedIn() -> {
-                val role = AccountManager.getAccount()?.isClient
-                if (role == true) "main_screen" else "main_screen"
+        // Start WebSocketService if user is logged in
+        val userId = AccountManager.getAccount()?.id
+        if (userId != null) {
+            val intent = Intent(this, WebSocketService::class.java).apply {
+                putExtra("userId", userId.toString())
             }
+            startForegroundService(intent)
+        }
+        val notificationRoute = intent.getStringExtra("navigate_to")
+        val startDestination = notificationRoute ?: when {
+            !isShown -> "landing_page"
+            TokenManager.isLoggedIn() -> "main_screen" // Default to main_screen for both roles
             else -> "login"
         }
+
+//         Determine the start destination based on token and user role
+//        val startDestination = when {
+//            !isShown -> "landing_page"
+//            TokenManager.isLoggedIn() -> {
+//                val role = AccountManager.getAccount()?.isClient
+//                if (role == true) "main_screen" else "main_screen"
+//            }
+//            else -> "login"
+//        }
+
         val trade = Tradesman(R.drawable.pfp, "Ezekiel", "Plumber", "P500/hr", 4.5, R.drawable.bookmark)
-        TokenManager.init(this)
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 
@@ -332,6 +350,8 @@ class MainActivity : ComponentActivity() {
         val reportConcernVMFactory = ReportConcernViewModelFactory(apiService)
         val reportConcernViewModel = ViewModelProvider(this, reportConcernVMFactory)[ReportConcernViewModel::class.java]
 
+        val getClientPostedJobsVMFactory = GetClientPostedJobsViewModelFactory(apiService)
+        val getClientPostedJobsViewModel = ViewModelProvider(this, getClientPostedJobsVMFactory)[GetClientPostedJobsViewModel::class.java]
 
         val updateTradesmanDetailVMFactory = UpdateTradesmanDetailViewModelFactory(apiService)
         val updateTradesmanDetailViewModel = ViewModelProvider(this, updateTradesmanDetailVMFactory)[UpdateTradesmanDetailViewModel::class.java]
@@ -569,7 +589,7 @@ class MainActivity : ComponentActivity() {
                         composable("tradesmanapply/{jobId}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             Log.e("Job ID", jobId)
-                            TradesmanApply(jobId, navController, viewJobViewModel)
+                            TradesmanApply(jobId, navController, viewJobViewModel, getClientPostedJobsViewModel)
                         }
                         composable("hiringdetails/{jobId}/{clientId}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -685,8 +705,6 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("tradesmanjobdecline/{jobId}") {backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-
-
                             TradesmanJobDecline(jobId,
                                 modifier = Modifier,
                                 navController,
