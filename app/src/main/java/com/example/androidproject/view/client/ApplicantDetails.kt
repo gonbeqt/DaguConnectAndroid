@@ -189,7 +189,7 @@ fun ApplicantDetails(
                                         "Pending" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
                                             navController.popBackStack()
                                         }
-                                        "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
+                                        "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
                                             navController.popBackStack()
                                         }else -> {
                                            navController.popBackStack()

@@ -190,7 +190,9 @@ fun MessagingScreen(
                             contentDescription = "Back",
                             modifier = Modifier
                                 .size(24.dp)
-                                .clickable { navController.navigate("message_screen") }
+                                .clickable { navController.navigate("main_screen?selectedItem=3"){
+                                    navController.popBackStack()
+                                } }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         AsyncImage(

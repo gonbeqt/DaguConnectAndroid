@@ -1,9 +1,9 @@
 package com.example.androidproject.view.tradesman
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,8 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Help
-import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Help
 import androidx.compose.material.icons.outlined.LocationOn
@@ -36,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -53,11 +50,11 @@ import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import com.example.androidproject.viewmodel.report.ReportClientViewModel
-import java.sql.Types.NULL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, getJobs: ViewJobViewModel,reportClientViewModel: ReportClientViewModel) {
+fun TradesmanApplication(jobId: String, jobs :String,status:String, modifier: Modifier = Modifier, navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, getJobs: ViewJobViewModel,reportClientViewModel: ReportClientViewModel ) {
+    Log.d("test","nagopen")
     val reportClientState by reportClientViewModel.reportClientState.collectAsState()
     val context = LocalContext.current
     val windowSize = rememberWindowSizeClass()
@@ -76,6 +73,7 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    val bookingStatus = status.ifEmpty { return }
     var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(-1) }
@@ -133,7 +131,7 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
 
     // Find the booking with the matching jobId and "Pending" status
     val selectedBooking = bookingPendingState.itemSnapshotList.items
-        .firstOrNull { it.id == jobID && it.status == "Cancelled" }
+        .firstOrNull { it.id == jobID }
     when (val getjobs = jobsState ){
         is ViewJobViewModel.JobState.Loading -> {
 
@@ -167,7 +165,30 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
                                 Icon(
                                     imageVector = Icons.Default.ArrowBack,
                                     contentDescription = "Back",
-                                    modifier = Modifier.clickable {},
+                                    modifier = Modifier.clickable {
+                                        when (bookingStatus) {
+                                            "Pending" -> navController.navigate("main_screen?selectedItem=1&selectedTab=1&selectedSection=1") {
+                                                navController.popBackStack()
+                                            }
+
+                                            "Active" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
+                                                navController.popBackStack()
+                                            }
+
+                                            "Completed" -> navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
+                                                navController.popBackStack()
+                                            }
+
+                                            "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
+                                                navController.popBackStack()
+                                            }
+
+                                            "Cancelled" -> navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
+                                                navController.popBackStack()
+                                            }
+
+                                        }
+                                    },
                                     tint = Color(0xFF81D796)
                                 )
                                 Text(
@@ -205,7 +226,7 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Your application is Cancelled",
+                                        text = "Your application is ${bookingStatus}",
                                         fontSize = nameTextSize,
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold
@@ -266,11 +287,47 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
                                                 .weight(1f)
                                                 .padding(start = 10.dp)
                                         ) {
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween
-                                            ) {
+                                            if (bookingStatus == "Completed" || bookingStatus == "Cancelled") {
+                                                Row(Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
+                                                    if (selectedBooking != null) {
+                                                        Text(
+                                                            text = selectedBooking.clientFullname,
+                                                            color = Color.Black,
+                                                            fontWeight = FontWeight.Medium,
+                                                            fontSize = nameTextSize,
+                                                        )
+                                                    }
+                                                    Box {
+                                                        Icon(
+                                                            painter = painterResource(id = R.drawable.meatball_ic),
+                                                            contentDescription = "Menu Icon",
+                                                            modifier = Modifier
+                                                                .size(25.dp)
+                                                                .clickable { showMenu = true }
+                                                        )
+                                                        // Popup Menu
+                                                        DropdownMenu(
+                                                            expanded = showMenu,
+                                                            onDismissRequest = { showMenu = false },
+                                                            modifier = Modifier.background(Color.White)
+                                                        ) {
+                                                            DropdownMenuItem(
+                                                                text = {
+                                                                    Text(
+                                                                        "Report",
+                                                                        textAlign = TextAlign.Center
+                                                                    )
+                                                                },
+                                                                onClick = {
+                                                                    showMenu = false
+                                                                    showReportSheet = true
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                }
+
+                                            } else {
                                                 if (selectedBooking != null) {
                                                     Text(
                                                         text = selectedBooking.clientFullname,
@@ -279,37 +336,7 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
                                                         fontSize = nameTextSize,
                                                     )
                                                 }
-                                                Box {
-                                                    Icon(
-                                                        painter = painterResource(id = R.drawable.meatball_ic),
-                                                        contentDescription = "Menu Icon",
-                                                        modifier = Modifier
-                                                            .size(25.dp)
-                                                            .clickable { showMenu = true }
-                                                    )
-                                                    // Popup Menu
-                                                    DropdownMenu(
-                                                        expanded = showMenu,
-                                                        onDismissRequest = { showMenu = false },
-                                                        modifier = Modifier.background(Color.White)
-                                                    ) {
-                                                        DropdownMenuItem(
-                                                            text = {
-                                                                Text(
-                                                                    "Report",
-                                                                    textAlign = TextAlign.Center
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                showMenu = false
-                                                                showReportSheet = true
-                                                            }
-                                                        )
-                                                    }
-                                                }
                                             }
-
-
 
                                             if (selectedBooking != null) {
                                                 Text(
@@ -592,65 +619,126 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
 
                                 }
                             }
-                            Spacer(Modifier.height(10.dp))
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                Card(
+                            if (bookingStatus == "Completed") {
+                                Spacer(Modifier.height(10.dp))
+                                Column(
                                     modifier = Modifier
-                                        .fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(Color.White),
-                                    shape = RoundedCornerShape(15.dp) // Keep card shape
+                                        .fillMaxWidth()
                                 ) {
-                                    Column(
+                                    Card(
                                         modifier = Modifier
-                                            .padding(16.dp)
-                                            .fillMaxWidth()
+                                            .fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(Color.White),
+                                        shape = RoundedCornerShape(15.dp) // Keep card shape
                                     ) {
-                                        Row(
+                                        Column(
                                             modifier = Modifier
-                                                .fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween
+                                                .padding(16.dp)
+                                                .fillMaxWidth()
                                         ) {
-                                            Text(
-                                                fontWeight = FontWeight.Normal,
-                                                fontSize = smallTextSize,
-                                                color = Color.Gray,
-                                                text = "Posted on"
-                                            )
-                                            if (myjobs != null) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+
                                                 Text(
+                                                    fontWeight = FontWeight.Normal,
                                                     fontSize = smallTextSize,
-                                                    text = myjobs.createdAt
+                                                    color = Color.Gray,
+                                                    text = "Posted on"
                                                 )
+                                                if (myjobs != null) {
+                                                    Text(
+                                                        fontSize = smallTextSize,
+                                                        text = myjobs.createdAt
+                                                    )
+                                                }
                                             }
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+
+                                                Text(
+                                                    fontWeight = FontWeight.Normal,
+                                                    fontSize = smallTextSize,
+                                                    color = Color.Gray,
+                                                    text = "Completed on"
+                                                )
+
+                                                if (selectedBooking != null) {
+                                                    Text(
+                                                        text = selectedBooking.jobDateStatus,
+                                                        fontSize = smallTextSize,
+                                                    )
+                                                }
+                                            }
+
+
                                         }
 
-
                                     }
-
                                 }
                             }
                             Spacer(Modifier.height(10.dp))
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { navController.navigate("tradesmanapplicationcanceldetails/${selectedBooking?.id}/${jobS}") }
-                                    .background(
-                                        color = Color.Transparent,
-                                        shape = RoundedCornerShape(12.dp)
-                                    )
-                                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "Cancelled Details", fontSize = nameTextSize)
+                            when (bookingStatus) {
+                                "Pending", "Active", "Completed" ->
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                when (bookingStatus) {
+                                                    "Pending" -> navController.navigate("main_screen?selectedItem=1&selectedTab=1&selectedSection=1") {
+                                                        navController.popBackStack()
+                                                    }
+
+                                                    "Active" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
+                                                        navController.popBackStack()
+                                                    }
+
+                                                    "Completed" -> navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
+                                                        navController.popBackStack()
+                                                    }
+                                                }
+
+                                            }
+                                            .background(
+                                                color = Color.Transparent,
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                            .padding(8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = "OK", fontSize = nameTextSize)
+                                    }
+
+                                "Cancelled", "Declined" ->
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                navController.navigate("tradesmanapplicationcanceldetails/${jobID}/${jobS}/${bookingStatus}")
+                                            }
+                                            .background(
+                                                color = Color.Transparent,
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                                            .padding(8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = "${bookingStatus} Details", fontSize = nameTextSize)
+                                    }
+
                             }
                         }
                     }
 
                 }
+
 
             }
             Box(
@@ -662,11 +750,9 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
             ) {
                 SnackbarController.ObserveSnackbar()
             }
-
         }
         else -> Unit
     }
-
     if (showReportSheet) {
         ModalBottomSheet(
             onDismissRequest = { showReportSheet = false },
@@ -839,5 +925,7 @@ fun TradesmanApplicationCancelled(jobId: String, jobs :String, modifier: Modifie
             }
         }
     }
+
+
 }
 

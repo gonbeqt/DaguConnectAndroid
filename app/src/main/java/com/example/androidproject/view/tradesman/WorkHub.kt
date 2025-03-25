@@ -211,10 +211,10 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                     }
                     when {
                         (selectedSection == 0 && getMyJobApplicationsLoadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0) -> {
-                            LoadingUI() // For "My Jobs" - this is correct as is
+                            LoadingUI()
                         }
                         (selectedSection == 1 && getTradesmanBookingLoadState.refresh is LoadState.Loading && getTradesmanBookingState.itemCount == 0) -> {
-                            LoadingUI() // For "My Applications" - use getMyJobApplications instead of getTradesmanBooking
+                            LoadingUI()
                         }else ->{
                         // Handle different states based on connectivity and data loading
                         if (!isConnected.value) {
@@ -835,7 +835,7 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
     }
     Card(
         modifier = Modifier
-            .clickable { navController.navigate("tradesmanpendingdetails/${pending.id}") }
+            .clickable { navController.navigate("tradesmandetails/${pending.id}/${pending.bookingStatus}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1160,7 +1160,7 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
 
     Card(
         modifier = Modifier
-            .clickable { navController.navigate("tradesmanjobdecline/${declined.id}") }
+            .clickable { navController.navigate("tradesmandetails/${declined.id}/${declined.bookingStatus}") }
             .fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1223,7 +1223,7 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmanjobdecline/${declined.id}") }
+                        .clickable { navController.navigate("tradesmandetails/${declined.id}/${declined.bookingStatus}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1265,7 +1265,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanactivedetails/${active.id}") }
+            .clickable { navController.navigate("tradesmandetails/${active.id}/${active.bookingStatus}") }
         ,
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -1329,7 +1329,7 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmanactivedetails/${active.id}") }
+                        .clickable { navController.navigate("tradesmandetails/${active.id}/${active.bookingStatus}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1369,7 +1369,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
     }
     Card(
         modifier = Modifier
-            .clickable { navController.navigate("tradesmancompleteddetails/${completed.id}") }
+            .clickable { navController.navigate("tradesmandetails/${completed.id}/${completed.bookingStatus}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1433,7 +1433,7 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmancompleteddetails/${completed.id}") }
+                        .clickable { navController.navigate("tradesmandetails/${completed.id}/${completed.bookingStatus}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -1476,7 +1476,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
     }
     Card(
         modifier = Modifier
-            .clickable { navController.navigate("tradesmanjobcancelled/${cancel.id}") }
+            .clickable { navController.navigate("tradesmandetails/${cancel.id}/${cancel.bookingStatus}") }
             .fillMaxWidth()
         ,
         shape = RoundedCornerShape(8.dp),
@@ -1540,7 +1540,7 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmanjobcancelled/${cancel.id}") }
+                        .clickable { navController.navigate("tradesmandetails/${cancel.id}/${cancel.bookingStatus}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -2003,8 +2003,8 @@ fun PendingMySubmissionsTradesmanItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanapplicationpending/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") }, // Add implementation for click if needed
+        shape = RoundedCornerShape(8.dp),
     ) {
         Box(
             modifier = Modifier
@@ -2092,9 +2092,7 @@ fun PendingMySubmissionsTradesmanItem(
                     }
                     Box(
                         modifier = Modifier
-                            .clickable {
-                                navController.navigate("tradesmanapplicationpending/${myJob.id}/${myJob.jobId}")
-                            }
+                            .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -2285,7 +2283,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
+            .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") },
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2357,7 +2355,7 @@ fun ActiveMySubmissionsTradesmanItem(myJob: JobApplicationData, navController: N
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmanapplicationactive/${myJob.id}/${myJob.jobId}") }
+                        .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -2405,8 +2403,8 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanapplicationdecline/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") } ,
+        shape = RoundedCornerShape(8.dp),
     ) {
         Box(
             modifier = Modifier
@@ -2494,9 +2492,7 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                     }
                     Box(
                         modifier = Modifier
-                            .clickable {
-                                navController.navigate("tradesmanapplicationdecline/${myJob.id}/${myJob.jobId}")
-                            }
+                            .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -2547,7 +2543,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanapplicationcompleted/${myJob.id}/${myJob.jobId}") },
+            .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") },
         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -2618,7 +2614,7 @@ fun CompletedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { navController.navigate("tradesmanapplicationcompleted/${myJob.id}/${myJob.jobId}") }
+                        .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") }
                         .background(
                             color = Color.Transparent,
                         )
@@ -2668,8 +2664,8 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("tradesmanapplicationcancelled/${myJob.id}/${myJob.jobId}") }, // Add implementation for click if needed
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            .clickable { navController.navigate("tradesmanapplication/${myJob.id}/${myJob.jobId}/${myJob.status}") }
+,        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
     ) {
         Box(
             modifier = Modifier

@@ -170,10 +170,13 @@ fun ProfileScreen(
         when(val updateProf = updateProfilePictureState){
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Success -> {
                 Toast.makeText(context, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                getClientProfileViewModel.getClientProfile()
                 updateClientProfilePictureViewModel.resetState()
+
             }
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Error -> {
                 val error = updateProf.message
+                updateClientProfilePictureViewModel.resetState()
                 Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
             }
             else->Unit

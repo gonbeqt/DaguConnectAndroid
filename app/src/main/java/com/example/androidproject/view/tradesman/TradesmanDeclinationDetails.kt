@@ -32,7 +32,7 @@ import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewMode
 
 
 @Composable
-fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, navController: NavController ,getTradesmanBooking: GetTradesmanBookingViewModel
+fun TradesmanDeclinationDetails(jobId: String,status:String, modifier: Modifier = Modifier, navController: NavController ,getTradesmanBooking: GetTradesmanBookingViewModel
 ) {
 
     val windowSize = rememberWindowSizeClass()
@@ -52,6 +52,8 @@ fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, na
         WindowType.LARGE -> 16.sp
     }
     val jobID = jobId.toIntOrNull() ?: return
+    val bookingStatus = status.ifEmpty { return }
+
     val bookingDeclinedState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
         bookingDeclinedState.refresh()
@@ -59,7 +61,7 @@ fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, na
 
     // Find the booking with the matching jobId and "Pending" status
     val selectedBooking = bookingDeclinedState.itemSnapshotList.items
-        .firstOrNull { it.id == jobID && it.bookingStatus == "Declined" }
+        .firstOrNull { it.id == jobID }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -86,11 +88,11 @@ fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, na
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        modifier = Modifier.clickable {},
+                        modifier = Modifier.clickable {navController.popBackStack()},
                         tint = Color(0xFF81D796)
                     )
                     Text(
-                        text = "Declination Details",
+                        text = "${bookingStatus} Details",
                         fontSize = 24.sp,
                         color = Color.Black,
                         textAlign = TextAlign.Left,
@@ -129,7 +131,7 @@ fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, na
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF42C2AE),
                         fontSize = 20.sp,
-                        text = " Job offer declined"
+                        text = " Job offer ${bookingStatus.lowercase()}"
                     )
                     Divider(
                         modifier = Modifier
@@ -208,7 +210,7 @@ fun TradesmanDeclinationDetails(jobId: String, modifier: Modifier = Modifier, na
                     .fillMaxWidth()
                     .clickable {
                         if (selectedBooking != null) {
-                            navController.navigate("tradesmanjobdecline/${selectedBooking.id}")
+                            navController.navigate("tradesmandetails/${jobID}/${bookingStatus}")
                         }
                     }
                     .background(
