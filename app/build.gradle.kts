@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp") version "2.0.21-1.0.27"
 }
 
 android {
@@ -41,6 +42,7 @@ android {
 }
 
 dependencies {
+// Kotlin support (if using Kotlin)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -52,6 +54,12 @@ dependencies {
     //navigation
     val nav_version = "2.8.4"
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    //room db
+    val room_version = "2.6.1" // Check for the latest version
+    implementation ("androidx.room:room-runtime:$room_version")
+    implementation ("androidx.room:room-ktx:$room_version")
+    ksp ("androidx.room:room-compiler:$room_version") // Use ksp instead of kapt
 
     implementation("androidx.compose.material:material-icons-extended")
     //retrofit
@@ -74,6 +82,9 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-flowlayout:0.31.2-alpha")
     //Firebase Cloud Messaging
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+
+
+    
 
     implementation ("com.airbnb.android:lottie-compose:6.4.0")
 
