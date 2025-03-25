@@ -2203,7 +2203,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color(0xFFEDEFEF)),
+                    .background(Color.White),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
 
                 ) {
