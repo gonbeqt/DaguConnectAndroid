@@ -79,9 +79,9 @@ object WebSocketNotificationManager {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             if (AccountManager.getAccount()?.isClient == true){
-                putExtra("navigate_to", "booking")
+                putExtra("navigate_to", "main_screen?selectedItem=1")
             } else {
-                putExtra("navigate_to", "bookingstradesman")
+                putExtra("navigate_to", "main_screen?selectedItem=1")
             }
         }
 
