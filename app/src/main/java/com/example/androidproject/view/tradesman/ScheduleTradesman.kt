@@ -20,6 +20,8 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -249,6 +251,17 @@ fun FilterSectionTradesman(
 
 @Composable
 fun MyJobsList(clientBooking: LazyPagingItems<GetTradesmanBooking>, selectedDate: LocalDate) {
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     val filteredClients = clientBooking.itemSnapshotList.filterNotNull()
@@ -272,8 +285,9 @@ fun MyJobsList(clientBooking: LazyPagingItems<GetTradesmanBooking>, selectedDate
         ) {
             Text(
                 text = "No Bookings Available",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = nameTextSize,
+                fontFamily = poppinsFont,
+                fontWeight = FontWeight.Normal,
                 color = Color.Gray
             )
         }
@@ -367,7 +381,7 @@ fun CalendarSectionTradesman(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
+                .height(240.dp)
                 .background(brush = myGradient4) // Apply gradient
         ) {
             Column(
@@ -439,7 +453,7 @@ fun CalendarSectionTradesman(
 
                                     Box(
                                         modifier = Modifier
-                                            .size(22.dp)
+                                            .size(24.dp)
                                             .background(
                                                 color = when {
                                                     date == selectedDate -> Color.Black
@@ -518,6 +532,7 @@ fun ScheduleTradesmanTopSection(navController: NavController){
 @Composable
 fun MyJobItem(clients: GetTradesmanBooking) {
     val date = ViewModelSetups.formatDateTime(clients.bookingDate)
+
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 18.sp

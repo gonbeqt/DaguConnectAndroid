@@ -20,6 +20,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +29,7 @@ import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.Chats
@@ -77,7 +80,7 @@ fun MessageScreen(
                     onExpandedChange = { isDropdownExpanded = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 25.dp)
+                        .padding(horizontal = 16.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -217,11 +220,12 @@ fun DropdownChatItem(
 fun ChatListItem(chats: Chats, navController: NavController) {
     val date = ViewModelSetups.formatDateTime(chats.createdAt)
     val receiverId = if (AccountManager.getAccount()?.id != chats.userId1) chats.userId1 else chats.userId2
-
+    var showFullText by remember { mutableStateOf(false) }
+    val maxPreviewLength = 20
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = 16.dp)
             .clickable {
                 val encodedProfilePicture = Uri.encode(chats.profilePicture)
                 navController.navigate("messaging/${chats.id}/$receiverId/${chats.fullName}/$encodedProfilePicture")
@@ -233,7 +237,7 @@ fun ChatListItem(chats: Chats, navController: NavController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -247,29 +251,42 @@ fun ChatListItem(chats: Chats, navController: NavController) {
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
                     text = chats.fullName,
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Medium,
                     color = Color.Black
                 )
-                Text(
-                    text = chats.latestMessage,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (showFullText) chats.latestMessage else "${chats.latestMessage.take(maxPreviewLength)}...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.weight(1f) // Takes available space to push date to the end
+                    )
+                    Text(
+                        text = date,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
             }
-            Text(
-                text = date,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray,
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
         }
     }
 }
 
 @Composable
 fun MessageTopSection(navController: NavController) {
+    val poppinsFont = FontFamily(
+        Font(com.example.androidproject.R.font.poppins_regular, FontWeight.Normal),
+        Font(com.example.androidproject.R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -285,8 +302,9 @@ fun MessageTopSection(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Message",
-                fontSize = 28.sp,
+                text = "Messages",
+                fontFamily = poppinsFont,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Medium
             )
             Icon(
@@ -294,7 +312,7 @@ fun MessageTopSection(navController: NavController) {
                 contentDescription = "Notifications Icon",
                 tint = Color.Black,
                 modifier = Modifier
-                    .size(35.dp)
+                    .size(32.dp)
                     .clickable { navController.navigate("notification") }
             )
         }

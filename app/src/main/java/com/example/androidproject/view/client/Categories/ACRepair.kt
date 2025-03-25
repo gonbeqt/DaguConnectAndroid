@@ -74,6 +74,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -121,11 +123,33 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
         R.drawable.acrepairbg2,
         R.drawable.acrepairbg3
     )
+
+
+
+
     LaunchedEffect(ACRepairList.itemSnapshotList, dismissedResumes) {
         Log.d("TradesmanColumn", "Updating displayed resumes")
         displayedResumes = ACRepairList.itemSnapshotList.items
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
+
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
+
     LaunchedEffect(Unit) {
         getResumesViewModel.refreshResumes()
     }
@@ -150,9 +174,10 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
                     // "About" Section
                     Text(
                         text = "About",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
                         color = Color.Black,
+                        fontSize = nameTextSize,
+                        fontFamily = poppinsFont,
+                        fontWeight = FontWeight.Bold,
                     )
 
                     if (aboutme.length > maxPreviewLength) {
@@ -160,15 +185,20 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
                             Text(
                                 text = if (showFullText) aboutme else "${aboutme.take(maxPreviewLength)}...",
                                 modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp),
-                                fontSize = 14.sp,
-                                color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
+                                fontSize = taskTextSize,
+                                color = if (aboutme.isEmpty()) Color.Gray else Color.Gray,
+                                fontFamily = poppinsFont,
+                                fontWeight = FontWeight.Normal,
                             )
                             Text(
-                                modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp).clickable(interactionSource = remember { MutableInteractionSource() }
+                                modifier = Modifier
+                                    .padding(top = 4.dp, start = 4.dp, end = 4.dp)
+                                    .clickable(interactionSource = remember { MutableInteractionSource() }
                                     ,indication = null){ showFullText = !showFullText},
                                 text = if (showFullText) "See Less" else "See More",
                                 color = Color.Blue,
-                                fontSize = 14.sp,
+                                fontFamily = poppinsFont,
+                                fontWeight = FontWeight.Normal,                                fontSize = taskTextSize,
                                 textAlign = TextAlign.End
                             )
 
@@ -177,14 +207,17 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
                         Text(
                             text = aboutme,
                             modifier = Modifier.padding(top = 4.dp),
-                            fontSize = 16.sp,
+                            fontSize = taskTextSize,
+                            fontFamily = poppinsFont,
+                            fontWeight = FontWeight.Normal,
                             color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Expert",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -205,7 +238,8 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
                             {
                                 Text(
                                     text = "No Carpentry workers",
-                                    fontSize = 18.sp,
+                                    fontSize = nameTextSize,
+                                    fontFamily = poppinsFont,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
@@ -281,6 +315,7 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
                     Text(
                         text = "Air Care",
                         fontSize = 24.sp,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         textAlign = TextAlign.Start,
@@ -324,14 +359,14 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTrad
         WindowType.LARGE -> 32.dp
     }
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val smallTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
     }
     var reportDocument by remember { mutableStateOf<Uri?>(null) }
 
@@ -475,7 +510,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTrad
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Report", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                    Text("Report", fontSize = nameTextSize, fontWeight = FontWeight.Medium)
                     IconButton(onClick = { showReportSheet = false }) {
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
@@ -500,7 +535,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTrad
                                 ) {
                                     Text(
                                         text = reason,
-                                        fontSize = 16.sp,
+                                        fontSize = nameTextSize,
                                         fontWeight = FontWeight.Medium,
                                         color = Color.Black
                                     )
@@ -527,7 +562,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTrad
                             } else {
                                 Text(
                                     text = reason,
-                                    fontSize = 16.sp,
+                                    fontSize = nameTextSize,
                                     color = Color.Black,
                                     modifier = Modifier.padding(start = 8.dp)
                                 )
@@ -540,7 +575,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTrad
                     Text(
                         text = "Tell us the Problem",
                         fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp,
+                        fontSize = nameTextSize,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
 
