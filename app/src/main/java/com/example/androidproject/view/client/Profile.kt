@@ -1024,7 +1024,7 @@ fun GeneralSettings(
 fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewModel) {
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
-    var isChecked by remember { mutableStateOf(true) }
+    var isChecked by remember { mutableStateOf(NotificationSettingManager.getNotification()) }
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
             // Clear tokens and navigate regardless of result
@@ -1081,8 +1081,12 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                 Switch(
                     checked = isChecked,
                     onCheckedChange = { isChecked = it
-                        NotificationSettingManager.saveNotification(it)
-                        Toast.makeText(context, "$isChecked", Toast.LENGTH_SHORT).show()
+                        NotificationSettingManager.saveNotification(isChecked)
+                        if (isChecked) {
+                            Toast.makeText(context, "Notification turned on", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Notification turned off", Toast.LENGTH_SHORT).show()
+                        }
                                       },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,

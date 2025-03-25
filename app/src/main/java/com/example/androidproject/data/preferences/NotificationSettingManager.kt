@@ -14,6 +14,7 @@ object NotificationSettingManager {
     }
 
     fun saveNotification(notification: Boolean) {
+        Log.d("NotificationSettings", "Saving notification: $notification")
         checkInitialized()
         preferences.edit().putBoolean(ACCOUNT_KEY, notification).apply()
     }
@@ -29,9 +30,11 @@ object NotificationSettingManager {
     }
 
     private fun checkInitialized() {
+        Log.d("NotificationSettings", "Checking initialization...")
         if (!::preferences.isInitialized) {
             throw IllegalStateException("NotificationSettingManager must be initialized before use. Call init(context) first.")
             Log.d("NOTIFICATION SETTING MANAGER", "NOT INITIALIZED")
         }
+        Log.d("NOTIFICATION SETTING MANAGER", "INITIALIZED")
     }
 }
