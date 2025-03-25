@@ -76,6 +76,7 @@ import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
@@ -269,6 +270,14 @@ fun BookingsScreen(
                             }
                         }
             }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
         }
     }
 }
@@ -908,7 +917,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
     LaunchedEffect(updateWorkState) {
         when (val updateWorkStatusState= updateWorkState) {
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
-                Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Booking Successfully Completed")
                 updateWorkStatusViewModel.resetState()
                 if(updateWorkStatusState.status == "Completed"){
                     // Navigate to the "profile" screen and clear the back stack
@@ -935,7 +944,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
             }
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = updateWorkStatusState.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(errorMessage)
                 updateWorkStatusViewModel.resetState()
             }
             else -> Unit
@@ -1300,7 +1309,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
                     "A client has cancelled a booking!",
                     "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the booking request, due to $cancelReason."
                 )
-                Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Application cancelled")
                 updateBookingTradesmanViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
                     navController.popBackStack()
@@ -1889,7 +1898,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                     }
                     Spacer(Modifier.width(16.dp))
                     OutlinedButton(
-                        onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}") },
+                        onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}/${completedBooking.id}") },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color(0xFFECAB1E)),
                         modifier = Modifier.weight(1f),
@@ -2527,7 +2536,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
             if (buttonSubmit) {
-                Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Job Application Updated")
                 putJobApplicationStatus.resetState()
                 if(jobput.status == "Active"){
                     WebSocketManager.sendNotificationJobToTradesman(
@@ -2939,7 +2948,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                 }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
-                    Toast.makeText(context, putJob.message, Toast.LENGTH_SHORT).show()
+                    SnackbarController.show(putJob.message)
                 }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
@@ -2949,7 +2958,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             "Job was marked as completed!",
                             "${myJob.clientFullname} has marked your ${myJob.jobType} service as completed!"
                         )
-                        Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
+                        SnackbarController.show("Job Completed")
                         navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
                             navController.popBackStack()
                         }
@@ -2959,7 +2968,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             "An active job was cancelled!",
                             "${myJob.clientFullname} has cancelled ${myJob.jobType} service due to $cancelReason!"
                         )
-                        Toast.makeText(context, "Job Cancelled", Toast.LENGTH_SHORT).show()
+                        SnackbarController.show("Job Cancelled")
                         navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                             navController.popBackStack()
                         }

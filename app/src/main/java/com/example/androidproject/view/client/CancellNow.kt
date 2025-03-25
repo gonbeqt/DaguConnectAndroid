@@ -59,6 +59,7 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
@@ -123,7 +124,7 @@ fun CancelNow(
                     "A book job has been cancelled!!",
                     "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the active book due to $cancellationReason."
                 )
-                Toast.makeText(context, "Appointment Cancelled successfully", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Appointment Cancelled successfully")
                 updateBookingTradesmanViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
                     popUpTo(navController.graph.startDestinationId) {
@@ -134,7 +135,7 @@ fun CancelNow(
             }
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = workState.message
-                Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Error: $errorMessage")
                 updateBookingTradesmanViewModel.resetState()
             }
             else -> Unit
@@ -148,335 +149,351 @@ fun CancelNow(
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
             val viewclientbooking = viewClientBooking.data
             val getbookdate = ViewModelSetups.formatDateTime(viewclientbooking.bookingDate)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFD9D9D9))
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .verticalScroll(rememberScrollState()),
-                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .background(Color.White)
-                            .fillMaxWidth()
-                            .size(70.dp)
-                            .padding(top = 5.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Arrow Back",
-                                Modifier
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) { navController.popBackStack() }
-                                    .padding(16.dp),
-                                tint = Color(0xFF81D796)
-                            )
-                            Text(
-                                text = "Bookings Details",
-                                fontSize = 24.sp,
-                                color = Color.Black,
-                                textAlign = TextAlign.Left,
-                                modifier = Modifier
-                                    .padding(top = 15.dp)
-                                    .weight(1f)
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
+            Box(Modifier.fillMaxSize()) {
+
+
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .verticalScroll(rememberScrollState())
+                        .fillMaxSize()
+                        .background(Color(0xFFD9D9D9))
                 ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(brush = myGradient3)
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Your appointment is ${bookingstatus}",
-                                fontSize = nameTextSize,
-                                color = Color.White,
-                            )
-                        }
-                    }
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .size(200.dp),
-                        colors = CardDefaults.cardColors(Color.White),
-                        shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp)
+                            .background(Color.White)
+                            .verticalScroll(rememberScrollState()),
+                        shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
                     ) {
-                        Box(
+                        Column(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White),
-                            contentAlignment = Alignment.CenterStart
+                                .background(Color.White)
+                                .fillMaxWidth()
+                                .size(70.dp)
+                                .padding(top = 5.dp)
                         ) {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
                             ) {
-                                AsyncImage(
-                                    model = viewclientbooking.tradesmanProfile,
-                                    contentDescription = "Tradesman Image",
-                                    modifier = Modifier
-                                        .size(120.dp)
-                                        .padding(start = 10.dp)
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Arrow Back",
+                                    Modifier
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() }
+                                        ) { navController.popBackStack() }
+                                        .padding(16.dp),
+                                    tint = Color(0xFF81D796)
                                 )
-                                Column(
+                                Text(
+                                    text = "Bookings Details",
+                                    fontSize = 24.sp,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Left,
                                     modifier = Modifier
+                                        .padding(top = 15.dp)
                                         .weight(1f)
-                                        .padding(start = 20.dp)
-                                ) {
-                                    Text(
-                                        text = viewclientbooking.tradesmanFullName,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight(500),
-                                        fontSize = nameTextSize,
-                                        modifier = Modifier.padding(top = 10.dp)
-                                    )
-                                    Text(
-                                        text = viewclientbooking.taskType,
-                                        color = Color.Black,
-                                        fontSize = taskTextSize,
-                                    )
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    color = (Color(0xFFF5F5F5)),
-                                                    shape = RoundedCornerShape(12.dp)
-                                                )
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        ) {
-                                            Text(
-                                                text = "P${viewclientbooking.workFee}/hr",
-                                                fontSize = 14.sp,
-                                                modifier = Modifier.padding(horizontal = 4.dp)
-                                            )
-                                        }
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    color = (Color(0xFFF5F5F5)),
-                                                    shape = RoundedCornerShape(12.dp)
-                                                )
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Star,
-                                                    contentDescription = "Star Icon",
-                                                    tint = Color(0xFFFFA500),
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                                Spacer(modifier = Modifier.size(4.dp))
-                                                Text(
-                                                    text = "4.5",
-                                                    fontSize = smallTextSize
-                                                )
-                                            }
-                                        }
-                                    }
-                                    Text(
-                                        text = "Weekdays Selected",
-                                        color = Color.Black,
-                                        fontSize = taskTextSize,
-                                    )
-                                    Text(
-                                        text = getbookdate,
-                                        color = Color.Gray,
-                                        fontSize = smallTextSize,
-                                    )
-                                }
+                                )
                             }
                         }
                     }
-                    Spacer(Modifier.height(16.dp))
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(Color.White),
-                            shape = RoundedCornerShape(15.dp)
+                            shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp)
                         ) {
-                            Column(
+                            Box(
                                 modifier = Modifier
-                                    .padding(16.dp)
                                     .fillMaxWidth()
+                                    .background(brush = myGradient3)
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Client’s Information",
-                                    fontSize = 18.sp,
-                                    color = Color.Black,
+                                    text = "Your appointment is ${bookingstatus}",
+                                    fontSize = nameTextSize,
+                                    color = Color.White,
                                 )
+                            }
+                        }
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .size(200.dp),
+                            colors = CardDefaults.cardColors(Color.White),
+                            shape = RoundedCornerShape(0.dp, 0.dp, 15.dp, 15.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.White),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(10.dp)
-                                        .padding(vertical = 20.dp),
+                                        .padding(10.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     AsyncImage(
-                                        model = viewclientbooking.clientProfile,
+                                        model = viewclientbooking.tradesmanProfile,
                                         contentDescription = "Tradesman Image",
-                                        modifier = Modifier.size(100.dp)
+                                        modifier = Modifier
+                                            .size(120.dp)
+                                            .padding(start = 10.dp)
                                     )
                                     Column(
                                         modifier = Modifier
                                             .weight(1f)
-                                            .padding(start = 10.dp)
+                                            .padding(start = 20.dp)
                                     ) {
                                         Text(
-                                            text = viewclientbooking.clientFullName,
+                                            text = viewclientbooking.tradesmanFullName,
                                             color = Color.Black,
                                             fontWeight = FontWeight(500),
                                             fontSize = nameTextSize,
                                             modifier = Modifier.padding(top = 10.dp)
                                         )
                                         Text(
-                                            text = viewclientbooking.phoneNumber,
-                                            color = Color.Gray,
-                                            fontWeight = FontWeight(500),
-                                            fontSize = smallTextSize,
-                                        )
-                                        Text(
-                                            text = viewclientbooking.address,
+                                            text = viewclientbooking.taskType,
                                             color = Color.Black,
                                             fontSize = taskTextSize,
                                         )
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(
+                                                        color = (Color(0xFFF5F5F5)),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    )
+                                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            ) {
+                                                Text(
+                                                    text = "P${viewclientbooking.workFee}/hr",
+                                                    fontSize = 14.sp,
+                                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                                )
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(
+                                                        color = (Color(0xFFF5F5F5)),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    )
+                                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            ) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Star,
+                                                        contentDescription = "Star Icon",
+                                                        tint = Color(0xFFFFA500),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.size(4.dp))
+                                                    Text(
+                                                        text = "4.5",
+                                                        fontSize = smallTextSize
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        Text(
+                                            text = "Weekdays Selected",
+                                            color = Color.Black,
+                                            fontSize = taskTextSize,
+                                        )
+                                        Text(
+                                            text = getbookdate,
+                                            color = Color.Gray,
+                                            fontSize = smallTextSize,
+                                        )
                                     }
                                 }
                             }
                         }
-                    }
-                    Spacer(Modifier.height(16.dp))
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(Color.White),
-                            shape = RoundedCornerShape(15.dp)
+                        Spacer(Modifier.height(16.dp))
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(Color.White),
+                                shape = RoundedCornerShape(15.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = "Client’s Information",
+                                        fontSize = 18.sp,
+                                        color = Color.Black,
+                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp)
+                                            .padding(vertical = 20.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        AsyncImage(
+                                            model = viewclientbooking.clientProfile,
+                                            contentDescription = "Tradesman Image",
+                                            modifier = Modifier.size(100.dp)
+                                        )
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(start = 10.dp)
+                                        ) {
+                                            Text(
+                                                text = viewclientbooking.clientFullName,
+                                                color = Color.Black,
+                                                fontWeight = FontWeight(500),
+                                                fontSize = nameTextSize,
+                                                modifier = Modifier.padding(top = 10.dp)
+                                            )
+                                            Text(
+                                                text = viewclientbooking.phoneNumber,
+                                                color = Color.Gray,
+                                                fontWeight = FontWeight(500),
+                                                fontSize = smallTextSize,
+                                            )
+                                            Text(
+                                                text = viewclientbooking.address,
+                                                color = Color.Black,
+                                                fontSize = taskTextSize,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(Color.White),
+                                shape = RoundedCornerShape(15.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = "Support Center",
+                                        fontSize = 18.sp,
+                                        color = Color.Black
+                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp, vertical = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row {
+                                            Icon(
+                                                imageVector = Icons.Default.Message,
+                                                contentDescription = "Message Icon",
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                            Text(
+                                                text = "Contact Tradesman",
+                                                modifier = Modifier.padding(start = 10.dp)
+                                                    .clickable {
+                                                        val encodedProfilePicture = Uri.encode(
+                                                            viewClientBooking.data.tradesmanProfile
+                                                        )
+                                                        navController.navigate("messaging/0/${viewclientbooking.tradesmanId}/${viewclientbooking.tradesmanFullName}/${encodedProfilePicture}")
+                                                    }
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowRight,
+                                            contentDescription = "Arrow Right Icon",
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                    Spacer(Modifier.height(10.dp))
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row {
+                                            Icon(
+                                                imageVector = Icons.Default.Help,
+                                                contentDescription = "Help Icon",
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                            Text(
+                                                text = "Help",
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowRight,
+                                            contentDescription = "Arrow Right Icon",
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .size(80.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
                         ) {
-                            Column(
+                            Box(
                                 modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth()
+                                    .clickable { Cancel = true }
+                                    .background(
+                                        color = Color.White,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        Color(0xFFB5B5B5),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(8.dp)
+                                    .size(300.dp, 30.dp),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Support Center",
-                                    fontSize = 18.sp,
-                                    color = Color.Black
+                                    text = "Cancel Appointment",
+                                    color = Color.Black,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight(500)
                                 )
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 10.dp, vertical = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row {
-                                        Icon(
-                                            imageVector = Icons.Default.Message,
-                                            contentDescription = "Message Icon",
-                                            modifier = Modifier.size(32.dp)
-                                        )
-                                        Text(
-                                            text = "Contact Tradesman",
-                                            modifier = Modifier.padding(start = 10.dp)
-                                                .clickable{
-                                                    val encodedProfilePicture = Uri.encode(
-                                                        viewClientBooking.data.tradesmanProfile
-                                                    )
-                                                    navController.navigate("messaging/0/${viewclientbooking.tradesmanId}/${viewclientbooking.tradesmanFullName}/${encodedProfilePicture}")
-                                                }
-                                        )
-                                    }
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowRight,
-                                        contentDescription = "Arrow Right Icon",
-                                        modifier = Modifier.size(32.dp)
-                                    )
-                                }
-                                Spacer(Modifier.height(10.dp))
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row {
-                                        Icon(
-                                            imageVector = Icons.Default.Help,
-                                            contentDescription = "Help Icon",
-                                            modifier = Modifier.size(32.dp)
-                                        )
-                                        Text(
-                                            text = "Help",
-                                            modifier = Modifier.padding(start = 10.dp)
-                                        )
-                                    }
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowRight,
-                                        contentDescription = "Arrow Right Icon",
-                                        modifier = Modifier.size(32.dp)
-                                    )
-                                }
                             }
                         }
                     }
-                    Spacer(Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .size(80.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .clickable { Cancel = true }
-                                .background(
-                                    color = Color.White,
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .border(1.dp, Color(0xFFB5B5B5), shape = RoundedCornerShape(12.dp))
-                                .padding(8.dp)
-                                .size(300.dp, 30.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Cancel Appointment",
-                                color = Color.Black,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight(500)
-                            )
-                        }
-                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 100.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    SnackbarController.ObserveSnackbar()
                 }
             }
         }
@@ -576,9 +593,9 @@ fun CancelNow(
                             Button(
                                 onClick = {
                                     if (selectedIndex == -1) {
-                                        Toast.makeText(context, "Please select a reason for cancellation", Toast.LENGTH_SHORT).show()
+                                       SnackbarController.show("Please select a reason for cancellation")
                                     } else if (selectedIndex == reasons.lastIndex && otherReason.isEmpty()) {
-                                        Toast.makeText(context, "Please type a reason for cancellation", Toast.LENGTH_SHORT).show()
+                                        SnackbarController.show("Please type a reason for cancellation")
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
                                             otherReason

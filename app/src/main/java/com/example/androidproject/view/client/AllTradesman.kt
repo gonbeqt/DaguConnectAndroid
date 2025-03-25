@@ -68,6 +68,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.androidproject.model.client.resumesItem
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
 import com.example.androidproject.viewmodel.report.ReportTradesmanViewModel
@@ -210,7 +211,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                                         refreshTrigger++
                                     } else {
                                         // Optionally show a toast if still no internet
-                                        Toast.makeText(context, "Still no internet connection", Toast.LENGTH_SHORT).show()
+                                       SnackbarController.show("Still no internet connection")
                                     }
                                 }
                                 .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
@@ -282,6 +283,14 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
             }
 
 
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
         }
     }
 }
@@ -622,8 +631,7 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                                 onClick = {
 
                                     if (selectedIndex == -1) {
-                                        // Show a message to the user indicating that they need to select a reason
-                                        Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                                        SnackbarController.show("Please select a reason for reporting")
                                     } else {
                                         val selectedReason = if (selectedIndex == reasons.size - 1) {
                                             // If "Others" is selected, use the value from the otherReason field
@@ -652,15 +660,16 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                                     }
                                     is ReportTradesmanViewModel.ReportState.Success -> {
                                         val responsereport = report.data?.message
-                                        Toast.makeText(context, responsereport, Toast.LENGTH_SHORT).show()
-
+                                        if (responsereport != null) {
+                                            SnackbarController.show(responsereport)
+                                        }
                                         reportTradesmanViewModel.resetState()
                                         // Close the dialog
                                         showReportDialog = false
                                     }
                                     is ReportTradesmanViewModel.ReportState.Error -> {
                                         val errorMessage = report.message
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                        SnackbarController.show(errorMessage)
                                         showReportDialog = true
                                         reportTradesmanViewModel.resetState()
                                     }
