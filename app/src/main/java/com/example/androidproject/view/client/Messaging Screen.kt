@@ -16,7 +16,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.setValue
@@ -188,7 +190,9 @@ fun MessagingScreen(
                             contentDescription = "Back",
                             modifier = Modifier
                                 .size(24.dp)
-                                .clickable { navController.navigate("message_screen") }
+                                .clickable { navController.navigate("main_screen?selectedItem=3"){
+                                    navController.popBackStack()
+                                } }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         AsyncImage(
@@ -203,15 +207,16 @@ fun MessagingScreen(
                             horizontalArrangement = Arrangement.SpaceBetween){
                             Text(
                                 text = receipientName,
+                                fontWeight = FontWeight.Medium,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Box {
                                 Icon(
-                                    painter = painterResource(R.drawable.meatball_ic),
+                                    imageVector = Icons.Outlined.Report,
                                     contentDescription = "Report Icon",
                                     modifier = Modifier
                                         .padding(end = 10.dp)
-                                        .size(16.dp)
+                                        .size(24.dp)
                                         .clickable { showMenu = true }
                                 )
 
@@ -440,7 +445,7 @@ fun BottomInputBar(onSend: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.LightGray)
+            .background(Color.White)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -453,7 +458,7 @@ fun BottomInputBar(onSend: (String) -> Unit) {
                 .height(56.dp),
             shape = RoundedCornerShape(24.dp),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFDFFFFA),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             )

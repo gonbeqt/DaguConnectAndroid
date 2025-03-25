@@ -3,6 +3,7 @@ package com.example.androidproject.view.tradesman
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -93,6 +94,7 @@ import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.WebSocketNotificationManager
+import com.example.androidproject.data.WebSocketService
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowSize
@@ -133,28 +135,23 @@ fun HomeTradesman(
 
     val userId = AccountManager.getAccount()?.id
 
-
-
     // Monitor network state dynamically
     LaunchedEffect(Unit) {
         while (true) {
             isConnected.value = checkNetworkConnectivity(connectivityManager)
-            delay(5000) // Check every 5 seconds (adjust as needed)
+            delay(5000) // Check every 5 seconds
         }
     }
 
-    // Initialize WebSocket and notifications
+    // Start WebSocket service if not already running
     LaunchedEffect(isConnected.value) {
-        if (isConnected.value) {
-            // Connect WebSocket and initialize notifications
-            WebSocketManager.connect(userId.toString())
-            WebSocketNotificationManager.initialize(context, userId.toString())
-        } else {
-            WebSocketNotificationManager.cleanup() // Cleanup if disconnected
+        if (isConnected.value && !WebSocketManager.isConnected()) {
+            val intent = Intent(context, WebSocketService::class.java).apply {
+                putExtra("userId", userId.toString())
+            }
+            context.startForegroundService(intent)
         }
     }
-
-
 
     var showLoading by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()

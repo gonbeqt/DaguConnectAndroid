@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NotificationsNone
@@ -47,6 +48,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -78,8 +80,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -103,6 +108,7 @@ import com.example.androidproject.view.ServicePosting
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
+import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
@@ -128,6 +134,11 @@ fun ProfileScreen(
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
     initialTabIndex: Int = 0
 ) {
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     // Function to check network connectivity using NetworkCapabilities (modern approach)
     fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
@@ -159,10 +170,13 @@ fun ProfileScreen(
         when(val updateProf = updateProfilePictureState){
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Success -> {
                 Toast.makeText(context, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                getClientProfileViewModel.getClientProfile()
                 updateClientProfilePictureViewModel.resetState()
+
             }
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Error -> {
                 val error = updateProf.message
+                updateClientProfilePictureViewModel.resetState()
                 Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
             }
             else->Unit
@@ -237,7 +251,8 @@ fun ProfileScreen(
             ) {
                 Text(
                     text = "Profile",
-                    fontSize = 28.sp,
+                    fontSize = 20.sp,
+                    fontFamily = poppinsFont,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -246,7 +261,7 @@ fun ProfileScreen(
                     contentDescription = "Notifications Icon",
                     tint = Color.Black,
                     modifier = Modifier
-                        .size(35.dp)
+                        .size(32.dp)
                         .clickable { navController.navigate("notification") }
                 )
 
@@ -326,14 +341,8 @@ fun ProfileScreen(
                                         .fillMaxWidth()
                                         .height(130.dp)
                                         .background(
-                                            brush = Brush.linearGradient(
-                                                colors = listOf(
-                                                    Color(0xFF81D796),
-                                                    Color(0xFF39BFB1)
-                                                ),
-                                                start = Offset(0f, 1f),
-                                                end = Offset(1f, 1f)
-                                            ), shape = RoundedCornerShape(8.dp)
+                                            myGradient4,
+                                            shape = RoundedCornerShape(8.dp)
                                         )
                                         .padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically
@@ -418,6 +427,7 @@ fun ProfileScreen(
                             ) {
                                 tabNames.forEachIndexed { index, title ->
                                     Tab(
+                                        modifier = Modifier.background(Color.White),
                                         selected = selectedTabIndex == index,
                                         onClick = { selectedTabIndex = index },
                                         text = {
@@ -489,8 +499,8 @@ fun MyPostsTab(
     }
 
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxSize()
+        Modifier.background(Color(0xFFEDEFEF)).fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(jobsList.itemCount) { index ->
             val job = jobsList[index]
@@ -528,6 +538,7 @@ fun PostsCard(
     job: GetJobs, // Renamed to `job` for clarity
     putJobs: PutJobViewModel
 ) {
+    var expanded by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
 
     val nameTextSize = when (windowSize.width) {
@@ -545,6 +556,12 @@ fun PostsCard(
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+
     val putJobState by putJobs.putJobState.collectAsState()
     val date = ViewModelSetups.formatDateTime(job.createdAt)
     val deadline = ViewModelSetups.formatDateTime(job.deadline)
@@ -620,7 +637,7 @@ fun PostsCard(
             .background(color = Color.White)
             .clip(RoundedCornerShape(8.dp))
     ) {
-        Box(modifier = Modifier.background(color = Color.White).shadow(1.dp)) {
+        Box(modifier = Modifier.background(color = Color.White)) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -635,29 +652,53 @@ fun PostsCard(
                         fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold
                     )
-                    TextButton(
-                        onClick = { isDialogVisible = true },
-                        colors = ButtonDefaults.buttonColors(Color.White),
-                        modifier = Modifier
-                            .border(1.dp, Color.Black, shape = RoundedCornerShape(8.dp))
-                            .height(40.dp)
-                            .width(130.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                    Box {
+                        Icon(
+                            painter = painterResource(id = R.drawable.meatball_ic),
+                            contentDescription = "Edit Post and Delete",
+                            tint = Color.Black,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable { expanded = true }
+                        )
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
                         ) {
-                            Text(
-                                "Edit Post",
-                                color = Color.Black,
-                                fontSize = taskTextSize,
-                                modifier = Modifier.padding(start = 8.dp, end = 2.dp),
-                                textAlign = TextAlign.Start
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit",
+                                            tint = Color.Black
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Edit", color = Color.Black)
+                                    }
+                                },
+                                onClick = {
+                                    isDialogVisible = true
+                                    expanded = false
+                                }
                             )
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Icon",
-                                tint = Color.Black,
-                                modifier = Modifier.padding(end = 8.dp).size(14.dp)
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete",
+                                            tint = Color.Red
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Delete", color = Color.Red)
+                                    }
+                                },
+                                onClick = {
+                                    // Add your delete logic here
+                                    expanded = false
+                                }
                             )
                         }
                     }
@@ -670,46 +711,47 @@ fun PostsCard(
                     fontWeight = FontWeight.Normal
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "Job Address:", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = taskTextSize)
-                    Text(text = editableLocation, fontSize = smallTextSize, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(text = "Job Address:", fontWeight = FontWeight.Medium, color = Color.Gray, fontSize = taskTextSize)
+                    Text(text = editableLocation, fontSize = taskTextSize, fontWeight = FontWeight.Medium, color = Color.Black)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = "Budget:",
                         fontSize = taskTextSize,
                         color = Color.Gray,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = "₱ ${editableBudget.toInt()} ",
                         fontSize = taskTextSize,
                         color = Color.Black,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Medium
                     )
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = "Service Type:",
                         fontSize = taskTextSize,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Medium,
                         color = Color.Gray
                     )
                     Text(
                         text = "${job.jobType}",
                         fontSize = taskTextSize,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Medium,
                         color = Color.Black
                     )
                 }
+                Text(text = "Job Deadline: $deadline", fontSize = taskTextSize, color = Color.Red, fontWeight = FontWeight.Medium,
+                )
 
                 Text(
                     text = "Applicants: ${job.totalApplicants}",
-                    fontSize = 16.sp,
+                    fontSize = taskTextSize,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onApplicantsClick() }
                 )
-                Text(text = "Job Deadline: $deadline", fontSize = 16.sp, color = Color.Red)
 
                 Text(
                     text = "Posted on $date - ${job.status}",

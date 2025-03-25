@@ -31,6 +31,10 @@ class GetClientProfileViewModel(private val apiService: ApiService) : ViewModel(
         }
     }
 
+    fun resetState(){
+        _getProfileState.value = ClientProfileState.Idle
+    }
+
     sealed class ClientProfileState {
         object Loading : ClientProfileState()
         object Idle : ClientProfileState()

@@ -24,7 +24,7 @@ class ViewModelSetups {
         fun formatDateTime(dateTime: String?): String {
             if (dateTime.isNullOrBlank()) return "Invalid Date"
 
-            val outputFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy")  // Ex: "January 31, 2025"
+            val outputFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")  // Ex: "January 31, 2025"
 
             return try {
                 // Try parsing as full datetime first

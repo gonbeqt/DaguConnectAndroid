@@ -214,7 +214,7 @@ fun ApplicantDeclinationDetails(resumeId: String,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        navController.navigate("applicantsdetails/${resumeID}/${bookingStatus}/${tradesmanID}")
+                        navController.navigate("applicantdetailjobsummary/$resumeId/$status/$tradesmanId")
                     }
                     .background(
                         color = Color.Transparent,

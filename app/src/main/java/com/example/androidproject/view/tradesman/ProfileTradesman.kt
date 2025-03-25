@@ -168,7 +168,7 @@ fun ProfileTradesman(
 
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
     val tabNames = listOf("Job Profile", "General")
-    val viewTradesmanProfilestate by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
+    val viewTradesmanProfileState by viewTradesmanProfileViewModel.viewTradesmanProfileResumeState.collectAsState()
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val imageLauncher = rememberLauncherForActivityResult(
@@ -234,6 +234,7 @@ fun ProfileTradesman(
             is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Error -> {
                 val errorMessage = updatingStatus.message
                 SnackbarController.show(errorMessage)
+                updateTradesmanActiveStatusViewModel.resetState()
             }
             else -> Unit
         }
@@ -306,7 +307,7 @@ fun ProfileTradesman(
                     }
                 }
             } else {
-                    when (val profileState = viewTradesmanProfilestate) {
+                    when (val profileState = viewTradesmanProfileState) {
                         is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Loading -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),

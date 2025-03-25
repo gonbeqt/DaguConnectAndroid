@@ -74,6 +74,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -126,6 +128,22 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
         displayedResumes = cleaningList.itemSnapshotList.items
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     LaunchedEffect(Unit) {
         getResumesViewModel.refreshResumes()
     }
@@ -148,7 +166,8 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                     // "About" Section
                     Text(
                         text = "About",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                     )
@@ -158,7 +177,9 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                             Text(
                                 text = if (showFullText) aboutme else "${aboutme.take(maxPreviewLength)}...",
                                 modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp),
-                                fontSize = 14.sp,
+                                fontSize = taskTextSize,
+                                fontFamily = poppinsFont,
+                                fontWeight = FontWeight.Normal,
                                 color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
                             )
                             Text(
@@ -166,7 +187,9 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                                     ,indication = null){ showFullText = !showFullText},
                                 text = if (showFullText) "See Less" else "See More",
                                 color = Color.Blue,
-                                fontSize = 14.sp,
+                                fontSize = taskTextSize,
+                                fontFamily = poppinsFont,
+                                fontWeight = FontWeight.Normal,
                                 textAlign = TextAlign.End
                             )
 
@@ -175,7 +198,7 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                         Text(
                             text = aboutme,
                             modifier = Modifier.padding(top = 4.dp),
-                            fontSize = 16.sp,
+                            fontSize = taskTextSize,
                             color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
                         )
                     }
@@ -183,8 +206,9 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
 
                     Text(
                         text = "Expert",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
                         fontWeight = FontWeight.Bold,
+                        fontFamily = poppinsFont,
                         color = Color.Black,
                         modifier = Modifier.padding(top = 8.dp)
                     )
@@ -203,7 +227,8 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                                     ,contentAlignment = Alignment.Center){
                                     Text(
                                         text = "No Cleaning workers",
-                                        fontSize = 18.sp,
+                                        fontSize = nameTextSize,
+                                        fontFamily = poppinsFont,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.Gray,
                                         textAlign = TextAlign.Center
@@ -281,6 +306,7 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                     Text(
                         text = "Cleaning Care",
                         fontSize = 24.sp,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         textAlign = TextAlign.Start,

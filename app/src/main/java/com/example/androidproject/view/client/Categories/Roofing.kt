@@ -70,6 +70,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -122,6 +124,22 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
         displayedResumes = roofingList.itemSnapshotList.items
             .filter { it.id !in dismissedResumes } // Remove dismissed
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
     // Example: Call this after adding a new resume
     LaunchedEffect(Unit) {
         getResumesViewModel.refreshResumes()
@@ -146,7 +164,8 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                     // "About" Section
                     Text(
                         text = "About",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                     )
@@ -156,7 +175,9 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                             Text(
                                 text = if (showFullText) aboutme else "${aboutme.take(maxPreviewLength)}...",
                                 modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp),
-                                fontSize = 14.sp,
+                                fontSize = nameTextSize,
+                                fontWeight = FontWeight.Normal,
+                                fontFamily = poppinsFont,
                                 color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
                             )
                             Text(
@@ -164,7 +185,9 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                                     ,indication = null){ showFullText = !showFullText},
                                 text = if (showFullText) "See Less" else "See More",
                                 color = Color.Blue,
-                                fontSize = 14.sp,
+                                fontSize = nameTextSize,
+                                fontWeight = FontWeight.Normal,
+                                fontFamily = poppinsFont,
                                 textAlign = TextAlign.End
                             )
 
@@ -173,14 +196,17 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                         Text(
                             text = aboutme,
                             modifier = Modifier.padding(top = 4.dp),
-                            fontSize = 16.sp,
+                            fontSize = taskTextSize,
+                            fontFamily = poppinsFont,
+                            fontWeight = FontWeight.Normal,
                             color = if (aboutme.isEmpty()) Color.Gray else Color.Gray
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Expert",
-                        fontSize = 18.sp,
+                        fontSize = nameTextSize,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -200,7 +226,8 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                             {
                                 Text(
                                     text = "No Roofing workers",
-                                    fontSize = 18.sp,
+                                    fontSize = nameTextSize,
+                                    fontFamily = poppinsFont,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
@@ -276,6 +303,7 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                     Text(
                         text = "Roofing Works",
                         fontSize = 24.sp,
+                        fontFamily = poppinsFont,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         textAlign = TextAlign.Start,

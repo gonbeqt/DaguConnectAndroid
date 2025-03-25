@@ -19,6 +19,7 @@ data class NotificationData(
 object WebSocketManager {
     private const val URL = "ws://192.168.100.167:8080" // Replace with your server IP
     private const val TAG = "WebSocketManager"
+    private var attemptCount = 0 // For exponential backoff
 
     private val client = OkHttpClient.Builder()
         .pingInterval(10, TimeUnit.SECONDS) // Keep connection alive
@@ -28,7 +29,6 @@ object WebSocketManager {
     private val _incomingMessages = MutableStateFlow<List<String>>(emptyList())
     val incomingMessages = _incomingMessages.asStateFlow()
 
-    // New flow for notification data
     private val _notifications = MutableStateFlow<NotificationData?>(null)
     val notifications = _notifications.asStateFlow()
 
@@ -42,9 +42,9 @@ object WebSocketManager {
 
         val request = Request.Builder().url(URL).build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
-
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d(TAG, "WebSocket connected!")
+                attemptCount = 0 // Reset retry count on success
                 val authMessage = """{"type": "auth", "user_id": "$userId"}"""
                 webSocket.send(authMessage)
                 Log.d(TAG, "Sent auth message: $authMessage")
@@ -54,7 +54,6 @@ object WebSocketManager {
                 Log.d(TAG, "Received message: $text")
                 _incomingMessages.update { currentMessages -> listOf(text) + currentMessages }
 
-                // Parse the incoming message and emit notification data if applicable
                 try {
                     val jsonObject = gson.fromJson(text, Map::class.java)
                     val type = jsonObject["type"] as? String
@@ -72,20 +71,21 @@ object WebSocketManager {
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 Log.e(TAG, "WebSocket failure: ${t.message}", t)
                 this@WebSocketManager.webSocket = null
+                val delay = minOf(60000L, 5000L * (1 shl attemptCount++)) // Exponential backoff
                 Handler(Looper.getMainLooper()).postDelayed({
-                    Log.d(TAG, "Reconnecting WebSocket...")
+                    Log.d(TAG, "Reconnecting WebSocket (attempt $attemptCount)...")
                     connect(userId)
-                }, 5000)
+                }, delay)
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                Log.d(TAG, "WebSocket closing: $reason")
+                Log.d(TAG, "WebSocket closing: $reason (code: $code)")
                 webSocket.close(code, reason)
                 this@WebSocketManager.webSocket = null
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                Log.d(TAG, "WebSocket closed: $reason")
+                Log.d(TAG, "WebSocket closed: $reason (code: $code)")
                 this@WebSocketManager.webSocket = null
             }
         })
@@ -197,6 +197,10 @@ object WebSocketManager {
         Log.d(TAG, "Disconnecting WebSocket...")
         webSocket?.close(1000, "Normal Closure")
         webSocket = null
+        attemptCount = 0
         Log.d(TAG, "WebSocket disconnected.")
     }
+
+    fun isConnected(): Boolean = webSocket != null
 }
+
