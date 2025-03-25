@@ -59,6 +59,7 @@ import com.example.androidproject.viewmodel.job_application.PutJobApplicationSta
 import com.example.androidproject.viewmodel.job_application.ViewJobApplicationViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
+import com.example.androidproject.viewmodel.jobs.DeleteJobViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.GetRecentJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
@@ -95,6 +96,7 @@ fun MainScreen(
     updateTradesmanActiveStatusViewModel: UpdateTradesmanActiveStatusViewModel,
     reportClientViewModel : ReportClientViewModel,
     viewRatingsViewModel: ViewRatingsViewModel,
+    deleteJobViewModel: DeleteJobViewModel,
     initialSelectedItem: Int = 0,
     initialSelectedTab: Int = 0,
     initialSelectedSection: Int = 0
@@ -238,7 +240,8 @@ fun MainScreen(
             updateClientProfilePictureViewModel,
             updateTradesmanActiveStatusViewModel,
             reportClientViewModel,
-            viewRatingsViewModel
+            viewRatingsViewModel,
+            deleteJobViewModel
         )
     }
 }
@@ -273,6 +276,7 @@ fun ContentScreen(
     updateTradesmanActiveStatusViewModel : UpdateTradesmanActiveStatusViewModel,
     reportClientViewModel:ReportClientViewModel,
     viewRatingsViewModel: ViewRatingsViewModel,
+    deleteJobViewModel: DeleteJobViewModel
 ) {
     val role = AccountManager.getAccount()?.isClient
     if (role == true) {
@@ -281,7 +285,7 @@ fun ContentScreen(
             1 -> BookingsScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,updateBookingTradesmanViewModel, getMyJobApplicantsViewModel, viewJobsApplication, putJobApplicationStatusViewModel,selectedTab,selectedSection)
             2 -> ScheduleScreen(modifier.padding(bottom = 0.1.dp),navController,getClientsBooking,getMyJobApplicantsViewModel)
             3 -> MessageScreen(modifier.padding(bottom = 0.1.dp),navController, viewModel)
-            4 -> ProfileScreen(modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel, putJobViewModel, updateClientProfilePictureViewModel, selectedTab,)
+            4 -> ProfileScreen(modifier = modifier.padding(bottom = 0.1.dp), navController, logoutViewModel, postJobsViewModel, getMyJobsViewModel, getClientProfileViewModel, putJobViewModel, updateClientProfilePictureViewModel, deleteJobViewModel, selectedTab,)
         }
     } else {
         when (selectedItem) {

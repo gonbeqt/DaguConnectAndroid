@@ -204,7 +204,7 @@ fun HiringDetails(jobId: String, clientId: String, modifier: Modifier, navContro
                         horizontalArrangement = Arrangement.End,
 
                     ) {
-                        Text("Character: ${characterCount}/500", color = Color.Gray, fontSize = 12.sp)
+                        Text("Character: ${characterCount}/150", color = Color.Gray, fontSize = 12.sp)
                     }
 
                     Spacer(modifier = Modifier.weight(1f)) // pushes the buttons to the bottom

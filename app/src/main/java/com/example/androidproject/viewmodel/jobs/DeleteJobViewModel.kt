@@ -8,18 +8,33 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class DeleteJobViewModel(private val apiService: ApiService) : ViewModel()  {
-    private val _deleteJobResult = MutableStateFlow<Boolean?>(null)
-    val deleteJobResult: StateFlow<Boolean?> = _deleteJobResult.asStateFlow()
+class DeleteJobViewModel(private val apiService: ApiService) : ViewModel() {
 
-    fun deleteJob(jobId: Int){
+    sealed class DeleteJobResult {
+        object Success : DeleteJobResult()
+        object Error : DeleteJobResult()
+        object Idle : DeleteJobResult()  // Represents the reset state
+    }
+
+    private val _deleteJobResult = MutableStateFlow<DeleteJobResult>(DeleteJobResult.Idle)
+    val deleteJobResult: StateFlow<DeleteJobResult> = _deleteJobResult.asStateFlow()
+
+    fun deleteJob(jobId: Int) {
         viewModelScope.launch {
             try {
                 val response = apiService.deleteJob(jobId)
-                _deleteJobResult.value = response.isSuccessful
-            } catch (e: Exception){
-                _deleteJobResult.value = false
+                _deleteJobResult.value = if (response.isSuccessful) {
+                    DeleteJobResult.Success
+                } else {
+                    DeleteJobResult.Error
+                }
+            } catch (e: Exception) {
+                _deleteJobResult.value = DeleteJobResult.Error
             }
         }
+    }
+
+    fun resetState() {
+        _deleteJobResult.value = DeleteJobResult.Idle
     }
 }

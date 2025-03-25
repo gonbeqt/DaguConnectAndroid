@@ -111,6 +111,7 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
+import com.example.androidproject.viewmodel.jobs.DeleteJobViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
@@ -132,6 +133,7 @@ fun ProfileScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     putJobs: PutJobViewModel,
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
+    deleteJobViewModel: DeleteJobViewModel,
     initialTabIndex: Int = 0
 ) {
     val poppinsFont = FontFamily(
@@ -162,9 +164,26 @@ fun ProfileScreen(
 
     //state of updating the profile picture
     val updateProfilePictureState by updateClientProfilePictureViewModel.updateClientProfileState.collectAsState()
-
+    val deleteJobState = deleteJobViewModel.deleteJobResult.collectAsState()
     val getMyJobsViewModelState = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     val loadState = getMyJobsViewModelState.loadState
+
+    LaunchedEffect(deleteJobState) {
+        when (val deleteJob = deleteJobState.value) {
+            is DeleteJobViewModel.DeleteJobResult.Success -> {
+                getMyJobsViewModelState.refresh()
+                deleteJobViewModel.resetState()
+            }
+            is DeleteJobViewModel.DeleteJobResult.Error -> {
+                deleteJobViewModel.resetState()
+            }
+            is DeleteJobViewModel.DeleteJobResult.Idle -> Unit
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        getMyJobsViewModelState.refresh()
+    }
 
     LaunchedEffect(updateProfilePictureState) {
         when(val updateProf = updateProfilePictureState){
@@ -180,7 +199,6 @@ fun ProfileScreen(
                 Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
             }
             else->Unit
-
         }
     }
     LaunchedEffect(Unit) {
@@ -449,7 +467,7 @@ fun ProfileScreen(
                                     .padding(top = 2.dp)
                             ) {
                                 when (selectedTabIndex) {
-                                    0 -> MyPostsTab(getMyJobsViewModel, postJobViewModel, putJobs)
+                                    0 -> MyPostsTab(getMyJobsViewModel, postJobViewModel, putJobs, deleteJobViewModel)
                                     1 -> SettingsScreen(navController, logoutViewModel)
                                 }
 
@@ -478,7 +496,8 @@ fun ProfileScreen(
 fun MyPostsTab(
     getMyJobsViewModel: GetMyJobsViewModel,
     postJobViewModel: PostJobViewModel,
-    putJobs: PutJobViewModel
+    putJobs: PutJobViewModel,
+    deleteJobViewModel: DeleteJobViewModel
 ) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     val postJobState by postJobViewModel.postJobState.collectAsState()
@@ -512,7 +531,9 @@ fun MyPostsTab(
                     },
                     onApplicantsClick = { /* Handle applicants click */ },
                     job = job,
-                    putJobs = putJobs
+                    putJobs = putJobs,
+                    deleteJobViewModel = deleteJobViewModel,
+                    getMyJobsViewModel = getMyJobsViewModel
                 )
             }
         }
@@ -536,8 +557,11 @@ fun PostsCard(
     onEditClick: (Int, String, String, String) -> Unit,
     onApplicantsClick: () -> Unit,
     job: GetJobs, // Renamed to `job` for clarity
-    putJobs: PutJobViewModel
+    putJobs: PutJobViewModel,
+    deleteJobViewModel: DeleteJobViewModel,
+    getMyJobsViewModel: GetMyJobsViewModel
 ) {
+    val getMyJobsViewModelState = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     var expanded by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
 
@@ -696,7 +720,8 @@ fun PostsCard(
                                     }
                                 },
                                 onClick = {
-                                    // Add your delete logic here
+                                    deleteJobViewModel.deleteJob(job.id)
+                                    getMyJobsViewModelState.refresh()
                                     expanded = false
                                 }
                             )

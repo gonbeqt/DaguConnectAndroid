@@ -419,6 +419,7 @@ class MainActivity : ComponentActivity() {
                                 updateTradesmanActiveStatusViewModel,
                                 reportClientViewModel,
                                 viewRatingsViewModel,
+                                deleteJobViewModel,
                                 initialSelectedItem = selectedItem,
                                 initialSelectedTab = selectedTab,
                                 initialSelectedSection = selectedSection
