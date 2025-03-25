@@ -78,7 +78,7 @@ fun HiringDetails(jobId: String, clientId: String, modifier: Modifier, navContro
                         "New Tradesman Applicant!",
                         "$tradesmanFullname has applied to your job post."
                     )
-                    navController.navigate("main_screen")
+                    navController.navigate("main_screen?selectedItem=1&selectedTab=1&selectedSection=1")
                 }
                 is PostJobApplicationViewModel.PostJobApplicationState.Error -> {
                     val errorState = postJobApplicationState as PostJobApplicationViewModel.PostJobApplicationState.Error
@@ -122,7 +122,7 @@ fun HiringDetails(jobId: String, clientId: String, modifier: Modifier, navContro
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Arrow Back",
                         modifier = Modifier
-                            .clickable { }
+                            .clickable { navController.popBackStack() }
                             .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
                         tint = Color(0xFF81D796)
                     )

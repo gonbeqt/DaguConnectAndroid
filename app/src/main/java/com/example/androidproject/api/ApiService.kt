@@ -157,8 +157,8 @@ interface ApiService {
     @PUT("/user/tradesman/bookings/status/{booking_id}")
     suspend fun updateBookingClientStatus(@Body request : ClientWorkStatusRequest, @Path("booking_id") bookingId: Int): Response<ClientWorkStatusResponse>
 
-    @POST("/user/client/rate/tradesman/{tradesman_id}")
-    suspend fun ratetradesman(@Body request : rateTradesmanRequest, @Path("tradesman_id") bookingId: Int): Response<rateTradesmanResponse>
+    @POST("/user/client/rate/tradesman/{tradesman_id}/{booking_id}")
+    suspend fun rateTradesman(@Body request : rateTradesmanRequest, @Path("tradesman_id") tradesmanId: Int,@Path("booking_id") bookingId: Int): Response<rateTradesmanResponse>
 
     @POST("/user/client/job/apply/{jobId}")
     suspend fun postJobApplication(
@@ -241,4 +241,8 @@ interface ApiService {
 
     @DELETE("/user/notification/clear")
     suspend fun clearNotifications(): Response<Unit>
+
+
+    @GET("/job/getClientPostedJob/{clientId}")
+    suspend fun getJobsPostedByClient(@Path("clientId") clientId: Int): Response<GetMyJobs>
 }

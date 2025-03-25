@@ -300,7 +300,6 @@ fun HomeTopSection(navController: NavController,windowSize: WindowSize, bgColor:
 
 @Composable
 fun FontFamily(x0: Font, x1: Font, x2: Font) {
-    TODO("Not yet implemented")
 }
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
@@ -970,8 +969,10 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                             contentAlignment = Alignment.Center
 
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = "Start Icon",

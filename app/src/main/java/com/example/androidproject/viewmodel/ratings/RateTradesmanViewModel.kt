@@ -15,11 +15,11 @@ class RateTradesmanViewModel(private val apiService: ApiService, context : Conte
     private val _rateTradesmanState = MutableStateFlow<RateTradesman>(RateTradesman.Idle)
     val rateTradesmanState = _rateTradesmanState.asStateFlow()
 
-    fun rateTradesman(message : String, rating : Int, tradesmanId : Int){
+    fun rateTradesman(message : String, rating : Int, tradesmanId : Int,bookingId : Int){
         viewModelScope.launch {
             _rateTradesmanState.value = RateTradesman.Loading
             try{
-                val response = apiService.ratetradesman(rateTradesmanRequest(message,rating),tradesmanId)
+                val response = apiService.rateTradesman(rateTradesmanRequest(message,rating),tradesmanId,bookingId)
                 if(response.isSuccessful){
                     val body = response.body()
                     if(body!=null){

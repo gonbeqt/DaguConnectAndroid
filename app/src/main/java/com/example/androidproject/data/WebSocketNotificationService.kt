@@ -3,16 +3,22 @@ package com.example.androidproject.data
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.androidproject.MainActivity
+import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.NotificationSettingManager
+import com.example.androidproject.view.client.AccountSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+
 @SuppressLint("StaticFieldLeak")
 object WebSocketNotificationManager {
     private val TAG = "WebSocketNotifManager"
@@ -29,15 +35,11 @@ object WebSocketNotificationManager {
         this.context = context.applicationContext
         Log.d(TAG, "WebSocketNotificationManager initialized with userId: $userId")
 
-        // Start WebSocket connection
-        WebSocketManager.connect(userId)
-
-        // Collect WebSocket notifications
         scope.launch {
             Log.d(TAG, "Starting to collect WebSocket notifications")
             WebSocketManager.notifications.collect { notification ->
                 notification?.let {
-                    if(NotificationSettingManager.getNotification() == true || NotificationSettingManager.getNotification() == null){
+                    if (NotificationSettingManager.getNotification() == true || NotificationSettingManager.getNotification() == null) {
                         Log.d(TAG, "Collected notification: Title=${it.title}, Message=${it.message}")
                         showNotification(it.title, it.message)
                     } else {
@@ -73,6 +75,23 @@ object WebSocketNotificationManager {
             notificationManager.createNotificationChannel(channel)
         }
 
+        // Create an Intent to launch the app's MainActivity
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (AccountManager.getAccount()?.isClient == true){
+                putExtra("navigate_to", "booking")
+            } else {
+                putExtra("navigate_to", "bookingstradesman")
+            }
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info) // Replace with your app’s icon
             .setContentTitle(title ?: "Notification")
@@ -81,6 +100,7 @@ object WebSocketNotificationManager {
                 .bigText(messageBody ?: "New message received"))
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setContentIntent(pendingIntent)
             .build()
 
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)

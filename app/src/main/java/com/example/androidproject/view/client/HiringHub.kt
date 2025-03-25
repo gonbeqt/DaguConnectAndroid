@@ -2964,7 +2964,6 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             navController.popBackStack()
                         }
                     }
-
                     putJobApplicationStatus.resetState()
                 }
             }
@@ -3477,7 +3476,6 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
                 ) {
                     Text(text = "Job Details", fontSize = smallTextSize)
                 }
-
             }
         }
     }
