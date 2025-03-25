@@ -63,6 +63,7 @@ import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
 import com.example.androidproject.viewmodel.bookings.BooktradesmanViewModel
 import org.json.JSONArray
+import java.time.LocalDate
 import java.util.Calendar
 
 
@@ -505,18 +506,22 @@ fun DatePickerWithRestrictions(selectedDate: String, onDateSelected: (String) ->
     // Set minimum date (tomorrow)
     calendar.add(Calendar.DAY_OF_YEAR, 1)
     val minDate = calendar.timeInMillis
-
+    calendar.time = Calendar.getInstance().time // Reset to today
+    calendar.add(Calendar.MONTH, 1) // Add 1 month
+    val maxDate = calendar.timeInMillis
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
             val formattedDate = "$year-${month + 1}-$dayOfMonth"
-            onDateSelected(formattedDate) // ✅ Send selected date to ConfirmBook
+            onDateSelected(formattedDate) 
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     ).apply {
         datePicker.minDate = minDate // Restrict past dates
+        datePicker.maxDate = maxDate // Restrict past dates
+
     }
 
     Column(

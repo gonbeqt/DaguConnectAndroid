@@ -241,4 +241,8 @@ interface ApiService {
 
     @DELETE("/user/notification/clear")
     suspend fun clearNotifications(): Response<Unit>
+
+
+    @GET("/job/getClientPostedJob/{clientId}")
+    suspend fun getJobsPostedByClient(@Path("clientId") clientId: Int): Response<GetMyJobs>
 }
