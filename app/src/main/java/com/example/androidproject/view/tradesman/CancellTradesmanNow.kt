@@ -1,5 +1,6 @@
 package com.example.androidproject.view.tradesman
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -394,6 +395,12 @@ fun CancelTradesmanNow(jobApplicationId: String, navController: NavController, v
                                              Text(
                                                  text = "Contact Tradesman",
                                                  modifier = Modifier.padding(start = 10.dp)
+                                                     .clickable{
+                                                         val encodedProfilePicture = Uri.encode(
+                                                             viewJob?.jobApplication?.clientProfilePicture
+                                                         )
+                                                         navController.navigate("messaging/0/${viewJob?.jobApplication?.userId}/${viewJob?.jobApplication?.clientFullname}/${encodedProfilePicture}")
+                                                     }
                                              )
                                          }
                                          Icon(

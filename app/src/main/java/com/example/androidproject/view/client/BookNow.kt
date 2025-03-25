@@ -551,8 +551,15 @@ fun BookNow(viewResumeViewModel: ViewResumeViewModel, navController: NavControll
                                     contentDescription = "Message Icon",
                                     tint = Color.White
                                 )
-                                Text(text = "Chat Me", color = Color.White, fontSize = nameTextSize)
-
+                                Text(
+                                    text = "Chat Me",
+                                    color = Color.White,
+                                    fontSize = nameTextSize,
+                                    modifier = Modifier.clickable {
+                                        val encodedProfilePicture = Uri.encode(resume.profilePic)
+                                        navController.navigate("messaging/0/${resume.userid}/${resume.tradesmanFullName}/${encodedProfilePicture}")
+                                    }
+                                )
                             }
                         }
 

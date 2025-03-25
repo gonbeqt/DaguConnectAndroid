@@ -1,5 +1,6 @@
 package com.example.androidproject.view.tradesman
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -296,7 +297,7 @@ fun MyJobApplicationDetails(navController: NavController) {
                                             .size(32.dp)
                                     )
                                     Text(
-                                        text = "Contact Tradesman",
+                                        text = "Contact Client",
                                         modifier = Modifier.padding(start = 10.dp)
                                     )
                                 }

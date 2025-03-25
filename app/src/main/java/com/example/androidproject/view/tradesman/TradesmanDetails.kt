@@ -538,6 +538,12 @@ fun TradesmanDetails(jobId:String,status:String, modifier: Modifier = Modifier, 
                                             text = "Contact Client",
                                             fontSize = nameTextSize,
                                             modifier = Modifier.padding(start = 10.dp)
+                                                .clickable{
+                                                    val encodedProfilePicture = Uri.encode(
+                                                        selectedBooking?.clientProfile
+                                                    )
+                                                    navController.navigate("messaging/0/${selectedBooking?.userId}/${selectedBooking?.clientFullName}/${encodedProfilePicture}")
+                                                }
                                         )
                                     }
                                     Icon(

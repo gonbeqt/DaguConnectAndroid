@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -631,6 +632,12 @@ fun ApplicantDetails(
                                             text = "Contact Tradesman",
                                             fontSize = taskTextSize,
                                             modifier = Modifier.padding(start = 10.dp)
+                                                .clickable{
+                                                    val encodedProfilePicture = Uri.encode(
+                                                        resume.profilePic
+                                                    )
+                                                    navController.navigate("messaging/0/${resume.userid}/${resume.tradesmanFullName}/${encodedProfilePicture}")
+                                                }
                                         )
                                     }
                                     Icon(
