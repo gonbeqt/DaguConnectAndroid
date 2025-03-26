@@ -89,8 +89,8 @@ fun ManageProfile(
     var aboutMe by remember { mutableStateOf(about ?: "") }
 
     val context = LocalContext.current
-    var isPhoneValid by remember { mutableStateOf(phoneNumber.isEmpty() || "^9[0-9]{9}$".toRegex().matches(phoneNumber)) }
-    val phoneRegex = "^9[0-9]{9}$".toRegex()
+    var isPhoneValid by remember { mutableStateOf(phoneNumber.isEmpty() || "^09[0-9]{9}$".toRegex().matches(phoneNumber)) }
+    val phoneRegex = "^09[0-9]{9}$".toRegex()
 
     // Store initial values for change detection
     val initialLocation by remember { mutableStateOf(workLocation ?: "Select location") }
@@ -245,21 +245,19 @@ fun ManageProfile(
                                 .padding(horizontal = 14.dp, vertical = 18.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "+63",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = if (phoneNumber.isNotEmpty()) Color.Black else Color.Gray
-                                )
+
                                 BasicTextField(
                                     value = phoneNumber,
-                                    onValueChange = { newValue ->
-                                        val filteredValue = newValue.filter { it.isDigit() }.take(10)
+                                    onValueChange = {  newValue ->
+                                        // Filter to digits only and limit to 10 characters
+                                        val filteredValue = newValue.filter { it.isDigit() }.take(11)
                                         phoneNumber = when {
                                             filteredValue.isEmpty() -> ""
-                                            filteredValue.length == 1 && filteredValue != "9" -> "9$filteredValue"
                                             else -> filteredValue
                                         }
+
+                                        // Validate using regex
+                                        isPhoneValid = phoneNumber.isEmpty() || phoneRegex.matches(phoneNumber)
                                     },
                                     textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -270,7 +268,7 @@ fun ManageProfile(
                                         Box {
                                             if (phoneNumber.isEmpty()) {
                                                 Text(
-                                                    text = "eg. 9123456789",
+                                                    text = "eg. 09876543211",
                                                     color = Color.Gray,
                                                     style = TextStyle(fontSize = 14.sp)
                                                 )
@@ -283,7 +281,7 @@ fun ManageProfile(
                         }
                         if (!isPhoneValid && phoneNumber.isNotEmpty()) {
                             Text(
-                                text = "Phone number must be 10 digits starting with 9 (e.g., 9123456789)",
+                                text = "Phone number must be 11 digits starting with 09 (e.g., 09876543211)",
                                 color = Color.Red,
                                 style = TextStyle(fontSize = 12.sp),
                                 modifier = Modifier.padding(top = 4.dp)

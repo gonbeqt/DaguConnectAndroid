@@ -255,9 +255,7 @@ fun Carpentry(navController: NavController, getResumesViewModel: GetResumesViewM
                                         carpentry,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(carpentry.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -337,7 +335,7 @@ fun Carpentry(navController: NavController, getResumesViewModel: GetResumesViewM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel, onUninterested:() -> Unit) {
+fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -441,7 +439,6 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTr
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

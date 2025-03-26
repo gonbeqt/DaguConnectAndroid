@@ -243,9 +243,7 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                                         cleaning,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(cleaning.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -325,7 +323,7 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CleaningItem(cleaning: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun CleaningItem(cleaning: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -428,7 +426,6 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController, reportTrad
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

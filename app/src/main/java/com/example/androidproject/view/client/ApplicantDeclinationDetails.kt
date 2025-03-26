@@ -164,7 +164,7 @@ fun ApplicantDeclinationDetails(resumeId: String,
                             if (selectedBooking != null) {
                                 Text(
                                     fontSize = smallTextSize,
-                                    text = selectedBooking.jobDateStatus
+                                    text = selectedBooking.cancelledBy
                                 )
                             }
                         }
@@ -182,7 +182,7 @@ fun ApplicantDeclinationDetails(resumeId: String,
                             if (selectedBooking != null) {
                                 Text(
                                     fontSize = smallTextSize,
-                                    text = selectedBooking.updatedAt
+                                    text = selectedBooking.jobDateStatus
                                 )
                             }
                         }
@@ -214,7 +214,7 @@ fun ApplicantDeclinationDetails(resumeId: String,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        navController.navigate("applicantdetailjobsummary/$resumeId/$status/$tradesmanId")
+                        navController.navigate("applicantdetailjobsummary/${resumeId}/${bookingStatus}/${tradesmanID}")
                     }
                     .background(
                         color = Color.Transparent,

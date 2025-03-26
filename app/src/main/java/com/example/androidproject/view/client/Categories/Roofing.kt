@@ -240,9 +240,7 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                                         roofing,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(roofing.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -321,7 +319,7 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
 }
 
 @Composable
-fun RoofingItem(roofing: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun RoofingItem(roofing: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -423,7 +421,6 @@ fun RoofingItem(roofing: resumesItem, navController: NavController, reportTrades
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

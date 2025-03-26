@@ -91,6 +91,8 @@ fun ConfirmBook(
     val bookingState by bookingTradesmanViewModel.bookTradesmanState.collectAsState()
     var isValid by remember { mutableStateOf(false) }
     val phoneRegex = "^09[0-9]{9}$".toRegex()
+    var isPhoneValid by remember { mutableStateOf(phoneNumber.isEmpty() || "^09[0-9]{9}$".toRegex().matches(phoneNumber)) }
+
     var isValidAddress by remember { mutableStateOf(true) }
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
@@ -336,12 +338,16 @@ fun ConfirmBook(
                             ) {
                                 TextField(
                                     value = phoneNumber,
-                                    onValueChange = {
-                                        phoneNumber = it
-                                        isValid =
-                                            phoneNumber.isNotEmpty() && !phoneRegex.matches(
-                                                phoneNumber
-                                            )
+                                    onValueChange = {  newValue ->
+                                        // Filter to digits only and limit to 10 characters
+                                        val filteredValue = newValue.filter { it.isDigit() }.take(11)
+                                        phoneNumber = when {
+                                            filteredValue.isEmpty() -> ""
+                                            else -> filteredValue
+                                        }
+
+                                        // Validate using regex
+                                        isPhoneValid = phoneNumber.isEmpty() || phoneRegex.matches(phoneNumber)
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -351,7 +357,6 @@ fun ConfirmBook(
                                     keyboardOptions = KeyboardOptions.Default.copy(
                                         keyboardType = KeyboardType.Phone
                                     ),
-                                    isError = isValid, // Shows error if the length is not 11
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.White,
                                         unfocusedContainerColor = Color.White,
@@ -368,15 +373,12 @@ fun ConfirmBook(
 
 
                             }
-                            if (isValid) {
+                            if (!isPhoneValid && phoneNumber.isNotEmpty()) {
                                 Text(
-                                    text = "Phone number must start with 09 and 11 numbers only",
+                                    text = "Phone number must be 11 digits starting with 09 (e.g., 09876543211)",
                                     color = Color.Red,
                                     style = TextStyle(fontSize = 12.sp),
-                                    modifier = Modifier.padding(
-                                        top = 4.dp,
-                                        start = 4.dp
-                                    )
+                                    modifier = Modifier.padding(top = 4.dp)
                                 )
                             }
 
