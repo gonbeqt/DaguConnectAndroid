@@ -237,7 +237,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                                             .padding(16.dp),
                                         horizontalArrangement = Arrangement.Center
                                     ) {
-                                        CircularProgressIndicator()
+                                       LoadingUI()
                                     }
                                 }
                             }
