@@ -46,7 +46,7 @@ data class SubmitResumeResponse(
         val email: String,
         val id: Int,
         @SerializedName("prefered_work_location")
-        val preferredWorkLocation: String?,
+        val preferredWorkLocation: String,
         @SerializedName("profile_pic")
         val profilePic: String,
         @SerializedName("phone_number")
