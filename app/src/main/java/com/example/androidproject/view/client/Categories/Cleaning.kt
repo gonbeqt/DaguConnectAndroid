@@ -295,7 +295,11 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.popBackStack() }
+                                .clickable {
+                                    navController.navigate("main_screen"){
+                                        navController.popBackStack()
+                                    }
+                                }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White

@@ -567,7 +567,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
         }
     }
 
-    // Check if isapprove is 0, then set all fields to "N/A" or appropriate defaults
+    // Check if is approve is 0, then set all fields to "N/A" or appropriate defaults
     val displayDetails = if (tradesmanDetails.isApprove == 0) {
         tradesmanDetails.copy(
             specialty = "N/A",
@@ -689,7 +689,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            text = displayDetails.preferredWorkLocation?.let { "$it, Pangasinan" } ?: "N/A",
+                            text = if (displayDetails.preferredWorkLocation == "N/A") "N/A" else "${displayDetails.preferredWorkLocation}, Pangasinan",
                             color = Color.Black,
                             fontSize = taskTextSize,
                             fontWeight = FontWeight.Medium

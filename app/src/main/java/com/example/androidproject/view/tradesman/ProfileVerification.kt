@@ -124,14 +124,14 @@ fun ProfileVerification(
                             .clickable {
                                 if (currentStep > 1) {
                                     if (currentStep == 5) {
-                                        navController.navigate("main_screen")
+                                        navController.navigate("main_screen?selectedItem=4")
                                         currentStep++
                                         progressPercentage += 25
                                     }
                                     currentStep--
                                     progressPercentage -= 25
                                 } else if (currentStep == 1) {
-                                    navController.navigate("main_screen")
+                                    navController.navigate("main_screen?selectedItem=4")
                                 }
                             },
                         imageVector = Icons.Default.ArrowBack,
@@ -244,7 +244,7 @@ fun ProfileVerification(
                                             "Urdaneta City", "Villasis"
                                         ),
                                         selectedOption = selectedLocation,
-                                        onOptionSelected = { selectedLocation = "$it, Pangasinan" }
+                                        onOptionSelected = { selectedLocation = it }
                                     )
                                 }
 
@@ -561,6 +561,11 @@ fun ProfileVerification(
                                                         )
                                                         currentStep = 5
                                                         progressPercentage = 100
+                                                    }
+                                                    5 -> {
+                                                        navController.navigate("main_screen?selectedItem=4"){
+                                                            navController.popBackStack()
+                                                        }
                                                     }
                                                 }
                                             } else {
