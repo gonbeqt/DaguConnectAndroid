@@ -268,7 +268,7 @@ fun BookingsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 100.dp),
+                .padding(bottom = 16.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             SnackbarController.ObserveSnackbar()

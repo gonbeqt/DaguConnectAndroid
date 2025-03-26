@@ -226,18 +226,32 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
                         // Confirm Button
                         Button(
                             onClick = {
-                                passwordError = if (newPassword != confirmPassword) "Passwords do not match" else null
-                                lengthError = if (newPassword.length < 8) "Password must be at least 8 characters" else null
-                                if (passwordError == null && lengthError == null) {
-                                    changePassword.changePassword(oldPassword, newPassword)
-
+                                // Validate password matching first
+                                passwordError = if (newPassword != confirmPassword) {
+                                    "Passwords do not match"
+                                } else {
+                                    null
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
 
-                            enabled = oldPassword.isNotEmpty() && newPassword.isNotEmpty() && confirmPassword.isNotEmpty(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF122826))
+                                // Only check old vs new password if passwords match
+                                if (passwordError == null) {
+                                    if (oldPassword == newPassword) {
+                                        SnackbarController.show("New password cannot be the same as the old password")
+                                    } else {
+                                        // Validate password length
+                                        lengthError = if (newPassword.length < 8) {
+                                            "Password must be at least 8 characters"
+                                        } else {
+                                            null
+                                        }
 
+                                        // Proceed with password change if no errors
+                                        if (lengthError == null) {
+                                            changePassword.changePassword(oldPassword, newPassword)
+                                        }
+                                    }
+                                }
+                            }
                         ) {
                             Text("Confirm")
                         }
@@ -249,6 +263,15 @@ fun ChangePassword(navController: NavController,changePassword: ChangePasswordVi
             LoadingUI()
         }
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
+        }
     }
+
 }
 

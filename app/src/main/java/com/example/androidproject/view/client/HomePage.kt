@@ -230,7 +230,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 100.dp),
+                .padding(bottom = 16.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             SnackbarController.ObserveSnackbar()
@@ -441,6 +441,9 @@ fun TradesmanColumn(
 
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
+    LaunchedEffect(Unit) {
+       resumeList.refresh()
+    }
 
     val cardHeight = when (windowSize.width) {
         WindowType.SMALL -> 120.dp
