@@ -97,6 +97,7 @@ import com.example.androidproject.data.WebSocketNotificationManager
 import com.example.androidproject.data.WebSocketService
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.GetJobs
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.client.UploadFieldScreenShot
@@ -119,13 +120,6 @@ fun HomeTradesman(
     reportClientViewModel: ReportClientViewModel,
     initialTabIndex: Int = 0
 ) {
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }

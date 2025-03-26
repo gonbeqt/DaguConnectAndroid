@@ -74,6 +74,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.androidproject.R
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient
 import com.example.androidproject.viewmodel.RegisterViewModel
@@ -83,7 +84,7 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel,LoadingUI : @Composable () -> Unit) {
+fun SignUpScreen(navController: NavController, viewModel: RegisterViewModel) {
     val windowSize = rememberWindowSizeClass()
     val registerState by viewModel.registerState.collectAsState()
 

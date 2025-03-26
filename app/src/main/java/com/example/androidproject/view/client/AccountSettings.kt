@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfileAddressViewModel
 
@@ -57,7 +58,10 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
             }
             is UpdateClientProfileAddressViewModel.UpdateClientProfileAddressState.Success -> {
                 val responseMessage = updateClientDetails.data?.message
-                Toast.makeText(context, responseMessage, Toast.LENGTH_SHORT).show()
+                if (responseMessage != null) {
+                    SnackbarController.show(responseMessage)
+                }
+
                 navController.navigate("main_screen?selectedItem=4") {
                     navController.popBackStack()
                 }
@@ -65,8 +69,7 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
             }
             is UpdateClientProfileAddressViewModel.UpdateClientProfileAddressState.Error -> {
                 val error = updateClientDetails.message
-                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-            }
+                SnackbarController.show(error)            }
             else -> Unit // Handles Idle state or any other unexpected state
         }
     }
@@ -315,6 +318,14 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
         }
     }
 }

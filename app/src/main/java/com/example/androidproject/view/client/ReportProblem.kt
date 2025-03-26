@@ -37,12 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.ReportConcernViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ReportProblem(navController: NavController, reportConcernViewModel : ReportConcernViewModel, LoadingUI :@Composable ()-> Unit ){
+fun ReportProblem(navController: NavController, reportConcernViewModel : ReportConcernViewModel ){
     var issueDescription by remember { mutableStateOf("") }
     val categories = listOf("Booking", "Chats", "Search", "Profile", "Feedback", "Other")
     var selectedCategory by remember { mutableStateOf<String?>(null) }

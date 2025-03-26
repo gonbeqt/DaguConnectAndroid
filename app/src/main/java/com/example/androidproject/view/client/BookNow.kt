@@ -46,6 +46,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.view.tradesman.downloadFileTradesman
@@ -128,275 +129,319 @@ fun BookNow(
                     }
                     is ViewResumeViewModel.ViewResumeState.Success -> {
                         val resume = state.data
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White)
-                                .padding(12.dp)
-                                .verticalScroll(rememberScrollState())
-                        ) {
-                            // Tradesman Info Section
-                            Row(
+                        Box(Modifier.fillMaxSize()) {
+
+
+                            Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp, vertical = 0.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                    .fillMaxSize()
+                                    .background(Color.White)
+                                    .padding(12.dp)
+                                    .verticalScroll(rememberScrollState())
                             ) {
-                                AsyncImage(
-                                    model = resume.profilePic,
-                                    contentDescription = "Tradesman Image",
+                                // Tradesman Info Section
+                                Row(
                                     modifier = Modifier
-                                        .size(100.dp)
-                                        .padding(start = 10.dp)
-                                        .clip(CircleShape)
-                                )
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(start = 15.dp)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 10.dp, vertical = 0.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = resume.tradesmanFullName,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight(500),
-                                        fontSize = nameTextSize,
-                                        modifier = Modifier.padding(top = 10.dp)
+                                    AsyncImage(
+                                        model = resume.profilePic,
+                                        contentDescription = "Tradesman Image",
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .padding(start = 10.dp)
+                                            .clip(CircleShape)
                                     )
-                                    resume.specialty?.let {
-                                        BoxRow(specialties = it.replace("_", " "))
-                                    }
-                                    resume.preferredWorkLocation?.let {
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(start = 15.dp)
+                                    ) {
                                         Text(
-                                            text = it,
+                                            text = resume.tradesmanFullName,
                                             color = Color.Black,
-                                            fontSize = taskTextSize
+                                            fontWeight = FontWeight(500),
+                                            fontSize = nameTextSize,
+                                            modifier = Modifier.padding(top = 10.dp)
                                         )
-                                    }
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = Color(0xFFF5F5F5),
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = "Rating",
-                                            tint = Color(0xFFFFA500),
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = when {
-                                                resume.ratings == 0f -> "0"
-                                                else -> String.format("%.1f", resume.ratings)
-                                            },
-                                            fontSize = smallTextSize
-                                        )
-                                    }
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Divider(
-                                modifier = Modifier.padding(horizontal = 10.dp),
-                                color = Color.Gray,
-                                thickness = 0.3.dp
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // About Me Section
-                            Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                                Text(
-                                    text = "About Me",
-                                    color = Color.Black,
-                                    fontSize = nameTextSize,
-                                    fontWeight = FontWeight(500)
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                var showFullText by remember { mutableStateOf(false) }
-                                val aboutMe = resume.aboutMe ?: "No description available"
-                                val maxPreviewLength = 100
-                                if (aboutMe.length > maxPreviewLength) {
-                                    Column {
-                                        Text(
-                                            text = if (showFullText) aboutMe else "${aboutMe.take(maxPreviewLength)}...",
-                                            fontSize = taskTextSize,
-                                            color = if (aboutMe.isEmpty()) Color.Gray else Color.Black
-                                        )
-                                        TextButton(
-                                            onClick = { showFullText = !showFullText },
-                                            modifier = Modifier.align(Alignment.End)
-                                        ) {
+                                        resume.specialty?.let {
+                                            BoxRow(specialties = it.replace("_", " "))
+                                        }
+                                        resume.preferredWorkLocation?.let {
                                             Text(
-                                                text = if (showFullText) "See Less" else "See More",
-                                                color = Color.Blue,
+                                                text = it,
+                                                color = Color.Black,
+                                                fontSize = taskTextSize
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                color = Color(0xFFF5F5F5),
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.Star,
+                                                contentDescription = "Rating",
+                                                tint = Color(0xFFFFA500),
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = when {
+                                                    resume.ratings == 0f -> "0"
+                                                    else -> String.format("%.1f", resume.ratings)
+                                                },
                                                 fontSize = smallTextSize
                                             )
                                         }
                                     }
-                                } else {
-                                    Text(
-                                        text = aboutMe,
-                                        modifier = Modifier.padding(top = 4.dp),
-                                        fontSize = taskTextSize,
-                                        color = if (aboutMe.isEmpty()) Color.Gray else Color.Black
-                                    )
                                 }
 
-                                Divider(color = Color.Gray, thickness = 0.3.dp)
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Divider(
+                                    modifier = Modifier.padding(horizontal = 10.dp),
+                                    color = Color.Gray,
+                                    thickness = 0.3.dp
+                                )
                                 Spacer(modifier = Modifier.height(16.dp))
 
-                                // Tradesman Information
-                                Text(
-                                    text = "Tradesman Information",
-                                    color = Color.Black,
-                                    fontSize = nameTextSize,
-                                    fontWeight = FontWeight(500)
-                                )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
+                                // About Me Section
+                                Column(modifier = Modifier.padding(horizontal = 10.dp)) {
                                     Text(
-                                        text = "Preferred Location",
-                                        color = Color.Gray,
-                                        fontSize = taskTextSize,
+                                        text = "About Me",
+                                        color = Color.Black,
+                                        fontSize = nameTextSize,
                                         fontWeight = FontWeight(500)
                                     )
-                                    resume.preferredWorkLocation?.let {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    var showFullText by remember { mutableStateOf(false) }
+                                    val aboutMe = resume.aboutMe ?: "No description available"
+                                    val maxPreviewLength = 100
+                                    if (aboutMe.length > maxPreviewLength) {
+                                        Column {
+                                            Text(
+                                                text = if (showFullText) aboutMe else "${
+                                                    aboutMe.take(
+                                                        maxPreviewLength
+                                                    )
+                                                }...",
+                                                fontSize = taskTextSize,
+                                                color = if (aboutMe.isEmpty()) Color.Gray else Color.Black
+                                            )
+                                            TextButton(
+                                                onClick = { showFullText = !showFullText },
+                                                modifier = Modifier.align(Alignment.End)
+                                            ) {
+                                                Text(
+                                                    text = if (showFullText) "See Less" else "See More",
+                                                    color = Color.Blue,
+                                                    fontSize = smallTextSize
+                                                )
+                                            }
+                                        }
+                                    } else {
                                         Text(
-                                            text = it,
-                                            color = Color.Black,
+                                            text = aboutMe,
+                                            modifier = Modifier.padding(top = 4.dp),
+                                            fontSize = taskTextSize,
+                                            color = if (aboutMe.isEmpty()) Color.Gray else Color.Black
+                                        )
+                                    }
+
+                                    Divider(color = Color.Gray, thickness = 0.3.dp)
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Tradesman Information
+                                    Text(
+                                        text = "Tradesman Information",
+                                        color = Color.Black,
+                                        fontSize = nameTextSize,
+                                        fontWeight = FontWeight(500)
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "Preferred Location",
+                                            color = Color.Gray,
                                             fontSize = taskTextSize,
                                             fontWeight = FontWeight(500)
                                         )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "Est. Rate",
-                                        color = Color.Gray,
-                                        fontSize = taskTextSize,
-                                        fontWeight = FontWeight(500)
-                                    )
-                                    Text(
-                                        text = "₱${resume.workFee}",
-                                        color = Color.Black,
-                                        fontWeight = FontWeight(500),
-                                        fontSize = taskTextSize
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "Trade Credential",
-                                        color = Color.Gray,
-                                        fontSize = taskTextSize,
-                                        fontWeight = FontWeight(500)
-                                    )
-                                    Text(
-                                        text = "View File",
-                                        color = Color.Blue,
-                                        fontSize = taskTextSize,
-                                        textDecoration = TextDecoration.Underline,
-                                        fontWeight = FontWeight(500),
-                                        modifier = Modifier.clickable {
-                                            resume.documents?.let {
-                                                showConfirmDialog = true
-                                            } ?: Toast.makeText(
-                                                context,
-                                                "No file available",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                        resume.preferredWorkLocation?.let {
+                                            Text(
+                                                text = it,
+                                                color = Color.Black,
+                                                fontSize = taskTextSize,
+                                                fontWeight = FontWeight(500)
+                                            )
                                         }
-                                    )
-                                }
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "Est. Rate",
+                                            color = Color.Gray,
+                                            fontSize = taskTextSize,
+                                            fontWeight = FontWeight(500)
+                                        )
+                                        Text(
+                                            text = "₱${resume.workFee}",
+                                            color = Color.Black,
+                                            fontWeight = FontWeight(500),
+                                            fontSize = taskTextSize
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "Trade Credential",
+                                            color = Color.Gray,
+                                            fontSize = taskTextSize,
+                                            fontWeight = FontWeight(500)
+                                        )
+                                        Text(
+                                            text = "View File",
+                                            color = Color.Blue,
+                                            fontSize = taskTextSize,
+                                            textDecoration = TextDecoration.Underline,
+                                            fontWeight = FontWeight(500),
+                                            modifier = Modifier.clickable {
+                                                resume.documents?.let {
+                                                    showConfirmDialog = true
+                                                } ?: SnackbarController.show("No file available")
+                                            }
+                                        )
+                                    }
 
-                                if (showConfirmDialog) {
-                                    AlertDialog(
-                                        onDismissRequest = { showConfirmDialog = false },
-                                        title = { Text("Download File") },
-                                        text = { Text("Would you like to download the credential file?") },
-                                        confirmButton = {
-                                            TextButton(onClick = {
-                                                resume.documents?.let { fileUrl ->
-                                                    val fileName = "trade_credential_${resume.tradesmanFullName}.pdf"
-                                                    try {
-                                                        downloadId = downloadFileTradesman(context, fileUrl, fileName)
-                                                        Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
-
-                                                        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                                                        val onComplete = object : BroadcastReceiver() {
-                                                            override fun onReceive(context: Context, intent: Intent) {
-                                                                val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                                                                if (id == downloadId) {
-                                                                    val query = DownloadManager.Query().setFilterById(id)
-                                                                    val cursor = downloadManager.query(query)
-                                                                    if (cursor.moveToFirst()) {
-                                                                        val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                                                                        if (statusIndex != -1 && cursor.getInt(statusIndex) == DownloadManager.STATUS_SUCCESSFUL) {
-                                                                            Toast.makeText(context, "Download completed successfully", Toast.LENGTH_SHORT).show()
+                                    if (showConfirmDialog) {
+                                        AlertDialog(
+                                            onDismissRequest = { showConfirmDialog = false },
+                                            title = { Text("Download File") },
+                                            text = { Text("Would you like to download the credential file?") },
+                                            confirmButton = {
+                                                TextButton(onClick = {
+                                                    resume.documents?.let { fileUrl ->
+                                                        val fileName =
+                                                            "trade_credential_${resume.tradesmanFullName}.pdf"
+                                                        try {
+                                                            downloadId = downloadFileTradesman(
+                                                                context,
+                                                                fileUrl,
+                                                                fileName
+                                                            )
+                                                            SnackbarController.show("Download started")
+                                                            val downloadManager =
+                                                                context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                                                            val onComplete =
+                                                                object : BroadcastReceiver() {
+                                                                    override fun onReceive(
+                                                                        context: Context,
+                                                                        intent: Intent
+                                                                    ) {
+                                                                        val id =
+                                                                            intent.getLongExtra(
+                                                                                DownloadManager.EXTRA_DOWNLOAD_ID,
+                                                                                -1
+                                                                            )
+                                                                        if (id == downloadId) {
+                                                                            val query =
+                                                                                DownloadManager.Query()
+                                                                                    .setFilterById(
+                                                                                        id
+                                                                                    )
+                                                                            val cursor =
+                                                                                downloadManager.query(
+                                                                                    query
+                                                                                )
+                                                                            if (cursor.moveToFirst()) {
+                                                                                val statusIndex =
+                                                                                    cursor.getColumnIndex(
+                                                                                        DownloadManager.COLUMN_STATUS
+                                                                                    )
+                                                                                if (statusIndex != -1 && cursor.getInt(
+                                                                                        statusIndex
+                                                                                    ) == DownloadManager.STATUS_SUCCESSFUL
+                                                                                ) {
+                                                                                    SnackbarController.show(
+                                                                                        "Download completed"
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                            cursor.close()
+                                                                            context.unregisterReceiver(
+                                                                                this
+                                                                            )
                                                                         }
                                                                     }
-                                                                    cursor.close()
-                                                                    context.unregisterReceiver(this)
                                                                 }
-                                                            }
+
+                                                            ContextCompat.registerReceiver(
+                                                                context,
+                                                                onComplete,
+                                                                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                                                                ContextCompat.RECEIVER_NOT_EXPORTED
+                                                            )
+                                                        } catch (e: Exception) {
+                                                            SnackbarController.show("Download failed: ${e.message}")
                                                         }
-
-                                                        ContextCompat.registerReceiver(
-                                                            context,
-                                                            onComplete,
-                                                            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-                                                            ContextCompat.RECEIVER_NOT_EXPORTED
-                                                        )
-                                                    } catch (e: Exception) {
-                                                        Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
                                                     }
+                                                    showConfirmDialog = false
+                                                }) {
+                                                    Text("Yes")
                                                 }
-                                                showConfirmDialog = false
-                                            }) {
-                                                Text("Yes")
+                                            },
+                                            dismissButton = {
+                                                TextButton(onClick = {
+                                                    showConfirmDialog = false
+                                                }) {
+                                                    Text("No")
+                                                }
                                             }
-                                        },
-                                        dismissButton = {
-                                            TextButton(onClick = { showConfirmDialog = false }) {
-                                                Text("No")
-                                            }
-                                        }
+                                        )
+                                    }
+
+                                    Divider(color = Color.Gray, thickness = 0.3.dp)
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Ratings Section
+                                    Text(
+                                        text = "Ratings",
+                                        color = Color.Black,
+                                        fontSize = nameTextSize,
+                                        fontWeight = FontWeight(500)
                                     )
+                                    Text(
+                                        text = "Feedback from satisfied clients",
+                                        color = Color.Black,
+                                        fontSize = taskTextSize,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    FeedbackItem(viewRatingsViewModel, resume.userid)
                                 }
-
-                                Divider(color = Color.Gray, thickness = 0.3.dp)
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                // Ratings Section
-                                Text(
-                                    text = "Ratings",
-                                    color = Color.Black,
-                                    fontSize = nameTextSize,
-                                    fontWeight = FontWeight(500)
-                                )
-                                Text(
-                                    text = "Feedback from satisfied clients",
-                                    color = Color.Black,
-                                    fontSize = taskTextSize,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                FeedbackItem(viewRatingsViewModel, resume.userid)
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(bottom = 100.dp),
+                                contentAlignment = Alignment.BottomCenter
+                            ) {
+                                SnackbarController.ObserveSnackbar()
                             }
                         }
                     }
@@ -438,7 +483,7 @@ fun BookNow(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) {
-                                    navController.navigate("main_screen")
+                                    navController.popBackStack()
                                 },
                             tint = Color.White
                         )

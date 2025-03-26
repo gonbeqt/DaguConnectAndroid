@@ -100,10 +100,12 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.WebSocketNotificationManager
 import com.example.androidproject.model.client.resumesItem
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.Categories
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.Resumes.GetResumesViewModel
@@ -225,7 +227,14 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, getR
                 ) }
             }
         }
-
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
+        }
     }
 }
 @Composable
@@ -430,16 +439,6 @@ fun TradesmanColumn(
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    // Function to check network connectivity
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-                )
-    }
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
 
@@ -474,9 +473,9 @@ fun TradesmanColumn(
 
         Text(
             modifier = Modifier.clickable {
-                navController.navigate("alltradesmen")
+                navController.navigate("alltradesman")
             },
-            text = "See All",
+            text = "All Tradesman",
             color = Color.Gray,
             fontSize = when (windowSize.width) {
                 WindowType.SMALL -> 14.sp
@@ -841,7 +840,9 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         when (val report = reportState) {
             is ReportTradesmanViewModel.ReportState.Success -> {
                 val responseReport = report.data?.message
-                Toast.makeText(context, responseReport, Toast.LENGTH_SHORT).show()
+                if (responseReport != null) {
+                    SnackbarController.show(responseReport)
+                }
                 Log.d("ReportState", "Success: $responseReport")
                 showReportSheet = false
                 reportSubmissionKey = null // Reset key after handling
@@ -851,7 +852,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
 
             is ReportTradesmanViewModel.ReportState.Error -> {
                 val errorMessage = report.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(errorMessage)
                 Log.d("ReportState", "Error: $errorMessage")
                 showReportSheet = true
                 reportSubmissionKey = null // Reset key after handling
@@ -1134,8 +1135,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                         onClick = {
 
                             if (selectedIndex == -1) {
-                                // Show a message to the user indicating that they need to select a reason
-                                Toast.makeText(context, "Please select a reason for reporting", Toast.LENGTH_SHORT).show()
+                                SnackbarController.show("Please select a reason for reporting")
                             } else {
                                 val selectedReason = if (selectedIndex == reasons.size - 1) {
                                     // If "Others" is selected, use the value from the otherReason field
@@ -1234,6 +1234,6 @@ fun openScreenShot(context: Context, uri: Uri) {
         Log.d("openFile", "Attempting to open URI: $uri")
 
     } catch (e: ActivityNotFoundException) {
-        Toast.makeText(context, "No app available to open this file", Toast.LENGTH_SHORT).show()
+        SnackbarController.show("No app available to open this file")
     }
 }

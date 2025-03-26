@@ -62,6 +62,7 @@ import com.example.androidproject.R
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
 import com.example.androidproject.viewmodel.Resumes.ViewResumeViewModel
@@ -469,7 +470,7 @@ fun ConfirmBook(
                                 LaunchedEffect(bookingState) {
                                     when (val bookingstate = bookingState) {
                                         is BooktradesmanViewModel.BookTradesmanState.Success -> {
-                                            Toast.makeText(context, "Booking Successful", Toast.LENGTH_SHORT).show()
+                                          SnackbarController.show("Booking Successful")
                                             bookingTradesmanViewModel.resetState()
                                             WebSocketManager.sendNotificationBookingToTradesman(
                                                 resume.id.toString(),
@@ -486,7 +487,7 @@ fun ConfirmBook(
 
                                         is BooktradesmanViewModel.BookTradesmanState.Error -> {
                                             val errorMessage = bookingstate.message
-                                            Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+                                            SnackbarController.show("Error: $errorMessage")
                                             Log.e("BookTradesman", "Error: $errorMessage")
                                             bookingTradesmanViewModel.resetState()
                                         }
@@ -500,6 +501,14 @@ fun ConfirmBook(
                         }
                     }
                 }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 100.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    SnackbarController.ObserveSnackbar()
                 }
             }
         }

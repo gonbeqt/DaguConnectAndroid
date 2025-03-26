@@ -74,8 +74,10 @@ import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.bookings.UpdateBookingTradesmanViewModel
@@ -114,13 +116,6 @@ fun BookingsScreen(
     val myApplicantsTabs = listOf("All", "Pending", "Declined", "Active", "Completed", "Cancelled")
     val tabTitles = if (selectedSection == 0) myJobsTabs else myApplicantsTabs
 
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
@@ -270,6 +265,14 @@ fun BookingsScreen(
                         }
             }
         }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
+        }
     }
 }
 
@@ -384,7 +387,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
             Text(
                 text = "No Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -450,9 +453,9 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
         if (pendingBookings.isEmpty()) {
             // Display "No Pending Booking" when the list is empty
             Text(
-                text = "No Clients",
+                text = "No Pending Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -509,7 +512,7 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
             Text(
                 text = "No Declined Clients ",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -565,11 +568,11 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (activeBooking.isEmpty()) {
-            // Display "No Pending Booking" when the list is empty
+            // Display "No Active Booking" when the list is empty
             Text(
                 text = "No Active Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -624,11 +627,11 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (completedBookings.isEmpty()) {
-            // Display "No Pending Booking" when the list is empty
+            // Display "No Completed Booking" when the list is empty
             Text(
                 text = "No Completed Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -687,11 +690,11 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (completedBookings.isEmpty()) {
-            // Display "No Pending Booking" when the list is empty
+            // Display "No Cancelled Booking" when the list is empty
             Text(
                 text = "No Cancelled Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -908,7 +911,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
     LaunchedEffect(updateWorkState) {
         when (val updateWorkStatusState= updateWorkState) {
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Success -> {
-                Toast.makeText(context, "Booking Successfully Completed", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Booking Successfully Completed")
                 updateWorkStatusViewModel.resetState()
                 if(updateWorkStatusState.status == "Completed"){
                     // Navigate to the "profile" screen and clear the back stack
@@ -935,7 +938,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
             }
             is UpdateBookingTradesmanViewModel.UpdateWorkStatus.Error -> {
                 val errorMessage = updateWorkStatusState.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(errorMessage)
                 updateWorkStatusViewModel.resetState()
             }
             else -> Unit
@@ -1300,7 +1303,7 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
                     "A client has cancelled a booking!",
                     "${AccountManager.getAccount()?.firstName + " " + AccountManager.getAccount()?.lastName} has cancelled the booking request, due to $cancelReason."
                 )
-                Toast.makeText(navController.context, "Application cancelled", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Application cancelled")
                 updateBookingTradesmanViewModel.resetState()
                 navController.navigate("main_screen?selectedItem=1&selectedTab=5") {
                     navController.popBackStack()
@@ -1889,7 +1892,7 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                     }
                     Spacer(Modifier.width(16.dp))
                     OutlinedButton(
-                        onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}") },
+                        onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}/${completedBooking.id}") },
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color(0xFFECAB1E)),
                         modifier = Modifier.weight(1f),
@@ -2072,9 +2075,9 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
     val myJobs = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 16.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
     }
 
     LaunchedEffect(Unit) {
@@ -2089,11 +2092,11 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (myJobs.itemCount == 0) {
-            // Display "No Pending Booking" when the list is empty
+            // Display "No  Applicants" when the list is empty
             Text(
                 text = "No Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2124,9 +2127,9 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 16.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
     }
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -2142,11 +2145,11 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (pendingApplication.isEmpty()) {
-            // Display "No Pending Booking" when the list is empty
+            // Display "No Pending Applicants" when the list is empty
             Text(
                 text = "No Pending Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2172,9 +2175,9 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 16.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
     }
 
     LaunchedEffect(Unit) {
@@ -2190,11 +2193,11 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (declinedApplication.isEmpty()) {
-            // Display "No Pending Booking" when the list is empty
+            // Display "No Declined Applicants" when the list is empty
             Text(
                 text = "No Declined Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2221,9 +2224,9 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 16.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
     }
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -2238,11 +2241,11 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
         contentAlignment = Alignment.Center // Center the content
     ) {
         if (activeApplication.isEmpty()) {
-            // Display "No Pending Booking" when the list is empty
+            // Display "No Active Applicants" when the list is empty
             Text(
                 text = "No Active Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2269,9 +2272,9 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
     val myJob = getMyJobApplicant.jobApplicantsPagingData.collectAsLazyPagingItems()
     val windowSize = rememberWindowSizeClass()
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 16.sp
-        WindowType.MEDIUM -> 18.sp
-        WindowType.LARGE -> 20.sp
+        WindowType.SMALL -> 18.sp
+        WindowType.MEDIUM -> 20.sp
+        WindowType.LARGE -> 22.sp
     }
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -2287,11 +2290,11 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
     ) {
     if (completedApplication.isEmpty()) {
 
-        // Display "No Pending Booking" when the list is empty
+        // Display "No Completed Applicants" when the list is empty
         Text(
             text = "No Completed Applicants",
             fontSize = nameTextSize,
-            fontWeight = FontWeight.Normal,
+            fontWeight = FontWeight.Bold,
             color = Color.Black,
             textAlign = TextAlign.Center
         )
@@ -2340,11 +2343,11 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
     ) {
         if (cancelledApplication.isEmpty()) {
 
-            // Display "No Pending Booking" when the list is empty
+            // Display "No Cancelled Applicants" when the list is empty
             Text(
                 text = "No Cancelled Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2527,7 +2530,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
             if (buttonSubmit) {
-                Toast.makeText(LocalContext.current, "Job Application Updated", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Job Application Updated")
                 putJobApplicationStatus.resetState()
                 if(jobput.status == "Active"){
                     WebSocketManager.sendNotificationJobToTradesman(
@@ -2939,7 +2942,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                 }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
-                    Toast.makeText(context, putJob.message, Toast.LENGTH_SHORT).show()
+                    SnackbarController.show(putJob.message)
                 }
 
                 is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
@@ -2949,7 +2952,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             "Job was marked as completed!",
                             "${myJob.clientFullname} has marked your ${myJob.jobType} service as completed!"
                         )
-                        Toast.makeText(context, "Job Completed", Toast.LENGTH_SHORT).show()
+                        SnackbarController.show("Job Completed")
                         navController.navigate("main_screen?selectedItem=1&selectedTab=4&selectedSection=1") {
                             navController.popBackStack()
                         }
@@ -2959,7 +2962,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                             "An active job was cancelled!",
                             "${myJob.clientFullname} has cancelled ${myJob.jobType} service due to $cancelReason!"
                         )
-                        Toast.makeText(context, "Job Cancelled", Toast.LENGTH_SHORT).show()
+                        SnackbarController.show("Job Cancelled")
                         navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                             navController.popBackStack()
                         }

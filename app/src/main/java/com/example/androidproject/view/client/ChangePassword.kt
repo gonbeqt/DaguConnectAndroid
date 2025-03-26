@@ -26,11 +26,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.ChangePasswordViewModel
 
 @Composable
-fun ChangePassword(navController: NavController,changePassword: ChangePasswordViewModel, LoadingUI :@Composable ()-> Unit) {
+fun ChangePassword(navController: NavController,changePassword: ChangePasswordViewModel) {
     val changePasswordState by changePassword.changePassState.collectAsState()
     var oldPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }

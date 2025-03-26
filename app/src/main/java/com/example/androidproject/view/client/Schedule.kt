@@ -1,5 +1,7 @@
 package com.example.androidproject.view.client
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -38,13 +41,16 @@ import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.JobApplicantData
 import com.example.androidproject.model.client.GetClientsBooking
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.ApplicantsDate
 import com.example.androidproject.view.Tradesmandate
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.bookings.GetClientBookingViewModel
 import com.example.androidproject.viewmodel.job_application.client.GetMyJobApplicantsViewModel
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -68,6 +74,25 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
     var selectedApplicantDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var selectedFilter by remember { mutableStateOf("My Tradesman") }
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    var showLoading by remember { mutableStateOf(true) }
+    var showRetryLoading  by remember { mutableStateOf(false) }
+
+
+// Handle retry loading animation
+    LaunchedEffect(showRetryLoading) {
+        if (showRetryLoading) {
+            delay(1500) // Show LoadingUI for 1.5 seconds
+            isConnected.value = checkNetworkConnectivity(connectivityManager)
+            if (isConnected.value) {
+                showLoading = true // Trigger data fetch if internet is back
+            }
+            showRetryLoading = false // Hide loading animation
+        }
+    }
 
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -176,11 +201,51 @@ fun ScheduleScreen(modifier: Modifier = Modifier, navController: NavController, 
 
             FilterSection(selectedDate, selectedFilter) { selectedFilter = it }
 
-            if (selectedFilter == "My Tradesman") {
-                MyClientsList(clientBooking, selectedClientDate)
-            } else {
-                MyApplicantsList(clientApplicants, selectedApplicantDate)
+            if (!isConnected.value) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if(showRetryLoading){
+                        LoadingUI()
+                    }else{
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "No Internet Connection",
+                                fontSize = 18.sp,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Please check your internet and try again.",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        showRetryLoading = true // Start retry loading animation
+                                    }
+                                    .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Retry",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }else{
+                if (selectedFilter == "My Tradesman") {
+                    MyClientsList(clientBooking, selectedClientDate)
+                } else {
+                    MyApplicantsList(clientApplicants, selectedApplicantDate)
+                }
             }
+
         }
     }
 }
@@ -300,9 +365,9 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
             Text(
                 text = "No Bookings Available",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Bold,
                 fontFamily = poppinsFont,
-                color = Color.Gray
+                color = Color.Black
             )
         }
     } else {
