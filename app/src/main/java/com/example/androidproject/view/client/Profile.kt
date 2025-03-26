@@ -563,7 +563,7 @@ fun MyPostsTab(
     ) {
         if (jobsList.itemCount == 0) {
                     Text(
-                        text = "No Jobs Posted",
+                        text = "No Job Posted",
                         fontSize = 18.sp,
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
