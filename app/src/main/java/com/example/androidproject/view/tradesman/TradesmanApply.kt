@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import com.example.androidproject.LoadingUI
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowType
@@ -36,6 +35,7 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetClientPostedJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import coil.compose.AsyncImage
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.theme.myGradient3
 
 @OptIn(ExperimentalMaterial3Api::class)

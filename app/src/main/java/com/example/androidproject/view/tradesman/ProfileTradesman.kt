@@ -108,6 +108,7 @@ import com.example.androidproject.view.WindowType
 
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.model.client.viewResume
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.theme.myGradient4
@@ -129,20 +130,10 @@ fun ProfileTradesman(
     viewRatingsViewModel: ViewRatingsViewModel,
     initialTabIndex: Int = 0
 ) {
-    // Function to check network connectivity
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
 
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
-
-
 
     // State for profile update
     val updateProfileState by updateTradesmanProfileViewModel.updateTradesmanProfileState.collectAsState()
@@ -1019,11 +1010,16 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                     .fillMaxWidth()
                     .height(100.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "No ratings yet.", fontSize = 14.sp, color = Color.Gray)
+                    Text(
+                        text = "No ratings yet.",
+                        fontSize = 14.sp,fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
                     Text(
                         text = "Showcase your services to earn reviews!",
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
                 }
             }

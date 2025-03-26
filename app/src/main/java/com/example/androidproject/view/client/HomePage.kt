@@ -100,6 +100,7 @@ import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.WebSocketNotificationManager
 import com.example.androidproject.model.client.resumesItem
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.Categories
 import com.example.androidproject.view.WindowSize
 import com.example.androidproject.view.WindowType
@@ -438,16 +439,6 @@ fun TradesmanColumn(
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    // Function to check network connectivity
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-                )
-    }
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
 
@@ -482,7 +473,7 @@ fun TradesmanColumn(
 
         Text(
             modifier = Modifier.clickable {
-                navController.navigate("alltradesmen")
+                navController.navigate("alltradesman")
             },
             text = "All Tradesman",
             color = Color.Gray,

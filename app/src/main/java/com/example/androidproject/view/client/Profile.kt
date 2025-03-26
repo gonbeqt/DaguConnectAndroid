@@ -104,6 +104,7 @@ import com.example.androidproject.data.preferences.NotificationSettingManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.UpdateJob
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.ServicePosting
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
@@ -143,14 +144,7 @@ fun ProfileScreen(
         Font(R.font.poppins_bold, FontWeight.Bold)
     )
 
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
+
 
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -183,9 +177,7 @@ fun ProfileScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        getMyJobsViewModelState.refresh()
-    }
+
 
     LaunchedEffect(updateProfilePictureState) {
         when(val updateProf = updateProfilePictureState){
@@ -574,6 +566,7 @@ fun MyPostsTab(
                         text = "No Jobs Posted",
                         fontSize = 18.sp,
                         color = Color.Black,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                     )
 

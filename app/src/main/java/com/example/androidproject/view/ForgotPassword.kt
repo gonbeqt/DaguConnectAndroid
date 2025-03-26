@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.ForgotPassViewModel
 import com.example.androidproject.viewmodel.ResetPassViewModel
@@ -36,8 +37,7 @@ import kotlinx.coroutines.launch
 fun ResetPassword(
     navController: NavController,
     forgotPass: ForgotPassViewModel,
-    resetPass: ResetPassViewModel,
-    LoadingUI : @Composable () -> Unit
+    resetPass: ResetPassViewModel
 ) {
     val forgotPassState by forgotPass.forgotPasswordState.collectAsState()
     val resetPassState by resetPass.resetPassState.collectAsState()

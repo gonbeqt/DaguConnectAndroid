@@ -71,6 +71,7 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
@@ -105,13 +106,6 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
 
     // Function to check network connectivity using NetworkCapabilities (modern approach)
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
 
 
     val context = LocalContext.current
@@ -410,7 +404,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
             Text(
                 text = "No Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -453,7 +447,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             Text(
                 text = "No Pending Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -496,7 +490,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
             Text(
                 text = "No Declined Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -540,7 +534,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
             Text(
                 text = "No Active Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -585,7 +579,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
             Text(
                 text = "No Completed Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -630,7 +624,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
             Text(
                 text = "No Cancelled Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1577,7 +1571,7 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
             Text(
                 text = "No Applications",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1631,7 +1625,7 @@ fun PendingMySubmissionsTradesmanContent(
             Text(
                 text = "No Pending Applications",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1679,7 +1673,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
             Text(
                 text = "No Decline Applications",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1726,7 +1720,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
             Text(
                 text = "No Active Applications",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1773,7 +1767,7 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
             Text(
                 text = "No Completed Applications",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1818,7 +1812,7 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
             Text(
                 text = "No Cancelled Applications",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
