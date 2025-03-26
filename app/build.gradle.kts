@@ -62,7 +62,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation ("org.json:json:20231013")
     implementation ("androidx.paging:paging-runtime-ktx:3.2.1")
-    implementation ("androidx.paging:paging-compose:3.2.1")
+    implementation ("androidx.paging:paging-compose:3.3.0")
     implementation ("androidx.core:core-ktx:1.12.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
     //livedata

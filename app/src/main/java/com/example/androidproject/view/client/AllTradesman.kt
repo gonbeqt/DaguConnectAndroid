@@ -80,38 +80,26 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, reportTradesmanViewModel: ReportTradesmanViewModel) {
     val resumeList = getResumes.resumePagingData.collectAsLazyPagingItems()
-    var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
-
     val dismissedResumes by getResumes.dismissedResumes
 
-    LaunchedEffect(resumeList.itemSnapshotList, dismissedResumes) {
-        displayedResumes = resumeList.itemSnapshotList.items
-            .filter { it.id !in dismissedResumes }
-    }
-
-    // Example: Call this after adding a new resume
+    // Trigger refresh when the composable is first loaded
     LaunchedEffect(Unit) {
         getResumes.refreshResumes()
     }
-
-
 
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    // State to trigger refresh/recomposition
     var refreshTrigger by remember { mutableIntStateOf(0) }
-
-    // State to track loading during retry
     var isLoading by remember { mutableStateOf(false) }
 
-    // Trigger data fetching only when retry is clicked (not automatically on network change)
     LaunchedEffect(refreshTrigger) {
         if (isConnected.value) {
-            isLoading = true // Set loading state before fetching
-            delay(200.milliseconds) // Add a 500ms delay to ensure loading UI is visible
-            isLoading = false // Reset loading state after fetching (or handle errors)
+            isLoading = true
+            delay(200.milliseconds)
+            resumeList.refresh() // Explicitly refresh the Paging data
+            isLoading = false
         }
     }
 
@@ -121,7 +109,6 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
         WindowType.MEDIUM -> 140.dp
         WindowType.LARGE -> 160.dp
     }
-
 
     Box(
         modifier = Modifier
@@ -133,7 +120,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White),
-                shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
+                shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -149,7 +136,11 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Arrow Back",
-                            Modifier.clickable { navController.popBackStack() }
+                            Modifier.clickable {
+                                navController.navigate("main_screen"){
+                                    navController.popBackStack()
+                                }
+                            }
                                 .padding(16.dp),
                             tint = Color(0xFF81D796)
                         )
@@ -167,17 +158,17 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                     }
                 }
             }
+
             if (!isConnected.value) {
-                // No internet connection
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp), // Optional padding to avoid edge clipping
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center // Ensures vertical centering within the Column
+                        verticalArrangement = Arrangement.Center
                     ) {
                         Text(
                             text = "No Internet Connection",
@@ -190,22 +181,18 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                             text = "Please check your internet and try again.",
                             fontSize = 14.sp,
                             color = Color.Gray,
-                            textAlign = TextAlign.Center // Ensures the text is centered if it wraps
+                            textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        // Retry button (only fetch data when clicked)
                         Box(
                             modifier = Modifier
                                 .clickable {
-                                    // Re-check network connectivity
                                     isConnected.value = checkNetworkConnectivity(connectivityManager)
                                     if (isConnected.value) {
-                                        // Show loading state and trigger data fetch
                                         isLoading = true
                                         refreshTrigger++
                                     } else {
-                                        // Optionally show a toast if still no internet
-                                       SnackbarController.show("Still no internet connection")
+                                        SnackbarController.show("Still no internet connection")
                                     }
                                 }
                                 .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
@@ -221,63 +208,74 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                     }
                 }
             } else {
-                if (isLoading){
+                if (isLoading) {
                     LoadingUI()
-                }else{
+                } else {
                     LazyColumn(
-
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)
                             .background(Color.White),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        val filteredList = resumeList.itemSnapshotList.items.filter { it.id !in dismissedResumes }
-                        if (filteredList.isEmpty()) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillParentMaxSize()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "No Workers Available",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Gray,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        } else {
-                            items(filteredList.size) { index ->
-                                val resume = filteredList[index]
-                                if (resume.id !in dismissedResumes) { // Filter directly
-                                    AllTradesmanItem (resume,navController, cardHeight,reportTradesmanViewModel) {
-                                        getResumes.dismissResume(resume.id)
-                                    }
+                        items(resumeList.itemCount) { index ->
+                            val resume = resumeList[index]
+                            if (resume != null && resume.id !in dismissedResumes) {
+                                AllTradesmanItem(resume, navController, cardHeight, reportTradesmanViewModel) {
+                                    getResumes.dismissResume(resume.id)
                                 }
                             }
                         }
-                        item {
-                            if (resumeList.loadState.append == LoadState.Loading) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
+
+                        // Handle append loading state (next page)
+                        when (resumeList.loadState.append) {
+                            is LoadState.Loading -> {
+                                item {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                            }
+                            is LoadState.Error -> {
+                                item {
+                                    Text(
+                                        text = "Error loading more items",
+                                        color = Color.Red,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
+                            else -> {}
+                        }
+
+                        // Handle initial loading state
+                        when (resumeList.loadState.refresh) {
+                            is LoadState.Loading -> {
+                                item {
                                     LoadingUI()
                                 }
                             }
+                            is LoadState.Error -> {
+                                item {
+                                    Text(
+                                        text = "Error loading resumes",
+                                        color = Color.Red,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
+                            else -> {}
                         }
                     }
                 }
             }
-
-
         }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()

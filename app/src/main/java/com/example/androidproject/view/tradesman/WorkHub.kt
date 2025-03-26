@@ -112,12 +112,6 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    val getMyJobApplicationsState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
-    val getMyJobApplicationsLoadState = getMyJobApplicationsState.loadState
-
-    val getTradesmanBookingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
-    val getTradesmanBookingLoadState = getTradesmanBookingState.loadState
-
     // State to track loading during retry
     var showLoading by remember { mutableStateOf(false) }
 
@@ -203,13 +197,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             )
                         }
                     }
-                    when {
-                        (selectedSection == 0 && getMyJobApplicationsLoadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0) -> {
-                            LoadingUI()
-                        }
-                        (selectedSection == 1 && getTradesmanBookingLoadState.refresh is LoadState.Loading && getTradesmanBookingState.itemCount == 0) -> {
-                            LoadingUI()
-                        }else ->{
+
                         // Handle different states based on connectivity and data loading
                         if (!isConnected.value) {
                             if(showLoading){
@@ -218,11 +206,6 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                     delay(1500) // Show LoadingUI for 1.5 seconds
                                     isConnected.value = checkNetworkConnectivity(connectivityManager)
                                     showLoading = false // Hide LoadingUI after delay
-                                    if (isConnected.value) {
-                                        getMyJobApplicationsState.refresh()
-                                        getTradesmanBookingState.refresh()
-
-                                    }
                                 }
                             }
                             // No internet connection
@@ -289,8 +272,8 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             }
 
                         }
-                        }
-                    }
+
+
 
 
                 }

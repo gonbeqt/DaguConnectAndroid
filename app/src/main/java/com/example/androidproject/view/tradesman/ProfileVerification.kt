@@ -244,7 +244,7 @@ fun ProfileVerification(
                                             "Urdaneta City", "Villasis"
                                         ),
                                         selectedOption = selectedLocation,
-                                        onOptionSelected = { selectedLocation = "$it, Pangasinan" }
+                                        onOptionSelected = { selectedLocation = it }
                                     )
                                 }
 
