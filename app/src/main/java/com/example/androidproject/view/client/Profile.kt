@@ -1090,6 +1090,7 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
             SnackbarController.show("Logout successful")
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                navController.popBackStack()
             }
             logoutViewModel.resetLogoutResult()
             WebSocketManager.disconnect()
