@@ -302,7 +302,7 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
                 fontSize = nameTextSize,
                 fontWeight = FontWeight.Normal,
                 fontFamily = poppinsFont,
-                color = Color.Gray
+                color = Color.Black
             )
         }
     } else {

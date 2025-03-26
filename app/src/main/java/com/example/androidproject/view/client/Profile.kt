@@ -561,24 +561,43 @@ fun MyPostsTab(
         }
     }
 
-    LazyColumn(
-        Modifier.background(Color(0xFFEDEFEF)).fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFEDEFEF)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(jobsList.itemCount) { index ->
-            val job = jobsList[index]
-            if (job != null) {
-                PostsCard(
-                    onEditClick = { rate, description, location, deadline ->
-                        val update = UpdateJob(rate, description, location, deadline)
-                        putJobs.updateJobApplicationStatus(job.id, update)
-                    },
-                    onApplicantsClick = { /* Handle applicants click */ },
-                    job = job,
-                    putJobs = putJobs,
-                    deleteJobViewModel = deleteJobViewModel,
-                    getMyJobsViewModel = getMyJobsViewModel
-                )
+        if (jobsList.itemCount == 0) {
+                    Text(
+                        text = "No Jobs Posted",
+                        fontSize = 18.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                    )
+
+        } else {
+            LazyColumn(
+                Modifier.background(Color(0xFFEDEFEF)).fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(jobsList.itemCount) { index ->
+                    val job = jobsList[index]
+                    if (job != null) {
+                        PostsCard(
+                            onEditClick = { rate, description, location, deadline ->
+                                val update = UpdateJob(rate, description, location, deadline)
+                                putJobs.updateJobApplicationStatus(job.id, update)
+                            },
+                            onApplicantsClick = { /* Handle applicants click */ },
+                            job = job,
+                            putJobs = putJobs,
+                            deleteJobViewModel = deleteJobViewModel,
+                            getMyJobsViewModel = getMyJobsViewModel
+                        )
+                    }
+                }
             }
         }
     }
