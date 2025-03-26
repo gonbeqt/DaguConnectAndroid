@@ -435,14 +435,22 @@ fun TradesmanColumn(
     val resumeList = getResumesViewModel.resumePagingData.collectAsLazyPagingItems()
     val loadState = resumeList.loadState
     var displayedResumes by remember { mutableStateOf<List<resumesItem>>(emptyList()) }
-    var showLoading by remember { mutableStateOf(false) } // State to control LoadingUI visibility
+    var showLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
-    LaunchedEffect(Unit) {
-       resumeList.refresh()
+    // Refresh data whenever the composable is recomposed (e.g., navigating back to the screen)
+    LaunchedEffect(resumeList) {
+        resumeList.refresh() // Trigger refresh of the PagingData
+        // Update displayedResumes with the latest data after refresh
+        snapshotFlow { resumeList.itemSnapshotList.items }
+            .collect { items ->
+                displayedResumes = items
+                    .filter { it.ratings != null && it.id != null }
+                    .sortedByDescending { it.ratings }
+                    .take(5)
+            }
     }
 
     val cardHeight = when (windowSize.width) {
@@ -450,7 +458,6 @@ fun TradesmanColumn(
         WindowType.MEDIUM -> 140.dp
         WindowType.LARGE -> 160.dp
     }
-
     val textSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
         WindowType.MEDIUM -> 16.sp
@@ -465,50 +472,36 @@ fun TradesmanColumn(
     ) {
         Text(
             text = "Top-Rated",
-            fontSize = when (windowSize.width) {
-                WindowType.SMALL -> 14.sp
-                WindowType.MEDIUM -> 16.sp
-                WindowType.LARGE -> 18.sp
-            },
+            fontSize = textSize,
             fontWeight = FontWeight(500),
             fontFamily = poppinsFont
         )
-
         Text(
-            modifier = Modifier.clickable {
-                navController.navigate("alltradesman")
-            },
+            modifier = Modifier.clickable { navController.navigate("alltradesman") },
             text = "All Tradesman",
             color = Color.Gray,
-            fontSize = when (windowSize.width) {
-                WindowType.SMALL -> 14.sp
-                WindowType.MEDIUM -> 16.sp
-                WindowType.LARGE -> 18.sp
-            },
+            fontSize = textSize,
             fontWeight = FontWeight.Normal,
             fontFamily = poppinsFont
         )
-
     }
 
     when {
-        // Initial loading state
         loadState.refresh is LoadState.Loading && resumeList.itemCount == 0 -> {
             LoadingUI()
         }
         else -> {
             if (!isConnected.value) {
                 if (showLoading) {
-                        LoadingUI()
-                        LaunchedEffect(Unit) {
-                            delay(1500) // Show LoadingUI for 1.5 seconds
-                            isConnected.value = checkNetworkConnectivity(connectivityManager)
-                            showLoading = false // Hide LoadingUI after delay
-                            if (isConnected.value) {
-                                resumeList.refresh() // Refresh data after reconnecting
-                            }
+                    LoadingUI()
+                    LaunchedEffect(Unit) {
+                        delay(1500)
+                        isConnected.value = checkNetworkConnectivity(connectivityManager)
+                        showLoading = false
+                        if (isConnected.value) {
+                            resumeList.refresh()
                         }
-
+                    }
                 } else {
                     Box(
                         modifier = Modifier
@@ -536,9 +529,7 @@ fun TradesmanColumn(
                             Spacer(modifier = Modifier.height(16.dp))
                             Box(
                                 modifier = Modifier
-                                    .clickable {
-                                        showLoading = true // Show LoadingUI on retry
-                                    }
+                                    .clickable { showLoading = true }
                                     .background(Color(0xFF42C2AE), RoundedCornerShape(8.dp))
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
@@ -565,13 +556,6 @@ fun TradesmanColumn(
                             .background(Color(0xFFEDEFEF)),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        if (displayedResumes.isEmpty() && resumeList.itemCount > 0) {
-                            // Fallback to ensure data is displayed
-                            displayedResumes = resumeList.itemSnapshotList.items
-                                .filter { it.ratings != null && it.id != null }
-                                .sortedByDescending { it.ratings }
-                                .take(5)
-                        }
                         displayedResumes.forEach { resume ->
                             TradesmanItem(
                                 resumes = resume,
@@ -586,8 +570,6 @@ fun TradesmanColumn(
             }
         }
     }
-
-
 }
 
 
