@@ -1,5 +1,6 @@
 package com.example.androidproject.data
 
+import com.example.androidproject.R
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,7 +13,6 @@ import androidx.core.app.NotificationCompat
 import com.example.androidproject.MainActivity
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.data.preferences.NotificationSettingManager
-import com.example.androidproject.view.client.AccountSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -93,7 +93,7 @@ object WebSocketNotificationManager {
         )
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // Replace with your app’s icon
+            .setSmallIcon(R.drawable.daguconnect_logo)
             .setContentTitle(title ?: "Notification")
             .setContentText(messageBody ?: "New message received")
             .setStyle(NotificationCompat.BigTextStyle()

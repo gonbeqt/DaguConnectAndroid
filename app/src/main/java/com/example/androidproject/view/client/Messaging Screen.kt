@@ -79,7 +79,6 @@ fun MessagingScreen(
                     if (obj.has("type") && obj.getString("type") == "message") {
                         val data = obj.getJSONObject("data")
                         val createdAt = data.getString("created_at")
-                        // Convert from server local time (UTC-8) to UTC
                         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).apply {
                             timeZone = TimeZone.getTimeZone("UTC")
                         }
@@ -90,24 +89,26 @@ fun MessagingScreen(
                         val adjustedCreatedAt = if (localDate != null) {
                             val localTimeMillis = localDate.time
                             val offset = -8 * 60 * 60 * 1000L // Fixed -8 hours in milliseconds
-                            Log.d("MessagingScreen", "WebSocket createdAt: $createdAt, localTimeMillis: $localTimeMillis, offset: $offset")
-                            val utcTimeMillis = localTimeMillis - offset // Add 8 hours to convert UTC-8 to UTC
-                            Log.d("MessagingScreen", "UTC timeMillis for ${data.getString("message")}: $utcTimeMillis")
+                            val utcTimeMillis = localTimeMillis - offset
                             dateFormat.format(Date(utcTimeMillis))
                         } else {
-                            Log.w("MessagingScreen", "Failed to parse createdAt: $createdAt, using original")
                             createdAt
                         }
-                        Log.d("MessagingScreen", "Adjusted WebSocket createdAt for ${data.getString("message")}: $adjustedCreatedAt")
-                        Conversation(
+                        val conversation = Conversation(
                             id = data.getInt("id"),
                             userId = data.getString("user_id").toInt(),
                             receiverId = data.getString("receiver_id").toInt(),
-                            chatId = data.optInt("chat_id", chatId),
+                            chatId = data.getInt("chat_id"), // Use the chat_id from WebSocket
                             message = data.getString("message"),
                             isRead = data.getInt("is_read"),
-                            createdAt = adjustedCreatedAt // Adjusted to UTC
+                            createdAt = adjustedCreatedAt
                         )
+                        // Filter by chatId
+                        if (conversation.chatId == chatId) {
+                            conversation
+                        } else {
+                            null
+                        }
                     } else null
                 } catch (e: Exception) {
                     Log.e("MessagingScreen", "Error parsing WebSocket message: $json", e)
@@ -121,9 +122,7 @@ fun MessagingScreen(
                 .distinctBy { if (it.id == -1) "${it.message}_${it.createdAt}" else it.id.toString() }
                 .sortedBy { message ->
                     try {
-                        val time = dateFormat.parse(message.createdAt)?.time ?: Long.MAX_VALUE
-                        Log.d("MessagingScreen", "Message: ${message.message}, createdAt: ${message.createdAt}, parsed time: $time")
-                        time
+                        dateFormat.parse(message.createdAt)?.time ?: Long.MAX_VALUE
                     } catch (e: Exception) {
                         Log.e("MessagingScreen", "Error parsing createdAt: ${message.createdAt}", e)
                         Long.MAX_VALUE
@@ -131,6 +130,7 @@ fun MessagingScreen(
                 }
         }
     }
+
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -244,7 +244,7 @@ fun MessagingScreen(
         },
         bottomBar = {
             BottomInputBar(onSend = { newMessage ->
-                WebSocketManager.sendMessage(userId.toString(), receiverId.toString(), newMessage)
+                WebSocketManager.sendMessage(userId.toString(), receiverId.toString(), newMessage, chatId)
                 getMessages.refreshMessages()
                 sentMessage = true
             })

@@ -1,6 +1,6 @@
 package com.example.androidproject.data
 
-import android.R
+import com.example.androidproject.R
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -37,7 +37,7 @@ class WebSocketService : Service() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("DaguConnect")
             .setContentText("App is running in the background.")
-            .setSmallIcon(R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.daguconnect_logo)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
 
