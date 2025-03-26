@@ -69,7 +69,7 @@ fun CustomDurationSnackbar(
     message: String,
     show: Boolean,
     duration: Long = 1000L,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AnimatedVisibility(
         visible = show,

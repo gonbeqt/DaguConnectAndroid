@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +27,7 @@ import com.example.androidproject.ViewModelSetups.Companion.getDateOnly
 import com.example.androidproject.ViewModelSetups.Companion.isNotToday
 import com.example.androidproject.ViewModelSetups.Companion.isToday
 import com.example.androidproject.model.Notification
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.notifications.ClearNotificationViewModel
 import com.example.androidproject.viewmodel.notifications.GetNotificationViewModel
 
@@ -36,39 +38,50 @@ fun NotificationScreen(navController: NavController, getNotification: GetNotific
     LaunchedEffect(notifications) {
         getNotification.refreshNotification()
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF2F2F2)) // Light gray background
-    ) {
-        NotificationTopSection(navController, clearNotification, getNotification)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "You have a total of ${notifications.itemCount} notifications",
-            fontSize = 14.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(start = 16.dp)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        LazyColumn(
+    Box(Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Transparent)
-            ,
-            contentPadding = PaddingValues(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .background(Color(0xFFF2F2F2)) // Light gray background
         ) {
-            items(notifications.itemCount) { index ->
-                val notification = notifications[index]
-                if (notification != null) {
-                    NotificationCardToday(notification)
-                    Log.d("NotificationScreen", "Notification Title: ${notification.notificationTitle}")
+            NotificationTopSection(navController, clearNotification, getNotification)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "You have a total of ${notifications.itemCount} notifications",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(notifications.itemCount) { index ->
+                    val notification = notifications[index]
+                    if (notification != null) {
+                        NotificationCardToday(notification)
+                        Log.d(
+                            "NotificationScreen",
+                            "Notification Title: ${notification.notificationTitle}"
+                        )
+                    }
                 }
             }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
         }
     }
 }
@@ -82,7 +95,7 @@ fun NotificationTopSection(navController: NavController, clearNotification: Clea
     LaunchedEffect(clearNotificationState) {
         clearNotificationState?.let {
             notifications.refresh()
-            Toast.makeText(context, "Notifications cleared", Toast.LENGTH_SHORT).show()
+            SnackbarController.show("Notifications cleared")
             clearNotification.resetClearNotificationState()
         }
     }

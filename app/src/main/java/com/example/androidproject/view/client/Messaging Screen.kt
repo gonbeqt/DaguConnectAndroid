@@ -39,6 +39,7 @@ import com.example.androidproject.R
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.Conversation
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.messeges.GetMessagesViewModel
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -280,6 +281,14 @@ fun MessagingScreen(
                     }
                 }
             }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 100.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                SnackbarController.ObserveSnackbar()
+            }
         }
     }
     if (showReportSheet) {
@@ -470,7 +479,7 @@ fun BottomInputBar(onSend: (String) -> Unit) {
                     onSend(messageText) // Send the message
                     messageText = ""    // Clear the input field
                 } else {
-                    Toast.makeText(context, "Message cannot be empty", Toast.LENGTH_SHORT).show()
+                    SnackbarController.show("Message cannot be empty")
                 }
             },
             modifier = Modifier.size(48.dp)
