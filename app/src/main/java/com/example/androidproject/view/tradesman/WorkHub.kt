@@ -1986,12 +1986,12 @@ fun PendingMySubmissionsTradesmanItem(
             is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                 WebSocketManager.sendNotificationJobToClient(
                     myJob.clientId.toString(),
-                    "A job application was cancelled",
-                    "${myJob.tradesmanFullname} has cancelled the job application due to ${cancelReason}"
+                    "A job application was declined",
+                    "${myJob.tradesmanFullname} has declined the job application due to ${cancelReason}"
                 )
-                SnackbarController.show("Application cancelled")
+                SnackbarController.show("Application declined")
                 putJobApplicationStatusViewModel.resetState()
-                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
+                navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
                     navController.popBackStack()
                 }
 

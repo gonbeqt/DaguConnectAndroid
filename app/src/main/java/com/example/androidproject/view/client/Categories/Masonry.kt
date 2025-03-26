@@ -243,9 +243,7 @@ fun Masonry(navController: NavController, getResumesViewModel: GetResumesViewMod
                                         masonry,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(masonry.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -321,7 +319,7 @@ fun Masonry(navController: NavController, getResumesViewModel: GetResumesViewMod
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MasonryItem(masonry: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun MasonryItem(masonry: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -426,7 +424,6 @@ fun MasonryItem(masonry: resumesItem, navController: NavController, reportTrades
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

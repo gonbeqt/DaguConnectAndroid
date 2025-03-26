@@ -2212,7 +2212,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(420.dp)
-                    .background(Color.White),
+                    .background(Color(0xFFEDEFEF)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
 
                 ) {
@@ -2531,7 +2531,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
         }
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Error -> {
-
+            Log.e("PendingApplicantsItem", "Error: ${jobput.message}")
         }
 
         is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
@@ -2558,6 +2558,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                         navController.popBackStack()
                     }
                 }
+                buttonSubmit = false
             }
         }
         else -> Unit
@@ -2800,7 +2801,7 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                         onClick = {
                             showDeclineDialog = false
                             showDeclineReasons = true
-                            Log.d("My jobs", myJob.id.toString())
+                            Log.d("My jobsss", myJob.id.toString())
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                     ) {
@@ -2894,18 +2895,20 @@ fun PendingApplicantsItem(myJob: JobApplicantData, navController: NavController,
                 confirmButton = {
                     Button(
                         onClick = {
-                            reason = selectedReason ?: ""
-                            declined = true
-                            buttonSubmit = true
-                            showDeclineReasons = false
-                            selectedReason?.let {
+                            selectedReason?.let { selected ->
+                                reason = selected // Set the reason state
+                                declined = true
+                                showDeclineReasons = false
+                                Log.d("PendingApplicantsItem", "Selected reason: $selected")
                                 putJobApplicationStatus.updateJobApplicationStatus(
                                     myJob.id,
                                     "Declined",
-                                    it
+                                    selected
                                 )
+                                buttonSubmit = true
+                            } ?: run {
+                                Log.d("PendingApplicantsItem", "No reason selected")
                             }
-
                         },
                         enabled = selectedReason != null,
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE)),
@@ -3475,7 +3478,6 @@ fun DeclinedApplicantsItem(myJob: JobApplicantData, navController: NavController
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { navController.navigate("applicantdetailjobsummary/${myJob.id}/${myJob.status}/${myJob.resumeId}") }
-
                     .background(
                             color = Color.Transparent,
                         )

@@ -245,9 +245,7 @@ fun Electrician(navController: NavController, getResumesViewModel: GetResumesVie
                                         electrician,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(electrician.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -323,7 +321,7 @@ fun Electrician(navController: NavController, getResumesViewModel: GetResumesVie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ElectricianItem(electrician: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun ElectricianItem(electrician: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -427,7 +425,6 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController, repo
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

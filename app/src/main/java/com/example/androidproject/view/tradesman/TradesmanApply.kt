@@ -363,7 +363,7 @@ fun TradesmanApply(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable {navController.popBackStack()}
                                 .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
                             tint = Color(0xFF81D796)
                         )

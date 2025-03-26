@@ -482,7 +482,7 @@ fun TradesmanColumn(
 
         Text(
             modifier = Modifier.clickable {
-                navController.navigate("alltradesmen")
+                navController.navigate("alltradesman")
             },
             text = "All Tradesman",
             color = Color.Gray,

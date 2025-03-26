@@ -244,9 +244,7 @@ fun Plumbing(navController: NavController, getResumesViewModel: GetResumesViewMo
                                         plumber,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(plumber.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -322,7 +320,7 @@ fun Plumbing(navController: NavController, getResumesViewModel: GetResumesViewMo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlumbingItem(plumber: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun PlumbingItem(plumber: resumesItem, navController: NavController, reportTradesmanViewModel:ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -428,7 +426,6 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController, reportTrade
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

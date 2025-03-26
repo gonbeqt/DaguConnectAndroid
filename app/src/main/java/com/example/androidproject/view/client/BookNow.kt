@@ -483,7 +483,7 @@ fun BookNow(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) {
-                                    navController.navigate("main_screen")
+                                    navController.popBackStack()
                                 },
                             tint = Color.White
                         )
