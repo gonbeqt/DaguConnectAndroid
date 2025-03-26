@@ -165,20 +165,21 @@ fun ProfileScreen(
 
     //state of updating the profile picture
     val updateProfilePictureState by updateClientProfilePictureViewModel.updateClientProfileState.collectAsState()
-    val deleteJobState = deleteJobViewModel.deleteJobResult.collectAsState()
+    val deleteJobState by deleteJobViewModel.deleteJobResult.collectAsState()
     val getMyJobsViewModelState = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     val loadState = getMyJobsViewModelState.loadState
 
     LaunchedEffect(deleteJobState) {
-        when (val deleteJob = deleteJobState.value) {
+        when (deleteJobState) {
             is DeleteJobViewModel.DeleteJobResult.Success -> {
                 getMyJobsViewModelState.refresh()
                 deleteJobViewModel.resetState()
+                SnackbarController.show("Job deleted successfully")
             }
             is DeleteJobViewModel.DeleteJobResult.Error -> {
                 deleteJobViewModel.resetState()
             }
-            is DeleteJobViewModel.DeleteJobResult.Idle -> Unit
+            else -> Unit
         }
     }
 
@@ -497,7 +498,8 @@ fun ProfileScreen(
                                             0 -> MyPostsTab(
                                                 getMyJobsViewModel,
                                                 postJobViewModel,
-                                                putJobs
+                                                putJobs,
+                                                deleteJobViewModel
                                             )
 
                                             1 -> SettingsScreen(navController, logoutViewModel)
