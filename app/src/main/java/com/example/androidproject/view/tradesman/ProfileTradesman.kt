@@ -768,7 +768,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                                     if (fileUrl != null) {
                                         try {
                                             downloadId = downloadFileTradesman(context, fileUrl, fileName)
-                                            SnackbarController.show("Download success")
+                                            SnackbarController.show("Downloading Credentials")
                                         } catch (e: Exception) {
                                             SnackbarController.show("Download failed")
 
