@@ -93,7 +93,7 @@ object WebSocketNotificationManager {
         )
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.daguconnect_logo)
+            .setSmallIcon(R.drawable.daguconnectLogoNoBg)
             .setContentTitle(title ?: "Notification")
             .setContentText(messageBody ?: "New message received")
             .setStyle(NotificationCompat.BigTextStyle()
