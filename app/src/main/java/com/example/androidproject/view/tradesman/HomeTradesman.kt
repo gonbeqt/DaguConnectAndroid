@@ -442,7 +442,7 @@ fun TopMatchesItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                navController.navigate("tradesmanapply/${getJobs.id}")
+                navController.navigate("tradesmanapply/${getJobs.id}/${false}")
             },
         colors = CardDefaults.cardColors(Color.White)
     ) {
@@ -793,7 +793,7 @@ fun RecentJobsItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                navController.navigate("tradesmanapply/${getJobs.id}")
+                navController.navigate("tradesmanapply/${getJobs.id}/${false}")
             },
         colors = CardDefaults.cardColors(Color.White)
     ) {

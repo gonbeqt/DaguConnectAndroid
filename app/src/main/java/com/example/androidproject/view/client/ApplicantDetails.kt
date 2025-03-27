@@ -730,7 +730,7 @@ fun ApplicantDetails(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}") }
+                                        .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}/${true}") }
                                         .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                                         .padding(12.dp),
                                     contentAlignment = Alignment.Center
@@ -747,7 +747,7 @@ fun ApplicantDetails(
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}") }
+                                                .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}/${true}") }
                                                 .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                                                 .padding(12.dp),
                                             contentAlignment = Alignment.Center

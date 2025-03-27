@@ -644,10 +644,12 @@ class MainActivity : ComponentActivity() {
                                 reportClientViewModel
                             )
                         }
-                        composable("tradesmanapply/{jobId}") { backStackEntry ->
+                        composable("tradesmanapply/{jobId}/{isClicked}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val isClicked = backStackEntry.arguments?.getString("isClicked") ?: ""
+
                             Log.e("Job ID", jobId)
-                            TradesmanApply(jobId, navController, viewJobViewModel, getClientPostedJobsViewModel)
+                            TradesmanApply(jobId,isClicked, navController, viewJobViewModel, getClientPostedJobsViewModel)
                         }
                         composable("hiringdetails/{jobId}/{clientId}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""

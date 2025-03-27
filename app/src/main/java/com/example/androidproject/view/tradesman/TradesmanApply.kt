@@ -42,6 +42,7 @@ import com.example.androidproject.view.theme.myGradient3
 @Composable
 fun TradesmanApply(
     jobId: String,
+    isClicked:String,
     navController: NavController,
     viewModel: ViewJobViewModel,
     getClientPostedJobsViewModel: GetClientPostedJobsViewModel
@@ -70,6 +71,7 @@ fun TradesmanApply(
     }
 
     val jobID = jobId.toIntOrNull() ?: return
+    val IsClicked = isClicked.toBoolean()
 
     val bottomSheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.PartiallyExpanded,
@@ -389,26 +391,29 @@ fun TradesmanApply(
             }
             is ViewJobViewModel.JobState.Success -> {
                 val job = (viewJobState as ViewJobViewModel.JobState.Success).data
-                Button(
-                    onClick = { navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .padding(horizontal = 16.dp)
-                        .constrainAs(buttonRef) {
-                            bottom.linkTo(parent.bottom, margin = 44.dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3CC0B0))
-                ) {
-                    Text(
-                        text = "Apply Now",
-                        fontSize = nameTextSize,
-                        color = Color.White
-                    )
+                if (IsClicked == false){
+                    Button(
+                        onClick = { navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .padding(horizontal = 16.dp)
+                            .constrainAs(buttonRef) {
+                                bottom.linkTo(parent.bottom, margin = 44.dp)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3CC0B0))
+                    ) {
+                        Text(
+                            text = "Apply Now",
+                            fontSize = nameTextSize,
+                            color = Color.White
+                        )
+                    }
                 }
+
             }
             is ViewJobViewModel.JobState.Error -> {
                 val errorMessage = (viewJobState as ViewJobViewModel.JobState.Error).message

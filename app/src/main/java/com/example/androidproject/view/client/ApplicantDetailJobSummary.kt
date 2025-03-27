@@ -225,7 +225,7 @@ fun ApplicantDetailJobSummary(
                                     )
                                     Text(
                                         modifier = Modifier
-                                            .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}") },
+                                            .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}/${true}") },
                                         text = "View Post",
                                         textDecoration = TextDecoration.Underline,
                                         fontSize = smallTextSize,
