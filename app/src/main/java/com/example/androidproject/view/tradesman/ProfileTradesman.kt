@@ -62,6 +62,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -294,11 +295,13 @@ fun ProfileTradesman(
                         }
 
                         is ViewTradesmanProfileViewModel.ViewTradesmanProfileState.Success -> {
-                            val isUpdating =
-                                updateTradesmanActiveStatusState is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Loading
+                            val isUpdating = updateTradesmanActiveStatusState is UpdateTradesmanActiveStatusViewModel.UpdateStatusState.Loading
                             val tradesmanDetails = profileState.data
-                            var isAvailable by remember { mutableStateOf(tradesmanDetails.isActiveBoolean) }
-                            var previousAvailability by remember { mutableStateOf(isAvailable) }
+                            val isApproved = tradesmanDetails.isApprove == 1 // Assuming 1 means approved, 0 means not approved
+
+                            // If not approved, force isAvailable to false and make it immutable
+                            var isAvailable by remember(tradesmanDetails) { mutableStateOf(if (isApproved) tradesmanDetails.isActiveBoolean else false) }
+                            var previousAvailability by remember(tradesmanDetails) { mutableStateOf(isAvailable) }
 
                             Column(modifier = Modifier
                                 .fillMaxWidth()
@@ -404,7 +407,7 @@ fun ProfileTradesman(
                                                         .height(30.dp)
                                                         .clip(RoundedCornerShape(50.dp))
                                                         .background(Color.White)
-                                                        .clickable(enabled = !isUpdating) {
+                                                        .clickable( /*enabled = !isUpdating*/isApproved) {
                                                             previousAvailability = isAvailable
                                                             isAvailable = !isAvailable
                                                             updateTradesmanActiveStatusViewModel.updateStatusState(
