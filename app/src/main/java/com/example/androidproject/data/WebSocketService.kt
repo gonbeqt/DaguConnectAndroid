@@ -37,7 +37,7 @@ class WebSocketService : Service() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("DaguConnect")
             .setContentText("App is running in the background.")
-            .setSmallIcon(R.drawable.daguconnect_logo)
+            .setSmallIcon(R.drawable.daguconnectlogonobg)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
 
