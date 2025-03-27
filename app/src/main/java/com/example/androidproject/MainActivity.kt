@@ -206,7 +206,7 @@ class MainActivity : ComponentActivity() {
             TokenManager.isLoggedIn() -> "main_screen" // Default to main_screen for both roles
             else -> "login"
         }
-        TokenManager.init(this)
+
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 

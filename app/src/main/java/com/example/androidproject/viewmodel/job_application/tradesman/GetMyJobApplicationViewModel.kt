@@ -21,8 +21,8 @@ class GetMyJobApplicationViewModel(private val apiService: ApiService, private v
     val jobApplicationPagingData: Flow<PagingData<JobApplicationData>> =
         Pager(
             config = PagingConfig(
-                pageSize = 10,
-                initialLoadSize = 10,
+                pageSize = 50,
+                initialLoadSize = 50,
                 prefetchDistance = 2,
                 enablePlaceholders = false
             ),

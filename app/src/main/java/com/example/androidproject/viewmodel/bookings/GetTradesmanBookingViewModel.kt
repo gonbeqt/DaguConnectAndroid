@@ -19,8 +19,8 @@ class GetTradesmanBookingViewModel(private val apiService: ApiService) : ViewMod
     val TradesmanBookingPagingData: Flow<PagingData<GetTradesmanBooking>> =
         Pager(
             config = PagingConfig(
-                pageSize = 10,
-                initialLoadSize = 10,
+                pageSize = 50,
+                initialLoadSize = 50,
                 prefetchDistance = 2,
                 enablePlaceholders = false
             ),

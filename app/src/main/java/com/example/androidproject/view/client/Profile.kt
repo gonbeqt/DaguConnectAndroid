@@ -196,7 +196,7 @@ fun ProfileScreen(
         }
     }
     LaunchedEffect(Unit) {
-        if (isConnected.value && profileState !is GetClientProfileViewModel.ClientProfileState.Success) {
+        if (isConnected.value) {
             getClientProfileViewModel.getClientProfile()
         }
     }
