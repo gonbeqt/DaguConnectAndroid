@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import com.example.androidproject.LoadingUI
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.view.WindowType
@@ -36,12 +35,14 @@ import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.jobs.GetClientPostedJobsViewModel
 import com.example.androidproject.viewmodel.jobs.ViewJobViewModel
 import coil.compose.AsyncImage
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.theme.myGradient3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TradesmanApply(
     jobId: String,
+    isClicked:String,
     navController: NavController,
     viewModel: ViewJobViewModel,
     getClientPostedJobsViewModel: GetClientPostedJobsViewModel
@@ -70,6 +71,7 @@ fun TradesmanApply(
     }
 
     val jobID = jobId.toIntOrNull() ?: return
+    val IsClicked = isClicked.toBoolean()
 
     val bottomSheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.PartiallyExpanded,
@@ -363,7 +365,7 @@ fun TradesmanApply(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.navigate("main_screen") }
+                                .clickable {navController.popBackStack()}
                                 .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
                             tint = Color(0xFF81D796)
                         )
@@ -389,26 +391,29 @@ fun TradesmanApply(
             }
             is ViewJobViewModel.JobState.Success -> {
                 val job = (viewJobState as ViewJobViewModel.JobState.Success).data
-                Button(
-                    onClick = { navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .padding(horizontal = 16.dp)
-                        .constrainAs(buttonRef) {
-                            bottom.linkTo(parent.bottom, margin = 44.dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3CC0B0))
-                ) {
-                    Text(
-                        text = "Apply Now",
-                        fontSize = nameTextSize,
-                        color = Color.White
-                    )
+                if (IsClicked == false){
+                    Button(
+                        onClick = { navController.navigate("hiringdetails/${job.job.id}/${job.job.userId}") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .padding(horizontal = 16.dp)
+                            .constrainAs(buttonRef) {
+                                bottom.linkTo(parent.bottom, margin = 44.dp)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3CC0B0))
+                    ) {
+                        Text(
+                            text = "Apply Now",
+                            fontSize = nameTextSize,
+                            color = Color.White
+                        )
+                    }
                 }
+
             }
             is ViewJobViewModel.JobState.Error -> {
                 val errorMessage = (viewJobState as ViewJobViewModel.JobState.Error).message

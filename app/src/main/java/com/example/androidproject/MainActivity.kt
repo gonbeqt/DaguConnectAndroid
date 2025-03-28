@@ -206,7 +206,7 @@ class MainActivity : ComponentActivity() {
             TokenManager.isLoggedIn() -> "main_screen" // Default to main_screen for both roles
             else -> "login"
         }
-        TokenManager.init(this)
+
 
         val apiService = RetrofitInstance.create(ApiService::class.java)
 
@@ -356,7 +356,7 @@ class MainActivity : ComponentActivity() {
                             LandingPage2(navController)
                         }
                         composable("signup") {
-                            SignUpScreen(navController, registerViewModel, { LoadingUI() })
+                            SignUpScreen(navController, registerViewModel)
                         }
                         composable("login") {
                             LogInScreen(navController, loginViewModel, logoutViewModel)
@@ -367,8 +367,7 @@ class MainActivity : ComponentActivity() {
                             ResetPassword(
                                 navController,
                                 forgotPassViewModel,
-                                resetPassViewModel,
-                                { LoadingUI() })
+                                resetPassViewModel)
                         }
 
                         composable(
@@ -419,6 +418,7 @@ class MainActivity : ComponentActivity() {
                                 updateTradesmanActiveStatusViewModel,
                                 reportClientViewModel,
                                 viewRatingsViewModel,
+                                deleteJobViewModel,
                                 initialSelectedItem = selectedItem,
                                 initialSelectedTab = selectedTab,
                                 initialSelectedSection = selectedSection
@@ -602,16 +602,16 @@ class MainActivity : ComponentActivity() {
                             Welding(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("alltradesman") {
-                            AllTradesman(navController, getResumesViewModel, reportTradesmanViewModel,{LoadingUI()})
+                            AllTradesman(navController, getResumesViewModel, reportTradesmanViewModel)
                         }
                         composable("changepassword") {
-                            ChangePassword(navController, changePasswordViewModel, { LoadingUI() })
+                            ChangePassword(navController, changePasswordViewModel)
                         }
                         composable("aboutus") {
                             AboutUs(navController)
                         }
                         composable("reportproblem") {
-                            ReportProblem(navController,reportConcernViewModel,{ LoadingUI() })
+                            ReportProblem(navController,reportConcernViewModel)
                         }
                         composable("notification") {
                             NotificationScreen(navController, getNotificationViewModel, clearNotificationViewModel)
@@ -644,10 +644,12 @@ class MainActivity : ComponentActivity() {
                                 reportClientViewModel
                             )
                         }
-                        composable("tradesmanapply/{jobId}") { backStackEntry ->
+                        composable("tradesmanapply/{jobId}/{isClicked}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+                            val isClicked = backStackEntry.arguments?.getString("isClicked") ?: ""
+
                             Log.e("Job ID", jobId)
-                            TradesmanApply(jobId, navController, viewJobViewModel, getClientPostedJobsViewModel)
+                            TradesmanApply(jobId,isClicked, navController, viewJobViewModel, getClientPostedJobsViewModel)
                         }
                         composable("hiringdetails/{jobId}/{clientId}") { backStackEntry ->
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -769,33 +771,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-@Composable
-fun LoadingUI() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        // Square white box with shadow behind the CircularProgressIndicator
-        Box(
-            modifier = Modifier
-                .size(60.dp) // Define the size of the square box
-                .shadow(
-                    elevation = 8.dp, // Shadow elevation for the 3D effect
-                    shape = RoundedCornerShape(12.dp), // Rounded corners for a polished look
-                    clip = true // Clip the shadow to the shape
-                )
-                .background(Color.White) // White background for the box
-        )
-
-        // CircularProgressIndicator on top of the square box
-        CircularProgressIndicator(
-            color = Color(0xFF122826), // Match the app's color scheme
-            modifier = Modifier
-                .size(40.dp) // Size of the CircularProgressIndicator
-        )
     }
 }
 

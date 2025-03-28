@@ -104,13 +104,16 @@ import com.example.androidproject.data.preferences.NotificationSettingManager
 import com.example.androidproject.data.preferences.TokenManager
 import com.example.androidproject.model.GetJobs
 import com.example.androidproject.model.UpdateJob
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.ServicePosting
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.client_profile.GetClientProfileViewModel
 import com.example.androidproject.viewmodel.client_profile.UpdateClientProfilePictureViewModel
+import com.example.androidproject.viewmodel.jobs.DeleteJobViewModel
 import com.example.androidproject.viewmodel.jobs.GetMyJobsViewModel
 import com.example.androidproject.viewmodel.jobs.PostJobViewModel
 import com.example.androidproject.viewmodel.jobs.PutJobViewModel
@@ -132,6 +135,7 @@ fun ProfileScreen(
     getClientProfileViewModel: GetClientProfileViewModel,
     putJobs: PutJobViewModel,
     updateClientProfilePictureViewModel : UpdateClientProfilePictureViewModel,
+    deleteJobViewModel: DeleteJobViewModel,
     initialTabIndex: Int = 0
 ) {
     val poppinsFont = FontFamily(
@@ -140,14 +144,7 @@ fun ProfileScreen(
         Font(R.font.poppins_bold, FontWeight.Bold)
     )
 
-    // Function to check network connectivity using NetworkCapabilities (modern approach)
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
+
 
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -162,14 +159,30 @@ fun ProfileScreen(
 
     //state of updating the profile picture
     val updateProfilePictureState by updateClientProfilePictureViewModel.updateClientProfileState.collectAsState()
-
+    val deleteJobState by deleteJobViewModel.deleteJobResult.collectAsState()
     val getMyJobsViewModelState = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     val loadState = getMyJobsViewModelState.loadState
+
+    LaunchedEffect(deleteJobState) {
+        when (deleteJobState) {
+            is DeleteJobViewModel.DeleteJobResult.Success -> {
+                getMyJobsViewModelState.refresh()
+                deleteJobViewModel.resetState()
+                SnackbarController.show("Job deleted successfully")
+            }
+            is DeleteJobViewModel.DeleteJobResult.Error -> {
+                deleteJobViewModel.resetState()
+            }
+            else -> Unit
+        }
+    }
+
+
 
     LaunchedEffect(updateProfilePictureState) {
         when(val updateProf = updateProfilePictureState){
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Success -> {
-                Toast.makeText(context, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Profile picture updated successfully")
                 getClientProfileViewModel.getClientProfile()
                 updateClientProfilePictureViewModel.resetState()
 
@@ -177,14 +190,13 @@ fun ProfileScreen(
             is UpdateClientProfilePictureViewModel.UpdateClientProfilePictureState.Error -> {
                 val error = updateProf.message
                 updateClientProfilePictureViewModel.resetState()
-                Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Error: $error")
             }
             else->Unit
-
         }
     }
     LaunchedEffect(Unit) {
-        if (isConnected.value && profileState !is GetClientProfileViewModel.ClientProfileState.Success) {
+        if (isConnected.value) {
             getClientProfileViewModel.getClientProfile()
         }
     }
@@ -220,9 +232,9 @@ fun ProfileScreen(
                     Manifest.permission.READ_MEDIA_IMAGES
                 )
                 if (shouldShowRationale) {
-                    Toast.makeText(context, "Permission is required to select a profile picture", Toast.LENGTH_LONG).show()
+                    SnackbarController.show("Permission is required to select a profile picture")
                 } else {
-                    Toast.makeText(context, "Permission denied. Enable it in Settings.", Toast.LENGTH_LONG).show()
+                    SnackbarController.show("Permission denied. Enable it in Settings.")
                     val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.parse("package:${context.packageName}")
                     context.startActivity(intent)
@@ -232,241 +244,283 @@ fun ProfileScreen(
     }
 
 
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.White)
         ) {
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 25.dp)
-                    .fillMaxWidth(),
+                Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Profile",
-                    fontSize = 20.sp,
-                    fontFamily = poppinsFont,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications Icon",
-                    tint = Color.Black,
+                Row(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clickable { navController.navigate("notification") }
-                )
+                        .padding(horizontal = 25.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Profile",
+                        fontSize = 20.sp,
+                        fontFamily = poppinsFont,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Icon(
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Notifications Icon",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clickable { navController.navigate("notification") }
+                    )
 
 
-
+                }
             }
-        }
 
 
-        when{
-            loadState.refresh is LoadState.Loading && getMyJobsViewModelState.itemCount == 0 ->{
-                LoadingUI()
-            }else -> {
-            // Handle different states based on connectivity and data loading
-            if (!isConnected.value) {
-                if(showLoading){
+            when {
+                loadState.refresh is LoadState.Loading && getMyJobsViewModelState.itemCount == 0 -> {
                     LoadingUI()
-                    LaunchedEffect(Unit) {
-                        delay(1500)
-                        isConnected.value = checkNetworkConnectivity(connectivityManager)
-                        showLoading = false // Hide LoadingUI after delay
-                        if (isConnected.value) {
-                            getMyJobsViewModelState.refresh() // Refresh data after reconnecting
-                        }
-                    }
                 }
-                // No internet connection
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "No Internet Connection",
-                            fontSize = 18.sp,
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Please check your internet and try again.",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        // Retry button (only fetch data when clicked)
-                        Box(
-                            modifier = Modifier
-                                .clickable {
-                                    showLoading = true
+
+                else -> {
+                    // Handle different states based on connectivity and data loading
+                    if (!isConnected.value) {
+                        if (showLoading) {
+                            LoadingUI()
+                            LaunchedEffect(Unit) {
+                                delay(1500)
+                                isConnected.value = checkNetworkConnectivity(connectivityManager)
+                                showLoading = false // Hide LoadingUI after delay
+                                if (isConnected.value) {
+                                    getMyJobsViewModelState.refresh() // Refresh data after reconnecting
                                 }
-                                .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = "Retry",
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            }
                         }
-                    }
-                }
-            } else {
-                when (val state = profileState) {
-                    is GetClientProfileViewModel.ClientProfileState.Success -> {
-                        val profile = state.data
-                        // Profile Info Section
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.White)
+                        // No internet connection
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(10.dp)
-                            ) {
-                                Row(
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    fontSize = 18.sp,
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Please check your internet and try again.",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                // Retry button (only fetch data when clicked)
+                                Box(
+                                    modifier = Modifier
+                                        .clickable {
+                                            showLoading = true
+                                        }
+                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Retry",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        when (val state = profileState) {
+                            is GetClientProfileViewModel.ClientProfileState.Success -> {
+                                val profile = state.data
+                                // Profile Info Section
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(130.dp)
-                                        .background(
-                                            myGradient4,
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                        .background(Color.White)
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(100.dp)
-                                            .background(Color.White, RoundedCornerShape(50.dp))
+                                            .padding(10.dp)
                                     ) {
-                                        // Profile Icon
-                                        AsyncImage(
-                                            model = selectedImageUri ?: profile.profilePicture,
-                                            contentDescription = "Profile Image",
+                                        Row(
                                             modifier = Modifier
-                                                .size(100.dp)
-                                                .clip(CircleShape),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = "Edit Profile Picture",
-                                            tint = Color.Gray,
-                                            modifier = Modifier
-                                                .size(20.dp)
-                                                .align(Alignment.TopEnd)
-                                                .background(Color.White, CircleShape)
-                                                .clickable {
-                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
-                                                        permissionLauncher.launch(arrayOf(
-                                                            Manifest.permission.READ_MEDIA_IMAGES,
-                                                            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-                                                        ))
-                                                    } else {
-                                                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
-                                                            imageLauncher.launch("image/*")
-                                                        } else {
-                                                            permissionLauncher.launch(arrayOf(Manifest.permission.READ_MEDIA_IMAGES))
-                                                        }
-                                                    }
-                                                }
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
-                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                                            Text(
-                                                text = profile.fullname,
-                                                color = Color.White,
-                                                fontSize = 18.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Icon(
-                                                imageVector = Icons.Default.Edit,
-                                                contentDescription = "Edit Profile Picture",
-                                                tint = Color.White,
+                                                .fillMaxWidth()
+                                                .height(130.dp)
+                                                .background(
+                                                    myGradient4,
+                                                    shape = RoundedCornerShape(8.dp)
+                                                )
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(
                                                 modifier = Modifier
-                                                    .size(26.dp)
-                                                    .background(Color.Transparent, shape = CircleShape)
-                                                    .clickable{
-                                                        navController.navigate("accountsettings")
-                                                    }
+                                                    .size(100.dp)
+                                                    .background(
+                                                        Color.White,
+                                                        RoundedCornerShape(50.dp)
+                                                    )
+                                            ) {
+                                                // Profile Icon
+                                                AsyncImage(
+                                                    model = selectedImageUri
+                                                        ?: profile.profilePicture,
+                                                    contentDescription = "Profile Image",
+                                                    modifier = Modifier
+                                                        .size(100.dp)
+                                                        .clip(CircleShape),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = "Edit Profile Picture",
+                                                    tint = Color.Gray,
+                                                    modifier = Modifier
+                                                        .size(20.dp)
+                                                        .align(Alignment.TopEnd)
+                                                        .background(Color.White, CircleShape)
+                                                        .clickable {
+                                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+                                                                permissionLauncher.launch(
+                                                                    arrayOf(
+                                                                        Manifest.permission.READ_MEDIA_IMAGES,
+                                                                        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                                                                    )
+                                                                )
+                                                            } else {
+                                                                if (ContextCompat.checkSelfPermission(
+                                                                        context,
+                                                                        Manifest.permission.READ_MEDIA_IMAGES
+                                                                    ) == PackageManager.PERMISSION_GRANTED
+                                                                ) {
+                                                                    imageLauncher.launch("image/*")
+                                                                } else {
+                                                                    permissionLauncher.launch(
+                                                                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Column {
+                                                Row(
+                                                    Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Text(
+                                                        text = profile.fullname,
+                                                        color = Color.White,
+                                                        fontSize = 18.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Icon(
+                                                        imageVector = Icons.Default.Edit,
+                                                        contentDescription = "Edit Profile Picture",
+                                                        tint = Color.White,
+                                                        modifier = Modifier
+                                                            .size(26.dp)
+                                                            .background(
+                                                                Color.Transparent,
+                                                                shape = CircleShape
+                                                            )
+                                                            .clickable {
+                                                                navController.navigate("accountsettings")
+                                                            }
+                                                    )
+                                                }
+
+                                                Text(text = profile.email, color = Color.White)
+                                                Text(text = profile.address, color = Color.White)
+                                                Text(
+                                                    text = profile.phoneNumber,
+                                                    color = Color.White
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Tabs and Content
+                                    TabRow(
+                                        selectedTabIndex = selectedTabIndex,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        indicator = { tabPositions ->
+                                            TabRowDefaults.Indicator(
+                                                Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                                color = Color(0xFF3CC0B0)
                                             )
                                         }
+                                    ) {
+                                        tabNames.forEachIndexed { index, title ->
+                                            Tab(
+                                                modifier = Modifier.background(Color.White),
+                                                selected = selectedTabIndex == index,
+                                                onClick = { selectedTabIndex = index },
+                                                text = {
+                                                    Text(
+                                                        title, fontSize = 14.sp,
+                                                        color = if (selectedTabIndex == index) Color(
+                                                            0xFF3CC0B0
+                                                        ) else Color.Black
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    }
 
-                                        Text(text = profile.email, color = Color.White)
-                                        Text(text = profile.address, color = Color.White)
-                                        Text(text = profile.phoneNumber, color = Color.White)
+                                    // Content based on selected tab
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(top = 2.dp)
+                                    ) {
+                                        when (selectedTabIndex) {
+                                            0 -> MyPostsTab(
+                                                getMyJobsViewModel,
+                                                postJobViewModel,
+                                                putJobs,
+                                                deleteJobViewModel
+                                            )
+
+                                            1 -> SettingsScreen(navController, logoutViewModel)
+                                        }
+
                                     }
                                 }
-                            }
-
-                            // Tabs and Content
-                            TabRow(
-                                selectedTabIndex = selectedTabIndex,
-                                modifier = Modifier.fillMaxWidth(),
-                                indicator = { tabPositions ->
-                                    TabRowDefaults.Indicator(
-                                        Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                        color = Color(0xFF3CC0B0)
-                                    )
-                                }
-                            ) {
-                                tabNames.forEachIndexed { index, title ->
-                                    Tab(
-                                        modifier = Modifier.background(Color.White),
-                                        selected = selectedTabIndex == index,
-                                        onClick = { selectedTabIndex = index },
-                                        text = {
-                                            Text(
-                                                title, fontSize = 14.sp,
-                                                color = if (selectedTabIndex == index) Color(
-                                                    0xFF3CC0B0
-                                                ) else Color.Black
-                                            )
-                                        }
-                                    )
-                                }
-                            }
-
-                            // Content based on selected tab
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(top = 2.dp)
-                            ) {
-                                when (selectedTabIndex) {
-                                    0 -> MyPostsTab(getMyJobsViewModel, postJobViewModel, putJobs)
-                                    1 -> SettingsScreen(navController, logoutViewModel)
-                                }
 
                             }
+
+                            is GetClientProfileViewModel.ClientProfileState.Error -> {
+                                Text(text = "Error: ${state.message}", color = Color.Red)
+                            }
+
+                            else -> Unit
                         }
-
                     }
-
-                    is GetClientProfileViewModel.ClientProfileState.Error -> {
-                        Text(text = "Error: ${state.message}", color = Color.Red)
-                    }
-                    else -> Unit
                 }
             }
-            }
-        }
 
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarController.ObserveSnackbar()
+        }
     }
 }
 
@@ -478,7 +532,8 @@ fun ProfileScreen(
 fun MyPostsTab(
     getMyJobsViewModel: GetMyJobsViewModel,
     postJobViewModel: PostJobViewModel,
-    putJobs: PutJobViewModel
+    putJobs: PutJobViewModel,
+    deleteJobViewModel: DeleteJobViewModel
 ) {
     val jobsList = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     val postJobState by postJobViewModel.postJobState.collectAsState()
@@ -498,22 +553,44 @@ fun MyPostsTab(
         }
     }
 
-    LazyColumn(
-        Modifier.background(Color(0xFFEDEFEF)).fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .size(420.dp)
+            .background(Color(0xFFEDEFEF)),
+        contentAlignment = Alignment.Center // Center the content
     ) {
-        items(jobsList.itemCount) { index ->
-            val job = jobsList[index]
-            if (job != null) {
-                PostsCard(
-                    onEditClick = { rate, description, location, deadline ->
-                        val update = UpdateJob(rate, description, location, deadline)
-                        putJobs.updateJobApplicationStatus(job.id, update)
-                    },
-                    onApplicantsClick = { /* Handle applicants click */ },
-                    job = job,
-                    putJobs = putJobs
-                )
+        if (jobsList.itemCount == 0) {
+                    Text(
+                        text = "No Job Posted",
+                        fontSize = 18.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+
+        } else {
+            LazyColumn(
+                Modifier.background(Color(0xFFEDEFEF)).fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(jobsList.itemCount) { index ->
+                    val job = jobsList[index]
+                    if (job != null) {
+                        PostsCard(
+                            onEditClick = { rate, description, location, deadline ->
+                                val update = UpdateJob(rate, description, location, deadline)
+                                putJobs.updateJobApplicationStatus(job.id, update)
+                            },
+                            onApplicantsClick = { /* Handle applicants click */ },
+                            job = job,
+                            putJobs = putJobs,
+                            deleteJobViewModel = deleteJobViewModel,
+                            getMyJobsViewModel = getMyJobsViewModel
+                        )
+                    }
+                }
             }
         }
     }
@@ -536,8 +613,11 @@ fun PostsCard(
     onEditClick: (Int, String, String, String) -> Unit,
     onApplicantsClick: () -> Unit,
     job: GetJobs, // Renamed to `job` for clarity
-    putJobs: PutJobViewModel
+    putJobs: PutJobViewModel,
+    deleteJobViewModel: DeleteJobViewModel,
+    getMyJobsViewModel: GetMyJobsViewModel
 ) {
+    val getMyJobsViewModelState = getMyJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     var expanded by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
 
@@ -593,7 +673,7 @@ fun PostsCard(
                 val formattedDate = pickedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 editableDeadline = formattedDate
             } else {
-                Toast.makeText(context, "You cannot select a past date!", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("You cannot select a past date!")
             }
         },
         today.year,
@@ -618,13 +698,13 @@ fun PostsCard(
         when (val state = putJobState) {
             is PutJobViewModel.PutJobState.Success -> {
                 updateSubmissionKey = null
-                Toast.makeText(context, "Job updated successfully", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("Job updated successfully")
                 putJobs.resetState()
                 isDialogVisible = false
             }
             is PutJobViewModel.PutJobState.Error -> {
                 updateSubmissionKey = null
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(state.message)
                 putJobs.resetState()
             }
             else -> {}
@@ -696,7 +776,8 @@ fun PostsCard(
                                     }
                                 },
                                 onClick = {
-                                    // Add your delete logic here
+                                    deleteJobViewModel.deleteJob(job.id)
+                                    getMyJobsViewModelState.refresh()
                                     expanded = false
                                 }
                             )
@@ -999,16 +1080,17 @@ fun GeneralSettings(
 fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewModel) {
     val logoutResult by logoutViewModel.logoutResult.collectAsState()
     val context = LocalContext.current
-    var isChecked by remember { mutableStateOf(true) }
+    var isChecked by remember { mutableStateOf(NotificationSettingManager.getNotification()) }
     LaunchedEffect(logoutResult) {
         logoutResult?.let {
             // Clear tokens and navigate regardless of result
             TokenManager.clearToken()
             AccountManager.clearAccountData()
             NotificationSettingManager.clearNotificationData()
-            Toast.makeText(context, "logout successful", Toast.LENGTH_SHORT).show()
+            SnackbarController.show("Logout successful")
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                navController.popBackStack()
             }
             logoutViewModel.resetLogoutResult()
             WebSocketManager.disconnect()
@@ -1056,8 +1138,12 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                 Switch(
                     checked = isChecked,
                     onCheckedChange = { isChecked = it
-                        NotificationSettingManager.saveNotification(it)
-                        Toast.makeText(context, "$isChecked", Toast.LENGTH_SHORT).show()
+                        NotificationSettingManager.saveNotification(isChecked)
+                        if (isChecked) {
+                            SnackbarController.show("Notification turned on")
+                        } else {
+                            SnackbarController.show("Notification turned off")
+                        }
                                       },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
@@ -1192,7 +1278,7 @@ fun FabPosting(
                 deadline = formattedDate
                 onDeadlineChange(formattedDate)
             } else {
-                Toast.makeText(context, "You cannot select a past date!", Toast.LENGTH_SHORT).show()
+                SnackbarController.show("You cannot select a past date!")
             }
         },
         today.year,
@@ -1206,13 +1292,13 @@ fun FabPosting(
         when (postJobState) {
             is PostJobViewModel.PostJobState.Success -> {
                 val message = postJobState as PostJobViewModel.PostJobState.Success
-                Toast.makeText(context, message.message.message, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(message.message.message)
                 postJobViewModel.resetState()
             }
             is PostJobViewModel.PostJobState.Error -> {
                 val message = postJobState as PostJobViewModel.PostJobState.Error
                 postJobViewModel.resetState()
-                Toast.makeText(context, message.message, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(message.message)
             }
             is PostJobViewModel.PostJobState.Loading -> {}
             else -> Unit
@@ -1390,7 +1476,7 @@ fun FabPosting(
                                     location == "Select location" ||
                                     deadline.isEmpty()
                                 ) {
-                                    Toast.makeText(context, "Please fill in all fields.", Toast.LENGTH_SHORT).show()
+                                    SnackbarController.show("Please fill in all fields.")
                                     isSubmitting = false
                                     return@Button
                                 }
@@ -1399,13 +1485,13 @@ fun FabPosting(
                                 val applicantCountInt = applicantCount.toIntOrNull()
 
                                 if (applicantCountInt == null) {
-                                    Toast.makeText(context, "Invalid Applicant Count!", Toast.LENGTH_SHORT).show()
+                                    SnackbarController.show("Invalid Applicant Count!")
                                     isSubmitting = false
                                     return@Button
                                 }
 
                                 if (rateInt == null) {
-                                    Toast.makeText(context, "Invalid Budget!", Toast.LENGTH_SHORT).show()
+                                    SnackbarController.show("Invalid Budget!")
                                     isSubmitting = false
                                     return@Button
                                 }

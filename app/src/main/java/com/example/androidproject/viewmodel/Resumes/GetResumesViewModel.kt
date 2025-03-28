@@ -36,7 +36,9 @@ class GetResumesViewModel(private val apiService: ApiService) : ViewModel() {
                 prefetchDistance = 2,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { GetResumePagingSource(apiService)}
+            pagingSourceFactory = {
+                GetResumePagingSource(apiService)
+            }
         ).flow.cachedIn(viewModelScope)
 
 

@@ -1,6 +1,8 @@
 package com.example.androidproject.view.tradesman
 
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -33,12 +36,15 @@ import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.Tradesmandate
 import com.example.androidproject.view.WindowType
+import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient4
 import com.example.androidproject.viewmodel.bookings.GetTradesmanBookingViewModel
 import com.example.androidproject.viewmodel.job_application.tradesman.GetMyJobApplicationViewModel
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -62,7 +68,25 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
     var selectedApplicantDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     var selectedFilter by remember { mutableStateOf("My Jobs") }
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
 
+    var showLoading by remember { mutableStateOf(true) }
+    var showRetryLoading  by remember { mutableStateOf(false) }
+
+
+// Handle retry loading animation
+    LaunchedEffect(showRetryLoading) {
+        if (showRetryLoading) {
+            delay(1500) // Show LoadingUI for 1.5 seconds
+            isConnected.value = checkNetworkConnectivity(connectivityManager)
+            if (isConnected.value) {
+                showLoading = true // Trigger data fetch if internet is back
+            }
+            showRetryLoading = false // Hide loading animation
+        }
+    }
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
@@ -168,11 +192,49 @@ fun ScheduleTradesman(modifier: Modifier = Modifier, navController: NavControlle
             )
 
             FilterSectionTradesman(selectedDate, selectedFilter) { selectedFilter = it }
-
-            if (selectedFilter == "My Jobs") {
-                MyJobsList(clientBooking, selectedClientDate)
-            } else {
-                MySubmissionList(applicantBooking, selectedApplicantDate)
+            if (!isConnected.value) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if(showRetryLoading){
+                        LoadingUI()
+                    }else{
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "No Internet Connection",
+                                fontSize = 18.sp,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Please check your internet and try again.",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        showRetryLoading = true // Start retry loading animation
+                                    }
+                                    .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Retry",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }else{
+                if (selectedFilter == "My Jobs") {
+                    MyJobsList(clientBooking, selectedClientDate)
+                } else {
+                    MySubmissionList(applicantBooking, selectedApplicantDate)
+                }
             }
         }
     }
@@ -287,8 +349,9 @@ fun MyJobsList(clientBooking: LazyPagingItems<GetTradesmanBooking>, selectedDate
                 text = "No Bookings Available",
                 fontSize = nameTextSize,
                 fontFamily = poppinsFont,
-                fontWeight = FontWeight.Normal,
-                color = Color.Gray
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+
             )
         }
     } else {

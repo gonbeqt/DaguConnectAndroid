@@ -252,9 +252,7 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
                                         ACRepair,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(ACRepair.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -304,7 +302,11 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.popBackStack() }
+                                .clickable {
+                                    navController.navigate("main_screen"){
+                                        navController.popBackStack()
+                                    }
+                                }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -330,7 +332,7 @@ fun ACRepair(navController: NavController, getResumesViewModel: GetResumesViewMo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel) {
 
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
@@ -438,7 +440,6 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTrad
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
 
                                 }
                             )

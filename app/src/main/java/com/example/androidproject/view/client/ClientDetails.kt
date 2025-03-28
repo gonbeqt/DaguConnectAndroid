@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -377,6 +378,12 @@ fun ClientDetails(modifier: Modifier = Modifier, resumeId: String,status:String,
                                         text = "Contact Tradesman",
                                         fontSize = nameTextSize,
                                         modifier = Modifier.padding(start = 10.dp)
+                                            .clickable{
+                                                val encodedProfilePicture = Uri.encode(
+                                                    selectedBooking?.tradesmanProfile
+                                                )
+                                                navController.navigate("messaging/0/${selectedBooking?.userid}/${selectedBooking?.tradesmanFullName}/${encodedProfilePicture}")
+                                            }
                                     )
                                 }
                                 Icon(

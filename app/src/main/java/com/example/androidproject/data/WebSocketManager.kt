@@ -91,8 +91,8 @@ object WebSocketManager {
         })
     }
 
-    fun sendMessage(userId: String, receiverId: String, message: String) {
-        val json = """{"type": "message", "user_id": "$userId", "receiver_id": "$receiverId", "message": "$message", "is_read": 0}"""
+    fun sendMessage(userId: String, receiverId: String, message: String, chatId: Int) {
+        val json = """{"type": "message", "user_id": "$userId", "receiver_id": "$receiverId", "chat_id": $chatId, "message": "$message", "is_read": 0}"""
         if (webSocket != null) {
             val success = webSocket?.send(json) == true
             Log.d(TAG, if (success) "Sent: $json" else "Failed to send: $json")

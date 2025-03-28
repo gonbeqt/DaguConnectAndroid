@@ -239,9 +239,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                         mechanics,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(mechanics.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -291,7 +289,11 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.popBackStack() }
+                                .clickable {
+                                    navController.navigate("main_screen"){
+                                        navController.popBackStack()
+                                    }
+                                }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -316,7 +318,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
 }
 
 @Composable
-fun MechanicsItem(mechanics: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun MechanicsItem(mechanics: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -418,7 +420,6 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController, reportTr
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

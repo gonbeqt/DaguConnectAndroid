@@ -1,5 +1,7 @@
 package com.example.androidproject.view.client
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -33,8 +35,10 @@ import com.example.androidproject.R
 import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.Chats
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,11 +48,29 @@ fun MessageScreen(
     getChatViewModel: GetChatViewModel
 ) {
     val chatState = getChatViewModel.getChatsPagingData.collectAsLazyPagingItems()
-    val loadState = chatState.loadState
 
     // State for search input and dropdown visibility
     var searchQuery by remember { mutableStateOf("") }
     var isDropdownExpanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
+
+    var showLoading by remember { mutableStateOf(true) }
+    var showRetryLoading  by remember { mutableStateOf(false) }
+
+
+// Handle retry loading animation
+    LaunchedEffect(showRetryLoading) {
+        if (showRetryLoading) {
+            delay(1500) // Show LoadingUI for 1.5 seconds
+            isConnected.value = checkNetworkConnectivity(connectivityManager)
+            if (isConnected.value) {
+                showLoading = true // Trigger data fetch if internet is back
+            }
+            showRetryLoading = false // Hide loading animation
+        }
+    }
 
     // Filtered list of chats based on search query
     val filteredChats = remember(searchQuery, chatState.itemCount) {
@@ -61,11 +83,7 @@ fun MessageScreen(
         getChatViewModel.refreshChats()
     }
 
-    when {
-        loadState.refresh is LoadState.Loading && chatState.itemCount == 0 -> {
-            LoadingUI()
-        }
-        else -> {
+
             Column(
                 modifier = Modifier
                     .background(Color.White)
@@ -141,34 +159,74 @@ fun MessageScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(chatState.itemCount) { index ->
-                        val chats = chatState[index]
-                        if (chats != null) {
-                            ChatListItem(chats = chats, navController = navController)
+                if(!isConnected.value){
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        if(showRetryLoading){
+                            LoadingUI()
+                        }else{
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    fontSize = 18.sp,
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Please check your internet and try again.",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clickable {
+                                            showRetryLoading = true // Start retry loading animation
+                                        }
+                                        .background(Color(0xFF3CC0B0), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Retry",
+                                        color = Color.White,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
-                    if (loadState.append is LoadState.Loading) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
+                }else{
+                    // Check if chat list is empty
+                    if (chatState.itemCount == 0) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No Message Available",
+                                fontSize = 20.sp,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(chatState.itemCount) { index ->
+                                val chats = chatState[index]
+                                if (chats != null) {
+                                    ChatListItem(chats = chats, navController = navController)
+                                }
                             }
                         }
                     }
                 }
-            }
+
         }
     }
-}
 
 // Smaller version of ChatListItem for dropdown
 @Composable

@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -186,7 +187,7 @@ fun ApplicantDetails(
                                 contentDescription = "Back",
                                 modifier = Modifier.clickable {
                                     when(bookingStatus){
-                                        "Pending" -> navController.navigate("main_screen?selectedItem=1&selectedTab=3&selectedSection=1") {
+                                        "Pending" -> navController.navigate("main_screen?selectedItem=1&selectedTab=1&selectedSection=1") {
                                             navController.popBackStack()
                                         }
                                         "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
@@ -677,6 +678,12 @@ fun ApplicantDetails(
                                             text = "Contact Tradesman",
                                             fontSize = taskTextSize,
                                             modifier = Modifier.padding(start = 10.dp)
+                                                .clickable{
+                                                    val encodedProfilePicture = Uri.encode(
+                                                        resume.profilePic
+                                                    )
+                                                    navController.navigate("messaging/0/${resume.userid}/${resume.tradesmanFullName}/${encodedProfilePicture}")
+                                                }
                                         )
                                     }
                                     Icon(
@@ -718,12 +725,12 @@ fun ApplicantDetails(
 
                         // View Job Post Button
                         when (bookingStatus){
-                            "Pending" , "Declined" -> {
+                            "Pending"  -> {
 
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable { navController.navigate("booknow/$tradesmanId") }
+                                        .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}/${true}") }
                                         .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                                         .padding(12.dp),
                                     contentAlignment = Alignment.Center
@@ -734,6 +741,41 @@ fun ApplicantDetails(
                                         color = Color.Black
                                     )
                                 }
+                            }
+                            "Declined" ->{
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}/${true}") }
+                                                .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                                                .padding(12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "View Job Post",
+                                                fontSize = nameTextSize,
+                                                color = Color.Black
+                                            )
+                                        }
+                                        Spacer(Modifier.width(8.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clickable {  navController.navigate("applicantsdeclinedetails/${resumeID}/${bookingStatus}/${tradesmanID}") }
+                                                .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                                                .padding(12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "Declanation Details",
+                                                fontSize = nameTextSize,
+                                                color = Color.Black
+                                            )
+                                        }
+
+                                    }
+
                             }
                         }
                     }

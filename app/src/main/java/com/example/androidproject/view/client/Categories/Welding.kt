@@ -248,9 +248,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                                         welder,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(welder.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -300,7 +298,11 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.popBackStack() }
+                                .clickable {
+                                    navController.navigate("main_screen"){
+                                        navController.popBackStack()
+                                    }
+                                }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -326,7 +328,7 @@ fun Welding(navController: NavController, getResumesViewModel: GetResumesViewMod
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WeldingItem(welding: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun WeldingItem(welding: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -431,7 +433,6 @@ fun WeldingItem(welding: resumesItem, navController: NavController, reportTrades
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

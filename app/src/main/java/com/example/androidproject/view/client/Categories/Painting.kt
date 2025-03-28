@@ -245,9 +245,7 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                                         painter,
                                         navController,
                                         reportTradesmanViewModel
-                                    ) {
-                                        getResumesViewModel.dismissResume(painter.id)
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -297,7 +295,11 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Arrow Back",
                             modifier = Modifier
-                                .clickable { navController.popBackStack() }
+                                .clickable {
+                                    navController.navigate("main_screen"){
+                                        navController.popBackStack()
+                                    }
+                                }
                                 .padding(8.dp)
                                 .size(24.dp),
                             tint = Color.White
@@ -323,7 +325,7 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaintingsItem(painter: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
+fun PaintingsItem(painter: resumesItem, navController: NavController, reportTradesmanViewModel: ReportTradesmanViewModel) {
     var selectedIndex by remember { mutableStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -427,7 +429,6 @@ fun PaintingsItem(painter: resumesItem, navController: NavController, reportTrad
                                 text = { Text("Uninterested") },
                                 onClick = {
                                     showMenu = false
-                                    onUninterested()
                                 }
                             )
                         }

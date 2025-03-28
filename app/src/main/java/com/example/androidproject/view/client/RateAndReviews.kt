@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +51,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.data.preferences.AccountManager
+import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.viewmodel.bookings.ViewClientBookingViewModel
 import com.example.androidproject.viewmodel.ratings.RateTradesmanViewModel
 
@@ -81,7 +83,12 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
                     "${AccountManager.getAccount()?.firstName + AccountManager.getAccount()?.lastName} has rated you $rateStar start for your service!",
                 )
                 val successMessage = ratetradesman.data?.message
-                Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
+                if (successMessage != null) {
+                    SnackbarController.show(successMessage)
+                }
+                if (successMessage != null) {
+                    SnackbarController.show(successMessage)
+                }
                 navController.navigate("main_screen?selectedItem=1&selectedTab=4"){
                     navController.popBackStack()
                 }
@@ -89,7 +96,7 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
             }
             is RateTradesmanViewModel.RateTradesman.Error -> {
                val errormessage = ratetradesman.message
-                Toast.makeText(context, errormessage, Toast.LENGTH_SHORT).show()
+                SnackbarController.show(errormessage)
                 rateTradesmanViewModel.resetState()
             }
             else -> Unit
@@ -102,156 +109,172 @@ fun RateAndReviews(rateTradesmanViewModel: RateTradesmanViewModel,viewClientBook
         }
         is ViewClientBookingViewModel.ViewClientBookings.Success -> {
             val booking = (viewBookingState as ViewClientBookingViewModel.ViewClientBookings.Success).data
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFECECEC))
-
-            ) {
-                // Header Card
-                Card(
+            Box(Modifier.fillMaxSize()) {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .verticalScroll(rememberScrollState()),
-                    shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
+                        .fillMaxSize()
+                        .background(Color(0xFFECECEC))
+
                 ) {
-                    Column(
+                    // Header Card
+                    Card(
                         modifier = Modifier
-                            .background(Color.White)
                             .fillMaxWidth()
-                            .size(70.dp)
-                            .padding(top = 5.dp)
+                            .background(Color.White)
+                            .verticalScroll(rememberScrollState()),
+                        shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp) // Rounded top corners
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
+                        Column(
+                            modifier = Modifier
+                                .background(Color.White)
+                                .fillMaxWidth()
+                                .size(70.dp)
+                                .padding(top = 5.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Arrow Back",
-                                Modifier
-                                    .clickable {
-                                        navController.navigate("main_screen?selectedItem=1&selectedTab=4"){
-                                        navController.popBackStack() }
-                                    }
-                                    .padding(16.dp),
-                                tint = Color(0xFF81D796)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Arrow Back",
+                                    Modifier
+                                        .clickable {
+                                            navController.navigate("main_screen?selectedItem=1&selectedTab=4") {
+                                                navController.popBackStack()
+                                            }
+                                        }
+                                        .padding(16.dp),
+                                    tint = Color(0xFF81D796)
+                                )
+
+                                Text(
+                                    text = "Rate And Reviews",
+                                    fontSize = 24.sp,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Left,
+                                    modifier = Modifier
+                                        .padding(top = 15.dp)
+                                        .weight(1f)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = CardDefaults.cardColors((Color(0xFFECECEC)))
+
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            AsyncImage(
+                                model = booking.tradesmanProfile,
+                                contentDescription = "Tradesman Image",
+                                modifier = Modifier
+                                    .size(150.dp)
+                                    .padding(8.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = booking.tradesmanFullName,
+                                fontSize = 24.sp,
+                                color = Color.Black
                             )
 
                             Text(
-                                text = "Rate And Reviews",
-                                fontSize = 24.sp,
-                                color = Color.Black,
-                                textAlign = TextAlign.Left,
-                                modifier = Modifier
-                                    .padding(top = 15.dp)
-                                    .weight(1f)
+                                text = booking.taskType,
+                                fontSize = 20.sp,
+                                color = Color.Gray
                             )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors((Color(0xFFECECEC)))
 
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AsyncImage(
-                            model = booking.tradesmanProfile,
-                            contentDescription = "Tradesman Image",
-                            modifier = Modifier
-                                .size(150.dp)
-                                .padding(8.dp)
-                        )
+                            Spacer(modifier = Modifier.height(20.dp))
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            // 5-star rating
+                            Row {
+                                for (i in 1..5) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Star",
+                                        modifier = Modifier
+                                            .size(45.dp)
+                                            .clickable { rating.value = i },
+                                        tint = if (i <= rating.value) Color(0xFFECAB1E) else Color.Gray
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                }
+                            }
 
-                        Text(
-                            text = booking.tradesmanFullName,
-                            fontSize = 24.sp,
-                            color = Color.Black
-                        )
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = booking.taskType,
-                            fontSize = 20.sp,
-                            color = Color.Gray
-                        )
+                            // Review TextField
+                            TextField(
+                                value = reviewText.value,
+                                onValueChange = { reviewText.value = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.Gray,
+                                        shape = RoundedCornerShape(8.dp)
+                                    ),
+                                placeholder = { Text("Write your review here...") },
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.White,
+                                    unfocusedContainerColor = Color.White,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                            )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(20.dp))
 
-                        // 5-star rating
-                        Row {
-                            for (i in 1..5) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = "Star",
-                                    modifier = Modifier
-                                        .size(45.dp)
-                                        .clickable { rating.value = i },
-                                    tint = if (i <= rating.value) Color(0xFFECAB1E) else Color.Gray
+                            // Submit Button
+                            Button(
+                                onClick = {
+                                    rateTradesmanViewModel.rateTradesman(
+                                        reviewText.value,
+                                        rating.value,
+                                        tradesman_Id,
+                                        booking_Id
+                                    )
+                                    rateStar = rating.value.toString()
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF122826),
+                                    contentColor = Color.White
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
+
+                            ) {
+                                Text("Submit", fontSize = 20.sp, fontWeight = FontWeight(500))
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Review TextField
-                        TextField(
-                            value = reviewText.value,
-                            onValueChange = { reviewText.value = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.Gray,
-                                    shape = RoundedCornerShape(8.dp)
-                                ),
-                            placeholder = { Text("Write your review here...") },
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-                        )
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // Submit Button
-                        Button(
-                            onClick = {
-                                rateTradesmanViewModel.rateTradesman(reviewText.value, rating.value, tradesman_Id,booking_Id)
-                                rateStar = rating.value.toString()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF122826),
-                                contentColor = Color.White
-                            )
-
-                        ) {
-                            Text("Submit", fontSize = 20.sp, fontWeight = FontWeight(500))
-                        }
                     }
                 }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 76.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    SnackbarController.ObserveSnackbar()
+                }
             }
+
         }
         is ViewClientBookingViewModel.ViewClientBookings.Error -> {
             Text(text = "Error: ${(viewBookingState as ViewClientBookingViewModel.ViewClientBookings.Error).message}")

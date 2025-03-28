@@ -1,5 +1,6 @@
 package com.example.androidproject.view.client
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,6 +55,7 @@ fun ApplicantDetailJobSummary(
     val bookingStatus = status.ifEmpty { return }
     val tradesmanID = tradesmanId.toIntOrNull() ?: return
 
+    Log.d("ApplicantDetails1", "Resume ID: $resumeID,bookings $bookingStatus, tradesman ID: $tradesmanID")
     val context = LocalContext.current
     var downloadId by remember { mutableStateOf<Long?>(null) }
 
@@ -129,7 +131,11 @@ fun ApplicantDetailJobSummary(
                                         "Cancelled" -> navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                                             navController.popBackStack()
                                         }
+                                        "Declined" -> navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
+                                            navController.popBackStack()
+                                        }
                                     }
+                                    Log.d("ApplicantDetails2", "Back button clicked")
                                 },
                                 tint = Color(0xFF81D796)
                             )
@@ -166,14 +172,14 @@ fun ApplicantDetailJobSummary(
                             ) {
                                 when (bookingStatus) {
 
-                                    "Active", -> Text( // Combined identical cases
+                                    "Active" -> Text(
                                         text = "The applicant is active.",
                                         fontSize = nameTextSize,
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold
                                     )
 
-                                    "Completed", -> Text( // Combined identical cases
+                                    "Completed" -> Text(
                                         text = "The applicant has successfully completed the job.",
                                         fontSize = nameTextSize,
                                         color = Color.White,
@@ -186,12 +192,17 @@ fun ApplicantDetailJobSummary(
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold
                                     )
+                                    "Declined" -> Text(
+                                        text = "The applicant has declined.",
+                                        fontSize = nameTextSize,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
 
                                 }
                             }
                         }
 
-                        // Tradesman Info Card
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -213,7 +224,8 @@ fun ApplicantDetailJobSummary(
                                         color = Color.Black,
                                     )
                                     Text(
-                                        modifier = Modifier.clickable{""},
+                                        modifier = Modifier
+                                            .clickable { navController.navigate("tradesmanapply/${selectedBooking?.jobId}/${true}") },
                                         text = "View Post",
                                         textDecoration = TextDecoration.Underline,
                                         fontSize = smallTextSize,
@@ -359,7 +371,7 @@ fun ApplicantDetailJobSummary(
                                     )
                                     Text(
                                         modifier = Modifier
-                                            .clickable{navController.navigate("applicantsdetails/{resumeId}/{status}/{tradesmanId}")},
+                                            .clickable{navController.navigate("applicantsdetails/${resumeID}/${bookingStatus}/${tradesmanID}")},
                                         text = "View Resume",
                                         textDecoration = TextDecoration.Underline,
                                         fontSize = smallTextSize,
@@ -467,6 +479,12 @@ fun ApplicantDetailJobSummary(
                                             text = "Contact Tradesman",
                                             fontSize = nameTextSize,
                                             modifier = Modifier.padding(start = 10.dp)
+                                                .clickable{
+                                                    val encodedProfilePicture = Uri.encode(
+                                                        resume.profilePic
+                                                    )
+                                                    navController.navigate("messaging/0/${resume.userid}/${resume.tradesmanFullName}/${encodedProfilePicture}")
+                                                }
                                         )
                                     }
                                     Icon(

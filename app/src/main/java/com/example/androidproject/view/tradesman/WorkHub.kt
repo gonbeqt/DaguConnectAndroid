@@ -71,6 +71,7 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.WebSocketManager
 import com.example.androidproject.model.JobApplicationData
 import com.example.androidproject.model.client.GetTradesmanBooking
+import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
 import com.example.androidproject.view.extras.SnackbarController
@@ -105,24 +106,11 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
 
 
     // Function to check network connectivity using NetworkCapabilities (modern approach)
-    fun checkNetworkConnectivity(connectivityManager: ConnectivityManager): Boolean {
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-    }
 
 
     val context = LocalContext.current
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val isConnected = remember { mutableStateOf(checkNetworkConnectivity(connectivityManager)) }
-
-    val getMyJobApplicationsState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
-    val getMyJobApplicationsLoadState = getMyJobApplicationsState.loadState
-
-    val getTradesmanBookingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
-    val getTradesmanBookingLoadState = getTradesmanBookingState.loadState
 
     // State to track loading during retry
     var showLoading by remember { mutableStateOf(false) }
@@ -210,13 +198,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             )
                         }
                     }
-                    when {
-                        (selectedSection == 0 && getMyJobApplicationsLoadState.refresh is LoadState.Loading && getMyJobApplicationsState.itemCount == 0) -> {
-                            LoadingUI()
-                        }
-                        (selectedSection == 1 && getTradesmanBookingLoadState.refresh is LoadState.Loading && getTradesmanBookingState.itemCount == 0) -> {
-                            LoadingUI()
-                        }else ->{
+
                         // Handle different states based on connectivity and data loading
                         if (!isConnected.value) {
                             if(showLoading){
@@ -225,11 +207,6 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                                     delay(1500) // Show LoadingUI for 1.5 seconds
                                     isConnected.value = checkNetworkConnectivity(connectivityManager)
                                     showLoading = false // Hide LoadingUI after delay
-                                    if (isConnected.value) {
-                                        getMyJobApplicationsState.refresh()
-                                        getTradesmanBookingState.refresh()
-
-                                    }
                                 }
                             }
                             // No internet connection
@@ -296,8 +273,8 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             }
 
                         }
-                        }
-                    }
+
+
 
 
                 }
@@ -457,7 +434,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             Text(
                 text = "No Pending Jobs",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2068,12 +2045,12 @@ fun PendingMySubmissionsTradesmanItem(
             is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                 WebSocketManager.sendNotificationJobToClient(
                     myJob.clientId.toString(),
-                    "A job application was cancelled",
-                    "${myJob.tradesmanFullname} has cancelled the job application due to ${cancelReason}"
+                    "A job application was declined",
+                    "${myJob.tradesmanFullname} has declined the job application due to ${cancelReason}"
                 )
-                SnackbarController.show("Application cancelled")
+                SnackbarController.show("Application declined")
                 putJobApplicationStatusViewModel.resetState()
-                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
+                navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
                     navController.popBackStack()
                 }
 
