@@ -646,7 +646,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                     horizontalArrangement = Arrangement.spacedBy(10.dp)){
                     Box(
                         modifier = Modifier
-                            .clickable { }
+                            .clickable {navController.navigate("booknow/${tradesmanDetails.userid}")}
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -656,7 +656,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Public View", color = Color(0xFF122826), fontSize = 14.sp)
+                        Text(text = "See Public View", color = Color(0xFF122826), fontSize = 14.sp)
                     }
 
                     Box(

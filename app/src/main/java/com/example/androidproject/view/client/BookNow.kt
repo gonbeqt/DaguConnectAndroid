@@ -28,12 +28,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -44,7 +41,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.view.theme.myGradient3
@@ -68,7 +64,6 @@ fun BookNow(
     val screenHeightDp = configuration.screenHeightDp.dp
     var showConfirmDialog by remember { mutableStateOf(false) }
 
-
     val nameTextSize = when (windowSize.width) {
         WindowType.SMALL -> 16.sp
         WindowType.MEDIUM -> 18.sp
@@ -88,11 +83,6 @@ fun BookNow(
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(resumeIdInt)
     }
-    val poppinsFont = FontFamily(
-        Font(com.example.androidproject.R.font.poppins_regular, FontWeight.Normal),
-        Font(com.example.androidproject.R.font.poppins_medium, FontWeight.Medium),
-        Font(R.font.poppins_bold, FontWeight.Bold)
-    )
 
     var downloadId by remember { mutableStateOf<Long?>(null) }
     val bottomSheetState = rememberStandardBottomSheetState(
@@ -214,7 +204,7 @@ fun BookNow(
                                 Text(
                                     text = "About Me",
                                     color = Color.Black,
-                                    fontSize = nameTextSize,
+                                    fontSize = 24.sp,
                                     fontWeight = FontWeight(500)
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
@@ -255,7 +245,7 @@ fun BookNow(
                                 Text(
                                     text = "Tradesman Information",
                                     color = Color.Black,
-                                    fontSize = nameTextSize,
+                                    fontSize = 24.sp,
                                     fontWeight = FontWeight(500)
                                 )
                                 Row(
@@ -307,7 +297,7 @@ fun BookNow(
                                         fontWeight = FontWeight(500)
                                     )
                                     Text(
-                                        text = "View File",
+                                        text = "Download File",
                                         color = Color.Blue,
                                         fontSize = taskTextSize,
                                         textDecoration = TextDecoration.Underline,
@@ -386,7 +376,7 @@ fun BookNow(
                                 Text(
                                     text = "Ratings",
                                     color = Color.Black,
-                                    fontSize = nameTextSize,
+                                    fontSize = 24.sp,
                                     fontWeight = FontWeight(500)
                                 )
                                 Text(
@@ -433,25 +423,23 @@ fun BookNow(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
                             modifier = Modifier
-                                .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp)
                                 .clickable(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) {
                                     navController.navigate("main_screen")
-                                },
+                                }
+                                .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
                             tint = Color.White
                         )
                         Text(
                             text = "Expert Details",
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = poppinsFont,
                             fontSize = 20.sp,
                             color = Color.White,
                             textAlign = TextAlign.Left,
                             modifier = Modifier
+                                .padding(top = 10.dp)
                                 .weight(1f)
-
                         )
                     }
                 }
@@ -490,6 +478,7 @@ fun BookNow(
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(

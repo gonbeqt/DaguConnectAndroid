@@ -352,9 +352,9 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
     val windowSize = rememberWindowSizeClass()
 
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val taskTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
