@@ -400,6 +400,7 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
 
                 ,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                reverseLayout = true
             ) {
 
                 items(allBooking.itemCount) { index ->
@@ -441,7 +442,7 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
         pending.refresh()
     }
     // Filter the bookings to get only those with status "Pending"
-    val pendingBookings = pending.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
+    val pendingBookings = pending.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }.reversed()
 
     Box(
         modifier = Modifier
@@ -499,7 +500,7 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
     }
 
     // Filter the bookings to get only those with status "Declined"
-    val declinedBookings = declined.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
+    val declinedBookings = declined.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -559,7 +560,7 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
         active.refresh()
     }
     // Filter the bookings to get only those with status "Active"
-    val activeBooking = active.itemSnapshotList.items.filter { it.bookingStatus == "Active" }
+    val activeBooking = active.itemSnapshotList.items.filter { it.bookingStatus == "Active" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -618,7 +619,7 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
         completed.refresh()
     }
     // Filter the bookings to get only those with status "Completed"
-    val completedBookings = completed.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }
+    val completedBookings = completed.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -681,7 +682,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
     }
 
     // Filter the bookings to get only those with status "Completed"
-    val completedBookings = cancelled.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }
+    val completedBookings = cancelled.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -2107,6 +2108,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
                     .size(420.dp)
                     .background(Color(0xFFEDEFEF)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                reverseLayout = true
             ) {
                 items(myJobs.itemCount) { index ->
                     val myJob = myJobs[index]
@@ -2135,7 +2137,7 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
         myJob.refresh()
     }
 
-    val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
+    val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }.reversed()
 
     Box(
         modifier = Modifier
@@ -2184,7 +2186,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
         myJob.refresh()
     }
 
-    val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
+    val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -2232,7 +2234,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
         myJob.refresh()
     }
 
-    val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }
+    val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -2280,7 +2282,7 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
         myJob.refresh()
     }
 
-    val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }
+    val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -2332,7 +2334,7 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
         myJob.refresh()
     }
 
-    val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }
+    val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }.reversed()
 
     Box(
         modifier = Modifier

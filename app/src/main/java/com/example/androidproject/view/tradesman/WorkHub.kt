@@ -398,6 +398,7 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
                     .size(420.dp)
                     .background(Color(0xFFD9D9D9)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                reverseLayout = true
             ) {
                 items(allBooking.itemCount) { index ->
                     val clients = allBooking[index]
@@ -417,7 +418,7 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
         bookingPendingstate.refresh()
     }
     val bookingPending =
-        bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
+        bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -460,7 +461,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
         declinedBookingState.refresh()
     }
 
-    val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }
+    val declinedBookings = declinedBookingState.itemSnapshotList.items.filter { it.bookingStatus == "Declined" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -504,7 +505,7 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
     LaunchedEffect(Unit) {
         activeBookingstate.refresh()
     }
-    val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Active" }
+    val activeBookings = activeBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Active" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -548,7 +549,7 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
     LaunchedEffect(Unit) {
         completedBookingstate.refresh()
     }
-    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }
+    val completedBooking = completedBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Completed" }.reversed()
 
     Box(
         modifier = Modifier
@@ -594,7 +595,7 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
         cancelledBookingstate.refresh()
     }
 
-    val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }
+    val cancelledBookings = cancelledBookingstate.itemSnapshotList.items.filter { it.bookingStatus == "Cancelled" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -1565,10 +1566,9 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
                     .padding(bottom = 70.dp)
 
                     .size(420.dp)
-                    .background(Color(0xFFD9D9D9))
-
-                ,
+                    .background(Color(0xFFD9D9D9)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                reverseLayout = true
             ) {
                 items(myJobs.itemCount) { index ->
                     val myJob = myJobs[index]
@@ -1595,7 +1595,7 @@ fun PendingMySubmissionsTradesmanContent(
     LaunchedEffect(Unit) {
         myJob.refresh()
     }
-    val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }
+    val pendingApplication = myJob.itemSnapshotList.items.filter { it.status == "Pending" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -1643,7 +1643,7 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
     LaunchedEffect(Unit) {
         myJob.refresh()
     }
-    val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }
+    val declinedApplication = myJob.itemSnapshotList.items.filter { it.status == "Declined" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -1690,7 +1690,7 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
         myJob.refresh()
     }
 
-    val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }
+    val activeApplication = myJob.itemSnapshotList.items.filter { it.status == "Active" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -1737,7 +1737,7 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
         myJob.refresh()
     }
 
-    val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }
+    val completedApplication = myJob.itemSnapshotList.items.filter { it.status == "Completed" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -1782,7 +1782,7 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
         myJob.refresh()
     }
 
-    val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }
+    val cancelledApplication = myJob.itemSnapshotList.items.filter { it.status == "Cancelled" }.reversed()
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -2720,7 +2720,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}") }
+                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}/${false}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
