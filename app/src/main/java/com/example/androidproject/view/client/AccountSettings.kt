@@ -71,7 +71,7 @@ fun AccountSettings(navController: NavController, getClientProfileViewModel: Get
                     SnackbarController.show(responseMessage)
                 }
 
-                navController.navigate("main_screen?selectedItem=4") {
+                navController.navigate("main_screen?selectedItem=4&selectedTab=1") {
                     navController.popBackStack()
                 }
                 updateClientProfileAddressViewModel.resetState()
