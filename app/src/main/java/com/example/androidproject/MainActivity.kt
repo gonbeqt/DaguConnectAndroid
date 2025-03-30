@@ -744,7 +744,8 @@ class MainActivity : ComponentActivity() {
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            TradesmanDeclinationDetails( jobId,
+                            TradesmanDeclinationDetails(
+                                jobId,
                                 status,
                                 modifier = Modifier,
                                 navController,
@@ -765,7 +766,12 @@ class MainActivity : ComponentActivity() {
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
                             val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            TradesmanApplicationCancelDetails(jobId,jobs,status,modifier = Modifier, navController,getMyJobApplicationViewModel)
+                            TradesmanApplicationCancelDetails(jobId,
+                                jobs,
+                                status
+                                ,modifier = Modifier,
+                                navController,
+                                getMyJobApplicationViewModel)
                         }
 
 

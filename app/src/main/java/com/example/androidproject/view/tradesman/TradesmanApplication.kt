@@ -73,7 +73,6 @@ fun TradesmanApplication(jobId: String, jobs :String,status:String, modifier: Mo
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
-    val bookingStatus = status.ifEmpty { return }
     var reportDocument by remember { mutableStateOf<Uri?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(-1) }
@@ -120,7 +119,7 @@ fun TradesmanApplication(jobId: String, jobs :String,status:String, modifier: Mo
     ) { uri -> uri?.let { reportDocument = it } }
     val jobID = jobId.toIntOrNull() ?: return
     val jobS = jobs.toIntOrNull() ?: return
-
+    val bookingStatus = status.ifEmpty { return }
     val jobsState by getJobs.jobState.collectAsState()
 
     val bookingPendingState = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
