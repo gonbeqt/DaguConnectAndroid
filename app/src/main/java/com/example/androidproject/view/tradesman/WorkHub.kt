@@ -2824,7 +2824,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}") }
+                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}/${false}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
