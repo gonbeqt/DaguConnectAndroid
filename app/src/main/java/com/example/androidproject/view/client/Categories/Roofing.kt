@@ -228,7 +228,7 @@ fun Roofing(navController: NavController, getResumesViewModel: GetResumesViewMod
                                     text = "No Roofing workers",
                                     fontSize = nameTextSize,
                                     fontFamily = poppinsFont,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
                                 )

@@ -365,7 +365,7 @@ fun MyClientsList(clientBooking: LazyPagingItems<GetClientsBooking>, selectedDat
             Text(
                 text = "No Bookings Available",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 fontFamily = poppinsFont,
                 color = Color.Black
             )

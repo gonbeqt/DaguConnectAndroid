@@ -28,7 +28,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -44,7 +43,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.androidproject.R
 import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.SnackbarController
 import com.example.androidproject.view.rememberWindowSizeClass
@@ -57,6 +55,7 @@ import com.example.androidproject.viewmodel.ratings.ViewRatingsViewModel
 @Composable
 fun BookNow(
     viewResumeViewModel: ViewResumeViewModel,
+    isPublic: String,
     navController: NavController,
     resumeId: String,
     viewRatingsViewModel: ViewRatingsViewModel
@@ -85,6 +84,7 @@ fun BookNow(
         WindowType.MEDIUM -> 14.sp
         WindowType.LARGE -> 16.sp
     }
+    val IsPublic = isPublic.toBoolean()
 
     LaunchedEffect(Unit) {
         viewResumeViewModel.viewResume(resumeIdInt)
@@ -92,7 +92,7 @@ fun BookNow(
     val poppinsFont = FontFamily(
         Font(com.example.androidproject.R.font.poppins_regular, FontWeight.Normal),
         Font(com.example.androidproject.R.font.poppins_medium, FontWeight.Medium),
-        Font(R.font.poppins_bold, FontWeight.Bold)
+        Font(com.example.androidproject.R.font.poppins_bold, FontWeight.Bold)
     )
 
     var downloadId by remember { mutableStateOf<Long?>(null) }
@@ -155,54 +155,59 @@ fun BookNow(
                                             .padding(start = 10.dp)
                                             .clip(CircleShape)
                                     )
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(start = 15.dp)
-                                    ) {
-                                        Text(
-                                            text = resume.tradesmanFullName,
-                                            color = Color.Black,
-                                            fontWeight = FontWeight(500),
-                                            fontSize = nameTextSize,
-                                            modifier = Modifier.padding(top = 10.dp)
-                                        )
-                                        resume.specialty?.let {
-                                            BoxRow(specialties = it.replace("_", " "))
-                                        }
-                                        resume.preferredWorkLocation?.let {
+
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f)
+                                                .padding(start = 15.dp)
+                                        ) {
                                             Text(
-                                                text = it,
+                                                text = resume.tradesmanFullName,
                                                 color = Color.Black,
-                                                fontSize = taskTextSize
+                                                fontWeight = FontWeight(500),
+                                                fontSize = 18.sp,
+                                                modifier = Modifier.padding(top = 10.dp)
                                             )
+                                            resume.specialty?.let {
+                                                BoxRow(specialties = it.replace("_", " "))
+                                            }
+                                            resume.preferredWorkLocation?.let {
+                                                Text(
+                                                    text = it + ", Pangasinan",
+                                                    color = Color.Black,
+                                                )
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(
+                                                        color = Color(0xFFF5F5F5),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    )
+                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                            ) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Star,
+                                                        contentDescription = "Rating",
+                                                        tint = Color(0xFFFFA500),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                    Text(
+                                                        text = when {
+                                                            resume.ratings == 0f -> "0"
+                                                            else -> String.format(
+                                                                "%.1f",
+                                                                resume.ratings
+                                                            )
+                                                        },
+                                                        fontSize = smallTextSize
+                                                    )
+                                                }
+                                            }
                                         }
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                color = Color(0xFFF5F5F5),
-                                                shape = RoundedCornerShape(12.dp)
-                                            )
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Star,
-                                                contentDescription = "Rating",
-                                                tint = Color(0xFFFFA500),
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text(
-                                                text = when {
-                                                    resume.ratings == 0f -> "0"
-                                                    else -> String.format("%.1f", resume.ratings)
-                                                },
-                                                fontSize = smallTextSize
-                                            )
-                                        }
-                                    }
+
                                 }
 
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -218,7 +223,7 @@ fun BookNow(
                                     Text(
                                         text = "About Me",
                                         color = Color.Black,
-                                        fontSize = nameTextSize,
+                                        fontSize = 20.sp,
                                         fontWeight = FontWeight(500)
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
@@ -233,7 +238,6 @@ fun BookNow(
                                                         maxPreviewLength
                                                     )
                                                 }...",
-                                                fontSize = taskTextSize,
                                                 color = if (aboutMe.isEmpty()) Color.Gray else Color.Black
                                             )
                                             TextButton(
@@ -251,7 +255,6 @@ fun BookNow(
                                         Text(
                                             text = aboutMe,
                                             modifier = Modifier.padding(top = 4.dp),
-                                            fontSize = taskTextSize,
                                             color = if (aboutMe.isEmpty()) Color.Gray else Color.Black
                                         )
                                     }
@@ -263,7 +266,7 @@ fun BookNow(
                                     Text(
                                         text = "Tradesman Information",
                                         color = Color.Black,
-                                        fontSize = nameTextSize,
+                                        fontSize = 20.sp,
                                         fontWeight = FontWeight(500)
                                     )
                                     Row(
@@ -273,14 +276,12 @@ fun BookNow(
                                         Text(
                                             text = "Preferred Location",
                                             color = Color.Gray,
-                                            fontSize = taskTextSize,
-                                            fontWeight = FontWeight(500)
+                                            fontWeight = FontWeight.Normal
                                         )
                                         resume.preferredWorkLocation?.let {
                                             Text(
                                                 text = it,
                                                 color = Color.Black,
-                                                fontSize = taskTextSize,
                                                 fontWeight = FontWeight(500)
                                             )
                                         }
@@ -293,14 +294,12 @@ fun BookNow(
                                         Text(
                                             text = "Est. Rate",
                                             color = Color.Gray,
-                                            fontSize = taskTextSize,
-                                            fontWeight = FontWeight(500)
+                                            fontWeight = FontWeight.Normal
                                         )
                                         Text(
                                             text = "₱${resume.workFee}",
                                             color = Color.Black,
                                             fontWeight = FontWeight(500),
-                                            fontSize = taskTextSize
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(2.dp))
@@ -311,13 +310,11 @@ fun BookNow(
                                         Text(
                                             text = "Trade Credential",
                                             color = Color.Gray,
-                                            fontSize = taskTextSize,
-                                            fontWeight = FontWeight(500)
+                                            fontWeight = FontWeight.Normal
                                         )
                                         Text(
                                             text = "View File",
                                             color = Color.Blue,
-                                            fontSize = taskTextSize,
                                             textDecoration = TextDecoration.Underline,
                                             fontWeight = FontWeight(500),
                                             modifier = Modifier.clickable {
@@ -422,13 +419,12 @@ fun BookNow(
                                     Text(
                                         text = "Ratings",
                                         color = Color.Black,
-                                        fontSize = nameTextSize,
+                                        fontSize = 20.sp,
                                         fontWeight = FontWeight(500)
                                     )
                                     Text(
                                         text = "Feedback from satisfied clients",
                                         color = Color.Black,
-                                        fontSize = taskTextSize,
                                         modifier = Modifier.padding(top = 4.dp)
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -483,13 +479,17 @@ fun BookNow(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) {
-                                    navController.popBackStack()
+                                    if (IsPublic == false) {
+                                        navController.popBackStack()
+                                    } else {
+                                        navController.navigate("main_screen?selectedItem=4")
+                                    }
+
                                 },
                             tint = Color.White
                         )
                         Text(
                             text = "Expert Details",
-                            fontWeight = FontWeight.Medium,
                             fontFamily = poppinsFont,
                             fontSize = 20.sp,
                             color = Color.White,
@@ -513,54 +513,61 @@ fun BookNow(
         // Fixed Buttons at the Bottom
         if (viewResumeState is ViewResumeViewModel.ViewResumeState.Success) {
             val resume = (viewResumeState as ViewResumeViewModel.ViewResumeState.Success).data
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .constrainAs(buttonsRef) {
-                        bottom.linkTo(parent.bottom, margin = 44.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                Button(
-                    onClick = {
-                        val encodedProfilePicture = Uri.encode(resume.profilePic)
-                        navController.navigate("messaging/0/$resumeId/${resume.tradesmanFullName}/$encodedProfilePicture")
-                    },
+            if (IsPublic == false) {
+                Row(
                     modifier = Modifier
-                        .border(1.dp,Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp))
-                        .width(150.dp)
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .constrainAs(buttonsRef) {
+                            bottom.linkTo(parent.bottom, margin = 44.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        },
+                    horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Message,
-                            contentDescription = "Message",
-                            tint = Color(0xFF42C2AE)
-                        )
-                        Text(text = "Chat Me", color = Color(0xFF42C2AE), fontSize = nameTextSize)
-                    }
-                }
+                    Button(
+                        onClick = {
+                            val encodedProfilePicture = Uri.encode(resume.profilePic)
+                            navController.navigate("messaging/0/$resumeId/${resume.tradesmanFullName}/$encodedProfilePicture")
+                        },
+                        modifier = Modifier
+                            .border(1.dp, Color(0xFF42C2AE), shape = RoundedCornerShape(12.dp))
+                            .width(150.dp)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
 
-                Button(
-                    onClick = { navController.navigate("confirmbook/${resume.id}/${resume.userid}") },
-                    modifier = Modifier
-                        .width(170.dp)
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.AddShoppingCart,
-                            contentDescription = "Book",
-                            tint = Color.White
-                        )
-                        Text(text = "Book Now", color = Color.White, fontSize = nameTextSize)
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.Message,
+                                contentDescription = "Message",
+                                tint = Color(0xFF42C2AE)
+                            )
+                            Text(
+                                text = "Chat Me",
+                                color = Color(0xFF42C2AE),
+                                fontSize = nameTextSize
+                            )
+                        }
+                    }
+
+                    Button(
+                        onClick = { navController.navigate("confirmbook/${resume.id}/${resume.userid}") },
+                        modifier = Modifier
+                            .width(170.dp)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF42C2AE))
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.AddShoppingCart,
+                                contentDescription = "Book",
+                                tint = Color.White
+                            )
+                            Text(text = "Book Now", color = Color.White, fontSize = nameTextSize)
+                        }
                     }
                 }
             }
@@ -570,17 +577,9 @@ fun BookNow(
 
 @Composable
 fun BoxRow(specialties: String) {
-    val windowSize = rememberWindowSizeClass()
-    val taskTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
-    }
     Text(
         text = specialties,
         color = Color.Black,
-        fontSize = taskTextSize,
-        fontWeight = FontWeight.Medium
     )
 }
 

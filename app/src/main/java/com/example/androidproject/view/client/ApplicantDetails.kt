@@ -55,9 +55,10 @@ fun ApplicantDetails(
     Log.d("ApplicantDetails", "Input - resumeId: '$resumeId', status: '$status', tradesmanId: '$tradesmanId'")
 
     // Parse parameters with fallback values
-    val resumeID = resumeId.toIntOrNull() ?: -1 // Fallback to -1 if invalid
-    val bookingStatus = if (status.isEmpty()) "Unknown" else status // Fallback to "Unknown" if empty
-    val tradesmanID = tradesmanId.toIntOrNull() ?: -1 // Fallback to -1 if invalid
+    val resumeID = resumeId.toIntOrNull() ?: return
+    val bookingStatus = status?.ifEmpty { return } ?: return
+    val tradesmanID = tradesmanId.toIntOrNull() ?: return
+    Log.d("test123","${resumeID} ${bookingStatus} ${tradesmanID}")
 
     // Log the parsed values
     Log.d("ApplicantDetails", "Parsed - resumeID: $resumeID, bookingStatus: $bookingStatus, tradesmanID: $tradesmanID")

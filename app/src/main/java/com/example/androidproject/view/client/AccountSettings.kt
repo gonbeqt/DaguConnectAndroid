@@ -416,7 +416,7 @@ fun JobSelectionDropdown1(
             readOnly = true,
             textStyle = TextStyle(
                 color = textColor,
-                fontSize = 12.sp // Smaller font size for selected option
+                fontSize = 16.sp // Smaller font size for selected option
             ),  // apply correct text color
             trailingIcon = {
                 Icon(
@@ -441,7 +441,7 @@ fun JobSelectionDropdown1(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option,fontSize = 14.sp) },
+                    text = { Text(option,fontSize = 16.sp) },
                     onClick = {
                         onOptionSelected(option)
                         expanded = false

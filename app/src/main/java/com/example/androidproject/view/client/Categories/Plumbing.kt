@@ -231,7 +231,7 @@ fun Plumbing(navController: NavController, getResumesViewModel: GetResumesViewMo
                                 Text(
                                     text = "No Plumbing workers",
                                     fontSize = nameTextSize,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     fontFamily = poppinsFont,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center

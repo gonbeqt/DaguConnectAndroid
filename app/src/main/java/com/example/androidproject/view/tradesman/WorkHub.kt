@@ -58,6 +58,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -88,6 +90,11 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel,  initialTabIndex: Int = 0, initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 24.dp
@@ -139,8 +146,9 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
             // Left-aligned text
             Text(
                 text = "Job Hub",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Normal
+                fontSize = 20.sp,
+                fontFamily = poppinsFont,
+                fontWeight = FontWeight.Medium
             )
             // Right-aligned icons
             Row(
@@ -180,7 +188,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             TabRowDefaults.Indicator(
                                 modifier = Modifier
                                     .tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                color = Color(0xFF122826), // Change this to your desired color
+                                color = Color(0xFF3CC0B0),
                                 height = 2.dp // Adjust thickness if needed
                             )
                         },
@@ -192,7 +200,8 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             Tab(
                                 selected = selectedTabIndex == index,
                                 onClick = { selectedTabIndex = index },
-                                text = { Text(title, fontSize = textSize, color = if (selectedTabIndex == index) Color(0xFF122826) else Color.Gray) },
+                                text = { Text(title, fontSize = textSize,
+                                    color = if (selectedTabIndex == index) Color(0xFF3CC0B0) else Color.Black)},
                                 modifier = Modifier.background(Color.White)
                             )
                         }
@@ -299,6 +308,12 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
         WindowType.MEDIUM -> 18.sp
         WindowType.LARGE -> 20.sp
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+
 
     Row(
         modifier = Modifier
@@ -310,52 +325,49 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
         // Left-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(
-                    if (selectedSection == 0) SolidColor(Color(0xFF122826)) else SolidColor(
-                        Color.Transparent
-                    )
-                )
                 .weight(1f)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
             TextButton(
                 onClick = { onSectionSelected(0) },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == 0) Color.White else Color.Black
-                ),
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
                     text = "My Jobs",
                     fontSize = headerTextSize,
-                    fontWeight = FontWeight.Medium
+                    fontFamily = poppinsFont,
+                    fontWeight = FontWeight.Medium,
+                    color = if (selectedSection == 0) Color.Black else Color.Gray
+
                 )
             }
         }
+        Divider(
+            color = Color.Gray,
+            modifier = Modifier
+                .background(Color.LightGray)
+                .padding(vertical = 16.dp)
+                .width(2.dp)
+        )
 
         // Right-aligned clickable text with box
         Box(
             modifier = Modifier
-                .background(
-                    if (selectedSection == 1) SolidColor(Color(0xFF122826)) else SolidColor(
-                        Color.Transparent
-                    )
-                )
                 .padding(4.dp)
                 .weight(1f),
         ) {
             TextButton(
                 onClick = { onSectionSelected(1) },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = if (selectedSection == 1) Color.White else Color.Black
-                ),
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
                     text = "My Applications",
                     fontSize = headerTextSize,
-                    fontWeight = FontWeight.Medium
+                    fontFamily = poppinsFont,
+                    fontWeight = FontWeight.Medium,
+                    color = if (selectedSection == 1) Color.Black else Color.Gray
+
                 )
             }
         }
@@ -371,6 +383,14 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
 @Composable
 fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewModel) {
     val allBooking = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+
 
     LaunchedEffect(Unit) {
         allBooking.refresh()
@@ -386,8 +406,8 @@ fun AllBookingsTradesmanContent(getTradesmanBooking: GetTradesmanBookingViewMode
             // Display "No Declined Jobs" when the list is empty
             Text(
                 text = "No Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -418,6 +438,12 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
     }
     val bookingPending =
         bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -429,8 +455,8 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             // Display "No Pending Jobs" when the list is empty
             Text(
                 text = "No Pending Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -455,6 +481,13 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
 @Composable
 fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
     val declinedBookingState = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         declinedBookingState.refresh()
@@ -472,8 +505,8 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
             // Display "No Declined Jobs" when the list is empty
             Text(
                 text = "No Declined Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -500,6 +533,13 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
 @Composable
 fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
    val activeBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         activeBookingstate.refresh()
@@ -516,8 +556,8 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
             // Display "No Active Jobs" when the list is empty
             Text(
                 text = "No Active Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -544,6 +584,13 @@ fun ActiveBookingsTradesmanContent(navController: NavController,getTradesmanBook
 @Composable
 fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
     val completedBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         completedBookingstate.refresh()
@@ -561,8 +608,8 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
             // Display "No Completed Jobs" when the list is empty
             Text(
                 text = "No Completed Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -589,6 +636,13 @@ fun CompletedBookingsTradesmanContent(navController: NavController,getTradesmanB
 @Composable
 fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanBooking: GetTradesmanBookingViewModel) {
     val cancelledBookingstate = getTradesmanBooking.TradesmanBookingPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         cancelledBookingstate.refresh()
@@ -606,8 +660,8 @@ fun CancelledBookingsTradesmanContent(navController: NavController,getTradesmanB
             // Display "No Cancelled Jobs" when the list is empty
             Text(
                 text = "No Cancelled Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -702,31 +756,37 @@ fun AllTradesmanItem(allBooking: GetTradesmanBooking) {
                             .padding(start = 10.dp)
 
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
 
-                        Text(
-                            text = allBooking.clientFullName,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = nameTextSize
-                        )
+                            Text(
+                                text = allBooking.clientFullName,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = nameTextSize
+                            )
+                            Text(
+                                text = allBooking.bookingStatus,
+                                color = statusColor,
+                                fontSize = taskTextSize,
+                            )
+                        }
 
                         Row {
                             Text(
                                 text = "Job Date:",
-                                color = Color.Black,
+                                color = Color.Gray,
                                 fontSize = taskTextSize
                             )
                             Text(
                                 text = date,
-                                color = Color.Gray,
+                                color = Color.Black,
                                 fontSize = taskTextSize,
                             )
                         }
-                        Text(
-                            text = allBooking.bookingStatus,
-                            color = statusColor,
-                            fontSize = taskTextSize,
-                        )
 
                     }
                 }
@@ -859,13 +919,13 @@ fun PendingTradesmanItem(pending: GetTradesmanBooking, navController: NavControl
                         Row {
                             Text(
                                 text = "Job Date:",
-                                color = Color.Black,
+                                color = Color.Gray,
                                 fontSize = taskTextSize,
                             )
                             Text(
                                 modifier = Modifier.padding(start = 5.dp),
                                 text = date,
-                                color = Color.Gray,
+                                color = Color.Black,
                                 fontSize = taskTextSize,
                             )
                         }
@@ -1183,12 +1243,12 @@ fun DeclinedTradesmanItem(declined: GetTradesmanBooking, navController: NavContr
                         Row {
                             Text(
                                 text = "Job Date:",
-                                color = Color.Black,
+                                color = Color.Gray,
                                 fontSize = taskTextSize
                             )
                             Text(
                                 text = date,
-                                color = Color.Gray,
+                                color = Color.Black,
                                 fontSize = taskTextSize,
                             )
                         }
@@ -1288,13 +1348,13 @@ fun ActiveTradesmanItem(active: GetTradesmanBooking, navController: NavControlle
                         Row {
                             Text(
                                 text = "Job Date:",
-                                color = Color.Black,
+                                color = Color.Gray,
                                 fontSize = taskTextSize,
                             )
                             Text(
                                 modifier = Modifier.padding(start = 5.dp),
                                 text = date,
-                                color = Color.Gray,
+                                color = Color.Black,
                                 fontSize = taskTextSize,
                             )
                         }
@@ -1393,12 +1453,12 @@ fun CompletedItem(completed: GetTradesmanBooking, navController: NavController) 
                         Row {
                             Text(
                                 text = "Job Date:",
-                                color = Color.Black,
+                                color = Color.Gray,
                                 fontSize = taskTextSize
                             )
                             Text(
                                 text = date,
-                                color = Color.Gray,
+                                color = Color.Black,
                                 fontSize = taskTextSize,
                             )
                         }
@@ -1500,12 +1560,12 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
                         Row {
                             Text(
                                 text = "Job Date:",
-                                color = Color.Black,
+                                color = Color.Gray,
                                 fontSize = 12.sp
                             )
                             Text(
                                 text = date,
-                                color = Color.Gray,
+                                color = Color.Black,
                                 fontSize = taskTextSize,
                             )
                         }
@@ -1537,6 +1597,13 @@ fun CancelledItem(cancel: GetTradesmanBooking, navController: NavController) {
 @Composable
 fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationViewModel) {
     val myJobs = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         myJobs.refresh()
@@ -1553,8 +1620,8 @@ fun AllMySubmissionsTradesmanContent(getMyJobApplications: GetMyJobApplicationVi
             // Display "No Submissions" when the list is empty
             Text(
                 text = "No Applications",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1591,6 +1658,13 @@ fun PendingMySubmissionsTradesmanContent(
     putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel
 ) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -1607,8 +1681,8 @@ fun PendingMySubmissionsTradesmanContent(
             // Display "No Pending Submissions" when the list is empty
             Text(
                 text = "No Pending Applications",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1639,6 +1713,13 @@ fun PendingMySubmissionsTradesmanContent(
 @Composable
 fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -1655,8 +1736,8 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
             // Display "No Active Submissions" when the list is empty
             Text(
                 text = "No Decline Applications",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1685,6 +1766,13 @@ fun DeclinedMySubmissionsTradesmanContent(navController: NavController, getMyJob
 fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel) {
 
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -1702,8 +1790,8 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
             // Display "No Active Submissions" when the list is empty
             Text(
                 text = "No Active Applications",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1732,6 +1820,13 @@ fun ActiveMySubmissionsTradesmanContent(navController: NavController, getMyJobAp
 @Composable
 fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -1749,8 +1844,8 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
             // Display "No Completed Submissions" when the list is empty
             Text(
                 text = "No Completed Applications",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1777,6 +1872,13 @@ fun CompletedMySubmissionsTradesmanContent(navController: NavController, getMyJo
 @Composable
 fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJobApplications: GetMyJobApplicationViewModel, viewJobsApplication: ViewJobApplicationViewModel) {
     val myJob = getMyJobApplications.jobApplicationPagingData.collectAsLazyPagingItems()
+    val windowSize = rememberWindowSizeClass()
+
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
 
     LaunchedEffect(Unit) {
         myJob.refresh()
@@ -1794,8 +1896,8 @@ fun CancelledMySubmissionsTradesmanContent(navController: NavController, getMyJo
             // Display "No Declined Submissions" when the list is empty
             Text(
                 text = "No Cancelled Applications",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1834,6 +1936,8 @@ fun AllMySubmissionsTradesmanItem(myJob: JobApplicationData) {
         WindowType.MEDIUM -> 400.dp to 200.dp
         WindowType.LARGE -> 410.dp to 210.dp
     }
+
+
     var jobType = myJob.jobType
 
     if (jobType == "Electrical_work") {
@@ -2720,7 +2824,7 @@ fun CancelledMySubmissionsTradesmanItem(myJob: JobApplicationData, navController
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}") }
+                            .clickable { navController.navigate("tradesmanapply/${myJob.jobId}/${false}") }
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
