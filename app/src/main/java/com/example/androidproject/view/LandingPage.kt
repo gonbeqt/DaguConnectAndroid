@@ -273,7 +273,7 @@ fun LandingPageScreen(navController: NavController) {
             ) {
                 repeat(3) { index ->
                     val animatedSize by animateDpAsState(
-                        targetValue = if (index == clickCount) 20.dp else 8.dp,
+                        targetValue = if (index == clickCount) 10.dp else 6.dp,
                         animationSpec = tween(durationMillis = 300)
                     )
                     val animatedColor by animateColorAsState(

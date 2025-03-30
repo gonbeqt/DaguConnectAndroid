@@ -2066,12 +2066,12 @@ fun PendingMySubmissionsTradesmanItem(
             is PutJobApplicationStatusViewModel.PutJobApplicationState.Success -> {
                 WebSocketManager.sendNotificationJobToClient(
                     myJob.clientId.toString(),
-                    "A job application was declined",
-                    "${myJob.tradesmanFullname} has declined the job application due to ${cancelReason}"
+                    "A job application was cancelled",
+                    "${myJob.tradesmanFullname} has cancelled the job application due to ${cancelReason}"
                 )
                 SnackbarController.show("Application declined")
                 putJobApplicationStatusViewModel.resetState()
-                navController.navigate("main_screen?selectedItem=1&selectedTab=2&selectedSection=1") {
+                navController.navigate("main_screen?selectedItem=1&selectedTab=5&selectedSection=1") {
                     navController.popBackStack()
                 }
 
@@ -2177,12 +2177,12 @@ fun PendingMySubmissionsTradesmanItem(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .border(1.dp, Color(0xFFFF8D37), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Job Details", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                        Text(text = "Job Details", color = Color(0xFFFF8D37), fontSize = smallTextSize)
                     }
                 }
             }
@@ -2577,12 +2577,12 @@ fun DeclinedMySubmissionsTradesmanItem(myJob: JobApplicationData, navController:
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .border(1.dp, Color(0xFFECAB1E), shape = RoundedCornerShape(12.dp))
+                            .border(1.dp, Color(0xFFFF8D37), shape = RoundedCornerShape(12.dp))
                             .weight(1f)
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Job Details", color = Color(0xFFECAB1E), fontSize = smallTextSize)
+                        Text(text = "Job Details", color = Color(0xFFFF8D37), fontSize = smallTextSize)
                     }
                 }
             }

@@ -854,7 +854,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
         modifier = Modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .clickable { navController.navigate("booknow/${resumes.id}") }, //implementation here
+            .clickable { navController.navigate("booknow/${resumes.id}/${false}") },
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(1.dp)
 

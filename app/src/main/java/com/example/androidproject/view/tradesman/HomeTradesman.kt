@@ -369,7 +369,7 @@ fun TopMatches(
     }
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFE9E9E9))) {
         LazyColumn(
-            modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
+            modifier = Modifier.padding(bottom = 65.dp, top = 2.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(jobsList.itemCount) { index ->
@@ -729,7 +729,7 @@ fun RecentJobs(
 ) {
     val jobList = getRecentJobsViewModel.jobsPagingData.collectAsLazyPagingItems()
     LazyColumn(
-        modifier = Modifier.padding(bottom = 80.dp, top = 2.dp),
+        modifier = Modifier.padding(bottom = 65.dp, top = 2.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(jobList.itemCount) { index ->
