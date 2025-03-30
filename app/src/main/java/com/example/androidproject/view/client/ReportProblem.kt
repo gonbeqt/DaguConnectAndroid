@@ -87,7 +87,10 @@ fun ReportProblem(navController: NavController, reportConcernViewModel : ReportC
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = {
+                    navController.navigate("main_screen?selectedItem=4&selectedTab=1"){
+                    navController.popBackStack()
+                } }) {
                     Icon(
                         Icons.Default.ArrowBack, contentDescription = "Back",
                         tint = Color(0xFF00A99D)
