@@ -417,12 +417,7 @@ fun RoofingItem(roofing: resumesItem, navController: NavController, reportTrades
                                     showReportDialog = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

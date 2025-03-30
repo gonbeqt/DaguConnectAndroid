@@ -416,12 +416,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController, reportTr
                                     showReportDialog = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

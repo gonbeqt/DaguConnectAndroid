@@ -429,12 +429,7 @@ fun WeldingItem(welding: resumesItem, navController: NavController, reportTrades
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

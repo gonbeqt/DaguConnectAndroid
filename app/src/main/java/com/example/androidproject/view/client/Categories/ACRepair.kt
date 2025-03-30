@@ -436,13 +436,7 @@ fun ACRepairItem(ACRepair: resumesItem, navController: NavController, reportTrad
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
 
-                                }
-                            )
                         }
                     }
                 }

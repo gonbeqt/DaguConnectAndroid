@@ -435,12 +435,7 @@ fun CarpentryItem(carpentry: resumesItem, navController: NavController, reportTr
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

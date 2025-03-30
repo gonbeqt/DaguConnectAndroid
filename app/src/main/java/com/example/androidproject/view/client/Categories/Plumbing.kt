@@ -426,12 +426,7 @@ fun PlumbingItem(plumber: resumesItem, navController: NavController, reportTrade
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

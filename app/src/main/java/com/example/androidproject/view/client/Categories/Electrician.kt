@@ -425,12 +425,7 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController, repo
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }
