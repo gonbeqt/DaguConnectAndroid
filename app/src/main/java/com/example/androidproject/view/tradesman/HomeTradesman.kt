@@ -79,6 +79,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -150,11 +152,16 @@ fun HomeTradesman(
     var showLoading by remember { mutableStateOf(false) }
     val windowSize = rememberWindowSizeClass()
     val headerTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 14.sp
-        WindowType.MEDIUM -> 16.sp
-        WindowType.LARGE -> 18.sp
+        WindowType.SMALL -> 12.sp
+        WindowType.MEDIUM -> 14.sp
+        WindowType.LARGE -> 16.sp
     }
     var selectedTabIndex by remember { mutableIntStateOf(initialTabIndex) }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
 
     val tabTitles = listOf("Top Matches", "Recent Posted Jobs")
@@ -202,6 +209,7 @@ fun HomeTradesman(
                                 text = {
                                     Text(
                                         text = title,
+                                        fontFamily = poppinsFont,
                                         fontSize = headerTextSize,
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier
@@ -293,6 +301,11 @@ fun HomeTradesman(
 
 @Composable
 fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize) {
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
     Box(
         modifier = Modifier
             .shadow(10.dp)
@@ -312,8 +325,10 @@ fun TopSectionHomeTradesman(navController: NavController, windowSize: WindowSize
             // Left-aligned text
             Text(
                 text = "Home",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Normal
+                fontSize = 20.sp,
+                color = Color.Black,
+                fontFamily = poppinsFont,
+                fontWeight = FontWeight.Medium
             )
             // Right-aligned icons
             Row(
@@ -411,6 +426,11 @@ fun TopMatchesItem(
     if (jobType == "Ac_technician") {
         jobType = "AC Technician"
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     LaunchedEffect(reportClientState, reportSubmissionKey) {
         if (reportSubmissionKey == null) return@LaunchedEffect // Skip if no submission yet

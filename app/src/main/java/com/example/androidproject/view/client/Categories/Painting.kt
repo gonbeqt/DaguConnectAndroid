@@ -233,7 +233,7 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                                     text = "No Painter workers",
                                     fontSize = nameTextSize,
                                     fontFamily = poppinsFont,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
                                 )
@@ -425,12 +425,7 @@ fun PaintingsItem(painter: resumesItem, navController: NavController, reportTrad
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

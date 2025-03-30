@@ -36,7 +36,9 @@ import com.example.androidproject.ViewModelSetups
 import com.example.androidproject.data.preferences.AccountManager
 import com.example.androidproject.model.Chats
 import com.example.androidproject.utils.NetworkUtils.checkNetworkConnectivity
+import com.example.androidproject.view.WindowType
 import com.example.androidproject.view.extras.LoadingUI
+import com.example.androidproject.view.rememberWindowSizeClass
 import com.example.androidproject.viewmodel.chats.GetChatViewModel
 import kotlinx.coroutines.delay
 
@@ -58,6 +60,17 @@ fun MessageScreen(
 
     var showLoading by remember { mutableStateOf(true) }
     var showRetryLoading  by remember { mutableStateOf(false) }
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
 
 // Handle retry loading animation
@@ -205,9 +218,10 @@ fun MessageScreen(
                         ) {
                             Text(
                                 text = "No Message Available",
-                                fontSize = 20.sp,
+                                fontSize = nameTextSize,
                                 color = Color.Black,
-                                fontWeight = FontWeight.Bold
+                                fontFamily = poppinsFont,
+                                fontWeight = FontWeight.Normal
                             )
                         }
                     } else {

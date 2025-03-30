@@ -464,6 +464,7 @@ fun TradesmanColumn(
         WindowType.LARGE -> 18.sp
     }
 
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -898,7 +899,7 @@ fun TradesmanItem(resumes: resumesItem, navController: NavController, cardHeight
                                 painter = painterResource(R.drawable.meatball_ic),
                                 contentDescription = "Report Icon",
                                 modifier = Modifier
-                                    .padding(end = 10.dp)
+                                    .padding(end = 8.dp)
                                     .size(iconSize)
                                     .clickable { showMenu = true }
                             )

@@ -227,7 +227,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                     text = "No Mechanic workers",
                                     fontSize = nameTextSize,
                                     fontFamily = poppinsFont,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
                                 )
@@ -416,12 +416,7 @@ fun MechanicsItem(mechanics: resumesItem, navController: NavController, reportTr
                                     showReportDialog = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

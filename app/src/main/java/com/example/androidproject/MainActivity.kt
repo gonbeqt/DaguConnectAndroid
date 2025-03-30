@@ -427,11 +427,13 @@ class MainActivity : ComponentActivity() {
                         composable("message_screen") {
                             MessageScreen(modifier = Modifier, navController, getChatsViewModel)
                         }
-                        composable("booknow/{resumeId}") { backStackEntry ->
+                        composable("booknow/{resumeId}/{isPublic}") { backStackEntry ->
+                            val isPublic = backStackEntry.arguments?.getString("isPublic") ?: ""
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             Log.d("rateid", resumeId)
                             BookNow(
                                 viewResumeViewModel,
+                                isPublic,
                                 navController,
                                 resumeId,
                                 viewRatingsViewModel
@@ -742,7 +744,8 @@ class MainActivity : ComponentActivity() {
                             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
                             val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            TradesmanDeclinationDetails( jobId,
+                            TradesmanDeclinationDetails(
+                                jobId,
                                 status,
                                 modifier = Modifier,
                                 navController,
@@ -763,7 +766,12 @@ class MainActivity : ComponentActivity() {
                             val jobs = backStackEntry.arguments?.getString("jobs") ?: ""
                             val status = backStackEntry.arguments?.getString("status") ?: ""
 
-                            TradesmanApplicationCancelDetails(jobId,jobs,status,modifier = Modifier, navController,getMyJobApplicationViewModel)
+                            TradesmanApplicationCancelDetails(jobId,
+                                jobs,
+                                status
+                                ,modifier = Modifier,
+                                navController,
+                                getMyJobApplicationViewModel)
                         }
 
 

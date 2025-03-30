@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -143,6 +144,17 @@ fun ProfileScreen(
         Font(R.font.poppins_medium, FontWeight.Medium),
         Font(R.font.poppins_bold, FontWeight.Bold)
     )
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
+    val taskTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 14.sp
+        WindowType.MEDIUM -> 16.sp
+        WindowType.LARGE -> 18.sp
+    }
 
 
 
@@ -367,31 +379,25 @@ fun ProfileScreen(
                                             Box(
                                                 modifier = Modifier
                                                     .size(100.dp)
-                                                    .background(
-                                                        Color.White,
-                                                        RoundedCornerShape(50.dp)
-                                                    )
+                                                    .background(Color.White, RoundedCornerShape(50.dp))
                                             ) {
-                                                // Profile Icon
                                                 AsyncImage(
                                                     model = selectedImageUri
                                                         ?: profile.profilePicture,
-                                                    contentDescription = "Profile Image",
+                                                    contentDescription = "Client Image",
                                                     modifier = Modifier
                                                         .size(100.dp)
                                                         .clip(CircleShape),
                                                     contentScale = ContentScale.Crop
                                                 )
-                                                Icon(
-                                                    imageVector = Icons.Default.Edit,
-                                                    contentDescription = "Edit Profile Picture",
-                                                    tint = Color.Gray,
+                                                Box(
                                                     modifier = Modifier
-                                                        .size(20.dp)
-                                                        .align(Alignment.TopEnd)
-                                                        .background(Color.White, CircleShape)
+                                                        .size(28.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color(0xFF42C2AE))
+                                                        .align(Alignment.BottomEnd)
                                                         .clickable {
-                                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+                                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                                                                 permissionLauncher.launch(
                                                                     arrayOf(
                                                                         Manifest.permission.READ_MEDIA_IMAGES,
@@ -407,15 +413,25 @@ fun ProfileScreen(
                                                                     imageLauncher.launch("image/*")
                                                                 } else {
                                                                     permissionLauncher.launch(
-                                                                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+                                                                        arrayOf(
+                                                                            Manifest.permission.READ_MEDIA_IMAGES
+                                                                        )
                                                                     )
                                                                 }
                                                             }
-                                                        }
-                                                )
+                                                        },
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Edit,
+                                                        contentDescription = "Edit Profile Picture",
+                                                        tint = Color.White,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
                                             }
                                             Spacer(modifier = Modifier.width(16.dp))
-                                            Column {
+                                            Column (modifier = Modifier.padding(vertical = 10.dp)) {
                                                 Row(
                                                     Modifier.fillMaxWidth(),
                                                     horizontalArrangement = Arrangement.SpaceBetween
@@ -426,27 +442,15 @@ fun ProfileScreen(
                                                         fontSize = 18.sp,
                                                         fontWeight = FontWeight.Bold
                                                     )
-                                                    Icon(
-                                                        imageVector = Icons.Default.Edit,
-                                                        contentDescription = "Edit Profile Picture",
-                                                        tint = Color.White,
-                                                        modifier = Modifier
-                                                            .size(26.dp)
-                                                            .background(
-                                                                Color.Transparent,
-                                                                shape = CircleShape
-                                                            )
-                                                            .clickable {
-                                                                navController.navigate("accountsettings")
-                                                            }
-                                                    )
+
                                                 }
 
-                                                Text(text = profile.email, color = Color.White)
-                                                Text(text = profile.address, color = Color.White)
+                                                Text(text = profile.email, color = Color.White, fontSize = (taskTextSize))
+                                                Text(text = profile.address, color = Color.White, fontSize = (taskTextSize))
                                                 Text(
                                                     text = profile.phoneNumber,
-                                                    color = Color.White
+                                                    color = Color.White,
+                                                    fontSize = (taskTextSize)
                                                 )
                                             }
                                         }
@@ -738,7 +742,7 @@ fun PostsCard(
                             contentDescription = "Edit Post and Delete",
                             tint = Color.Black,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(16.dp)
                                 .clickable { expanded = true }
                         )
 
@@ -1154,6 +1158,13 @@ fun SettingsScreen(navController: NavController, logoutViewModel: LogoutViewMode
                 )
             }
         }
+        GeneralSettings(
+            icon = Icons.Outlined.Settings,
+            title = "Account Settings",
+            description = "Edit your account profile",
+            trailingIcon = Icons.Default.ArrowForwardIos,
+            onClick = {navController.navigate("accountsettings") }
+        )
         GeneralSettings(
             icon = ImageVector.vectorResource(id = R.drawable.ic_privacy),
             title = "Privacy",

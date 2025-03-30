@@ -229,7 +229,7 @@ fun Cleaning(navController: NavController, getResumesViewModel: GetResumesViewMo
                                         text = "No Cleaning workers",
                                         fontSize = nameTextSize,
                                         fontFamily = poppinsFont,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.Normal,
                                         color = Color.Gray,
                                         textAlign = TextAlign.Center
                                     )
@@ -422,12 +422,7 @@ fun CleaningItem(cleaning: resumesItem, navController: NavController, reportTrad
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

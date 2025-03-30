@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.R
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -54,8 +55,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -102,6 +110,11 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
             isLoading = false
         }
     }
+    val poppinsFont = FontFamily(
+        Font(com.example.androidproject.R.font.poppins_regular, FontWeight.Normal),
+        Font(com.example.androidproject.R.font.poppins_medium, FontWeight.Medium),
+        Font(com.example.androidproject.R.font.poppins_bold, FontWeight.Bold)
+    )
 
     val windowSize = rememberWindowSizeClass()
     val cardHeight = when (windowSize.width) {
@@ -110,24 +123,33 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
         WindowType.LARGE -> 160.dp
     }
 
+    val iconSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 24.dp
+        WindowType.LARGE -> 32.dp
+    }
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
+            .background(Color(0xFFEDEFEF))
     ) {
         Column {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White),
-                shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp)
-            ) {
                 Column(
                     modifier = Modifier
                         .background(Color.White)
                         .fillMaxWidth()
-                        .size(100.dp)
-                        .padding(top = 20.dp)
+                        .size(70.dp)
+                        .drawBehind {
+                            // Draw a shadow-like gradient at the bottom
+                            val shadowHeight = 2.dp.toPx() // Height of the shadow
+                            val shadowColor = Color.Black.copy(alpha = 0.2f) // Shadow color with transparency
+
+                            drawRect(
+                                color = shadowColor,
+                                topLeft = Offset(0f, size.height - shadowHeight),
+                                size = Size(size.width, shadowHeight)
+                            )
+                        }
+                        .padding(top = 5.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -147,17 +169,17 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
 
                         Text(
                             text = "All Tradesman",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = poppinsFont,
+                            fontSize = 20.sp,
                             color = Color.Black,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Left,
                             modifier = Modifier
-                                .padding(top = 15.dp, end = 50.dp)
-                                .weight(1f)
+                                .padding(top = 15.dp)
+                                .weight(1f) // Ensures the text takes available space and is centered
                         )
                     }
                 }
-            }
+
 
             if (!isConnected.value) {
                 Box(
@@ -211,65 +233,76 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
                 if (isLoading) {
                     LoadingUI()
                 } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                            .background(Color.White),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(resumeList.itemCount) { index ->
-                            val resume = resumeList[index]
-                            if (resume != null && resume.id !in dismissedResumes) {
-                                AllTradesmanItem(resume, navController, cardHeight, reportTradesmanViewModel) {
-                                    getResumes.dismissResume(resume.id)
-                                }
-                            }
-                        }
-
-                        // Handle append loading state (next page)
-                        when (resumeList.loadState.append) {
-                            is LoadState.Loading -> {
-                                item {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        horizontalArrangement = Arrangement.Center
+                    Column(modifier = Modifier.padding(vertical = 16.dp)){
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp)
+                                .background(Color.Transparent),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(resumeList.itemCount) { index ->
+                                val resume = resumeList[index]
+                                if (resume != null && resume.id !in dismissedResumes) {
+                                    AllTradesmanItem(
+                                        resume,
+                                        navController,
+                                        cardHeight,
+                                        reportTradesmanViewModel
                                     ) {
-                                       LoadingUI()
+                                        getResumes.dismissResume(resume.id)
                                     }
                                 }
                             }
-                            is LoadState.Error -> {
-                                item {
-                                    Text(
-                                        text = "Error loading more items",
-                                        color = Color.Red,
-                                        modifier = Modifier.padding(16.dp)
-                                    )
-                                }
-                            }
-                            else -> {}
-                        }
 
-                        // Handle initial loading state
-                        when (resumeList.loadState.refresh) {
-                            is LoadState.Loading -> {
-                                item {
-                                    LoadingUI()
+                            // Handle append loading state (next page)
+                            when (resumeList.loadState.append) {
+                                is LoadState.Loading -> {
+                                    item {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            LoadingUI()
+                                        }
+                                    }
                                 }
-                            }
-                            is LoadState.Error -> {
-                                item {
-                                    Text(
-                                        text = "Error loading resumes",
-                                        color = Color.Red,
-                                        modifier = Modifier.padding(16.dp)
-                                    )
+
+                                is LoadState.Error -> {
+                                    item {
+                                        Text(
+                                            text = "Error loading more items",
+                                            color = Color.Red,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
                                 }
+
+                                else -> {}
                             }
-                            else -> {}
+
+                            // Handle initial loading state
+                            when (resumeList.loadState.refresh) {
+                                is LoadState.Loading -> {
+                                    item {
+                                        LoadingUI()
+                                    }
+                                }
+
+                                is LoadState.Error -> {
+                                    item {
+                                        Text(
+                                            text = "Error loading resumes",
+                                            color = Color.Red,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
+                                }
+
+                                else -> {}
+                            }
                         }
                     }
                 }
@@ -288,6 +321,7 @@ fun AllTradesman(navController: NavController, getResumes: GetResumesViewModel, 
 }
 @Composable
 fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHeight: Dp, reportTradesmanViewModel: ReportTradesmanViewModel, onUninterested: () -> Unit) {
+
     var selectedIndex by remember { mutableIntStateOf(-1) }
     var otherReason by remember { mutableStateOf("") }
     var reasonDescription by remember { mutableStateOf("") }
@@ -322,14 +356,14 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
 
     val windowSize = rememberWindowSizeClass()
     val iconSize = when (windowSize.width) {
-        WindowType.SMALL -> 25.dp
-        WindowType.MEDIUM -> 35.dp
-        WindowType.LARGE -> 45.dp
+        WindowType.SMALL -> 16.dp
+        WindowType.MEDIUM -> 24.dp
+        WindowType.LARGE -> 32.dp
     }
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val taskTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
@@ -387,9 +421,10 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                         // Menu Icon
                         Box {
                             Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
+                                painter = painterResource(id = com.example.androidproject.R.drawable.meatball_ic),
                                 contentDescription = "Menu Icon",
                                 modifier = Modifier
+                                    .padding(end = 8.dp)
                                     .size(iconSize)
                                     .clickable { showMenu = true }
                             )
@@ -424,48 +459,57 @@ fun AllTradesmanItem(resumes: resumesItem, navController: NavController, cardHei
                         color = Color.Black,
                         fontSize = taskTextSize,
                     )
-                    Row(modifier = Modifier.size(185.dp, 110.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(70.dp, 50.dp)
-                                .padding(top = 15.dp, end = 5.dp)
-                                .background(
-                                    color = (Color(0xFFF5F5F5)),
-                                    shape =RoundedCornerShape(12.dp)
-                                )
-                        ) {
-                            Text(
-                                text = "P${resumes.workFee}/hr",
-                                fontSize = smallTextSize,
-                                modifier = Modifier.padding(top = 5.dp, start = 8.dp)
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(70.dp, 50.dp)
-                                .padding(top = 15.dp, start = 10.dp, end = 10.dp)
+                                .size(70.dp, 30.dp)
                                 .background(
                                     color = (Color(0xFFF5F5F5)),
                                     shape = RoundedCornerShape(12.dp)
-                                )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Star, contentDescription = "Start Icon",
-                                tint = Color(0xFFFFA500), modifier = Modifier
-                                    .size(25.dp)
-                                    .padding(top = 7.dp, start = 2.dp)
-                            )
                             Text(
-                                when {
-                                    resumes.ratings == 0f -> "0"
-                                    else -> String.format("%.1f", resumes.ratings)
-                                },
-                                fontSize = smallTextSize,
-                                modifier = Modifier.padding(top = 5.dp, start = 28.dp)
+                                text = "P${resumes.workFee}/hr",
+                                fontSize = smallTextSize
                             )
                         }
-                    }
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp, 30.dp)
+                                .background(
+                                    color = (Color(0xFFF5F5F5)),
+                                    shape = RoundedCornerShape(12.dp)
+                                ),
+                            contentAlignment = Alignment.Center
 
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Start Icon",
+                                    tint = Color(0xFFFFA500),
+                                    modifier = Modifier
+                                        .size(iconSize)
+                                )
+                                Text(
+                                    when {
+                                        resumes.ratings == 0f -> "0"
+                                        else -> String.format("%.1f", resumes.ratings)
+                                    },
+                                    fontSize = smallTextSize,
+                                )
+                            }
+                        }
+                    }
 
                 }
 

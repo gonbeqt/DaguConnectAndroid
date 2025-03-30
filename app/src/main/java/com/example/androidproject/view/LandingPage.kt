@@ -110,7 +110,7 @@ fun LandingPageScreen(navController: NavController) {
     )
 
     val images = listOf(
-        R.drawable.landing3,
+        R.drawable.landing1,
         R.drawable.landing2,
         R.drawable.landing3
     )

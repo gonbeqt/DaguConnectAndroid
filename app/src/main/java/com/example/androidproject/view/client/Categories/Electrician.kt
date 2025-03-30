@@ -233,7 +233,7 @@ fun Electrician(navController: NavController, getResumesViewModel: GetResumesVie
                                     text = "No Electrician workers",
                                     fontSize = nameTextSize,
                                     fontFamily = poppinsFont,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
                                 )
@@ -425,12 +425,7 @@ fun ElectricianItem(electrician: resumesItem, navController: NavController, repo
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }

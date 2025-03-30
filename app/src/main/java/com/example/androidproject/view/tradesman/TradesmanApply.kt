@@ -55,9 +55,9 @@ fun TradesmanApply(
     val screenHeightDp = configuration.screenHeightDp.dp
 
     val nameTextSize = when (windowSize.width) {
-        WindowType.SMALL -> 18.sp
-        WindowType.MEDIUM -> 20.sp
-        WindowType.LARGE -> 22.sp
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
     }
     val taskTextSize = when (windowSize.width) {
         WindowType.SMALL -> 14.sp
@@ -248,13 +248,11 @@ fun TradesmanApply(
                                         Spacer(modifier = Modifier.size(4.dp))
                                         Text(
                                             text = "Preferred Location",
-                                            fontSize = taskTextSize,
                                             fontWeight = FontWeight.Medium
                                         )
                                     }
                                     Text(
                                         text = "${job.job.address}, Pangasinan",
-                                        fontSize = taskTextSize,
                                         fontWeight = FontWeight.Normal,
                                         modifier = Modifier.padding(start = 28.dp)
                                     )
@@ -270,13 +268,11 @@ fun TradesmanApply(
                                         Spacer(modifier = Modifier.size(4.dp))
                                         Text(
                                             text = "Estimated Budget",
-                                            fontSize = taskTextSize,
                                             fontWeight = FontWeight.Medium
                                         )
                                     }
                                     Text(
                                         text = "₱${job.job.salary}",
-                                        fontSize = taskTextSize,
                                         fontWeight = FontWeight.Normal,
                                         modifier = Modifier.padding(start = 28.dp)
                                     )
@@ -295,7 +291,7 @@ fun TradesmanApply(
                                         val jobsAvailable = state.jobs.filter { it.status == "Available" }
                                         Text(
                                             text = "Other services needed by this client (${jobsAvailable.size})",
-                                            fontSize = 18.sp,
+                                            fontSize = 24.sp,
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.padding(bottom = 10.dp)
                                         )
@@ -308,25 +304,26 @@ fun TradesmanApply(
                                             if (jobsAvailable.isEmpty()) {
                                                 Text(
                                                     text = "No other jobs posted by this client.",
-                                                    fontSize = 20.sp,
-                                                    fontWeight = FontWeight.Medium,
+                                                    fontSize = nameTextSize,
+                                                    fontWeight = FontWeight.Normal,
                                                     color = Color.Black, // Changed to black for visibility
                                                     textAlign = TextAlign.Center,
                                                     modifier = Modifier.align(Alignment.Center)
                                                 )
                                             } else {
-                                                LazyColumn(
+                                                Column(
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp),
                                                     modifier = Modifier
+                                                        .padding(vertical = 10.dp)
+                                                        .background(Color.White)
                                                         .fillMaxSize()
-                                                        .padding(horizontal = 10.dp, vertical = 8.dp)
-                                                        .padding(bottom = 60.dp), // Added bottom padding to extend scrollable area
-                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                                ) {
-                                                    items(jobsAvailable.size) { index ->
-                                                        val jobItem = jobsAvailable[index]
-                                                        jobsOfClient(jobItem, navController)
+                                                        .verticalScroll(rememberScrollState())
+                                                    ) {
+                                                        jobsAvailable.forEach { jobItem ->
+                                                            jobsOfClient(jobItem, navController)
                                                     }
                                                 }
+
                                             }
                                         }
                                     }
@@ -367,7 +364,7 @@ fun TradesmanApply(
                             modifier = Modifier
                                 .clickable {navController.popBackStack()}
                                 .padding(start = 16.dp, top = 12.dp, end = 12.dp, bottom = 14.dp),
-                            tint = Color(0xFF81D796)
+                            tint = Color.White
                         )
                         Text(
                             text = "Job Details",

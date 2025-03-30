@@ -231,7 +231,7 @@ fun Masonry(navController: NavController, getResumesViewModel: GetResumesViewMod
                                     text = "No Mason workers",
                                     fontSize = nameTextSize,
                                     fontFamily = poppinsFont,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
                                 )
@@ -424,12 +424,7 @@ fun MasonryItem(masonry: resumesItem, navController: NavController, reportTrades
                                     showReportSheet = true
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uninterested") },
-                                onClick = {
-                                    showMenu = false
-                                }
-                            )
+
                         }
                     }
                 }
