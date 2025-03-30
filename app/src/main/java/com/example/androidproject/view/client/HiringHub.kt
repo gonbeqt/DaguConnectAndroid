@@ -385,9 +385,9 @@ fun AllBookingsContent(getClientsBooking: GetClientBookingViewModel,navControlle
         if (allBooking.itemCount == 0) {
             // Display "No Pending Booking" when the list is empty
             Text(
-                text = "No Clients",
+                text = "No clients yet",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -455,7 +455,7 @@ fun PendingBookingsContent(getClientBooking: GetClientBookingViewModel, navContr
             Text(
                 text = "No Pending Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -512,17 +512,13 @@ fun DeclinedBookingsContent(getClientBooking: GetClientBookingViewModel,navContr
             Text(
                 text = "No Declined Clients ",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .size(420.dp)
-                    .background(Color(0xFFEDEFEF9))
-                ,
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(declinedBookings.size) { index ->
@@ -572,7 +568,7 @@ fun ActiveBookingsContent(getClientBooking: GetClientBookingViewModel,navControl
             Text(
                 text = "No Active Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -631,7 +627,7 @@ fun CompletedBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
             Text(
                 text = "No Completed Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -694,7 +690,7 @@ fun CancelledBookingsContent(getClientBooking: GetClientBookingViewModel,navCont
             Text(
                 text = "No Cancelled Clients",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -1082,7 +1078,7 @@ fun ActiveItems(activeBooking: GetClientsBooking,navController:NavController,upd
 
 
                     ) {
-                        Text("Completed", fontSize = smallTextSize)
+                        Text("Complete", fontSize = smallTextSize)
                     }
 
                 }
@@ -1462,12 +1458,12 @@ fun PendingItem(pendingBooking : GetClientsBooking, navController:NavController,
                             navController.navigate("clientdetails/${pendingBooking.id}/${pendingBooking.bookingStatus}")
                         },
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFFECAB1E)),
+                        border = BorderStroke(1.dp, Color(0xFFFF8D37)),
                         modifier = Modifier.weight(1f),
 
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8D37))
                     ) {
-                        Text("Booking Details", fontSize = smallTextSize)
+                        Text("Booking Details", fontSize = smallTextSize, color = Color(0xFFFF8D37))
                     }
                 }
             }
@@ -1735,12 +1731,12 @@ fun DeclinedItem(declineBooking: GetClientsBooking, navController:NavController)
                     OutlinedButton(
                         onClick = { navController.navigate("booknow/${declineBooking.resumeId}") },
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFFECAB1E)),
+                        border = BorderStroke(1.dp, Color(0xFFFF8D37)),
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8D37))
 
                     ) {
-                        Text("Book Again", fontSize = smallTextSize, color = Color(0xFFECAB1E) )
+                        Text("Book Again", fontSize = smallTextSize, color = Color(0xFFFF8D37) )
                     }
                 }
             }
@@ -1894,12 +1890,12 @@ fun CompletedItem(completedBooking: GetClientsBooking, navController:NavControll
                     OutlinedButton(
                         onClick = { navController.navigate("rateandreviews/${completedBooking.resumeId}/${completedBooking.tradesmanId}/${completedBooking.id}") },
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFFECAB1E)),
+                        border = BorderStroke(1.dp, Color(0xFFFF8D37)),
                         modifier = Modifier.weight(1f),
 
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8D37))
                     ) {
-                        Text("Rate", fontSize = smallTextSize, color = Color(0xFFECAB1E))
+                        Text("Rate", fontSize = smallTextSize, color = Color(0xFFFF8D37))
                     }
                 }
             }
@@ -2055,11 +2051,11 @@ fun CancelledItem(cancelledBooking: GetClientsBooking, navController:NavControll
                     OutlinedButton(
                         onClick = { navController.navigate("booknow/${cancelledBooking.resumeId}") },
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFFECAB1E)),
+                        border = BorderStroke(1.dp, Color(0xFFFF8D37)),
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFECAB1E))
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8D37))
                     ) {
-                        Text("Book Again", fontSize = smallTextSize)
+                        Text("Book Again", fontSize = smallTextSize, color = (Color(0xFFFF8D37)))
                     }
                 }
             }
@@ -2096,7 +2092,7 @@ fun AllApplicantsContent(getMyJobApplicant: GetMyJobApplicantsViewModel, viewJob
             Text(
                 text = "No Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2149,7 +2145,7 @@ fun PendingApplicantsContent(navController: NavController, getMyJobApplicant: Ge
             Text(
                 text = "No Pending Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2197,7 +2193,7 @@ fun DeclinedApplicantsContent(navController: NavController, getMyJobApplicant: G
             Text(
                 text = "No Declined Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2245,7 +2241,7 @@ fun ActiveApplicantsContent(navController: NavController, getMyJobApplicant: Get
             Text(
                 text = "No Active Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -2294,7 +2290,7 @@ fun CompletedApplicantsContent(navController: NavController, getMyJobApplicant: 
         Text(
             text = "No Completed Applicants",
             fontSize = nameTextSize,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             color = Color.Black,
             textAlign = TextAlign.Center
         )
@@ -2347,7 +2343,7 @@ fun CancelledApplicantsContent(navController: NavController, getMyJobApplicant: 
             Text(
                 text = "No Cancelled Applicants",
                 fontSize = nameTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -3131,7 +3127,7 @@ fun ActiveApplicantsItem(myJob: JobApplicantData, navController: NavController, 
                         ) {
 
                             Text(
-                                text = " Completed",
+                                text = " Complete",
                                 color = Color(0xFFECAB1E),
                                 fontSize = taskTextSize
                             )
@@ -3619,7 +3615,7 @@ fun CompletedApplicantsItem(myJob: JobApplicantData, navController: NavControlle
                         .padding(vertical = 8.dp),  // Adjust padding as needed
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Applicant Details", fontSize = smallTextSize)
+                    Text(text = "Job Details", fontSize = smallTextSize)
                 }
 
             }

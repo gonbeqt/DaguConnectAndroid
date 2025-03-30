@@ -233,7 +233,7 @@ fun Painting(navController: NavController, getResumesViewModel: GetResumesViewMo
                                     text = "No Painter workers",
                                     fontSize = nameTextSize,
                                     fontFamily = poppinsFont,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
                                 )

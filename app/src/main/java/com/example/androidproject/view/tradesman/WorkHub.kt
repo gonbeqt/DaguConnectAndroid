@@ -58,6 +58,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -88,6 +90,11 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavController, updateBookingClientViewModel: UpdateBookingClientViewModel, getMyJobApplications: GetMyJobApplicationViewModel, getTradesmanBooking: GetTradesmanBookingViewModel, putJobApplicationStatusViewModel: PutJobApplicationStatusViewModel, viewJobsApplication: ViewJobApplicationViewModel,  initialTabIndex: Int = 0, initialSection: Int = 0) {// Default to 0 if not provided
     val windowSize = rememberWindowSizeClass()
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     val iconSize = when (windowSize.width) {
         WindowType.SMALL -> 24.dp
@@ -139,8 +146,9 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
             // Left-aligned text
             Text(
                 text = "Job Hub",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Normal
+                fontSize = 20.sp,
+                fontFamily = poppinsFont,
+                fontWeight = FontWeight.Medium
             )
             // Right-aligned icons
             Row(
@@ -180,7 +188,7 @@ fun BookingsTradesman(modifier: Modifier = Modifier, navController: NavControlle
                             TabRowDefaults.Indicator(
                                 modifier = Modifier
                                     .tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                color = Color(0xFF122826), // Change this to your desired color
+                                color = Color(0xFF3CC0B0),
                                 height = 2.dp // Adjust thickness if needed
                             )
                         },
@@ -300,6 +308,12 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
         WindowType.MEDIUM -> 18.sp
         WindowType.LARGE -> 20.sp
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
+
 
     Row(
         modifier = Modifier
@@ -322,6 +336,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
                 Text(
                     text = "My Jobs",
                     fontSize = headerTextSize,
+                    fontFamily = poppinsFont,
                     fontWeight = FontWeight.Medium,
                     color = if (selectedSection == 0) Color.Black else Color.Gray
 
@@ -349,6 +364,7 @@ fun JobsTradesmanTopSection(navController: NavController, selectedSection: Int, 
                 Text(
                     text = "My Applications",
                     fontSize = headerTextSize,
+                    fontFamily = poppinsFont,
                     fontWeight = FontWeight.Medium,
                     color = if (selectedSection == 1) Color.Black else Color.Gray
 
@@ -422,6 +438,12 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
     }
     val bookingPending =
         bookingPendingstate.itemSnapshotList.items.filter { it.bookingStatus == "Pending" }
+    val windowSize = rememberWindowSizeClass()
+    val nameTextSize = when (windowSize.width) {
+        WindowType.SMALL -> 16.sp
+        WindowType.MEDIUM -> 18.sp
+        WindowType.LARGE -> 20.sp
+    }
     Box(
         modifier = Modifier
             .fillMaxHeight()
@@ -433,8 +455,8 @@ fun PendingBookingsTradesmanContent(navController: NavController, getTradesmanBo
             // Display "No Pending Jobs" when the list is empty
             Text(
                 text = "No Pending Jobs",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = nameTextSize,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
@@ -485,7 +507,7 @@ fun DeclinedBookingsTradesmanContent(navController: NavController,getTradesmanBo
                 text = "No Declined Jobs",
                 fontSize = nameTextSize,
                 fontWeight = FontWeight.Normal,
-                color = Color.Gray,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         } else{

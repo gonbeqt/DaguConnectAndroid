@@ -427,11 +427,13 @@ class MainActivity : ComponentActivity() {
                         composable("message_screen") {
                             MessageScreen(modifier = Modifier, navController, getChatsViewModel)
                         }
-                        composable("booknow/{resumeId}") { backStackEntry ->
+                        composable("booknow/{resumeId}/{isPublic}") { backStackEntry ->
+                            val isPublic = backStackEntry.arguments?.getString("isPublic") ?: ""
                             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                             Log.d("rateid", resumeId)
                             BookNow(
                                 viewResumeViewModel,
+                                isPublic,
                                 navController,
                                 resumeId,
                                 viewRatingsViewModel

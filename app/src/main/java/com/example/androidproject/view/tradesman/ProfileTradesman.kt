@@ -57,6 +57,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -79,6 +81,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -137,6 +141,11 @@ fun ProfileTradesman(
             else -> Unit
         }
     }
+    val poppinsFont = FontFamily(
+        Font(com.example.androidproject.R.font.poppins_regular, FontWeight.Normal),
+        Font(com.example.androidproject.R.font.poppins_medium, FontWeight.Medium),
+        Font(com.example.androidproject.R.font.poppins_bold, FontWeight.Bold)
+    )
 
     val updateTradesmanActiveStatusState by updateTradesmanActiveStatusViewModel.updateStatusState.collectAsState()
 
@@ -235,7 +244,8 @@ fun ProfileTradesman(
             ) {
                 Text(
                     text = "Profile",
-                    fontSize = 24.sp,
+                    fontSize = 20.sp,
+                    fontFamily = poppinsFont,
                     fontWeight = FontWeight.Medium
                 )
                 Icon(
@@ -403,7 +413,7 @@ fun ProfileTradesman(
                                             Row {
                                                 Box(
                                                     modifier = Modifier
-                                                        .width(100.dp)
+                                                        .width(120.dp)
                                                         .height(30.dp)
                                                         .clip(RoundedCornerShape(50.dp))
                                                         .background(Color.White)
@@ -439,13 +449,13 @@ fun ProfileTradesman(
                                                         .padding(start = 10.dp)
                                                         .size(26.dp)
                                                         .background(
-                                                            Color.White,
+                                                            Color.Transparent,
                                                             RoundedCornerShape(50.dp)
                                                         )
                                                         .clickable { navController.navigate("availabilitystatus") }
                                                         .border(
                                                             1.dp,
-                                                            Color.Gray,
+                                                            Color.Black,
                                                             RoundedCornerShape(50.dp)
                                                         ),
                                                     contentAlignment = Alignment.Center
@@ -453,7 +463,8 @@ fun ProfileTradesman(
                                                     Icon(
                                                         Icons.Default.QuestionMark,
                                                         contentDescription = "Edit profile and skills",
-                                                        tint = Color.Black
+                                                        tint = Color.Black,
+                                                        modifier = Modifier.size(16.dp)
                                                     )
                                                 }
                                             }
@@ -465,13 +476,27 @@ fun ProfileTradesman(
                             Column {
                                 TabRow(
                                     selectedTabIndex = selectedTabIndex,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    indicator = { tabPositions ->
+                                        TabRowDefaults.Indicator(
+                                            Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                                            color = Color(0xFF3CC0B0)
+                                        )
+                                    }
                                 ) {
                                     tabNames.forEachIndexed { index, title ->
                                         Tab(
+                                            modifier = Modifier.background(Color.White),
                                             selected = selectedTabIndex == index,
                                             onClick = { selectedTabIndex = index },
-                                            text = { Text(title, fontSize = 14.sp) }
+                                            text = {
+                                                Text(
+                                                    title, fontSize = 14.sp,
+                                                    color = if (selectedTabIndex == index) Color(
+                                                        0xFF3CC0B0
+                                                    ) else Color.Black
+                                                )
+                                            }
                                         )
                                     }
                                 }
@@ -625,7 +650,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
                     horizontalArrangement = Arrangement.spacedBy(10.dp)){
                     Box(
                         modifier = Modifier
-                            .clickable {navController.navigate("booknow/${tradesmanDetails.userid}")}
+                            .clickable {navController.navigate("booknow/${tradesmanDetails.userid}/${true}")}
                             .background(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
@@ -807,7 +832,7 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
             .padding(start = 0.dp, end = 0.dp, top = 0.dp, bottom = 16.dp)) {
 
             Text(text = "Ratings", fontSize = nameTextSize, fontWeight = FontWeight.Bold)
-            Text(text = "Feedback from satisfied clients", fontSize = taskTextSize, color = Color.Gray)
+            Text(text = "Feedback from satisfied clients", fontSize = taskTextSize, color = Color.Black)
         }
         when (val viewRatings = ratingsState) {
             is ViewRatingsViewModel.ViewRatingsState.Loading -> {
@@ -996,21 +1021,21 @@ fun JobProfile(navController: NavController, tradesmanDetails: viewResume,viewRa
             is ViewRatingsViewModel.ViewRatingsState.Error -> {
                 Box(modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No ratings yet.",
-                        fontSize = 14.sp,fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = "Showcase your services to earn reviews!",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
+                    .height(200.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "No ratings yet.",
+                            fontSize = 14.sp,fontWeight = FontWeight.Normal,
+                            color = Color.Gray
+                        )
+                        Text(
+                            text = "Showcase your services to earn reviews!",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Gray
+                        )
+                    }
                 }
-            }
 
             }
             else -> Unit

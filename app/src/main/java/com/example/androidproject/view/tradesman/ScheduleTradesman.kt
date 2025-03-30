@@ -258,11 +258,15 @@ fun FilterSectionTradesman(
         WindowType.MEDIUM -> 16.sp
         WindowType.LARGE -> 18.sp
     }
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
     ) {
         Row(
             Modifier.fillMaxWidth(),
@@ -270,6 +274,7 @@ fun FilterSectionTradesman(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier.padding(start = 16.dp),
                 text = selectedDate.format(DateTimeFormatter.ofPattern("yyyy MMMM d")),
                 fontWeight = FontWeight.Bold,
                 fontSize = nameTextSize,
@@ -278,13 +283,13 @@ fun FilterSectionTradesman(
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.wrapContentSize(Alignment.Center)) {
                 TextButton(onClick = { expanded = true }) {
-                    Text(text = selectedFilter, color = Color(0xFF3CC0B0), fontSize = taskTextSize)
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF3CC0B0))
+                    Text(text = selectedFilter, color = Color.Black, fontSize = taskTextSize, fontWeight = FontWeight.Normal, fontFamily = poppinsFont)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Black)
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                        text = { Text("My Jobs", fontSize = taskTextSize) },
+                        text = { Text("My Tradesman", fontSize = taskTextSize, fontWeight = FontWeight.Normal, fontFamily = poppinsFont) },
                         onClick = {
                             onFilterChange("My Jobs")
                             expanded = false
@@ -292,7 +297,7 @@ fun FilterSectionTradesman(
                     )
                     DropdownMenuItem(
                         colors = MenuDefaults.itemColors(textColor = Color(0xFF3CC0B0)),
-                        text = { Text("My Applicants" , fontSize = taskTextSize) },
+                        text = { Text("My Applicants" , fontSize = taskTextSize, fontWeight = FontWeight.Normal, fontFamily = poppinsFont) },
                         onClick = {
                             onFilterChange("My Applicants")
                             expanded = false
@@ -304,6 +309,7 @@ fun FilterSectionTradesman(
 
         Text(
             text = selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+            modifier = Modifier.padding(start = 16.dp),
             fontSize = taskTextSize,
             fontWeight = FontWeight.Normal,
             color = Color.Gray
@@ -349,7 +355,7 @@ fun MyJobsList(clientBooking: LazyPagingItems<GetTradesmanBooking>, selectedDate
                 text = "No Bookings Available",
                 fontSize = nameTextSize,
                 fontFamily = poppinsFont,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Normal,
                 color = Color.Black,
 
             )
@@ -560,6 +566,11 @@ fun CalendarSectionTradesman(
 
 @Composable
 fun ScheduleTradesmanTopSection(navController: NavController){
+    val poppinsFont = FontFamily(
+        Font(R.font.poppins_regular, FontWeight.Normal),
+        Font(R.font.poppins_medium, FontWeight.Medium),
+        Font(R.font.poppins_bold, FontWeight.Bold)
+    )
 
     Row(Modifier.fillMaxWidth().height(70.dp).shadow(0.2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -576,7 +587,8 @@ fun ScheduleTradesmanTopSection(navController: NavController){
         ) {
             Text(
                 text = "Schedule",
-                fontSize = 24.sp,
+                fontSize = 20.sp,
+                fontFamily = poppinsFont,
                 fontWeight = FontWeight.Medium
             )
             Icon(

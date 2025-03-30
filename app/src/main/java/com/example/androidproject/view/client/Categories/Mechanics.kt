@@ -227,7 +227,7 @@ fun Mechanics(navController: NavController, getResumesViewModel: GetResumesViewM
                                     text = "No Mechanic workers",
                                     fontSize = nameTextSize,
                                     fontFamily = poppinsFont,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.Normal,
                                     color = Color.Gray,
                                     textAlign = TextAlign.Center
                                 )
